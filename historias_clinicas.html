@@ -203,6 +203,7 @@ tr:hover td{background:rgba(0,180,216,.03)}
 .nav{gap:4px}.nav a{font-size:.68rem;padding:4px 8px}
 }
 </style>
+    <script src="nexus_db.js"></script>
     <script src="permisos.js"></script>
 </head>
 <body>
@@ -903,13 +904,9 @@ document.addEventListener('DOMContentLoaded', () => {
    ═══════════════════════════════════════════ */
 function loadMedicosSelect(selectedValue='') {
     const sel = document.getElementById('medicoTratante');
-    const usuarios = getUsuarios();
-    
+
     // Filter users with médico role
-    const medicos = usuarios.filter(u => {
-        const rol = (u.rol || '').toLowerCase();
-        return rol.includes('médico') || rol.includes('medico') || rol.includes('doctor');
-    });
+    const medicos = window.NXROLES ? NXROLES.medicos() : [];
     
     sel.innerHTML = '<option value="">-- Seleccionar Médico --</option>';
     

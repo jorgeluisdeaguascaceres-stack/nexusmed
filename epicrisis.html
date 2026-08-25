@@ -289,6 +289,7 @@ tr:hover td{background:rgba(0,180,216,.03)}
   .destino-egreso-grid{grid-template-columns:1fr 1fr}
 }
 </style>
+    <script src="nexus_db.js"></script>
     <script src="permisos.js"></script>
 </head>
 <body>
@@ -862,7 +863,7 @@ function loadMedicosSelect(selectedValue) {
   const sel = document.getElementById('medicoResponsable');
   sel.innerHTML = '<option value="">Seleccione médico...</option>';
   const usuarios = JSON.parse(localStorage.getItem(STORAGE_USUARIOS) || '[]');
-  const medicos = usuarios.filter(u => u.rol === 'Médico' || u.rol === 'medico' || u.rol === 'Medico');
+  const medicos = window.NXROLES ? NXROLES.medicos() : [];
   if (medicos.length === 0) {
     // If no users, also check for any user with especialidad
     const otros = usuarios.filter(u => u.especialidad);

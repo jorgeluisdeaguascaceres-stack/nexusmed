@@ -316,6 +316,7 @@ tr:hover td{background:rgba(0,180,216,.03)}
 .estado-terapia-grid{grid-template-columns:1fr 1fr}
 }
 </style>
+    <script src="nexus_db.js"></script>
     <script src="permisos.js"></script>
 </head>
 <body>
@@ -839,16 +840,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // ═══════════════════════════════════════════
 function loadTerapeutasSelect(selectedValue='') {
     const sel = document.getElementById('terapeutaSelect');
-    const usuarios = getUsuarios();
 
     // Filter users with therapy-related roles
-    const terapeutas = usuarios.filter(u => {
-        const rol = (u.rol || '').toLowerCase();
-        return rol.includes('terapeuta') || rol.includes('fisioterapeuta') || rol.includes('terapista') ||
-               rol.includes('ocupacional') || rol.includes('fonoaudiolog') || rol.includes('fonoaudiólogo') ||
-               rol.includes('nutricionista') || rol.includes('psicolog') || rol.includes('kinesiolog') ||
-               rol.includes('kinesiólogo') || rol.includes('fisioterap') || rol.includes('lenguaje');
-    });
+    const terapeutas = window.NXROLES ? NXROLES.terapia() : [];
 
     sel.innerHTML = '<option value="">-- Seleccionar Terapeuta --</option>';
 
@@ -859,7 +853,7 @@ function loadTerapeutasSelect(selectedValue='') {
     // Group by rol
     const grouped = {};
     terapeutas.forEach(p => {
-        const rol = p.rol || 'Sin rol';
+        const rol = NXROLES.nombre(p.rol) || 'Sin rol';
         if (!grouped[rol]) grouped[rol] = [];
         grouped[rol].push(p);
     });

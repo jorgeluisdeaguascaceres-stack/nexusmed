@@ -102,6 +102,7 @@
         @media (max-width: 768px) { .header { flex-direction: column; gap: 10px; } .toolbar { flex-direction: column; } }
     </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="nexus_db.js"></script>
     <script src="permisos.js"></script>
 </head>
 <body>
@@ -146,12 +147,6 @@
                         <label>Médico</label>
                         <select id="citaMedico" required>
                             <option value="">Seleccionar médico...</option>
-                            <option value="Dr. García">Dr. García</option>
-                            <option value="Dr. López">Dr. López</option>
-                            <option value="Dra. Martínez">Dra. Martínez</option>
-                            <option value="Dr. Rodríguez">Dr. Rodríguez</option>
-                            <option value="Dra. Sánchez">Dra. Sánchez</option>
-                            <option value="Dr. Fernández">Dr. Fernández</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -222,7 +217,7 @@
             <h3>✏️ Editar Cita</h3>
             <div class="form-grid">
                 <div class="form-group"><label>Paciente</label><select id="editPaciente"></select></div>
-                <div class="form-group"><label>Médico</label><select id="editMedico"><option value="Dr. García">Dr. García</option><option value="Dr. López">Dr. López</option><option value="Dra. Martínez">Dra. Martínez</option><option value="Dr. Rodríguez">Dr. Rodríguez</option><option value="Dra. Sánchez">Dra. Sánchez</option><option value="Dr. Fernández">Dr. Fernández</option></select></div>
+                <div class="form-group"><label>Médico</label><select id="editMedico"></select></div>
                 <div class="form-group"><label>Especialidad</label><select id="editEspecialidad"><option value="Medicina General">Medicina General</option><option value="Cardiología">Cardiología</option><option value="Neurología">Neurología</option><option value="Traumatología">Traumatología</option><option value="Pediatría">Pediatría</option><option value="Ginecología">Ginecología</option><option value="Dermatología">Dermatología</option><option value="Oftalmología">Oftalmología</option></select></div>
                 <div class="form-group"><label>Fecha</label><input type="date" id="editFecha"></div>
                 <div class="form-group"><label>Hora</label><input type="time" id="editHora"></div>
@@ -247,7 +242,7 @@
             document.getElementById('userAvatar').textContent = sesion.nombre.charAt(0);
         }
 
-        document.addEventListener('DOMContentLoaded', () => { cargarPacientesEnSelect(); cargarTabla(); actualizarEstadisticas(); const hoy = new Date().toISOString().slice(0, 10); document.getElementById('citaFecha').value = hoy; });
+        document.addEventListener('DOMContentLoaded', () => { cargarPacientesEnSelect(); cargarMedicosEnSelect(); cargarTabla(); actualizarEstadisticas(); const hoy = new Date().toISOString().slice(0, 10); document.getElementById('citaFecha').value = hoy; });
 
         function obtenerCitas() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
         function guardarCitas(c) { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); }
@@ -260,6 +255,37 @@
                 s.innerHTML = '<option value="">Seleccionar paciente...</option>';
                 pacientes.forEach(p => { const opt = document.createElement('option'); opt.value = p.nombre; opt.textContent = `${p.nombre} (${p.documento})`; s.appendChild(opt); });
             });
+        }
+
+        /* Los medicos salen de los usuarios creados en Configuracion */
+        function cargarMedicosEnSelect(valorActual) {
+            const medicos = window.NXROLES ? NXROLES.medicos() : [];
+            const sel = document.getElementById('citaMedico');
+            const selEdit = document.getElementById('editMedico');
+            [sel, selEdit].forEach(s => {
+                if (!s) return;
+                s.innerHTML = '<option value="">Seleccionar médico...</option>';
+                if (medicos.length === 0) {
+                    const aviso = document.createElement('option');
+                    aviso.value = '';
+                    aviso.disabled = true;
+                    aviso.textContent = 'Sin médicos configurados';
+                    s.appendChild(aviso);
+                }
+                medicos.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.nombre || m.usuario || '';
+                    opt.textContent = NXROLES.etiquetaPersona(m);
+                    s.appendChild(opt);
+                });
+            });
+            /* Conserva el medico guardado aunque ya no este en la lista */
+            if (valorActual && selEdit && !Array.prototype.some.call(selEdit.options, o => o.value === valorActual)) {
+                const opt = document.createElement('option');
+                opt.value = valorActual;
+                opt.textContent = valorActual;
+                selEdit.appendChild(opt);
+            }
         }
 
         function registrarCita() {
@@ -342,6 +368,7 @@
             if (!c) return;
             idEditando = id;
             cargarPacientesEnSelect();
+            cargarMedicosEnSelect(c.medico);
             document.getElementById('editPaciente').value = c.paciente;
             document.getElementById('editMedico').value = c.medico;
             document.getElementById('editEspecialidad').value = c.especialidad;

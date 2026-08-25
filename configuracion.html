@@ -161,6 +161,7 @@
         .aviso-bloqueo p { color: #90e0ef; font-size: 14px; margin-bottom: 20px; }
     </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="nexus_db.js"></script>
     <script src="permisos.js"></script>
 </head>
 <body>
@@ -466,25 +467,16 @@
 
         function esAdministrador() { return sesion && normalizarRol(sesion.rol) === 'admin'; }
 
-        /* ================== USUARIOS POR DEFECTO ================== */
-        function usuariosPorDefecto() {
-            return [
-                { usuario: 'admin',        documento: '1000000001', nombre: 'Administrador',  password: 'admin123',      contrasena: 'admin123',      rol: 'admin',          especialidad: 'Administración', registro: '', firma: '' },
-                { usuario: 'recepcion',    documento: '1000000002', nombre: 'Ana Martínez',   password: 'recep123',      contrasena: 'recep123',      rol: 'recepcion',      especialidad: 'Recepción',      registro: '', firma: '' },
-                { usuario: 'medico',       documento: '1000000003', nombre: 'Dr. García',     password: 'medico123',     contrasena: 'medico123',     rol: 'medico_general', especialidad: 'Medicina General', registro: 'RM-10234', firma: '' },
-                { usuario: 'enfermera',    documento: '1000000004', nombre: 'Enf. López',     password: 'enfermeria123', contrasena: 'enfermeria123', rol: 'enfermeria',     especialidad: 'Enfermería',     registro: 'RE-20117', firma: '' },
-                { usuario: 'terapia',      documento: '1000000005', nombre: 'Ft. Ramírez',    password: 'terapia123',    contrasena: 'terapia123',    rol: 'terapia',        especialidad: 'Fisioterapia',   registro: 'RT-30455', firma: '' },
-                { usuario: 'especialista', documento: '1000000006', nombre: 'Dra. Fernández', password: 'especial123',   contrasena: 'especial123',   rol: 'especialista',   especialidad: 'Cardiología',    registro: 'RM-40988', firma: '' }
-            ];
-        }
-
+        /* ================== USUARIOS ==================
+           Las contrasenas se guardan cifradas (hash) mediante NXAUTH.
+           No hay usuarios ni contrasenas escritos en el codigo.        */
         function obtenerUsuarios() { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
         function guardarUsuarios(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
 
         function inicializarUsuarios() {
             let usuarios = obtenerUsuarios();
-            if (!usuarios.length) { guardarUsuarios(usuariosPorDefecto()); return; }
-            // Migrar registros antiguos: roles viejos, documento y firma
+            if (!usuarios.length) return;
+            // Migrar registros antiguos: roles viejos, documento, firma y contrasenas en texto plano
             let cambio = false;
             usuarios = usuarios.map(u => {
                 const rolNuevo = normalizarRol(u.rol);
@@ -493,8 +485,12 @@
                 if (u.firma === undefined) { u.firma = ''; cambio = true; }
                 if (u.especialidad === undefined) { u.especialidad = ''; cambio = true; }
                 if (u.registro === undefined) { u.registro = ''; cambio = true; }
-                if (!u.password && u.contrasena) { u.password = u.contrasena; cambio = true; }
-                if (!u.contrasena && u.password) { u.contrasena = u.password; cambio = true; }
+                if (!u.clave && (u.password || u.contrasena) && window.NXAUTH) {
+                    u.clave = NXAUTH.resumen(u.usuario, u.password || u.contrasena);
+                    cambio = true;
+                }
+                if (u.password !== undefined) { delete u.password; cambio = true; }
+                if (u.contrasena !== undefined) { delete u.contrasena; cambio = true; }
                 return u;
             });
             if (cambio) guardarUsuarios(usuarios);
@@ -642,7 +638,8 @@
             if (usuarios.some(u => u.usuario === usuario)) { mostrarToast('El usuario ya existe', 'error'); return; }
             if (usuarios.some(u => (u.documento || '') === documento)) { mostrarToast('Ya existe un usuario con ese documento', 'error'); return; }
 
-            usuarios.push({ usuario, documento, nombre, password, contrasena: password, rol, especialidad, registro, firma: firmaNueva, fechaRegistro: new Date().toISOString() });
+            const clave = window.NXAUTH ? NXAUTH.resumen(usuario, password) : '';
+            usuarios.push({ usuario, documento, nombre, clave, rol, especialidad, registro, firma: firmaNueva, fechaRegistro: new Date().toISOString() });
             try { guardarUsuarios(usuarios); }
             catch (e) { mostrarToast('Almacenamiento lleno: use una firma más liviana', 'error'); return; }
             cargarUsuarios(); actualizarInfoSistema(); limpiarFormUsuario();
@@ -685,7 +682,13 @@
             usuarios[idx].registro = document.getElementById('editRegistro').value.trim();
             usuarios[idx].firma = firmaEdicion;
             const newPass = document.getElementById('editPassword').value;
-            if (newPass) { usuarios[idx].password = newPass; usuarios[idx].contrasena = newPass; }
+            if (newPass) {
+                if (newPass.length < 5) { mostrarToast('La contrase\u00f1a debe tener al menos 5 caracteres', 'error'); return; }
+                usuarios[idx].clave = window.NXAUTH ? NXAUTH.resumen(usuarios[idx].usuario, newPass) : '';
+                delete usuarios[idx].password;
+                delete usuarios[idx].contrasena;
+                usuarios[idx].fechaCambioClave = new Date().toISOString();
+            }
             try { guardarUsuarios(usuarios); }
             catch (e) { mostrarToast('Almacenamiento lleno: use una firma más liviana', 'error'); return; }
             cerrarModal(); cargarUsuarios(); actualizarInfoSistema();
@@ -1036,12 +1039,12 @@
         function limpiarTodoDatos() {
             if (!confirm('⚠️ ¿Eliminar TODOS los datos clínicos? Esta acción es irreversible.')) return;
             if (!confirm('¿Está completamente seguro? Se perderán pacientes, citas, historias, evoluciones y notas.')) return;
-            const conservar = [USERS_KEY, PERMISOS_KEY, 'nexus_sesion'];
+            const conservar = [USERS_KEY, PERMISOS_KEY, HOSPITAL_KEY, 'nexus_sesion'];
             const keysToRemove = [];
             for (let key in localStorage) { if (key.indexOf('nexus_') === 0 && conservar.indexOf(key) === -1) keysToRemove.push(key); }
             keysToRemove.forEach(k => localStorage.removeItem(k));
             actualizarInfoSistema(); cargarUsuarios(); cargarHospital();
-            mostrarToast('Datos clínicos eliminados (usuarios y permisos conservados)', 'info');
+            mostrarToast('Datos clínicos eliminados (usuarios, permisos y datos de la IPS conservados)', 'info');
         }
 
         /* ================== UTILIDADES ================== */

@@ -138,6 +138,7 @@
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="nexus_db.js"></script>
     <script src="permisos.js"></script>
 </head>
 <body>
@@ -587,8 +588,7 @@
            CARGAR MÉDICOS DESDE CONFIGURACIÓN
            ═══════════════════════════════════════════ */
         function cargarMedicos() {
-            const usuarios = JSON.parse(localStorage.getItem(STORAGE_USUARIOS) || '[]');
-            const medicos = usuarios.filter(u => u.rol && (u.rol.toLowerCase() === 'médico' || u.rol.toLowerCase() === 'medico'));
+            const medicos = window.NXROLES ? NXROLES.medicos() : [];
             const selectForm = document.getElementById('medico');
             const selectEdit = document.getElementById('editMedico');
             // Limpiar opciones excepto la primera
@@ -599,9 +599,11 @@
                 selectEdit.innerHTML += '<option value="" disabled>Sin médicos configurados</option>';
             } else {
                 medicos.forEach(m => {
-                    const opt = `<option value="${m.nombre}">${m.nombre}</option>`;
-                    selectForm.innerHTML += opt;
-                    selectEdit.innerHTML += opt;
+                    const opt = document.createElement('option');
+                    opt.value = m.nombre || m.usuario || '';
+                    opt.textContent = NXROLES.etiquetaPersona(m);
+                    selectForm.appendChild(opt);
+                    selectEdit.appendChild(opt.cloneNode(true));
                 });
             }
         }

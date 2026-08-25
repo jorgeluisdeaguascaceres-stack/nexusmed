@@ -480,6 +480,7 @@
             }
         }
     </style>
+    <script src="nexus_db.js"></script>
 </head>
 <body>
 
@@ -575,6 +576,46 @@
         </div>
     </div>
 
+    <!-- ===== MODAL: PRIMER ARRANQUE ===== -->
+    <div class="modal-overlay" id="modalInicio">
+        <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="tituloModalInicio">
+            <div class="modal-head">
+                <div class="modal-titulo" id="tituloModalInicio">Configuración inicial</div>
+            </div>
+            <div class="modal-nota">Este sistema todavía no tiene usuarios. Cree la cuenta del administrador; la contraseña que elija se guardará cifrada y no queda escrita en el sistema.</div>
+
+            <div class="form-group">
+                <label for="inUsuario">Usuario</label>
+                <input type="text" id="inUsuario" placeholder="Ej: admin" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="inNombre">Nombre completo</label>
+                <input type="text" id="inNombre" placeholder="Ej: María Rodríguez" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="inClave">Contraseña</label>
+                <div class="input-pass">
+                    <input type="password" id="inClave" placeholder="Mínimo 5 caracteres">
+                    <button type="button" class="toggle-ojo" onclick="alternarVer('inClave', this)" aria-label="Mostrar u ocultar la contraseña">&#128065;</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="inClave2">Confirmar contraseña</label>
+                <div class="input-pass">
+                    <input type="password" id="inClave2" placeholder="Repita la contraseña">
+                    <button type="button" class="toggle-ojo" onclick="alternarVer('inClave2', this)" aria-label="Mostrar u ocultar la contraseña">&#128065;</button>
+                </div>
+            </div>
+
+            <div class="modal-acciones">
+                <button type="button" class="btn-guardar" onclick="crearPrimerUsuario()">Crear administrador</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== MODAL: CAMBIAR CONTRASEÑA ===== -->
     <div class="modal-overlay" id="modalPass" onclick="clicFueraModal(event)">
         <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="tituloModalPass">
@@ -622,32 +663,11 @@
     </div>
 
     <script>
-        // ===== USUARIOS POR DEFECTO =====
-        const USUARIOS = [
-            { usuario: 'admin', contrasena: 'admin123', password: 'admin123', nombre: 'Administrador', rol: 'admin' },
-            { usuario: 'medico', contrasena: 'medico123', password: 'medico123', nombre: 'Dr. García', rol: 'medico' },
-            { usuario: 'enfermera', contrasena: 'enfermera123', password: 'enfermera123', nombre: 'Enf. López', rol: 'enfermera' },
-            { usuario: 'recepcion', contrasena: 'recep123', password: 'recep123', nombre: 'Ana Martínez', rol: 'recepcion' }
-        ];
-
-        // Guardar usuarios en localStorage si no existen
-        if (!localStorage.getItem('nexus_usuarios')) {
-            localStorage.setItem('nexus_usuarios', JSON.stringify(USUARIOS));
-        }
-
-        // ===== HELPERS DE USUARIOS =====
+        // ===== BASE COMPARTIDA DE USUARIOS =====
+        // Las contraseñas NO están en el código: se guardan cifradas (hash)
+        // en la base compartida y se validan con NXAUTH.
         function obtenerUsuarios() {
-            try {
-                const datos = JSON.parse(localStorage.getItem('nexus_usuarios'));
-                return Array.isArray(datos) ? datos : [];
-            } catch (e) {
-                return [];
-            }
-        }
-
-        // Acepta los dos nombres de campo usados en el sistema
-        function claveDe(u) {
-            return (u && (u.contrasena !== undefined && u.contrasena !== '' ? u.contrasena : u.password)) || '';
+            return (window.NXAUTH ? NXAUTH.usuarios() : []);
         }
 
         // ===== VALIDAR LOGIN =====
@@ -664,11 +684,9 @@
                 return;
             }
 
-            const usuarios = obtenerUsuarios();
-            const encontrado = usuarios.find(u => String(u.usuario).toLowerCase() === usuario.toLowerCase() && claveDe(u) === contrasena);
+            const encontrado = window.NXAUTH ? NXAUTH.verificar(usuario, contrasena) : null;
 
             if (encontrado) {
-                // Guardar sesión
                 const sesion = {
                     logueado: true,
                     usuario: encontrado.usuario,
@@ -680,7 +698,6 @@
 
                 mostrarToast(`Bienvenido, ${encontrado.nombre}`, 'success');
 
-                // Redirigir al menú
                 setTimeout(() => {
                     window.location.href = 'menu.html';
                 }, 800);
@@ -744,32 +761,59 @@
             if (nueva === actual) { mostrarToast('La nueva contraseña debe ser distinta de la actual', 'error'); return; }
             if (nueva !== confirmar) { mostrarToast('Las contraseñas nuevas no coinciden', 'error'); return; }
 
-            const usuarios = obtenerUsuarios();
-            const idx = usuarios.findIndex(u => String(u.usuario).toLowerCase() === usuario.toLowerCase());
-            if (idx === -1) { mostrarToast('El usuario no existe', 'error'); return; }
-            if (claveDe(usuarios[idx]) !== actual) { mostrarToast('La contraseña actual no es correcta', 'error'); return; }
-
-            // Se actualizan ambos campos para mantener compatibilidad con Configuración
-            usuarios[idx].password = nueva;
-            usuarios[idx].contrasena = nueva;
-            usuarios[idx].fechaCambioClave = new Date().toISOString();
-
-            try {
-                localStorage.setItem('nexus_usuarios', JSON.stringify(usuarios));
-            } catch (e) {
-                mostrarToast('No se pudo guardar el cambio en este navegador', 'error');
-                return;
-            }
+            const resultado = window.NXAUTH ? NXAUTH.cambiarClave(usuario, actual, nueva) : 'error';
+            if (resultado === 'inexistente') { mostrarToast('El usuario no existe', 'error'); return; }
+            if (resultado === 'clave') { mostrarToast('La contraseña actual no es correcta', 'error'); return; }
+            if (resultado !== 'ok') { mostrarToast('No se pudo guardar el cambio', 'error'); return; }
 
             cerrarModalPass();
-            document.getElementById('usuario').value = usuarios[idx].usuario;
+            document.getElementById('usuario').value = usuario;
             document.getElementById('contrasena').value = '';
             document.getElementById('contrasena').focus();
             mostrarToast('Contraseña actualizada. Ingrese con la nueva contraseña', 'success');
         }
 
+        // ===== PRIMER ARRANQUE: CREAR ADMINISTRADOR =====
+        function abrirModalInicio() {
+            document.getElementById('modalInicio').classList.add('activo');
+            setTimeout(() => document.getElementById('inUsuario').focus(), 80);
+        }
+
+        function modalInicioAbierto() {
+            return document.getElementById('modalInicio').classList.contains('activo');
+        }
+
+        function crearPrimerUsuario() {
+            const usuario = document.getElementById('inUsuario').value.trim();
+            const nombre = document.getElementById('inNombre').value.trim();
+            const clave = document.getElementById('inClave').value.trim();
+            const clave2 = document.getElementById('inClave2').value.trim();
+
+            if (!usuario) { mostrarToast('Escriba el nombre de usuario', 'error'); return; }
+            if (/\s/.test(usuario)) { mostrarToast('El usuario no puede tener espacios', 'error'); return; }
+            if (!nombre) { mostrarToast('Escriba el nombre completo', 'error'); return; }
+            if (clave.length < 5) { mostrarToast('La contraseña debe tener al menos 5 caracteres', 'error'); return; }
+            if (clave !== clave2) { mostrarToast('Las contraseñas no coinciden', 'error'); return; }
+
+            if (!window.NXAUTH || !NXAUTH.crearAdministrador(usuario, nombre, clave)) {
+                mostrarToast('Ya existe un usuario registrado', 'error');
+                document.getElementById('modalInicio').classList.remove('activo');
+                return;
+            }
+
+            document.getElementById('modalInicio').classList.remove('activo');
+            document.getElementById('usuario').value = usuario.toLowerCase();
+            document.getElementById('contrasena').value = '';
+            document.getElementById('contrasena').focus();
+            mostrarToast('Administrador creado. Ya puede ingresar', 'success');
+        }
+
         // ===== TECLADO: ENTER / ESC =====
         document.addEventListener('keydown', (e) => {
+            if (modalInicioAbierto()) {
+                if (e.key === 'Enter') crearPrimerUsuario();
+                return;
+            }
             if (modalPassAbierto()) {
                 if (e.key === 'Enter') guardarNuevaPass();
                 if (e.key === 'Escape') cerrarModalPass();
@@ -778,13 +822,15 @@
             if (e.key === 'Enter') validarLogin();
         });
 
-        // ===== VERIFICAR SI YA HAY SESIÓN =====
-        let sesion = null;
-        try { sesion = JSON.parse(localStorage.getItem('nexus_sesion')); } catch (e) { sesion = null; }
-        if (sesion && sesion.logueado) {
-            // Ya está logueado, opcionalmente redirigir
-            // window.location.href = 'menu.html';
-        }
+        // ===== ARRANQUE =====
+        // Se espera a que los datos compartidos terminen de bajar de la nube
+        // antes de decidir si hay que crear el primer administrador.
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.NXAUTH && NXAUTH.sinUsuarios()) {
+                abrirModalInicio();
+            }
+        });
+
     </script>
 
 </body>

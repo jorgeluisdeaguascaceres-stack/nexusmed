@@ -210,6 +210,7 @@ tr:hover td{background:rgba(0,180,216,.03)}
 .nav{gap:4px}.nav a{font-size:.68rem;padding:4px 8px}
 }
 </style>
+    <script src="nexus_db.js"></script>
     <script src="permisos.js"></script>
 </head>
 <body>
@@ -832,16 +833,9 @@ document.addEventListener('DOMContentLoaded', () => {
    ═══════════════════════════════════════════ */
 function loadProfesionalesSelect(selectedValue='') {
     const sel = document.getElementById('profesionalEvolucion');
-    const usuarios = getUsuarios();
 
     // Filter users with clinical roles
-    const profesionales = usuarios.filter(u => {
-        const rol = (u.rol || '').toLowerCase();
-        return rol.includes('médico') || rol.includes('medico') || rol.includes('doctor') ||
-               rol.includes('enfermero') || rol.includes('enfermera') || rol.includes('terapeuta') ||
-               rol.includes('fisioterapeuta') || rol.includes('nutricionista') || rol.includes('psicólogo') ||
-               rol.includes('psicologa') || rol.includes('odontólogo') || rol.includes('odontologo');
-    });
+    const profesionales = window.NXROLES ? NXROLES.clinicos() : [];
 
     sel.innerHTML = '<option value="">-- Seleccionar Profesional --</option>';
 
@@ -852,7 +846,7 @@ function loadProfesionalesSelect(selectedValue='') {
     // Group by rol
     const grouped = {};
     profesionales.forEach(p => {
-        const rol = p.rol || 'Sin rol';
+        const rol = NXROLES.nombre(p.rol) || 'Sin rol';
         if (!grouped[rol]) grouped[rol] = [];
         grouped[rol].push(p);
     });

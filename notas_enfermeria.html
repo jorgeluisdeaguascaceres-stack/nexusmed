@@ -350,6 +350,7 @@ tr:hover td{background:rgba(0,180,216,.03)}
 .estado-paciente-grid{grid-template-columns:1fr 1fr}
 }
 </style>
+    <script src="nexus_db.js"></script>
     <script src="permisos.js"></script>
 </head>
 <body>
@@ -900,14 +901,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // ═══════════════════════════════════════════
 function loadEnfermerasSelect(selectedValue='') {
     const sel = document.getElementById('enfermeraNota');
-    const usuarios = getUsuarios();
 
     // Filter users with enfermería roles
-    const enfermeras = usuarios.filter(u => {
-        const rol = (u.rol || '').toLowerCase();
-        return rol.includes('enfermero') || rol.includes('enfermera') || rol.includes('enfermer') ||
-               rol.includes('auxiliar') || rol.includes('tecnico') || rol.includes('técnico');
-    });
+    const enfermeras = window.NXROLES ? NXROLES.enfermeria() : [];
 
     sel.innerHTML = '<option value="">-- Seleccionar Enfermera(o) --</option>';
 
@@ -918,7 +914,7 @@ function loadEnfermerasSelect(selectedValue='') {
     // Group by rol
     const grouped = {};
     enfermeras.forEach(p => {
-        const rol = p.rol || 'Sin rol';
+        const rol = NXROLES.nombre(p.rol) || 'Sin rol';
         if (!grouped[rol]) grouped[rol] = [];
         grouped[rol].push(p);
     });
