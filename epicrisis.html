@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUSMED - Epicrisis</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0a1628;color:#c8d6e5;min-height:100vh}
+
+/* Header */
+.header{background:linear-gradient(135deg,#0d2137,#122a45);padding:12px 30px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1a3a5c;position:sticky;top:0;z-index:100}
+.header .logo{display:flex;align-items:center;gap:10px}
+.header .logo h1{font-size:1.3rem;font-weight:700;color:#00b4d8;letter-spacing:1px}
+.header .logo span{font-size:.7rem;color:#5a7a9a;font-weight:300}
+.header .user-info{display:flex;align-items:center;gap:12px;color:#90e0ef;font-size:.85rem}
+.header .user-info i{color:#00b4d8}
+.header .btn-logout{background:transparent;border:1px solid #ff3860;color:#ff3860;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.75rem;transition:.3s}
+.header .btn-logout:hover{background:#ff3860;color:#fff}
+
+/* Nav */
+.nav{background:#0d2137;padding:8px 20px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #1a3a5c}
+.nav a{text-decoration:none;color:#5a7a9a;font-size:.75rem;padding:6px 12px;border-radius:6px;transition:.3s;border:1px solid transparent}
+.nav a:hover{color:#00b4d8;border-color:#1a3a5c;background:rgba(0,180,216,.05)}
+.nav a.active{color:#00b4d8;background:rgba(0,180,216,.1);border-color:#00b4d8}
+
+/* Main */
+.main{padding:25px 30px;max-width:1400px;margin:0 auto}
+.page-title{font-size:1.5rem;font-weight:700;color:#90e0ef;margin-bottom:5px;display:flex;align-items:center;gap:10px}
+.page-title i{color:#00b4d8}
+.page-subtitle{color:#5a7a9a;font-size:.85rem;margin-bottom:25px}
+
+/* Stats Row */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:25px}
+.stat-card{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:10px;padding:18px;text-align:center}
+.stat-card .stat-num{font-size:1.8rem;font-weight:700;color:#00b4d8}
+.stat-card .stat-label{font-size:.72rem;color:#5a7a9a;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+
+/* Toolbar */
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.search-box{flex:1;min-width:250px;position:relative}
+.search-box input{width:100%;padding:10px 14px 10px 38px;background:#0d2137;border:1px solid #1a3a5c;border-radius:8px;color:#c8d6e5;font-size:.85rem;outline:none;transition:.3s}
+.search-box input:focus{border-color:#00b4d8}
+.search-box i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#5a7a9a}
+.btn-primary{background:linear-gradient(135deg,#0077b6,#00b4d8);color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px;transition:.3s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(0,180,216,.3)}
+.filter-select{padding:10px 12px;background:#0d2137;border:1px solid #1a3a5c;border-radius:8px;color:#c8d6e5;font-size:.82rem;outline:none}
+.filter-select:focus{border-color:#00b4d8}
+
+/* Table */
+.table-container{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{background:#122a45;color:#90e0ef;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;padding:14px 16px;text-align:left;border-bottom:1px solid #1a3a5c}
+td{padding:12px 16px;border-bottom:1px solid rgba(26,58,92,.5);font-size:.82rem;color:#c8d6e5}
+tr:hover td{background:rgba(0,180,216,.03)}
+.empty-row td{text-align:center;color:#5a7a9a;padding:40px;font-style:italic}
+
+.badge{padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600}
+.badge-mejoria{background:rgba(72,199,142,.15);color:#48c78e}
+.badge-alta-voluntaria{background:rgba(255,209,102,.15);color:#ffd166}
+.badge-fallecimiento{background:rgba(255,56,96,.15);color:#ff3860}
+.badge-traslado{background:rgba(0,180,216,.15);color:#00b4d8}
+.badge-contra-referencia{background:rgba(178,102,255,.15);color:#b266ff}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;justify-content:center;align-items:flex-start;padding:30px 20px;overflow-y:auto}
+.modal-overlay.active{display:flex}
+.modal{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:14px;width:100%;max-width:1000px;padding:0;animation:modalIn .3s}
+@keyframes modalIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{padding:20px 25px;border-bottom:1px solid #1a3a5c;display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:1.1rem;color:#90e0ef;display:flex;align-items:center;gap:8px}
+.modal-header h2 i{color:#00b4d8}
+.modal-close{background:none;border:none;color:#5a7a9a;font-size:1.3rem;cursor:pointer;transition:.3s}
+.modal-close:hover{color:#ff3860}
+.modal-body{padding:25px;max-height:75vh;overflow-y:auto;overflow-x:hidden;position:relative}
+.modal-footer{padding:15px 25px;border-top:1px solid #1a3a5c;display:flex;justify-content:flex-end;gap:10px}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:.75rem;color:#90e0ef;font-weight:500;text-transform:uppercase;letter-spacing:.3px}
+.form-group input,.form-group select,.form-group textarea{padding:10px 12px;background:#0a1628;border:1px solid #1a3a5c;border-radius:8px;color:#c8d6e5;font-size:.85rem;font-family:'Inter',sans-serif;outline:none;transition:.3s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#00b4d8}
+.form-group textarea{resize:vertical;min-height:80px}
+
+/* Read-only fields from admisión */
+.form-group input.readonly-adm,.form-group select.readonly-adm,.form-group textarea.readonly-adm{
+  background:rgba(0,180,216,.04);border:1px solid #14375a;color:#7ab8d4;cursor:default;opacity:.88
+}
+.form-group input.readonly-adm:focus,.form-group select.readonly-adm:focus,.form-group textarea.readonly-adm:focus{
+  border-color:#14375a;outline:none;box-shadow:none
+}
+.form-group label.label-adm{color:#4a8aa5;position:relative}
+.form-group label.label-adm::after{content:' (Admisión)';font-size:.6rem;text-transform:none;letter-spacing:0;font-weight:400;opacity:.7}
+
+/* Admisión data section separator */
+.adm-section-header{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:8px 0 4px 0;margin-top:4px;border-bottom:1px dashed #1a3a5c}
+.adm-section-header i{color:#00b4d8;font-size:.7rem}
+.adm-section-header span{color:#4a8aa5;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+.clinical-section-header{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:8px 0 4px 0;margin-top:8px;border-bottom:1px dashed #1a3a5c}
+.clinical-section-header i{color:#90e0ef;font-size:.7rem}
+.clinical-section-header span{color:#90e0ef;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+.btn-secondary{background:transparent;border:1px solid #1a3a5c;color:#90e0ef;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:.85rem;transition:.3s}
+.btn-secondary:hover{border-color:#00b4d8;color:#00b4d8}
+.btn-danger{background:transparent;border:1px solid #ff3860;color:#ff3860;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.8rem;transition:.3s}
+.btn-danger:hover{background:#ff3860;color:#fff}
+
+/* Action buttons for table */
+.btn-action{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.75rem;font-weight:500;border:1px solid transparent;transition:all .25s;font-family:'Inter',sans-serif;white-space:nowrap}
+.btn-action:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.3)}
+.btn-pdf{background:linear-gradient(135deg,#1b4332,#2d6a4f);color:#95d5b2;border:1px solid #40916c}
+.btn-pdf:hover{background:linear-gradient(135deg,#2d6a4f,#40916c);color:#d8f3dc}
+.btn-edit{background:linear-gradient(135deg,#0d2137,#1a3a5c);color:#90e0ef;border:1px solid #00b4d8}
+.btn-edit:hover{background:#00b4d8;color:#fff}
+.btn-view{background:transparent;color:#5a7a9a;border:1px solid #1a3a5c;padding:6px 8px}
+.btn-view:hover{color:#00b4d8;border-color:#00b4d8}
+.btn-delete{background:linear-gradient(135deg,#3d0c11,#5c1a24);color:#ff6b6b;border:1px solid #ff3860}
+.btn-delete:hover{background:#ff3860;color:#fff}
+
+/* Patient search inline */
+.patient-search-row{display:flex;gap:10px;align-items:flex-end}
+.patient-search-row input{flex:1}
+.patient-search-row .btn-buscar{background:linear-gradient(135deg,#0077b6,#00b4d8);color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;transition:.3s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.patient-search-row .btn-buscar:hover{box-shadow:0 4px 15px rgba(0,180,216,.3)}
+.patient-info-inline{margin-top:6px;padding:8px 12px;border-radius:8px;font-size:.8rem;display:none}
+.patient-info-inline.found{display:block;background:rgba(0,180,216,.08);border:1px solid #00b4d8;color:#90e0ef}
+.patient-info-inline.not-found{display:block;background:rgba(255,56,96,.08);border:1px solid #ff3860;color:#ff3860}
+
+/* CIE-10 Searchable Select */
+.searchable-select{position:relative}
+.searchable-select input{width:100%;background-color:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;transition:border-color .3s}
+.searchable-select input:focus{outline:none;border-color:#00b4d8;box-shadow:0 0 8px rgba(0,180,216,.3)}
+.searchable-select input.readonly-adm{background:rgba(0,180,216,.04);border:1px solid #14375a;color:#7ab8d4;cursor:default;opacity:.88}
+.searchable-select input.readonly-adm:focus{border-color:#14375a;outline:none;box-shadow:none}
+.searchable-select .dropdown-list{display:none;position:absolute;top:100%;left:0;right:0;max-height:220px;overflow-y:auto;background-color:#0d2137;border:1px solid #00b4d8;border-radius:0 0 8px 8px;z-index:100;box-shadow:0 8px 25px rgba(0,0,0,.5)}
+.searchable-select .dropdown-list.open{display:block}
+.searchable-select .dropdown-item{padding:8px 12px;cursor:pointer;font-size:13px;color:#c0c0c0;transition:all .15s;border-bottom:1px solid #0a1628}
+.searchable-select .dropdown-item:hover{background-color:#122a45;color:#00b4d8}
+.searchable-select .dropdown-item .code{color:#00b4d8;font-weight:700;margin-right:6px}
+.searchable-select .dropdown-item .desc{color:#90e0ef}
+.searchable-select .no-results{padding:12px;color:#5a7a9a;font-size:13px;text-align:center}
+
+/* ═══ Tipo de Egreso Visual Cards ═══ */
+.tipo-egreso-grid{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+}
+.tipo-egreso-option{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:14px 6px;
+  background:#0a1628;
+  border:2px solid #1a3a5c;
+  border-radius:10px;
+  cursor:pointer;
+  transition:.25s;
+  user-select:none;
+  text-align:center;
+}
+.tipo-egreso-option:hover{border-color:#00b4d8;background:rgba(0,180,216,.05)}
+.tipo-egreso-option input[type=radio]{display:none}
+.tipo-egreso-option .tipo-icon{font-size:1.2rem;transition:.25s}
+.tipo-egreso-option .tipo-label{font-size:.7rem;font-weight:600;letter-spacing:.3px;line-height:1.2}
+
+.tipo-egreso-option.selected-mejoria{border-color:#48c78e;background:rgba(72,199,142,.12)}
+.tipo-egreso-option.selected-mejoria .tipo-icon{color:#48c78e}
+.tipo-egreso-option.selected-mejoria .tipo-label{color:#48c78e}
+
+.tipo-egreso-option.selected-alta-voluntaria{border-color:#ffd166;background:rgba(255,209,102,.12)}
+.tipo-egreso-option.selected-alta-voluntaria .tipo-icon{color:#ffd166}
+.tipo-egreso-option.selected-alta-voluntaria .tipo-label{color:#ffd166}
+
+.tipo-egreso-option.selected-fallecimiento{border-color:#ff3860;background:rgba(255,56,96,.12)}
+.tipo-egreso-option.selected-fallecimiento .tipo-icon{color:#ff3860}
+.tipo-egreso-option.selected-fallecimiento .tipo-label{color:#ff3860}
+
+.tipo-egreso-option.selected-traslado{border-color:#00b4d8;background:rgba(0,180,216,.12)}
+.tipo-egreso-option.selected-traslado .tipo-icon{color:#00b4d8}
+.tipo-egreso-option.selected-traslado .tipo-label{color:#00b4d8}
+
+.tipo-egreso-option.selected-contra-referencia{border-color:#b266ff;background:rgba(178,102,255,.12)}
+.tipo-egreso-option.selected-contra-referencia .tipo-icon{color:#b266ff}
+.tipo-egreso-option.selected-contra-referencia .tipo-label{color:#b266ff}
+
+/* ═══ Destino de Egreso Visual Cards ═══ */
+.destino-egreso-grid{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+.destino-egreso-option{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:12px 6px;
+  background:#0a1628;
+  border:2px solid #1a3a5c;
+  border-radius:10px;
+  cursor:pointer;
+  transition:.25s;
+  user-select:none;
+  text-align:center;
+}
+.destino-egreso-option:hover{border-color:#00b4d8;background:rgba(0,180,216,.05)}
+.destino-egreso-option input[type=radio]{display:none}
+.destino-egreso-option .destino-icon{font-size:1.1rem;transition:.25s}
+.destino-egreso-option .destino-label{font-size:.7rem;font-weight:600;letter-spacing:.3px;line-height:1.2}
+
+.destino-egreso-option.selected-domicilio{border-color:#48c78e;background:rgba(72,199,142,.12)}
+.destino-egreso-option.selected-domicilio .destino-icon{color:#48c78e}
+.destino-egreso-option.selected-domicilio .destino-label{color:#48c78e}
+
+.destino-egreso-option.selected-institucion-salud{border-color:#0077b6;background:rgba(0,119,182,.12)}
+.destino-egreso-option.selected-institucion-salud .destino-icon{color:#0077b6}
+.destino-egreso-option.selected-institucion-salud .destino-label{color:#0077b6}
+
+.destino-egreso-option.selected-institucion-larga{border-color:#ffd166;background:rgba(255,209,102,.12)}
+.destino-egreso-option.selected-institucion-larga .destino-icon{color:#ffd166}
+.destino-egreso-option.selected-institucion-larga .destino-label{color:#ffd166}
+
+.destino-egreso-option.selected-defuncion{border-color:#ff3860;background:rgba(255,56,96,.12)}
+.destino-egreso-option.selected-defuncion .destino-icon{color:#ff3860}
+.destino-egreso-option.selected-defuncion .destino-label{color:#ff3860}
+
+/* Auto-resumen button */
+.btn-auto-resumen{
+  background:linear-gradient(135deg,#0d3a4a,#122a45);
+  border:1px solid #00b4d8;
+  color:#00b4d8;
+  padding:10px 20px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:.82rem;
+  font-weight:600;
+  transition:.3s;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.btn-auto-resumen:hover{background:rgba(0,180,216,.15);box-shadow:0 4px 15px rgba(0,180,216,.2);transform:translateY(-1px)}
+.btn-auto-resumen i{animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* Detail modal */
+.detail-section{margin-bottom:20px}
+.detail-section h3{color:#00b4d8;font-size:.9rem;margin-bottom:10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1a3a5c;padding-bottom:8px}
+.detail-field{display:grid;grid-template-columns:200px 1fr;gap:8px;margin-bottom:8px;font-size:.82rem}
+.detail-field .label{color:#5a7a9a;font-weight:500}
+.detail-field .value{color:#c8d6e5}
+.detail-field .label.adm-label{color:#4a8aa5}
+.detail-field .value.adm-value{color:#7ab8d4}
+.detail-text-block{white-space:pre-wrap;font-size:.85rem;color:#c8d6e5;background:#0a1628;padding:12px;border-radius:8px;border:1px solid #1a3a5c;margin-top:4px}
+
+/* Toast */
+.toast-container{position:fixed;top:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{padding:14px 20px;border-radius:10px;font-size:.82rem;display:flex;align-items:center;gap:10px;animation:toastIn .3s;min-width:280px;box-shadow:0 5px 20px rgba(0,0,0,.3)}
+.toast.success{background:linear-gradient(135deg,#0d4a2e,#0d2137);border:1px solid #48c78e;color:#48c78e}
+.toast.error{background:linear-gradient(135deg,#4a0d1a,#0d2137);border:1px solid #ff3860;color:#ff3860}
+.toast.info{background:linear-gradient(135deg,#0d3a4a,#0d2137);border:1px solid #00b4d8;color:#00b4d8}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+/* Scrollbar */
+.modal-body::-webkit-scrollbar{width:6px}
+.modal-body::-webkit-scrollbar-track{background:#0a1628}
+.modal-body::-webkit-scrollbar-thumb{background:#1a3a5c;border-radius:3px}
+.modal-body::-webkit-scrollbar-thumb:hover{background:#00b4d8}
+
+@media(max-width:768px){
+  .form-grid{grid-template-columns:1fr}
+  .tipo-egreso-grid{grid-template-columns:1fr 1fr 1fr}
+  .destino-egreso-grid{grid-template-columns:1fr 1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .nav{gap:4px}.nav a{font-size:.68rem;padding:4px 8px}
+}
+@media(max-width:480px){
+  .tipo-egreso-grid{grid-template-columns:1fr 1fr}
+  .destino-egreso-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+    <script src="permisos.js"></script>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="logo">
+    <i class="fas fa-hospital" style="color:#00b4d8;font-size:1.5rem"></i>
+    <div>
+      <h1>NEXUSMED</h1>
+      <span>IPS Domiciliaria</span>
+    </div>
+  </div>
+  <div class="user-info">
+    <i class="fas fa-user-circle"></i>
+    <span id="nombreUsuario">Usuario</span>
+    <button class="btn-logout" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Salir</button>
+  </div>
+</header>
+
+<!-- Nav -->
+<nav class="nav">
+  <a href="inicio.html"><i class="fas fa-home"></i> Inicio</a>
+  <a href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+  <a href="pacientes.html"><i class="fas fa-users"></i> Pacientes</a>
+  <a href="historias.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
+  <a href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
+  <a href="notas_enfermeria.html"><i class="fas fa-heartbeat"></i> Notas Enfermería</a>
+  <a href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
+  <a href="epicrisis.html" class="active"><i class="fas fa-file-alt"></i> Epicrisis</a>
+  <a href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+  <a href="egresados.html"><i class="fas fa-sign-out-alt"></i> Egresados</a>
+  <a href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
+  <a href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+</nav>
+
+<!-- Main -->
+<main class="main">
+  <h1 class="page-title"><i class="fas fa-file-alt"></i> Epicrisis</h1>
+  <p class="page-subtitle">Registro de egreso y resumen de hospitalización domiciliaria</p>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">Total Epicrisis</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statHoy">0</div>
+      <div class="stat-label">Registradas Hoy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statMejoria">0</div>
+      <div class="stat-label">Por Mejoría</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statOtros">0</div>
+      <div class="stat-label">Otros Egresos</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="filtroBusqueda" placeholder="Buscar por paciente, documento, epicrisis..." oninput="renderTabla()">
+    </div>
+    <select class="filter-select" id="filtroTipoEgreso" onchange="renderTabla()">
+      <option value="">Todos los tipos de egreso</option>
+      <option value="Mejoría">Mejoría</option>
+      <option value="Alta Voluntaria">Alta Voluntaria</option>
+      <option value="Fallecimiento">Fallecimiento</option>
+      <option value="Traslado">Traslado</option>
+      <option value="Contra-referencia">Contra-referencia</option>
+    </select>
+    <button class="btn-primary" onclick="abrirModalCrear()"><i class="fas fa-plus"></i> Nueva Epicrisis</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>N° Epicrisis</th>
+          <th>Paciente</th>
+          <th>Documento</th>
+          <th>Dx Ingreso</th>
+          <th>Tipo Egreso</th>
+          <th>Médico</th>
+          <th>Fecha Registro</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Form Modal -->
+<div class="modal-overlay" id="modalForm">
+  <div class="modal">
+    <div class="modal-header">
+      <h2><i class="fas fa-file-alt"></i> <span id="modalTitulo">Nueva Epicrisis</span></h2>
+      <button class="modal-close" onclick="cerrarModal('modalForm')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <!-- Patient Search -->
+        <div class="form-group full">
+          <label><i class="fas fa-search"></i> Buscar Paciente (Documento, Nombre o Admisión)</label>
+          <div class="patient-search-row">
+            <input type="text" id="pacienteBuscar" placeholder="Ingrese documento, nombre o N° admisión...">
+            <button class="btn-buscar" onclick="buscarPaciente()"><i class="fas fa-search"></i> Buscar</button>
+          </div>
+          <div class="patient-info-inline" id="pacienteInfo"></div>
+          <input type="hidden" id="pacienteId">
+        </div>
+
+        <!-- Admisión Data -->
+        <div class="adm-section-header"><i class="fas fa-door-open"></i><span>Datos de la Admisión</span></div>
+
+        <div class="form-group">
+          <label class="label-adm">N° Admisión</label>
+          <input type="text" id="admNumAdmision" class="readonly-adm" readonly>
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Fecha Ingreso</label>
+          <input type="text" id="admFechaIngreso" class="readonly-adm" readonly>
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Fecha Nacimiento</label>
+          <input type="text" id="admFechaNacimiento" class="readonly-adm" readonly>
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Edad</label>
+          <input type="text" id="admEdad" class="readonly-adm" readonly>
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Género</label>
+          <input type="text" id="admGenero" class="readonly-adm" readonly>
+        </div>
+        <div class="form-group">
+          <label class="label-adm">EPS</label>
+          <input type="text" id="admEps" class="readonly-adm" readonly>
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Servicio</label>
+          <input type="text" id="admServicio" class="readonly-adm" readonly>
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Habitación</label>
+          <input type="text" id="admHabitacion" class="readonly-adm" readonly>
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Médico Tratante</label>
+          <input type="text" id="admMedico" class="readonly-adm" readonly>
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Dirección</label>
+          <input type="text" id="admDireccion" class="readonly-adm" readonly>
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Teléfono</label>
+          <input type="text" id="admTelefono" class="readonly-adm" readonly>
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Familiar</label>
+          <input type="text" id="admFamiliar" class="readonly-adm" readonly>
+        </div>
+
+        <!-- Diagnósticos -->
+        <div class="clinical-section-header"><i class="fas fa-stethoscope"></i><span>Diagnósticos</span></div>
+
+        <div class="form-group">
+          <label>Diagnóstico de Ingreso (CIE-10)</label>
+          <div class="searchable-select" id="cie10IngresoContainer">
+            <input type="text" id="cie10IngresoDisplay" class="readonly-adm" placeholder="Se carga automáticamente de admisión" readonly>
+            <input type="hidden" id="cie10IngresoCodigo">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Diagnóstico de Egreso (CIE-10)</label>
+          <div class="searchable-select" id="cie10EgresoContainer">
+            <input type="text" id="cie10EgresoDisplay" placeholder="Buscar código o descripción..." autocomplete="off" onfocus="abrirCIE10Egreso()" oninput="filtrarCIE10Egreso()">
+            <input type="hidden" id="cie10EgresoCodigo">
+            <div class="dropdown-list" id="cie10EgresoDropdown"></div>
+          </div>
+        </div>
+
+        <!-- Tipo de Egreso -->
+        <div class="clinical-section-header"><i class="fas fa-door-open"></i><span>Tipo de Egreso</span></div>
+        <div class="tipo-egreso-grid">
+          <div class="tipo-egreso-option" onclick="seleccionarTipoEgreso(this,'Mejoría')" data-tipo="Mejoría">
+            <input type="radio" name="tipoEgreso" value="Mejoría">
+            <i class="fas fa-arrow-up tipo-icon" style="color:#5a7a9a"></i>
+            <span class="tipo-label" style="color:#5a7a9a">Mejoría</span>
+          </div>
+          <div class="tipo-egreso-option" onclick="seleccionarTipoEgreso(this,'Alta Voluntaria')" data-tipo="Alta Voluntaria">
+            <input type="radio" name="tipoEgreso" value="Alta Voluntaria">
+            <i class="fas fa-hand-paper tipo-icon" style="color:#5a7a9a"></i>
+            <span class="tipo-label" style="color:#5a7a9a">Alta Voluntaria</span>
+          </div>
+          <div class="tipo-egreso-option" onclick="seleccionarTipoEgreso(this,'Fallecimiento')" data-tipo="Fallecimiento">
+            <input type="radio" name="tipoEgreso" value="Fallecimiento">
+            <i class="fas fa-heart-broken tipo-icon" style="color:#5a7a9a"></i>
+            <span class="tipo-label" style="color:#5a7a9a">Fallecimiento</span>
+          </div>
+          <div class="tipo-egreso-option" onclick="seleccionarTipoEgreso(this,'Traslado')" data-tipo="Traslado">
+            <input type="radio" name="tipoEgreso" value="Traslado">
+            <i class="fas fa-ambulance tipo-icon" style="color:#5a7a9a"></i>
+            <span class="tipo-label" style="color:#5a7a9a">Traslado</span>
+          </div>
+          <div class="tipo-egreso-option" onclick="seleccionarTipoEgreso(this,'Contra-referencia')" data-tipo="Contra-referencia">
+            <input type="radio" name="tipoEgreso" value="Contra-referencia">
+            <i class="fas fa-exchange-alt tipo-icon" style="color:#5a7a9a"></i>
+            <span class="tipo-label" style="color:#5a7a9a">Contra-referencia</span>
+          </div>
+        </div>
+
+        <!-- Destino de Egreso -->
+        <div class="clinical-section-header"><i class="fas fa-map-marker-alt"></i><span>Destino de Egreso</span></div>
+        <div class="destino-egreso-grid">
+          <div class="destino-egreso-option" onclick="seleccionarDestinoEgreso(this,'Domicilio')" data-destino="Domicilio">
+            <input type="radio" name="destinoEgreso" value="Domicilio">
+            <i class="fas fa-home destino-icon" style="color:#5a7a9a"></i>
+            <span class="destino-label" style="color:#5a7a9a">Domicilio</span>
+          </div>
+          <div class="destino-egreso-option" onclick="seleccionarDestinoEgreso(this,'Institución de Salud')" data-destino="Institución de Salud">
+            <input type="radio" name="destinoEgreso" value="Institución de Salud">
+            <i class="fas fa-hospital destino-icon" style="color:#5a7a9a"></i>
+            <span class="destino-label" style="color:#5a7a9a">Inst. de Salud</span>
+          </div>
+          <div class="destino-egreso-option" onclick="seleccionarDestinoEgreso(this,'Institución de Larga Estancia')" data-destino="Institución de Larga Estancia">
+            <input type="radio" name="destinoEgreso" value="Institución de Larga Estancia">
+            <i class="fas fa-bed destino-icon" style="color:#5a7a9a"></i>
+            <span class="destino-label" style="color:#5a7a9a">Inst. Larga Estancia</span>
+          </div>
+          <div class="destino-egreso-option" onclick="seleccionarDestinoEgreso(this,'Fallecimiento')" data-destino="Fallecimiento">
+            <input type="radio" name="destinoEgreso" value="Fallecimiento">
+            <i class="fas fa-cross destino-icon" style="color:#5a7a9a"></i>
+            <span class="destino-label" style="color:#5a7a9a">Fallecimiento</span>
+          </div>
+        </div>
+
+        <!-- Fecha Egreso y Médico -->
+        <div class="clinical-section-header"><i class="fas fa-user-md"></i><span>Datos del Egreso</span></div>
+
+        <div class="form-group">
+          <label>Fecha de Egreso</label>
+          <input type="datetime-local" id="fechaEgreso">
+        </div>
+        <div class="form-group">
+          <label>Médico Responsable</label>
+          <select id="medicoResponsable">
+            <option value="">Seleccione médico...</option>
+          </select>
+        </div>
+
+        <!-- Resumen -->
+        <div class="clinical-section-header"><i class="fas fa-clipboard-list"></i><span>Resumen de la Hospitalización en Casa</span></div>
+
+        <div class="form-group full" style="flex-direction:row;align-items:center;gap:10px">
+          <button type="button" class="btn-auto-resumen" onclick="generarAutoResumen()"><i class="fas fa-magic"></i> Generar Resumen Automático</button>
+          <span style="font-size:.72rem;color:#5a7a9a">Compila datos de historia clínica, evoluciones, notas y terapias</span>
+        </div>
+        <div class="form-group full">
+          <label>Resumen de la Hospitalización en Casa</label>
+          <textarea id="resumenHospitalizacion" rows="6" placeholder="Resumen automático o manual de la hospitalización..."></textarea>
+        </div>
+
+        <!-- Terapias Recibidas -->
+        <div class="clinical-section-header"><i class="fas fa-hand-holding-medical"></i><span>Terapias Recibidas Durante la Estancia</span></div>
+
+        <div class="form-group full">
+          <label>Terapias Recibidas</label>
+          <textarea id="terapiasRecibidas" rows="5" placeholder="Resumen de terapias aplicadas durante la estancia..."></textarea>
+        </div>
+
+        <!-- Otros campos -->
+        <div class="clinical-section-header"><i class="fas fa-notes-medical"></i><span>Información Complementaria</span></div>
+
+        <div class="form-group full">
+          <label>Complicaciones</label>
+          <textarea id="complicaciones" rows="3" placeholder="Complicaciones presentadas durante la estancia..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Instrucciones Post-Egreso</label>
+          <textarea id="instruccionesPostEgreso" rows="3" placeholder="Instrucciones para el paciente al egreso..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Diagnósticos Secundarios</label>
+          <textarea id="diagnosticosSecundarios" rows="3" placeholder="Diagnósticos secundarios o comorbilidades..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Medicamentos al Egreso</label>
+          <textarea id="medicamentosEgreso" rows="3" placeholder="Medicamentos formulados al momento del egreso..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Condición Funcional al Egreso</label>
+          <textarea id="condicionFuncional" rows="3" placeholder="Estado funcional del paciente al egreso..."></textarea>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="cerrarModal('modalForm')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEpicrisis()"><i class="fas fa-save"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="modalDetalle">
+  <div class="modal">
+    <div class="modal-header">
+      <h2><i class="fas fa-file-alt"></i> Detalle de Epicrisis</h2>
+      <button class="modal-close" onclick="cerrarModal('modalDetalle')">×</button>
+    </div>
+    <div class="modal-body" id="detalleContenido"></div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="descargarPDF()" style="margin-right:10px"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
+      <button class="btn-secondary" onclick="cerrarModal('modalDetalle')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// Storage Keys
+// ═══════════════════════════════════════════
+const STORAGE_EPICRISIS = 'nexus_epicrisis';
+const STORAGE_PACIENTES = 'nexus_pacientes';
+const STORAGE_USUARIOS = 'nexus_usuarios';
+const STORAGE_SESION = 'nexus_sesion';
+const STORAGE_CONTADOR = 'nexus_contador_epi';
+const STORAGE_HISTORIAS = 'nexus_historias_clinicas';
+const STORAGE_EVOLUCIONES = 'nexus_evoluciones';
+const STORAGE_NOTAS = 'nexus_notas_enfermeria';
+const STORAGE_TERAPIAS = 'nexus_terapias';
+
+// ═══════════════════════════════════════════
+// CIE-10 Codes
+// ═══════════════════════════════════════════
+const CIE10 = [
+  { code: 'J18.9', desc: 'Neumonía, no especificada' },
+  { code: 'J06.9', desc: 'Infección aguda de vías respiratorias superiores' },
+  { code: 'J22', desc: 'Infección aguda de vías respiratorias inferiores' },
+  { code: 'J44.1', desc: 'EPOC con exacerbación aguda' },
+  { code: 'J44.0', desc: 'EPOC con infección respiratoria aguda' },
+  { code: 'J96.0', desc: 'Insuficiencia respiratoria aguda' },
+  { code: 'J96.1', desc: 'Insuficiencia respiratoria crónica' },
+  { code: 'J84.9', desc: 'Enfermedad pulmonar intersticial' },
+  { code: 'I10', desc: 'Hipertensión arterial esencial' },
+  { code: 'I11.9', desc: 'Enfermedad cardíaca hipertensiva sin insuficiencia cardíaca' },
+  { code: 'I50.9', desc: 'Insuficiencia cardíaca, no especificada' },
+  { code: 'I50.0', desc: 'Insuficiencia cardíaca congestiva' },
+  { code: 'I48', desc: 'Fibrilación y aleteo auricular' },
+  { code: 'I21.9', desc: 'Infarto agudo de miocardio, no especificado' },
+  { code: 'I25.1', desc: 'Enfermedad aterosclerótica del corazón' },
+  { code: 'I63.9', desc: 'Accidente cerebrovascular, no especificado' },
+  { code: 'I67.9', desc: 'Enfermedad cerebrovascular, no especificada' },
+  { code: 'I69.9', desc: 'Secuelas de enfermedad cerebrovascular' },
+  { code: 'E11.9', desc: 'Diabetes mellitus tipo 2 sin complicaciones' },
+  { code: 'E11.5', desc: 'Diabetes tipo 2 con trastornos circulatorios' },
+  { code: 'E11.6', desc: 'Diabetes tipo 2 con otras complicaciones' },
+  { code: 'E10.9', desc: 'Diabetes mellitus tipo 1 sin complicaciones' },
+  { code: 'E14.9', desc: 'Diabetes mellitus no especificada' },
+  { code: 'E78.5', desc: 'Dislipidemia, no especificada' },
+  { code: 'E87.5', desc: 'Hiperpotasemia' },
+  { code: 'E87.6', desc: 'Hipopotasemia' },
+  { code: 'E46', desc: 'Desnutrición proteico-calórica no especificada' },
+  { code: 'N18.9', desc: 'Enfermedad renal crónica, no especificada' },
+  { code: 'N17.9', desc: 'Insuficiencia renal aguda, no especificada' },
+  { code: 'N19', desc: 'Enfermedad renal, no especificada' },
+  { code: 'N39.0', desc: 'Infección de vías urinarias, sitio no especificado' },
+  { code: 'N40', desc: 'Hiperplasia prostática benigna' },
+  { code: 'K70.3', desc: 'Cirrosis hepática alcohólica' },
+  { code: 'K72.9', desc: 'Insuficiencia hepática, no especificada' },
+  { code: 'K74.6', desc: 'Cirrosis hepática, otra y no especificada' },
+  { code: 'K80.0', desc: 'Cálculo de la vesícula biliar con colecistitis aguda' },
+  { code: 'K80.1', desc: 'Cálculo de la vesícula biliar con otra colecistitis' },
+  { code: 'K92.2', desc: 'Hemorragia gastrointestinal, no especificada' },
+  { code: 'K35.9', desc: 'Apendicitis aguda, no especificada' },
+  { code: 'K56.6', desc: 'Obstrucción intestinal, no especificada' },
+  { code: 'K59.0', desc: 'Estreñimiento' },
+  { code: 'K21.0', desc: 'Reflujo gastroesofágico con esofagitis' },
+  { code: 'A09', desc: 'Gastroenteritis y colitis de presunto origen infeccioso' },
+  { code: 'A41.9', desc: 'Sepsis, no especificada' },
+  { code: 'A04.7', desc: 'Enterocolitis por Clostridium difficile' },
+  { code: 'B34.9', desc: 'Infección viral, no especificada' },
+  { code: 'B95.1', desc: 'Streptococcus, causa de enfermedades clasificadas en otros capítulos' },
+  { code: 'B96.2', desc: 'Escherichia coli, causa de enfermedades' },
+  { code: 'C34.9', desc: 'Neoplasia maligna de pulmón, no especificada' },
+  { code: 'C18.9', desc: 'Neoplasia maligna del colon, no especificada' },
+  { code: 'C50.9', desc: 'Neoplasia maligna de mama, no especificada' },
+  { code: 'C61', desc: 'Neoplasia maligna de la próstata' },
+  { code: 'C79.9', desc: 'Metástasis, no especificada' },
+  { code: 'C95.9', desc: 'Leucemia, no especificada' },
+  { code: 'D50.9', desc: 'Anemia por deficiencia de hierro, no especificada' },
+  { code: 'D46.9', desc: 'Síndrome mielodisplásico, no especificado' },
+  { code: 'D64.9', desc: 'Anemia, no especificada' },
+  { code: 'G40.9', desc: 'Epilepsia, no especificada' },
+  { code: 'G43.9', desc: 'Migraña, no especificada' },
+  { code: 'G47.3', desc: 'Apnea obstructiva del sueño' },
+  { code: 'G82.9', desc: 'Parálisis, no especificada' },
+  { code: 'G89.1', desc: 'Dolor crónico, no clasificado en otra parte' },
+  { code: 'F03', desc: 'Demencia, no especificada' },
+  { code: 'F10.1', desc: 'Trastorno por uso de alcohol – uso perjudicial' },
+  { code: 'F17.2', desc: 'Dependencia de tabaco' },
+  { code: 'F32.9', desc: 'Episodio depresivo, no especificado' },
+  { code: 'F41.1', desc: 'Trastorno de ansiedad generalizada' },
+  { code: 'F41.9', desc: 'Trastorno de ansiedad, no especificado' },
+  { code: 'M54.5', desc: 'Lumbalgia baja' },
+  { code: 'M54.1', desc: 'Radiculopatía' },
+  { code: 'M81.0', desc: 'Osteoporosis postmenopáusica' },
+  { code: 'M79.3', desc: 'Parestesia, no especificada' },
+  { code: 'M79.1', desc: 'Mialgia' },
+  { code: 'S22.0', desc: 'Fractura de vértebra torácica' },
+  { code: 'S72.0', desc: 'Fractura del cuello del fémur' },
+  { code: 'S82.8', desc: 'Fractura de la pierna' },
+  { code: 'S06.9', desc: 'Traumatismo intracraneal, no especificado' },
+  { code: 'S09.9', desc: 'Lesión de la cabeza, no especificada' },
+  { code: 'T14.0', desc: 'Herida superficial de región del cuerpo no especificada' },
+  { code: 'T88.9', desc: 'Complicación, no especificada' },
+  { code: 'R07.9', desc: 'Dolor torácico, no especificado' },
+  { code: 'R50.9', desc: 'Fiebre, no especificada' },
+  { code: 'R10.9', desc: 'Dolor abdominal y pélvico, no especificado' },
+  { code: 'R55', desc: 'Síncope y colapso' },
+  { code: 'R60.9', desc: 'Edema, no especificado' },
+  { code: 'R63.0', desc: 'Anorexia' },
+  { code: 'R65.9', desc: 'Síndrome de respuesta inflamatoria sistémica' },
+  { code: 'Z96.6', desc: 'Presencia de dispositivo de fijación ortopédica' },
+  { code: 'Z87.0', desc: 'Antecedente de enfermedades del sistema respiratorio' },
+  { code: 'Z95.1', desc: 'Presencia de bypass aortocoronario' },
+  { code: 'U07.1', desc: 'COVID-19, virus identificado' },
+  { code: 'U07.2', desc: 'COVID-19, virus no identificado' },
+  { code: 'B34.2', desc: 'Infección por coronavirus, no especificada' },
+];
+
+// ═══════════════════════════════════════════
+// ADM_FIELDS & ADM_MAP
+// ═══════════════════════════════════════════
+const ADM_FIELDS = [
+  'admNumAdmision','admFechaIngreso','admFechaNacimiento','admEdad',
+  'admGenero','admEps','admServicio','admHabitacion',
+  'admMedico','admDiagnostico','admDireccion','admTelefono','admFamiliar'
+];
+
+const ADM_MAP = {
+  numAdmision: 'admNumAdmision',
+  fechaIngreso: 'admFechaIngreso',
+  fechaNacimiento: 'admFechaNacimiento',
+  edad: 'admEdad',
+  genero: 'admGenero',
+  eps: 'admEps',
+  servicio: 'admServicio',
+  habitacion: 'admHabitacion',
+  medico: 'admMedico',
+  diagnostico: 'admDiagnostico',
+  direccion: 'admDireccion',
+  telefono: 'admTelefono',
+  familiarNombre: 'admFamiliar'
+};
+
+// ═══════════════════════════════════════════
+// Visual Selector Maps
+// ═══════════════════════════════════════════
+let _tipoEgresoSeleccionado = '';
+let _destinoEgresoSeleccionado = '';
+
+const TIPO_EGRESO_CLASS_MAP = {
+  'Mejoría': 'selected-mejoria',
+  'Alta Voluntaria': 'selected-alta-voluntaria',
+  'Fallecimiento': 'selected-fallecimiento',
+  'Traslado': 'selected-traslado',
+  'Contra-referencia': 'selected-contra-referencia'
+};
+
+const TIPO_EGRESO_COLOR_MAP = {
+  'Mejoría': '#48c78e',
+  'Alta Voluntaria': '#ffd166',
+  'Fallecimiento': '#ff3860',
+  'Traslado': '#00b4d8',
+  'Contra-referencia': '#b266ff'
+};
+
+const DESTINO_EGRESO_CLASS_MAP = {
+  'Domicilio': 'selected-domicilio',
+  'Institución de Salud': 'selected-institucion-salud',
+  'Institución de Larga Estancia': 'selected-institucion-larga',
+  'Fallecimiento': 'selected-defuncion'
+};
+
+const DESTINO_EGRESO_COLOR_MAP = {
+  'Domicilio': '#48c78e',
+  'Institución de Salud': '#0077b6',
+  'Institución de Larga Estancia': '#ffd166',
+  'Fallecimiento': '#ff3860'
+};
+
+let _epicrisisEditId = null;
+
+// ═══════════════════════════════════════════
+// Utility Functions
+// ═══════════════════════════════════════════
+function getEpicrisis() { return JSON.parse(localStorage.getItem(STORAGE_EPICRISIS) || '[]'); }
+function saveEpicrisis(arr) { localStorage.setItem(STORAGE_EPICRISIS, JSON.stringify(arr)); }
+function getPacientes() { return JSON.parse(localStorage.getItem(STORAGE_PACIENTES) || '[]'); }
+function savePacientes(arr) { localStorage.setItem(STORAGE_PACIENTES, JSON.stringify(arr)); }
+
+function getSession() {
+  const s = JSON.parse(localStorage.getItem(STORAGE_SESION) || 'null');
+  if (s) document.getElementById('nombreUsuario').textContent = s.nombre || 'Usuario';
+  return s;
+}
+
+function cerrarSesion() {
+  localStorage.removeItem(STORAGE_SESION);
+  window.location.href = 'index.html';
+}
+
+function showToast(msg, type, clearPrevious) {
+  const container = document.getElementById('toastContainer');
+  if (clearPrevious) container.innerHTML = '';
+  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.innerHTML = '<i class="fas ' + icons[type] + '"></i> ' + msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+function generarNumeroEpicrisis() {
+  const year = new Date().getFullYear();
+  let cont = JSON.parse(localStorage.getItem(STORAGE_CONTADOR) || 'null');
+  if (!cont || cont.year !== year) {
+    cont = { year, seq: 1 };
+  } else {
+    cont.seq++;
+  }
+  localStorage.setItem(STORAGE_CONTADOR, JSON.stringify(cont));
+  const num = 'EP-' + year + '-' + String(cont.seq).padStart(4, '0');
+  return num;
+}
+
+function formatDate(d) {
+  if (!d) return 'N/A';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
+    ' ' + dt.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+}
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// ═══════════════════════════════════════════
+// Load User Session
+// ═══════════════════════════════════════════
+getSession();
+
+// ═══════════════════════════════════════════
+// Load Médicos Dropdown
+// ═══════════════════════════════════════════
+function loadMedicosSelect(selectedValue) {
+  const sel = document.getElementById('medicoResponsable');
+  sel.innerHTML = '<option value="">Seleccione médico...</option>';
+  const usuarios = JSON.parse(localStorage.getItem(STORAGE_USUARIOS) || '[]');
+  const medicos = usuarios.filter(u => u.rol === 'Médico' || u.rol === 'medico' || u.rol === 'Medico');
+  if (medicos.length === 0) {
+    // If no users, also check for any user with especialidad
+    const otros = usuarios.filter(u => u.especialidad);
+    otros.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.nombre;
+      opt.textContent = m.nombre + (m.especialidad ? ' — ' + m.especialidad : '');
+      if (m.nombre === selectedValue) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  } else {
+    medicos.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.nombre;
+      opt.textContent = m.nombre + (m.especialidad ? ' — ' + m.especialidad : '');
+      if (m.nombre === selectedValue) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+}
+
+// ═══════════════════════════════════════════
+// CIE-10 Searchable Dropdown (Egreso)
+// ═══════════════════════════════════════════
+function abrirCIE10Egreso() {
+  const dropdown = document.getElementById('cie10EgresoDropdown');
+  renderCIE10List(CIE10, 'cie10EgresoDropdown');
+  dropdown.classList.add('open');
+}
+
+function filtrarCIE10Egreso() {
+  const term = document.getElementById('cie10EgresoDisplay').value.toLowerCase().trim();
+  const dropdown = document.getElementById('cie10EgresoDropdown');
+  if (!term) { renderCIE10List(CIE10, 'cie10EgresoDropdown'); dropdown.classList.add('open'); return; }
+  const filtered = CIE10.filter(c => c.code.toLowerCase().includes(term) || c.desc.toLowerCase().includes(term));
+  renderCIE10List(filtered, 'cie10EgresoDropdown');
+  dropdown.classList.add('open');
+}
+
+function renderCIE10List(lista, dropdownId) {
+  const dropdown = document.getElementById(dropdownId);
+  if (lista.length === 0) {
+    dropdown.innerHTML = '<div class="no-results">Sin resultados</div>';
+    return;
+  }
+  dropdown.innerHTML = lista.map(c =>
+    '<div class="dropdown-item" onclick="seleccionarCIE10Egreso(\'' + c.code + '\', \'' + c.desc.replace(/'/g, "\\'") + '\')">' +
+    '<span class="code">' + c.code + '</span><span class="desc">' + c.desc + '</span></div>'
+  ).join('');
+}
+
+function seleccionarCIE10Egreso(code, desc) {
+  document.getElementById('cie10EgresoDisplay').value = code + ' – ' + desc;
+  document.getElementById('cie10EgresoCodigo').value = code;
+  document.getElementById('cie10EgresoDropdown').classList.remove('open');
+}
+
+// Close CIE-10 dropdown on click outside
+document.addEventListener('click', function(e) {
+  const container = document.getElementById('cie10EgresoContainer');
+  if (container && !container.contains(e.target)) {
+    document.getElementById('cie10EgresoDropdown').classList.remove('open');
+  }
+});
+
+// ═══════════════════════════════════════════
+// Admisión Fields
+// ═══════════════════════════════════════════
+function limpiarCamposAdmision() {
+  ADM_FIELDS.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('cie10IngresoDisplay').value = '';
+  document.getElementById('cie10IngresoCodigo').value = '';
+}
+
+function llenarCamposAdmision(p) {
+  document.getElementById('admNumAdmision').value = p.numAdmision || '';
+  if (p.fechaIngreso) {
+    const d = new Date(p.fechaIngreso);
+    document.getElementById('admFechaIngreso').value = d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  } else { document.getElementById('admFechaIngreso').value = ''; }
+  if (p.fechaNacimiento) {
+    const d = new Date(p.fechaNacimiento);
+    document.getElementById('admFechaNacimiento').value = d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  } else { document.getElementById('admFechaNacimiento').value = ''; }
+  document.getElementById('admEdad').value = p.edad || '';
+  document.getElementById('admGenero').value = p.genero || '';
+  document.getElementById('admEps').value = p.eps || '';
+  document.getElementById('admServicio').value = p.servicio || '';
+  document.getElementById('admHabitacion').value = p.habitacion || '';
+  document.getElementById('admMedico').value = p.medico || '';
+  // Fill Diagnóstico Ingreso CIE-10
+  let dx = '';
+  if (p.diagnosticoCodigo && p.diagnostico) dx = p.diagnosticoCodigo + ' – ' + p.diagnostico;
+  else if (p.diagnostico) dx = p.diagnostico;
+  else if (p.diagnosticoCodigo) dx = p.diagnosticoCodigo;
+  document.getElementById('cie10IngresoDisplay').value = dx;
+  document.getElementById('cie10IngresoCodigo').value = p.diagnosticoCodigo || '';
+  // Also fill admDiagnostico for reference
+  document.getElementById('admDiagnostico').value = dx;
+  const dirParts = [p.direccion, p.barrio, p.municipio, p.departamento].filter(Boolean);
+  document.getElementById('admDireccion').value = dirParts.join(', ') || '';
+  document.getElementById('admTelefono').value = p.telefono || '';
+  const famParts = [];
+  if (p.familiarNombre) famParts.push(p.familiarNombre);
+  if (p.familiarParentesco) famParts.push('(' + p.familiarParentesco + ')');
+  if (p.familiarTelefono) famParts.push('Tel: ' + p.familiarTelefono);
+  document.getElementById('admFamiliar').value = famParts.join(' ') || '';
+}
+
+// ═══════════════════════════════════════════
+// Patient Search
+// ═══════════════════════════════════════════
+function buscarPaciente() {
+  const termino = document.getElementById('pacienteBuscar').value.trim().toLowerCase();
+  const infoDiv = document.getElementById('pacienteInfo');
+  const hiddenId = document.getElementById('pacienteId');
+
+  document.getElementById('toastContainer').innerHTML = '';
+
+  if (!termino) {
+    infoDiv.className = 'patient-info-inline';
+    infoDiv.style.display = 'none';
+    hiddenId.value = '';
+    limpiarCamposAdmision();
+    return;
+  }
+
+  const pacientes = getPacientes().filter(p => p.estado !== 'Egresado');
+
+  let paciente = null;
+  // 1) Exact numAdmision
+  paciente = pacientes.find(p => (p.numAdmision || '').toLowerCase() === termino);
+  // 2) Exact documento
+  if (!paciente) paciente = pacientes.find(p => p.documento.toLowerCase() === termino);
+  // 3) Partial documento
+  if (!paciente) paciente = pacientes.find(p => p.documento.toLowerCase().includes(termino));
+  // 4) Partial numAdmision
+  if (!paciente) paciente = pacientes.find(p => (p.numAdmision || '').toLowerCase().includes(termino));
+  // 5) Nombre partial
+  if (!paciente) paciente = pacientes.find(p => p.nombre.toLowerCase().includes(termino));
+  // 6) Multi-word
+  if (!paciente) {
+    const palabras = termino.split(/\s+/);
+    if (palabras.length > 1) {
+      paciente = pacientes.find(p => {
+        const nom = p.nombre.toLowerCase();
+        const doc = p.documento.toLowerCase();
+        const adm = (p.numAdmision || '').toLowerCase();
+        return palabras.every(w => nom.includes(w) || doc.includes(w) || adm.includes(w));
+      });
+    }
+  }
+
+  if (paciente) {
+    hiddenId.value = String(paciente.id);
+    infoDiv.className = 'patient-info-inline found';
+    let ingresoStr = 'N/A';
+    if (paciente.fechaIngreso) {
+      const d = new Date(paciente.fechaIngreso);
+      ingresoStr = d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    }
+    let admStr = paciente.numAdmision ? 'Adm: ' + paciente.numAdmision + ' — ' : '';
+    infoDiv.innerHTML = '<i class="fas fa-check-circle"></i> <strong>' + paciente.nombre + '</strong> — ' + admStr + 'Doc: ' + paciente.documento + ' — EPS: ' + (paciente.eps || 'N/A') + ' — Ingreso: ' + ingresoStr;
+    llenarCamposAdmision(paciente);
+    showToast('Datos de admisión cargados automáticamente', 'success', true);
+  } else {
+    hiddenId.value = '';
+    infoDiv.className = 'patient-info-inline not-found';
+    infoDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Paciente no encontrado en admisiones activas. Verifique documento, nombre o número de admisión.';
+    limpiarCamposAdmision();
+    showToast('Paciente no encontrado', 'error', true);
+  }
+}
+
+// Search on Enter key
+document.getElementById('pacienteBuscar').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); buscarPaciente(); }
+});
+
+// ═══════════════════════════════════════════
+// Tipo de Egreso Visual Selector
+// ═══════════════════════════════════════════
+function seleccionarTipoEgreso(el, tipo) {
+  document.querySelectorAll('.tipo-egreso-option').forEach(function(opt) {
+    Object.values(TIPO_EGRESO_CLASS_MAP).forEach(function(cls) { opt.classList.remove(cls); });
+    opt.querySelector('.tipo-icon').style.color = '#5a7a9a';
+    opt.querySelector('.tipo-label').style.color = '#5a7a9a';
+  });
+  var selClass = TIPO_EGRESO_CLASS_MAP[tipo] || '';
+  if (selClass) el.classList.add(selClass);
+  el.querySelector('input[type=radio]').checked = true;
+  el.querySelector('.tipo-icon').style.color = TIPO_EGRESO_COLOR_MAP[tipo] || '#00b4d8';
+  el.querySelector('.tipo-label').style.color = TIPO_EGRESO_COLOR_MAP[tipo] || '#00b4d8';
+  _tipoEgresoSeleccionado = tipo;
+
+  // Auto-set destino if Fallecimiento
+  if (tipo === 'Fallecimiento') {
+    seleccionarDestinoEgreso(document.querySelector('.destino-egreso-option[data-destino="Fallecimiento"]'), 'Fallecimiento');
+  }
+}
+
+function clearTipoEgresoSeleccion() {
+  _tipoEgresoSeleccionado = '';
+  document.querySelectorAll('.tipo-egreso-option').forEach(function(opt) {
+    Object.values(TIPO_EGRESO_CLASS_MAP).forEach(function(cls) { opt.classList.remove(cls); });
+    opt.querySelector('.tipo-icon').style.color = '#5a7a9a';
+    opt.querySelector('.tipo-label').style.color = '#5a7a9a';
+    opt.querySelector('input[type=radio]').checked = false;
+  });
+}
+
+function setTipoEgresoSeleccionado(tipo) {
+  clearTipoEgresoSeleccion();
+  if (tipo && TIPO_EGRESO_CLASS_MAP[tipo]) {
+    var el = document.querySelector('.tipo-egreso-option[data-tipo="' + tipo + '"]');
+    if (el) seleccionarTipoEgreso(el, tipo);
+  }
+}
+
+// ═══════════════════════════════════════════
+// Destino de Egreso Visual Selector
+// ═══════════════════════════════════════════
+function seleccionarDestinoEgreso(el, destino) {
+  if (!el) return;
+  document.querySelectorAll('.destino-egreso-option').forEach(function(opt) {
+    Object.values(DESTINO_EGRESO_CLASS_MAP).forEach(function(cls) { opt.classList.remove(cls); });
+    opt.querySelector('.destino-icon').style.color = '#5a7a9a';
+    opt.querySelector('.destino-label').style.color = '#5a7a9a';
+  });
+  var selClass = DESTINO_EGRESO_CLASS_MAP[destino] || '';
+  if (selClass) el.classList.add(selClass);
+  el.querySelector('input[type=radio]').checked = true;
+  el.querySelector('.destino-icon').style.color = DESTINO_EGRESO_COLOR_MAP[destino] || '#00b4d8';
+  el.querySelector('.destino-label').style.color = DESTINO_EGRESO_COLOR_MAP[destino] || '#00b4d8';
+  _destinoEgresoSeleccionado = destino;
+}
+
+function clearDestinoEgresoSeleccion() {
+  _destinoEgresoSeleccionado = '';
+  document.querySelectorAll('.destino-egreso-option').forEach(function(opt) {
+    Object.values(DESTINO_EGRESO_CLASS_MAP).forEach(function(cls) { opt.classList.remove(cls); });
+    opt.querySelector('.destino-icon').style.color = '#5a7a9a';
+    opt.querySelector('.destino-label').style.color = '#5a7a9a';
+    opt.querySelector('input[type=radio]').checked = false;
+  });
+}
+
+function setDestinoEgresoSeleccionado(destino) {
+  clearDestinoEgresoSeleccion();
+  if (destino && DESTINO_EGRESO_CLASS_MAP[destino]) {
+    var el = document.querySelector('.destino-egreso-option[data-destino="' + destino + '"]');
+    if (el) seleccionarDestinoEgreso(el, destino);
+  }
+}
+
+// ═══════════════════════════════════════════
+// AUTO-RESUMEN
+// ═══════════════════════════════════════════
+function generarAutoResumen() {
+  const pacienteId = document.getElementById('pacienteId').value;
+  if (!pacienteId) {
+    showToast('Primero busque y seleccione un paciente', 'error', true);
+    return;
+  }
+
+  const pid = String(pacienteId);
+  let resumen = '';
+
+  // 1) Historia Clínica
+  const historias = JSON.parse(localStorage.getItem(STORAGE_HISTORIAS) || '[]');
+  const historia = historias.find(function(h) { return String(h.pacienteId) === pid; });
+  if (historia) {
+    resumen += '═══ HISTORIA CLÍNICA ═══\n';
+    if (historia.antecedentes) resumen += 'Antecedentes: ' + historia.antecedentes + '\n';
+    if (historia.motivoConsulta) resumen += 'Motivo de Consulta: ' + historia.motivoConsulta + '\n';
+    if (historia.enfermedadActual) resumen += 'Enfermedad Actual: ' + historia.enfermedadActual + '\n';
+    if (historia.diagnostico) resumen += 'Diagnóstico: ' + historia.diagnostico + '\n';
+    if (historia.planManejo) resumen += 'Plan de Manejo: ' + historia.planManejo + '\n';
+    resumen += '\n';
+  }
+
+  // 2) Evoluciones
+  const evoluciones = JSON.parse(localStorage.getItem(STORAGE_EVOLUCIONES) || '[]');
+  const evolsPaciente = evoluciones.filter(function(e) { return String(e.pacienteId) === pid; });
+  if (evolsPaciente.length > 0) {
+    resumen += '═══ EVOLUCIONES (' + evolsPaciente.length + ' registradas) ═══\n';
+    evoluciones.filter(function(e) { return String(e.pacienteId) === pid; }).forEach(function(ev, i) {
+      const fecha = ev.fecha ? new Date(ev.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A';
+      resumen += '--- Evolución ' + (i + 1) + ' (' + fecha + ') ---\n';
+      if (ev.subjetivo) resumen += 'Subjetivo: ' + ev.subjetivo + '\n';
+      if (ev.objetivo) resumen += 'Objetivo: ' + ev.objetivo + '\n';
+      if (ev.analisis) resumen += 'Análisis: ' + ev.analisis + '\n';
+      if (ev.plan) resumen += 'Plan: ' + ev.plan + '\n';
+      resumen += '\n';
+    });
+  }
+
+  // 3) Notas de Enfermería
+  const notas = JSON.parse(localStorage.getItem(STORAGE_NOTAS) || '[]');
+  const notasPaciente = notas.filter(function(n) { return String(n.pacienteId) === pid; });
+  if (notasPaciente.length > 0) {
+    resumen += '═══ NOTAS DE ENFERMERÍA (' + notasPaciente.length + ' registradas) ═══\n';
+    notasPaciente.forEach(function(n, i) {
+      const fecha = n.fecha ? new Date(n.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A';
+      resumen += '--- Nota ' + (i + 1) + ' (' + fecha + ') ---\n';
+      if (n.signosVitales) {
+        let sv = '';
+        if (typeof n.signosVitales === 'string') sv = n.signosVitales;
+        else {
+          const parts = [];
+          if (n.signosVitales.fc) parts.push('FC: ' + n.signosVitales.fc);
+          if (n.signosVitales.ta) parts.push('TA: ' + n.signosVitales.ta);
+          if (n.signosVitales.fr) parts.push('FR: ' + n.signosVitales.fr);
+          if (n.signosVitales.temp) parts.push('Temp: ' + n.signosVitales.temp);
+          if (n.signosVitales.spo2) parts.push('SpO2: ' + n.signosVitales.spo2);
+          sv = parts.join(' | ');
+        }
+        if (sv) resumen += 'Signos Vitales: ' + sv + '\n';
+      }
+      if (n.procedimientos) resumen += 'Procedimientos: ' + n.procedimientos + '\n';
+      if (n.observaciones) resumen += 'Observaciones: ' + n.observaciones + '\n';
+      resumen += '\n';
+    });
+  }
+
+  if (!resumen) {
+    resumen = 'No se encontraron registros clínicos para este paciente en el sistema.';
+  }
+
+  document.getElementById('resumenHospitalizacion').value = resumen.trim();
+  showToast('Resumen generado automáticamente con ' + (historia ? 1 : 0) + ' historia, ' + evolsPaciente.length + ' evoluciones y ' + notasPaciente.length + ' notas', 'success', true);
+
+  // Also generate terapias resumen
+  generarResumenTerapias(pid);
+}
+
+function generarResumenTerapias(pacienteId) {
+  const terapias = JSON.parse(localStorage.getItem(STORAGE_TERAPIAS) || '[]');
+  const terapiasPaciente = terapias.filter(function(t) { return String(t.pacienteId) === pacienteId; });
+
+  if (terapiasPaciente.length === 0) {
+    document.getElementById('terapiasRecibidas').value = 'No se registraron terapias durante la estancia.';
+    return;
+  }
+
+  let resumen = '═══ TERAPIAS RECIBIDAS (' + terapiasPaciente.length + ' sesiones) ═══\n\n';
+  terapiasPaciente.forEach(function(t, i) {
+    const fecha = t.fecha ? new Date(t.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A';
+    resumen += '--- Sesión ' + (i + 1) + ' (' + fecha + ') ---\n';
+    if (t.tipoTerapia) resumen += 'Tipo: ' + t.tipoTerapia + '\n';
+    if (t.descripcionSesion) resumen += 'Descripción: ' + t.descripcionSesion + '\n';
+    if (t.observaciones) resumen += 'Observaciones: ' + t.observaciones + '\n';
+    if (t.terapeuta) resumen += 'Terapeuta: ' + t.terapeuta + '\n';
+    if (t.estado) resumen += 'Estado: ' + t.estado + '\n';
+    resumen += '\n';
+  });
+
+  document.getElementById('terapiasRecibidas').value = resumen.trim();
+}
+
+// ═══════════════════════════════════════════
+// Modal Functions
+// ═══════════════════════════════════════════
+function abrirModal(modalId) {
+  document.getElementById(modalId).classList.add('active');
+}
+
+function cerrarModal(modalId) {
+  document.getElementById(modalId).classList.remove('active');
+}
+
+function abrirModalCrear() {
+  _epicrisisEditId = null;
+  document.getElementById('modalTitulo').textContent = 'Nueva Epicrisis';
+  limpiarFormulario();
+  loadMedicosSelect('');
+  abrirModal('modalForm');
+}
+
+function limpiarFormulario() {
+  document.getElementById('pacienteBuscar').value = '';
+  document.getElementById('pacienteId').value = '';
+  document.getElementById('pacienteInfo').className = 'patient-info-inline';
+  document.getElementById('pacienteInfo').style.display = 'none';
+  limpiarCamposAdmision();
+  document.getElementById('cie10EgresoDisplay').value = '';
+  document.getElementById('cie10EgresoCodigo').value = '';
+  clearTipoEgresoSeleccion();
+  clearDestinoEgresoSeleccion();
+  document.getElementById('fechaEgreso').value = '';
+  document.getElementById('medicoResponsable').value = '';
+  document.getElementById('resumenHospitalizacion').value = '';
+  document.getElementById('terapiasRecibidas').value = '';
+  document.getElementById('complicaciones').value = '';
+  document.getElementById('instruccionesPostEgreso').value = '';
+  document.getElementById('diagnosticosSecundarios').value = '';
+  document.getElementById('medicamentosEgreso').value = '';
+  document.getElementById('condicionFuncional').value = '';
+}
+
+// ═══════════════════════════════════════════
+// CRUD - Save Epicrisis
+// ═══════════════════════════════════════════
+function guardarEpicrisis() {
+  const pacienteId = document.getElementById('pacienteId').value;
+  if (!pacienteId) {
+    showToast('Primero busque y seleccione un paciente', 'error', true);
+    return;
+  }
+  if (!_tipoEgresoSeleccionado) {
+    showToast('Seleccione el tipo de egreso', 'error', true);
+    return;
+  }
+  if (!_destinoEgresoSeleccionado) {
+    showToast('Seleccione el destino de egreso', 'error', true);
+    return;
+  }
+  const fechaEgreso = document.getElementById('fechaEgreso').value;
+  if (!fechaEgreso) {
+    showToast('Ingrese la fecha de egreso', 'error', true);
+    return;
+  }
+
+  const admData = {};
+  ADM_FIELDS.forEach(function(fid) {
+    var el = document.getElementById(fid);
+    admData[fid] = el ? el.value : '';
+  });
+
+  // Find patient for name/document
+  const pacientes = getPacientes();
+  const paciente = pacientes.find(function(p) { return String(p.id) === String(pacienteId); });
+
+  const epicrisisData = {
+    id: _epicrisisEditId || Date.now(),
+    pacienteId: pacienteId,
+    pacienteNombre: paciente ? paciente.nombre : '',
+    pacienteDocumento: paciente ? paciente.documento : '',
+    numEpicrisis: _epicrisisEditId ? null : generarNumeroEpicrisis(), // keep existing on edit
+    admData: admData,
+    dxIngresoCodigo: document.getElementById('cie10IngresoCodigo').value,
+    dxIngresoDisplay: document.getElementById('cie10IngresoDisplay').value,
+    dxEgresoCodigo: document.getElementById('cie10EgresoCodigo').value,
+    dxEgresoDisplay: document.getElementById('cie10EgresoDisplay').value,
+    tipoEgreso: _tipoEgresoSeleccionado,
+    destinoEgreso: _destinoEgresoSeleccionado,
+    fechaEgreso: fechaEgreso,
+    medicoResponsable: document.getElementById('medicoResponsable').value,
+    resumenHospitalizacion: document.getElementById('resumenHospitalizacion').value,
+    terapiasRecibidas: document.getElementById('terapiasRecibidas').value,
+    complicaciones: document.getElementById('complicaciones').value,
+    instruccionesPostEgreso: document.getElementById('instruccionesPostEgreso').value,
+    diagnosticosSecundarios: document.getElementById('diagnosticosSecundarios').value,
+    medicamentosEgreso: document.getElementById('medicamentosEgreso').value,
+    condicionFuncional: document.getElementById('condicionFuncional').value,
+    fechaRegistro: _epicrisisEditId ? null : new Date().toISOString(), // keep existing on edit
+    fechaEdicion: _epicrisisEditId ? new Date().toISOString() : null
+  };
+
+  const lista = getEpicrisis();
+
+  if (_epicrisisEditId) {
+    // Update existing
+    const idx = lista.findIndex(function(e) { return String(e.id) === String(_epicrisisEditId); });
+    if (idx >= 0) {
+      // Preserve numEpicrisis and fechaRegistro
+      epicrisisData.numEpicrisis = lista[idx].numEpicrisis;
+      epicrisisData.fechaRegistro = lista[idx].fechaRegistro;
+      lista[idx] = epicrisisData;
+    }
+  } else {
+    lista.push(epicrisisData);
+
+    // Update patient estado to Egresado
+    if (paciente) {
+      paciente.estado = 'Egresado';
+      paciente.fechaSalida = fechaEgreso;
+      savePacientes(pacientes);
+    }
+  }
+
+  saveEpicrisis(lista);
+  cerrarModal('modalForm');
+  renderTabla();
+  showToast(_epicrisisEditId ? 'Epicrisis actualizada exitosamente' : 'Epicrisis registrada exitosamente — Paciente egresado', 'success', true);
+  _epicrisisEditId = null;
+}
+
+// ═══════════════════════════════════════════
+// Edit Epicrisis
+// ═══════════════════════════════════════════
+function editarEpicrisis(id) {
+  const lista = getEpicrisis();
+  const epi = lista.find(function(e) { return String(e.id) === String(id); });
+  if (!epi) return;
+
+  _epicrisisEditId = epi.id;
+  document.getElementById('modalTitulo').textContent = 'Editar Epicrisis';
+  limpiarFormulario();
+
+  // Load patient data
+  document.getElementById('pacienteId').value = epi.pacienteId;
+  const pacientes = getPacientes();
+  const paciente = pacientes.find(function(p) { return String(p.id) === String(epi.pacienteId); });
+  if (paciente) {
+    document.getElementById('pacienteBuscar').value = paciente.nombre;
+    const infoDiv = document.getElementById('pacienteInfo');
+    infoDiv.className = 'patient-info-inline found';
+    let ingresoStr = 'N/A';
+    if (paciente.fechaIngreso) {
+      const d = new Date(paciente.fechaIngreso);
+      ingresoStr = d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    }
+    let admStr = paciente.numAdmision ? 'Adm: ' + paciente.numAdmision + ' — ' : '';
+    infoDiv.innerHTML = '<i class="fas fa-check-circle"></i> <strong>' + paciente.nombre + '</strong> — ' + admStr + 'Doc: ' + paciente.documento + ' — EPS: ' + (paciente.eps || 'N/A') + ' — Ingreso: ' + ingresoStr;
+    llenarCamposAdmision(paciente);
+  }
+
+  // Load adm data if stored
+  if (epi.admData) {
+    ADM_FIELDS.forEach(function(fid) {
+      var el = document.getElementById(fid);
+      if (el) el.value = epi.admData[fid] || '';
+    });
+  }
+
+  // CIE-10 Ingreso
+  document.getElementById('cie10IngresoDisplay').value = epi.dxIngresoDisplay || '';
+  document.getElementById('cie10IngresoCodigo').value = epi.dxIngresoCodigo || '';
+
+  // CIE-10 Egreso
+  document.getElementById('cie10EgresoDisplay').value = epi.dxEgresoDisplay || '';
+  document.getElementById('cie10EgresoCodigo').value = epi.dxEgresoCodigo || '';
+
+  // Tipo de Egreso
+  setTipoEgresoSeleccionado(epi.tipoEgreso);
+
+  // Destino de Egreso
+  setDestinoEgresoSeleccionado(epi.destinoEgreso);
+
+  // Fecha Egreso
+  if (epi.fechaEgreso) {
+    document.getElementById('fechaEgreso').value = epi.fechaEgreso;
+  }
+
+  // Médico
+  loadMedicosSelect(epi.medicoResponsable);
+
+  // Textareas
+  document.getElementById('resumenHospitalizacion').value = epi.resumenHospitalizacion || '';
+  document.getElementById('terapiasRecibidas').value = epi.terapiasRecibidas || '';
+  document.getElementById('complicaciones').value = epi.complicaciones || '';
+  document.getElementById('instruccionesPostEgreso').value = epi.instruccionesPostEgreso || '';
+  document.getElementById('diagnosticosSecundarios').value = epi.diagnosticosSecundarios || '';
+  document.getElementById('medicamentosEgreso').value = epi.medicamentosEgreso || '';
+  document.getElementById('condicionFuncional').value = epi.condicionFuncional || '';
+
+  abrirModal('modalForm');
+}
+
+// ═══════════════════════════════════════════
+// View Detail
+// ═══════════════════════════════════════════
+function verDetalle(id) {
+  _detalleActualId = id;
+  const lista = getEpicrisis();
+  const epi = lista.find(function(e) { return String(e.id) === String(id); });
+  if (!epi) return;
+
+  const tipoColor = TIPO_EGRESO_COLOR_MAP[epi.tipoEgreso] || '#5a7a9a';
+  const destinoColor = DESTINO_EGRESO_COLOR_MAP[epi.destinoEgreso] || '#5a7a9a';
+
+  let html = '';
+
+  // Header info
+  html += '<div class="detail-section">';
+  html += '<h3><i class="fas fa-file-alt"></i> Información General</h3>';
+  html += '<div class="detail-field"><span class="label">N° Epicrisis</span><span class="value" style="color:#00b4d8;font-weight:700">' + (epi.numEpicrisis || 'N/A') + '</span></div>';
+  html += '<div class="detail-field"><span class="label">Paciente</span><span class="value"><strong>' + (epi.pacienteNombre || 'N/A') + '</strong></span></div>';
+  html += '<div class="detail-field"><span class="label">Documento</span><span class="value">' + (epi.pacienteDocumento || 'N/A') + '</span></div>';
+  html += '<div class="detail-field"><span class="label">Fecha Registro</span><span class="value">' + formatDate(epi.fechaRegistro) + '</span></div>';
+  if (epi.fechaEdicion) html += '<div class="detail-field"><span class="label">Última Edición</span><span class="value">' + formatDate(epi.fechaEdicion) + '</span></div>';
+  html += '</div>';
+
+  // Admisión data
+  html += '<div class="detail-section">';
+  html += '<h3><i class="fas fa-door-open"></i> Datos de Admisión</h3>';
+  if (epi.admData) {
+    const admLabels = {
+      admNumAdmision: 'N° Admisión',
+      admFechaIngreso: 'Fecha Ingreso',
+      admFechaNacimiento: 'Fecha Nacimiento',
+      admEdad: 'Edad',
+      admGenero: 'Género',
+      admEps: 'EPS',
+      admServicio: 'Servicio',
+      admHabitacion: 'Habitación',
+      admMedico: 'Médico Tratante',
+      admDiagnostico: 'Diagnóstico',
+      admDireccion: 'Dirección',
+      admTelefono: 'Teléfono',
+      admFamiliar: 'Familiar'
+    };
+    for (var key in admLabels) {
+      if (epi.admData[key]) {
+        html += '<div class="detail-field"><span class="label adm-label">' + admLabels[key] + '</span><span class="value adm-value">' + epi.admData[key] + '</span></div>';
+      }
+    }
+  }
+  html += '</div>';
+
+  // Diagnósticos
+  html += '<div class="detail-section">';
+  html += '<h3><i class="fas fa-stethoscope"></i> Diagnósticos</h3>';
+  html += '<div class="detail-field"><span class="label">Dx Ingreso</span><span class="value">' + (epi.dxIngresoDisplay || 'N/A') + '</span></div>';
+  html += '<div class="detail-field"><span class="label">Dx Egreso</span><span class="value">' + (epi.dxEgresoDisplay || 'N/A') + '</span></div>';
+  html += '</div>';
+
+  // Egreso data
+  html += '<div class="detail-section">';
+  html += '<h3><i class="fas fa-door-open"></i> Egreso</h3>';
+  html += '<div class="detail-field"><span class="label">Tipo de Egreso</span><span class="value" style="color:' + tipoColor + ';font-weight:600">' + (epi.tipoEgreso || 'N/A') + '</span></div>';
+  html += '<div class="detail-field"><span class="label">Destino</span><span class="value" style="color:' + destinoColor + ';font-weight:600">' + (epi.destinoEgreso || 'N/A') + '</span></div>';
+  html += '<div class="detail-field"><span class="label">Fecha Egreso</span><span class="value">' + formatDate(epi.fechaEgreso) + '</span></div>';
+  html += '<div class="detail-field"><span class="label">Médico Responsable</span><span class="value">' + (epi.medicoResponsable || 'N/A') + '</span></div>';
+  html += '</div>';
+
+  // Resumen
+  if (epi.resumenHospitalizacion) {
+    html += '<div class="detail-section">';
+    html += '<h3><i class="fas fa-clipboard-list"></i> Resumen de la Hospitalización en Casa</h3>';
+    html += '<div class="detail-text-block">' + epi.resumenHospitalizacion + '</div>';
+    html += '</div>';
+  }
+
+  // Terapias
+  if (epi.terapiasRecibidas) {
+    html += '<div class="detail-section">';
+    html += '<h3><i class="fas fa-hand-holding-medical"></i> Terapias Recibidas Durante la Estancia</h3>';
+    html += '<div class="detail-text-block">' + epi.terapiasRecibidas + '</div>';
+    html += '</div>';
+  }
+
+  // Complicaciones
+  if (epi.complicaciones) {
+    html += '<div class="detail-section">';
+    html += '<h3><i class="fas fa-exclamation-triangle"></i> Complicaciones</h3>';
+    html += '<div class="detail-text-block">' + epi.complicaciones + '</div>';
+    html += '</div>';
+  }
+
+  // Instrucciones Post-Egreso
+  if (epi.instruccionesPostEgreso) {
+    html += '<div class="detail-section">';
+    html += '<h3><i class="fas fa-clipboard-list"></i> Instrucciones Post-Egreso</h3>';
+    html += '<div class="detail-text-block">' + epi.instruccionesPostEgreso + '</div>';
+    html += '</div>';
+  }
+
+  // Diagnósticos Secundarios
+  if (epi.diagnosticosSecundarios) {
+    html += '<div class="detail-section">';
+    html += '<h3><i class="fas fa-diagnoses"></i> Diagnósticos Secundarios</h3>';
+    html += '<div class="detail-text-block">' + epi.diagnosticosSecundarios + '</div>';
+    html += '</div>';
+  }
+
+  // Medicamentos Egreso
+  if (epi.medicamentosEgreso) {
+    html += '<div class="detail-section">';
+    html += '<h3><i class="fas fa-pills"></i> Medicamentos al Egreso</h3>';
+    html += '<div class="detail-text-block">' + epi.medicamentosEgreso + '</div>';
+    html += '</div>';
+  }
+
+  // Condición Funcional
+  if (epi.condicionFuncional) {
+    html += '<div class="detail-section">';
+    html += '<h3><i class="fas fa-wheelchair"></i> Condición Funcional al Egreso</h3>';
+    html += '<div class="detail-text-block">' + epi.condicionFuncional + '</div>';
+    html += '</div>';
+  }
+
+  document.getElementById('detalleContenido').innerHTML = html;
+  abrirModal('modalDetalle');
+}
+
+// ═══════════════════════════════════════════
+// Delete Epicrisis
+// ═══════════════════════════════════════════
+function eliminarEpicrisis(id) {
+  if (!confirm('¿Está seguro de eliminar esta epicrisis? Esta acción no se puede deshacer.')) return;
+  const lista = getEpicrisis();
+  const epi = lista.find(function(e) { return String(e.id) === String(id); });
+  const nuevaLista = lista.filter(function(e) { return String(e.id) !== String(id); });
+  saveEpicrisis(nuevaLista);
+
+  // Optionally restore patient to Activo
+  if (epi && epi.pacienteId) {
+    const pacientes = getPacientes();
+    const pac = pacientes.find(function(p) { return String(p.id) === String(epi.pacienteId); });
+    if (pac && pac.estado === 'Egresado') {
+      pac.estado = 'Activo';
+      pac.fechaSalida = '';
+      savePacientes(pacientes);
+    }
+  }
+
+  renderTabla();
+  showToast('Epicrisis eliminada', 'info', true);
+}
+
+// ═══════════════════════════════════════════
+// PDF Generation
+// ═══════════════════════════════════════════
+let _detalleActualId = null;
+
+function descargarPDF() {
+  // Use the last viewed detail
+  const lista = getEpicrisis();
+  let epi;
+  if (_detalleActualId) {
+    epi = lista.find(function(e) { return String(e.id) === String(_detalleActualId); });
+  }
+  if (!epi) {
+    showToast('No hay epicrisis para generar PDF', 'error', true);
+    return;
+  }
+
+  const tipoColor = TIPO_EGRESO_COLOR_MAP[epi.tipoEgreso] || '#333';
+  const destinoColor = DESTINO_EGRESO_COLOR_MAP[epi.destinoEgreso] || '#333';
+
+  let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Epicrisis - ' + (epi.pacienteNombre || '') + '</title>';
+  html += '<style>';
+  html += 'body{font-family:Arial,sans-serif;color:#222;margin:30px 40px;font-size:12px}';
+  html += 'h1{color:#0077b6;font-size:18px;border-bottom:2px solid #0077b6;padding-bottom:6px;margin-bottom:4px}';
+  html += 'h2{color:#0d2137;font-size:13px;margin-top:18px;border-bottom:1px solid #ccc;padding-bottom:4px}';
+  html += 'h3{color:#1a3a5c;font-size:11px;margin-top:12px}';
+  html += '.subtitle{color:#5a7a9a;font-size:10px;margin-bottom:16px}';
+  html += '.field{display:flex;margin:3px 0;font-size:11px}';
+  html += '.field .label{width:160px;font-weight:600;color:#1a3a5c}';
+  html += '.field .value{flex:1;color:#333}';
+  html += '.text-block{white-space:pre-wrap;background:#f5f8fa;padding:8px 12px;border-radius:4px;border:1px solid #ddd;margin:6px 0;font-size:11px}';
+  html += '.header-bar{display:flex;justify-content:space-between;align-items:center}';
+  html += '.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:600;color:#fff;background:' + tipoColor + '}';
+  html += '@media print{body{margin:15px 20px}}';
+  html += '</style></head><body>';
+
+  html += encabezadoIPS('Epicrisis — Registro de Egreso', epi.numEpicrisis || '');
+
+  // Paciente
+  html += '<h2>Información del Paciente</h2>';
+  html += '<div class="field"><span class="label">Paciente:</span><span class="value"><strong>' + (epi.pacienteNombre || 'N/A') + '</strong></span></div>';
+  html += '<div class="field"><span class="label">Documento:</span><span class="value">' + (epi.pacienteDocumento || 'N/A') + '</span></div>';
+
+  // Admisión data
+  if (epi.admData) {
+    html += '<h2>Datos de Admisión</h2>';
+    var admLabels = { admNumAdmision:'N° Admisión', admFechaIngreso:'Fecha Ingreso', admFechaNacimiento:'Fecha Nacimiento', admEdad:'Edad', admGenero:'Género', admEps:'EPS', admServicio:'Servicio', admHabitacion:'Habitación', admMedico:'Médico Tratante', admDiagnostico:'Diagnóstico', admDireccion:'Dirección', admTelefono:'Teléfono', admFamiliar:'Familiar' };
+    for (var key in admLabels) {
+      if (epi.admData[key]) html += '<div class="field"><span class="label">' + admLabels[key] + ':</span><span class="value">' + epi.admData[key] + '</span></div>';
+    }
+  }
+
+  // Diagnósticos
+  html += '<h2>Diagnósticos</h2>';
+  html += '<div class="field"><span class="label">Dx Ingreso:</span><span class="value">' + (epi.dxIngresoDisplay || 'N/A') + '</span></div>';
+  html += '<div class="field"><span class="label">Dx Egreso:</span><span class="value">' + (epi.dxEgresoDisplay || 'N/A') + '</span></div>';
+
+  // Egreso
+  html += '<h2>Datos de Egreso</h2>';
+  html += '<div class="field"><span class="label">Tipo Egreso:</span><span class="value"><span class="badge">' + (epi.tipoEgreso || 'N/A') + '</span></span></div>';
+  html += '<div class="field"><span class="label">Destino:</span><span class="value" style="color:' + destinoColor + ';font-weight:600">' + (epi.destinoEgreso || 'N/A') + '</span></div>';
+  html += '<div class="field"><span class="label">Fecha Egreso:</span><span class="value">' + formatDate(epi.fechaEgreso) + '</span></div>';
+  html += '<div class="field"><span class="label">Médico Responsable:</span><span class="value">' + (epi.medicoResponsable || 'N/A') + '</span></div>';
+
+  // Resumen
+  if (epi.resumenHospitalizacion) {
+    html += '<h2>Resumen de la Hospitalización en Casa</h2>';
+    html += '<div class="text-block">' + epi.resumenHospitalizacion + '</div>';
+  }
+
+  // Terapias
+  if (epi.terapiasRecibidas) {
+    html += '<h2>Terapias Recibidas Durante la Estancia</h2>';
+    html += '<div class="text-block">' + epi.terapiasRecibidas + '</div>';
+  }
+
+  // Complicaciones
+  if (epi.complicaciones) {
+    html += '<h2>Complicaciones</h2>';
+    html += '<div class="text-block">' + epi.complicaciones + '</div>';
+  }
+
+  // Instrucciones
+  if (epi.instruccionesPostEgreso) {
+    html += '<h2>Instrucciones Post-Egreso</h2>';
+    html += '<div class="text-block">' + epi.instruccionesPostEgreso + '</div>';
+  }
+
+  // Dx Secundarios
+  if (epi.diagnosticosSecundarios) {
+    html += '<h2>Diagnósticos Secundarios</h2>';
+    html += '<div class="text-block">' + epi.diagnosticosSecundarios + '</div>';
+  }
+
+  // Medicamentos
+  if (epi.medicamentosEgreso) {
+    html += '<h2>Medicamentos al Egreso</h2>';
+    html += '<div class="text-block">' + epi.medicamentosEgreso + '</div>';
+  }
+
+  // Condición Funcional
+  if (epi.condicionFuncional) {
+    html += '<h2>Condición Funcional al Egreso</h2>';
+    html += '<div class="text-block">' + epi.condicionFuncional + '</div>';
+  }
+
+  html += pieIPS();
+
+  html += '</body></html>';
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(function() { win.print(); }, 500);
+}
+
+// Store detail ID when viewing
+document.getElementById('modalDetalle').addEventListener('click', function() {});
+
+// ═══════════════════════════════════════════
+// Render Table
+// ═══════════════════════════════════════════
+function renderTabla() {
+  const lista = getEpicrisis();
+  const busqueda = (document.getElementById('filtroBusqueda').value || '').toLowerCase().trim();
+  const filtroTipo = document.getElementById('filtroTipoEgreso').value;
+
+  let filtrados = lista;
+  if (busqueda) {
+    filtrados = filtrados.filter(function(e) {
+      return (e.numEpicrisis || '').toLowerCase().includes(busqueda) ||
+        (e.pacienteNombre || '').toLowerCase().includes(busqueda) ||
+        (e.pacienteDocumento || '').toLowerCase().includes(busqueda) ||
+        (e.dxIngresoDisplay || '').toLowerCase().includes(busqueda) ||
+        (e.medicoResponsable || '').toLowerCase().includes(busqueda);
+    });
+  }
+  if (filtroTipo) {
+    filtrados = filtrados.filter(function(e) { return e.tipoEgreso === filtroTipo; });
+  }
+
+  // Sort by date descending
+  filtrados.sort(function(a, b) { return new Date(b.fechaRegistro || 0) - new Date(a.fechaRegistro || 0); });
+
+  const tbody = document.getElementById('tablaBody');
+
+  if (filtrados.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No hay epicrisis registradas</td></tr>';
+  } else {
+    tbody.innerHTML = filtrados.map(function(e) {
+      const badgeClass = 'badge badge-' + (e.tipoEgreso || '').toLowerCase().replace(/\s+/g, '-').replace(/-+/g, '-');
+      return '<tr>' +
+        '<td style="color:#00b4d8;font-weight:600">' + (e.numEpicrisis || 'N/A') + '</td>' +
+        '<td><strong>' + (e.pacienteNombre || 'N/A') + '</strong></td>' +
+        '<td>' + (e.pacienteDocumento || 'N/A') + '</td>' +
+        '<td style="font-size:.78rem">' + (e.dxIngresoDisplay || 'N/A') + '</td>' +
+        '<td><span class="' + badgeClass + '">' + (e.tipoEgreso || 'N/A') + '</span></td>' +
+        '<td>' + (e.medicoResponsable || 'N/A') + '</td>' +
+        '<td style="font-size:.78rem">' + formatDate(e.fechaRegistro) + '</td>' +
+        '<td>' +
+          '<button class="btn-action btn-view" onclick="verDetalle(\'' + e.id + '\')" title="Ver detalle"><i class="fas fa-eye"></i></button>' +
+          '<button class="btn-action btn-pdf" onclick="verDetallePDF(\'' + e.id + '\')" title="Descargar PDF"><i class="fas fa-file-pdf"></i> PDF</button>' +
+          '<button class="btn-action btn-edit" onclick="editarEpicrisis(\'' + e.id + '\')" title="Editar"><i class="fas fa-edit"></i> Editar</button>' +
+          '<button class="btn-action btn-delete" onclick="eliminarEpicrisis(\'' + e.id + '\')" title="Eliminar"><i class="fas fa-trash"></i></button>' +
+        '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // Stats
+  const total = lista.length;
+  const hoy = lista.filter(function(e) {
+    if (!e.fechaRegistro) return false;
+    return new Date(e.fechaRegistro).toLocaleDateString('es-ES') === new Date().toLocaleDateString('es-ES');
+  }).length;
+  const porMejoria = lista.filter(function(e) { return e.tipoEgreso === 'Mejoría'; }).length;
+  const otros = total - porMejoria;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statHoy').textContent = hoy;
+  document.getElementById('statMejoria').textContent = porMejoria;
+  document.getElementById('statOtros').textContent = otros;
+}
+
+// PDF from table (view detail then print)
+function verDetallePDF(id) {
+  verDetalle(id);
+  // _detalleActualId is set inside verDetalle; PDF button is in the detail modal
+}
+
+// _detalleActualId is now set inside verDetalle itself (no override needed)
+
+// Override descargarPDF to use _detalleActualId
+document.querySelector('#modalDetalle .btn-primary').onclick = function() {
+  descargarPDF();
+};
+
+// ═══════════════════════════════════════════
+// Initialize
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  renderTabla();
+  loadMedicosSelect('');
+});
+
+// Run immediately too (in case DOM is already loaded)
+renderTabla();
+</script>
+
+    <!-- MATRIZ GLOBAL DE PERMISOS -->
+    <script>
+        (function () {
+            function aplicar() {
+                if (!window.NX) return;
+                NX.iniciar('epicrisis', { C: ['abrirModalCrear'], E: ['editarEpicrisis', 'guardarEpicrisis'], B: ['eliminarEpicrisis'] });
+                NX.filtrarNavegacion();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', aplicar);
+            } else { aplicar(); }
+        })();
+    
+/* ════════════════════════════════════════════════════════════
+   DATOS DE LA IPS EN PDF / IMPRESIONES
+   Lee la información guardada en Configuración → Información de la IPS
+   ════════════════════════════════════════════════════════════ */
+function obtenerDatosIPS() {
+  try {
+    var h = JSON.parse(localStorage.getItem('nexus_hospital') || '{}');
+    return h && typeof h === 'object' ? h : {};
+  } catch (e) { return {}; }
+}
+
+function escaparIPS(txt) {
+  return String(txt == null ? '' : txt)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* Encabezado institucional (logo + datos de la IPS) para documentos HTML imprimibles */
+function encabezadoIPS(tituloDoc, refDoc) {
+  var h = obtenerDatosIPS();
+  var nombre = escaparIPS(h.nombre || 'NEXUSMED IPS Domiciliaria');
+  var lineas = [];
+  if (h.direccion) lineas.push(escaparIPS(h.direccion));
+  var contacto = [];
+  if (h.telefono) contacto.push('Tel: ' + escaparIPS(h.telefono));
+  if (h.email) contacto.push(escaparIPS(h.email));
+  if (contacto.length) lineas.push(contacto.join(' &nbsp;·&nbsp; '));
+  var legal = [];
+  if (h.nit) legal.push('NIT: ' + escaparIPS(h.nit));
+  if (h.codigo) legal.push('Cód. Habilitación: ' + escaparIPS(h.codigo));
+  if (legal.length) lineas.push(legal.join(' &nbsp;·&nbsp; '));
+
+  var logoHtml = '';
+  if (h.logo && String(h.logo).indexOf('data:image') === 0) {
+    logoHtml = '<td style="width:110px;vertical-align:middle;border:none;padding:0 12px 0 0">' +
+               '<img src="' + escaparIPS(h.logo) + '" alt="Logo de la IPS" style="max-width:100px;max-height:62px;object-fit:contain">' +
+               '</td>';
+  }
+
+  var derecha = '';
+  if (tituloDoc || refDoc) {
+    derecha = '<td style="vertical-align:middle;border:none;text-align:right;padding:0">' +
+              (tituloDoc ? '<div style="font-size:12px;font-weight:700;color:#14375a;text-transform:uppercase;letter-spacing:.5px">' + escaparIPS(tituloDoc) + '</div>' : '') +
+              (refDoc ? '<div style="font-size:10px;color:#666;margin-top:3px">' + escaparIPS(refDoc) + '</div>' : '') +
+              '</td>';
+  }
+
+  return '<table style="width:100%;border-collapse:collapse;border:none;margin:0 0 10px"><tr>' +
+    logoHtml +
+    '<td style="vertical-align:middle;border:none;padding:0">' +
+      '<div style="font-size:15px;font-weight:700;color:#14375a;line-height:1.2">' + nombre + '</div>' +
+      (lineas.length ? '<div style="font-size:10px;color:#555;line-height:1.5;margin-top:3px">' + lineas.join('<br>') + '</div>' : '') +
+    '</td>' +
+    derecha +
+  '</tr></table><div style="border-bottom:2px solid #14375a;margin-bottom:12px"></div>';
+}
+
+/* Pie de página institucional */
+function pieIPS() {
+  var h = obtenerDatosIPS();
+  var nombre = escaparIPS(h.nombre || 'NEXUSMED IPS Domiciliaria');
+  var datos = [];
+  if (h.nit) datos.push('NIT: ' + escaparIPS(h.nit));
+  if (h.codigo) datos.push('Cód. Habilitación: ' + escaparIPS(h.codigo));
+  if (h.telefono) datos.push('Tel: ' + escaparIPS(h.telefono));
+  if (h.direccion) datos.push(escaparIPS(h.direccion));
+  var f = new Date();
+  return '<div style="margin-top:20px;border-top:1px solid #ccc;padding-top:8px;font-size:9.5px;color:#777;text-align:center;line-height:1.6">' +
+    '<strong>' + nombre + '</strong>' + (datos.length ? '<br>' + datos.join(' &nbsp;·&nbsp; ') : '') +
+    '<br>Documento generado el ' + f.toLocaleDateString('es-ES') + ' a las ' + f.toLocaleTimeString('es-ES') + ' por NEXUSMED' +
+    '</div>';
+}
+
+</script>
+</body>
+</html>

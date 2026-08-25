@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUSMED - Historias Clínicas</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0a1628;color:#c8d6e5;min-height:100vh}
+
+/* Header */
+.header{background:linear-gradient(135deg,#0d2137,#122a45);padding:12px 30px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1a3a5c;position:sticky;top:0;z-index:100}
+.header .logo{display:flex;align-items:center;gap:10px}
+.header .logo h1{font-size:1.3rem;font-weight:700;color:#00b4d8;letter-spacing:1px}
+.header .logo span{font-size:.7rem;color:#5a7a9a;font-weight:300}
+.header .user-info{display:flex;align-items:center;gap:12px;color:#90e0ef;font-size:.85rem}
+.header .user-info i{color:#00b4d8}
+.header .btn-logout{background:transparent;border:1px solid #ff3860;color:#ff3860;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.75rem;transition:.3s}
+.header .btn-logout:hover{background:#ff3860;color:#fff}
+
+/* Nav */
+.nav{background:#0d2137;padding:8px 20px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #1a3a5c}
+.nav a{text-decoration:none;color:#5a7a9a;font-size:.75rem;padding:6px 12px;border-radius:6px;transition:.3s;border:1px solid transparent}
+.nav a:hover{color:#00b4d8;border-color:#1a3a5c;background:rgba(0,180,216,.05)}
+.nav a.active{color:#00b4d8;background:rgba(0,180,216,.1);border-color:#00b4d8}
+
+/* Main */
+.main{padding:25px 30px;max-width:1400px;margin:0 auto}
+
+.page-title{font-size:1.5rem;font-weight:700;color:#90e0ef;margin-bottom:5px;display:flex;align-items:center;gap:10px}
+.page-title i{color:#00b4d8}
+.page-subtitle{color:#5a7a9a;font-size:.85rem;margin-bottom:25px}
+
+/* Stats Row */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:25px}
+.stat-card{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:10px;padding:18px;text-align:center}
+.stat-card .stat-num{font-size:1.8rem;font-weight:700;color:#00b4d8}
+.stat-card .stat-label{font-size:.72rem;color:#5a7a9a;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+
+/* Toolbar */
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.search-box{flex:1;min-width:250px;position:relative}
+.search-box input{width:100%;padding:10px 14px 10px 38px;background:#0d2137;border:1px solid #1a3a5c;border-radius:8px;color:#c8d6e5;font-size:.85rem;outline:none;transition:.3s}
+.search-box input:focus{border-color:#00b4d8}
+.search-box i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#5a7a9a}
+.btn-primary{background:linear-gradient(135deg,#0077b6,#00b4d8);color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px;transition:.3s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(0,180,216,.3)}
+
+.filter-select{padding:10px 12px;background:#0d2137;border:1px solid #1a3a5c;border-radius:8px;color:#c8d6e5;font-size:.82rem;outline:none}
+.filter-select:focus{border-color:#00b4d8}
+
+/* Table */
+.table-container{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{background:#122a45;color:#90e0ef;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;padding:14px 16px;text-align:left;border-bottom:1px solid #1a3a5c}
+td{padding:12px 16px;border-bottom:1px solid rgba(26,58,92,.5);font-size:.82rem;color:#c8d6e5}
+tr:hover td{background:rgba(0,180,216,.03)}
+.empty-row td{text-align:center;color:#5a7a9a;padding:40px;font-style:italic}
+
+.badge{padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600}
+.badge-apertura{background:rgba(0,180,216,.15);color:#00b4d8}
+.badge-cerrada{background:rgba(72,199,142,.15);color:#48c78e}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;justify-content:center;align-items:flex-start;padding:30px 20px;overflow-y:auto}
+.modal-overlay.active{display:flex}
+.modal{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:14px;width:100%;max-width:900px;padding:0;animation:modalIn .3s}
+@keyframes modalIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{padding:20px 25px;border-bottom:1px solid #1a3a5c;display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:1.1rem;color:#90e0ef;display:flex;align-items:center;gap:8px}
+.modal-header h2 i{color:#00b4d8}
+.modal-close{background:none;border:none;color:#5a7a9a;font-size:1.3rem;cursor:pointer;transition:.3s}
+.modal-close:hover{color:#ff3860}
+.modal-body{padding:25px;max-height:75vh;overflow-y:auto;overflow-x:hidden;position:relative}
+.modal-footer{padding:15px 25px;border-top:1px solid #1a3a5c;display:flex;justify-content:flex-end;gap:10px}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:.75rem;color:#90e0ef;font-weight:500;text-transform:uppercase;letter-spacing:.3px}
+.form-group input,.form-group select,.form-group textarea{padding:10px 12px;background:#0a1628;border:1px solid #1a3a5c;border-radius:8px;color:#c8d6e5;font-size:.85rem;font-family:'Inter',sans-serif;outline:none;transition:.3s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#00b4d8}
+.form-group textarea{resize:vertical;min-height:80px}
+
+/* Read-only fields from admisión */
+.form-group input.readonly-adm,.form-group select.readonly-adm,.form-group textarea.readonly-adm{
+  background:rgba(0,180,216,.04);
+  border:1px solid #14375a;
+  color:#7ab8d4;
+  cursor:default;
+  opacity:.88;
+}
+.form-group input.readonly-adm:focus,.form-group select.readonly-adm:focus,.form-group textarea.readonly-adm:focus{
+  border-color:#14375a;
+  outline:none;
+  box-shadow:none;
+}
+.form-group label.label-adm{
+  color:#4a8aa5;
+  position:relative;
+}
+.form-group label.label-adm::after{
+  content:' (Admisión)';
+  font-size:.6rem;
+  text-transform:none;
+  letter-spacing:0;
+  font-weight:400;
+  opacity:.7;
+}
+
+/* Admisión data section separator */
+.adm-section-header{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 0 4px 0;
+  margin-top:4px;
+  border-bottom:1px dashed #1a3a5c;
+}
+.adm-section-header i{color:#00b4d8;font-size:.7rem}
+.adm-section-header span{color:#4a8aa5;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+.clinical-section-header{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 0 4px 0;
+  margin-top:8px;
+  border-bottom:1px dashed #1a3a5c;
+}
+.clinical-section-header i{color:#90e0ef;font-size:.7rem}
+.clinical-section-header span{color:#90e0ef;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+.btn-secondary{background:transparent;border:1px solid #1a3a5c;color:#90e0ef;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:.85rem;transition:.3s}
+.btn-secondary:hover{border-color:#00b4d8;color:#00b4d8}
+.btn-danger{background:transparent;border:1px solid #ff3860;color:#ff3860;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.8rem;transition:.3s}
+.btn-danger:hover{background:#ff3860;color:#fff}
+.btn-sm{padding:5px 10px;font-size:.72rem;border-radius:5px}
+.btn-info{background:transparent;border:1px solid #00b4d8;color:#00b4d8;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:.72rem;transition:.3s}
+.btn-info:hover{background:#00b4d8;color:#fff}
+
+/* Prominent action buttons for table */
+.btn-action{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.75rem;font-weight:500;border:1px solid transparent;transition:all .25s;font-family:'Inter',sans-serif;white-space:nowrap}
+.btn-action:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.3)}
+.btn-pdf{background:linear-gradient(135deg,#1b4332,#2d6a4f);color:#95d5b2;border:1px solid #40916c}
+.btn-pdf:hover{background:linear-gradient(135deg,#2d6a4f,#40916c);color:#d8f3dc}
+.btn-edit{background:linear-gradient(135deg,#0d2137,#1a3a5c);color:#90e0ef;border:1px solid #00b4d8}
+.btn-edit:hover{background:#00b4d8;color:#fff}
+.btn-view{background:transparent;color:#5a7a9a;border:1px solid #1a3a5c;padding:6px 8px}
+.btn-view:hover{color:#00b4d8;border-color:#00b4d8}
+.btn-close-hc{background:transparent;color:#5a7a9a;border:1px solid #1a3a5c;padding:6px 8px}
+.btn-close-hc:hover{color:#ffd166;border-color:#ffd166}
+.btn-open-hc{background:transparent;color:#5a7a9a;border:1px solid #1a3a5c;padding:6px 8px}
+.btn-open-hc:hover{color:#06d6a0;border-color:#06d6a0}
+.btn-delete{background:linear-gradient(135deg,#3d0c11,#5c1a24);color:#ff6b6b;border:1px solid #ff3860}
+.btn-delete:hover{background:#ff3860;color:#fff}
+
+/* Searchable-select (CIE-10) */
+.searchable-select { position: relative; }
+.searchable-select input { width: 100%; background-color: #0a1628; border: 1px solid #1a3a5c; color: #e0e0e0; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; transition: border-color 0.3s; }
+.searchable-select input:focus { outline: none; border-color: #00b4d8; box-shadow: 0 0 8px rgba(0, 180, 216, 0.3); }
+.searchable-select .dropdown-list { display: none; position: fixed; max-height: 280px; overflow-y: auto; background-color: #0d2137; border: 1px solid #00b4d8; border-radius: 0 0 8px 8px; z-index: 500; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); min-width: 320px; }
+.searchable-select .dropdown-list.open { display: block; }
+.searchable-select .dropdown-item { padding: 8px 12px; cursor: pointer; font-size: 13px; color: #c0c0c0; transition: all 0.15s; border-bottom: 1px solid #0a1628; }
+.searchable-select .dropdown-item:hover { background-color: #122a45; color: #00b4d8; }
+.searchable-select .dropdown-item .code { color: #00b4d8; font-weight: 700; margin-right: 6px; }
+.searchable-select .dropdown-item .desc { color: #90e0ef; }
+.searchable-select .no-results { padding: 12px; color: #5a7a9a; font-size: 13px; text-align: center; }
+
+/* Patient search inline */
+.patient-search-row { display: flex; gap: 10px; align-items: flex-end; }
+.patient-search-row input { flex: 1; }
+.patient-search-row .btn-buscar { background: linear-gradient(135deg,#0077b6,#00b4d8); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: .85rem; font-weight: 600; transition: .3s; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+.patient-search-row .btn-buscar:hover { box-shadow: 0 4px 15px rgba(0,180,216,.3); }
+.patient-info-inline { margin-top: 6px; padding: 8px 12px; border-radius: 8px; font-size: .8rem; display: none; }
+.patient-info-inline.found { display: block; background: rgba(0,180,216,.08); border: 1px solid #00b4d8; color: #90e0ef; }
+.patient-info-inline.not-found { display: block; background: rgba(255,56,96,.08); border: 1px solid #ff3860; color: #ff3860; }
+
+/* Detail */
+.detail-section{margin-bottom:20px}
+.detail-section h3{color:#00b4d8;font-size:.9rem;margin-bottom:10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1a3a5c;padding-bottom:8px}
+.detail-field{display:grid;grid-template-columns:180px 1fr;gap:8px;margin-bottom:8px;font-size:.82rem}
+.detail-field .label{color:#5a7a9a;font-weight:500}
+.detail-field .value{color:#c8d6e5}
+.detail-field .label.adm-label{color:#4a8aa5}
+.detail-field .value.adm-value{color:#7ab8d4}
+
+/* Toast */
+.toast-container{position:fixed;top:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{padding:14px 20px;border-radius:10px;font-size:.82rem;display:flex;align-items:center;gap:10px;animation:toastIn .3s;min-width:280px;box-shadow:0 5px 20px rgba(0,0,0,.3)}
+.toast.success{background:linear-gradient(135deg,#0d4a2e,#0d2137);border:1px solid #48c78e;color:#48c78e}
+.toast.error{background:linear-gradient(135deg,#4a0d1a,#0d2137);border:1px solid #ff3860;color:#ff3860}
+.toast.info{background:linear-gradient(135deg,#0d3a4a,#0d2137);border:1px solid #00b4d8;color:#00b4d8}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+@media(max-width:768px){
+.form-grid{grid-template-columns:1fr}
+.stats-row{grid-template-columns:1fr 1fr}
+.nav{gap:4px}.nav a{font-size:.68rem;padding:4px 8px}
+}
+</style>
+    <script src="permisos.js"></script>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Header -->
+<header class="header">
+  <div class="logo">
+    <h1><i class="fas fa-heartbeat"></i> NEXUSMED</h1>
+    <span>plataforma que conecta todo</span>
+  </div>
+  <div class="user-info">
+    <i class="fas fa-user-circle"></i>
+    <span id="userName">Admin</span>
+    <span style="color:#5a7a9a">|</span>
+    <span id="userRole" style="color:#5a7a9a">Administrador</span>
+  </div>
+  <button class="btn-logout" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Salir</button>
+</header>
+
+<!-- Nav -->
+<nav class="nav">
+  <a href="menu.html"><i class="fas fa-home"></i> Inicio</a>
+  <a href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+  <a href="pacientes.html"><i class="fas fa-users"></i> Pacientes</a>
+  <a href="historias_clinicas.html" class="active"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
+  <a href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
+  <a href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enfermería</a>
+  <a href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
+  <a href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
+  <a href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+  <a href="egresados.html"><i class="fas fa-door-closed"></i> Egresados</a>
+  <a href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
+  <a href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+</nav>
+
+<!-- Main -->
+<main class="main">
+  <h1 class="page-title"><i class="fas fa-file-medical"></i> Historias Clínicas</h1>
+  <p class="page-subtitle">Registro clínico integral de pacientes — Antecedentes, diagnóstico y plan de tratamiento</p>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">Total Historias</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statAbiertas">0</div>
+      <div class="stat-label">Abiertas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statCerradas">0</div>
+      <div class="stat-label">Cerradas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statHoy">0</div>
+      <div class="stat-label">Creadas Hoy</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Buscar por paciente, diagnóstico o número de historia...">
+    </div>
+    <select class="filter-select" id="filterEstado">
+      <option value="">Todos los estados</option>
+      <option value="Abierta">Abierta</option>
+      <option value="Cerrada">Cerrada</option>
+    </select>
+    <button class="btn-primary" onclick="abrirModalCrear()"><i class="fas fa-plus"></i> Nueva Historia</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>N° Historia</th>
+          <th>Paciente</th>
+          <th>Documento</th>
+          <th>Diagnóstico Principal</th>
+          <th>Médico</th>
+          <th>Fecha Apertura</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaHistorias"></tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Modal Crear/Editar -->
+<div class="modal-overlay" id="modalForm">
+  <div class="modal">
+    <div class="modal-header">
+      <h2><i class="fas fa-file-medical"></i> <span id="modalTitulo">Nueva Historia Clínica</span></h2>
+      <button class="modal-close" onclick="cerrarModal('modalForm')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <!-- Patient search by Documento, Nombre or N° Admisión -->
+        <div class="form-group full">
+          <label>Paciente (Buscar por Documento, Nombre o N° Admisión)</label>
+          <div class="patient-search-row">
+            <input type="text" id="pacienteBuscar" placeholder="Ingrese documento, nombre o número de admisión..." autocomplete="off">
+            <button class="btn-buscar" onclick="buscarPaciente()"><i class="fas fa-search"></i> Buscar</button>
+          </div>
+          <div class="patient-info-inline" id="pacienteInfo"></div>
+          <input type="hidden" id="pacienteId" value="">
+        </div>
+
+        <!-- ═══ ADMISIÓN DATA SECTION ═══ -->
+        <div class="adm-section-header">
+          <i class="fas fa-database"></i>
+          <span>Datos de Admisión (solo lectura — provienen del registro de admisión)</span>
+        </div>
+
+        <div class="form-group">
+          <label class="label-adm">N° Admisión</label>
+          <input type="text" id="admNumAdmision" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Fecha de Ingreso</label>
+          <input type="text" id="admFechaIngreso" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Fecha de Nacimiento</label>
+          <input type="text" id="admFechaNacimiento" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Edad</label>
+          <input type="text" id="admEdad" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Género</label>
+          <input type="text" id="admGenero" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">EPS</label>
+          <input type="text" id="admEps" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Servicio</label>
+          <input type="text" id="admServicio" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Habitación</label>
+          <input type="text" id="admHabitacion" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Médico (Admisión)</label>
+          <input type="text" id="admMedico" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Diagnóstico (Admisión)</label>
+          <input type="text" id="admDiagnostico" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group full">
+          <label class="label-adm">Dirección Completa</label>
+          <input type="text" id="admDireccion" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Teléfono</label>
+          <input type="text" id="admTelefono" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Familiar / Acudiente</label>
+          <input type="text" id="admFamiliar" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+
+        <!-- ═══ CLINICAL ASSESSMENT SECTION ═══ -->
+        <div class="clinical-section-header">
+          <i class="fas fa-stethoscope"></i>
+          <span>Evaluación Clínica — Datos editables</span>
+        </div>
+
+        <!-- Fecha y Hora -->
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="fechaHistoria" required>
+        </div>
+        <div class="form-group">
+          <label>Hora</label>
+          <input type="time" id="horaHistoria" required>
+        </div>
+        <!-- Médico Tratante as dropdown from nexus_usuarios -->
+        <div class="form-group">
+          <label>Médico Tratante</label>
+          <select id="medicoTratante">
+            <option value="">-- Seleccionar Médico --</option>
+          </select>
+        </div>
+        <!-- Especialidad -->
+        <div class="form-group">
+          <label>Especialidad</label>
+          <select id="especialidad">
+            <option value="">-- Seleccionar --</option>
+            <option>Medicina General</option>
+            <option>Medicina Interna</option>
+            <option>Cardiología</option>
+            <option>Neumología</option>
+            <option>Neurología</option>
+            <option>Endocrinología</option>
+            <option>Nefrología</option>
+            <option>Oncología</option>
+            <option>Geriatría</option>
+            <option>Medicina Física y Rehabilitación</option>
+            <option>Psiquiatría</option>
+            <option>Psicología</option>
+            <option>Nutrición</option>
+            <option>Cirugía General</option>
+            <option>Ortopedia</option>
+            <option>Otra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tipo de Atención</label>
+          <select id="tipoAtencion">
+            <option value="">-- Seleccionar --</option>
+            <option>Primera Vez</option>
+            <option>Seguimiento</option>
+            <option>Urgencia Domiciliaria</option>
+            <option>Hospitalización en Casa</option>
+            <option>Interconsulta</option>
+          </select>
+        </div>
+        <!-- Diagnóstico Principal as CIE-10 searchable dropdown -->
+        <div class="form-group full">
+          <label>Diagnóstico Principal (CIE-10)</label>
+          <div class="searchable-select" id="cie10Container">
+            <input type="text" id="diagnosticoPrincipal" placeholder="Buscar código o descripción CIE-10..." autocomplete="off" onfocus="abrirCIE10()" oninput="filtrarCIE10()">
+            <input type="hidden" id="diagnosticoCodigo" value="">
+            <div class="dropdown-list" id="cie10Dropdown"></div>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Diagnósticos Secundarios</label>
+          <textarea id="diagnosticosSecundarios" placeholder="Un diagnóstico por línea..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Antecedentes Personales</label>
+          <textarea id="antecedentesPersonales" rows="3" placeholder="Patológicos, quirúrgicos, alérgicos, farmacológicos, tóxicos..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Antecedentes Familiares</label>
+          <textarea id="antecedentesFamiliares" rows="2" placeholder="Enfermedades hereditarias, antecedentes relevantes..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Antecedentes Quirúrgicos</label>
+          <textarea id="antecedentesQuirurgicos" rows="2" placeholder="Cirugías previas con fecha y descripción..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Alergias</label>
+          <textarea id="alergias" rows="2" placeholder="Medicamentos, alimentos, otros..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Motivo de Consulta</label>
+          <textarea id="motivoConsulta" rows="2" placeholder="Razón de la consulta en palabras del paciente..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Enfermedad Actual</label>
+          <textarea id="enfermedadActual" rows="3" placeholder="Relato cronológico del cuadro clínico actual..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Examen Físico</label>
+          <textarea id="examenFisico" rows="3" placeholder="TA: / FC: / FR: / T°: / Peso: / Talla: / Hallazgos físicos..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Plan de Tratamiento</label>
+          <textarea id="planTratamiento" rows="3" placeholder="Medicamentos, terapias, estudios solicitados, interconsultas..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Observaciones</label>
+          <textarea id="observaciones" rows="2" placeholder="Notas adicionales..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="cerrarModal('modalForm')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarHistoria()"><i class="fas fa-save"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal-overlay" id="modalDetalle">
+  <div class="modal" style="max-width:900px">
+    <div class="modal-header">
+      <h2><i class="fas fa-file-medical"></i> <span id="detalleTitulo">Detalle Historia Clínica</span></h2>
+      <button class="modal-close" onclick="cerrarModal('modalDetalle')">×</button>
+    </div>
+    <div class="modal-body" id="detalleContenido"></div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="descargarPDF()" style="margin-right:10px"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
+      <button class="btn-secondary" onclick="cerrarModal('modalDetalle')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Session check
+const sesion = JSON.parse(localStorage.getItem('nexus_sesion') || 'null');
+if (!sesion) { window.location.href = 'index.html'; }
+else { document.getElementById('userName').textContent = sesion.usuario; document.getElementById('userRole').textContent = sesion.rol; }
+
+function cerrarSesion() { localStorage.removeItem('nexus_sesion'); window.location.href = 'index.html'; }
+
+// Data
+function getHistorias() { return JSON.parse(localStorage.getItem('nexus_historias_clinicas') || '[]'); }
+function saveHistorias(h) { localStorage.setItem('nexus_historias_clinicas', JSON.stringify(h)); }
+function getPacientes() { return JSON.parse(localStorage.getItem('nexus_pacientes') || '[]'); }
+function getUsuarios() { return JSON.parse(localStorage.getItem('nexus_usuarios') || '[]'); }
+function getContador() { return parseInt(localStorage.getItem('nexus_contador_hc') || '0'); }
+function incrementContador() { const c = getContador() + 1; localStorage.setItem('nexus_contador_hc', c.toString()); return c; }
+
+const today = new Date().toISOString().split('T')[0];
+
+/* ═══════════════════════════════════════════
+   CIE-10 Data
+   ═══════════════════════════════════════════ */
+const CIE10 = [
+    { code: 'J18.9', desc: 'Neumonía, no especificada' },
+    { code: 'J06.9', desc: 'Infección aguda de vías respiratorias superiores' },
+    { code: 'J22', desc: 'Infección aguda de vías respiratorias inferiores' },
+    { code: 'J44.1', desc: 'EPOC con exacerbación aguda' },
+    { code: 'J44.0', desc: 'EPOC con infección respiratoria aguda' },
+    { code: 'J96.0', desc: 'Insuficiencia respiratoria aguda' },
+    { code: 'J96.1', desc: 'Insuficiencia respiratoria crónica' },
+    { code: 'J84.9', desc: 'Enfermedad pulmonar intersticial' },
+    { code: 'I10', desc: 'Hipertensión arterial esencial' },
+    { code: 'I11.9', desc: 'Enfermedad cardíaca hipertensiva sin insuficiencia cardíaca' },
+    { code: 'I50.9', desc: 'Insuficiencia cardíaca, no especificada' },
+    { code: 'I50.0', desc: 'Insuficiencia cardíaca congestiva' },
+    { code: 'I48', desc: 'Fibrilación y aleteo auricular' },
+    { code: 'I21.9', desc: 'Infarto agudo de miocardio, no especificado' },
+    { code: 'I25.1', desc: 'Enfermedad aterosclerótica del corazón' },
+    { code: 'I63.9', desc: 'Accidente cerebrovascular, no especificado' },
+    { code: 'I67.9', desc: 'Enfermedad cerebrovascular, no especificada' },
+    { code: 'I69.9', desc: 'Secuelas de enfermedad cerebrovascular' },
+    { code: 'E11.9', desc: 'Diabetes mellitus tipo 2 sin complicaciones' },
+    { code: 'E11.5', desc: 'Diabetes tipo 2 con trastornos circulatorios' },
+    { code: 'E11.6', desc: 'Diabetes tipo 2 con otras complicaciones' },
+    { code: 'E10.9', desc: 'Diabetes mellitus tipo 1 sin complicaciones' },
+    { code: 'E14.9', desc: 'Diabetes mellitus no especificada' },
+    { code: 'E78.5', desc: 'Dislipidemia, no especificada' },
+    { code: 'E87.5', desc: 'Hiperpotasemia' },
+    { code: 'E87.6', desc: 'Hipopotasemia' },
+    { code: 'E46', desc: 'Desnutrición proteico-calórica no especificada' },
+    { code: 'N18.9', desc: 'Enfermedad renal crónica, no especificada' },
+    { code: 'N17.9', desc: 'Insuficiencia renal aguda, no especificada' },
+    { code: 'N19', desc: 'Enfermedad renal, no especificada' },
+    { code: 'N39.0', desc: 'Infección de vías urinarias, sitio no especificado' },
+    { code: 'N40', desc: 'Hiperplasia prostática benigna' },
+    { code: 'K70.3', desc: 'Cirrosis hepática alcohólica' },
+    { code: 'K72.9', desc: 'Insuficiencia hepática, no especificada' },
+    { code: 'K74.6', desc: 'Cirrosis hepática, otra y no especificada' },
+    { code: 'K80.0', desc: 'Cálculo de la vesícula biliar con colecistitis aguda' },
+    { code: 'K80.1', desc: 'Cálculo de la vesícula biliar con otra colecistitis' },
+    { code: 'K92.2', desc: 'Hemorragia gastrointestinal, no especificada' },
+    { code: 'K35.9', desc: 'Apendicitis aguda, no especificada' },
+    { code: 'K56.6', desc: 'Obstrucción intestinal, no especificada' },
+    { code: 'K59.0', desc: 'Estreñimiento' },
+    { code: 'K21.0', desc: 'Reflujo gastroesofágico con esofagitis' },
+    { code: 'A09', desc: 'Gastroenteritis y colitis de presunto origen infeccioso' },
+    { code: 'A41.9', desc: 'Sepsis, no especificada' },
+    { code: 'A04.7', desc: 'Enterocolitis por Clostridium difficile' },
+    { code: 'B34.9', desc: 'Infección viral, no especificada' },
+    { code: 'B95.1', desc: 'Streptococcus, causa de enfermedades clasificadas en otros capítulos' },
+    { code: 'B96.2', desc: 'Escherichia coli, causa de enfermedades' },
+    { code: 'C34.9', desc: 'Neoplasia maligna de pulmón, no especificada' },
+    { code: 'C18.9', desc: 'Neoplasia maligna del colon, no especificada' },
+    { code: 'C50.9', desc: 'Neoplasia maligna de mama, no especificada' },
+    { code: 'C61', desc: 'Neoplasia maligna de la próstata' },
+    { code: 'C79.9', desc: 'Metástasis, no especificada' },
+    { code: 'C95.9', desc: 'Leucemia, no especificada' },
+    { code: 'D50.9', desc: 'Anemia por deficiencia de hierro, no especificada' },
+    { code: 'D46.9', desc: 'Síndrome mielodisplásico, no especificado' },
+    { code: 'D64.9', desc: 'Anemia, no especificada' },
+    { code: 'G40.9', desc: 'Epilepsia, no especificada' },
+    { code: 'G43.9', desc: 'Migraña, no especificada' },
+    { code: 'G47.3', desc: 'Apnea obstructiva del sueño' },
+    { code: 'G82.9', desc: 'Parálisis, no especificada' },
+    { code: 'G89.1', desc: 'Dolor crónico, no clasificado en otra parte' },
+    { code: 'F03', desc: 'Demencia, no especificada' },
+    { code: 'F10.1', desc: 'Trastorno por uso de alcohol – uso perjudicial' },
+    { code: 'F17.2', desc: 'Dependencia de tabaco' },
+    { code: 'F32.9', desc: 'Episodio depresivo, no especificado' },
+    { code: 'F41.1', desc: 'Trastorno de ansiedad generalizada' },
+    { code: 'F41.9', desc: 'Trastorno de ansiedad, no especificado' },
+    { code: 'M54.5', desc: 'Lumbalgia baja' },
+    { code: 'M54.1', desc: 'Radiculopatía' },
+    { code: 'M81.0', desc: 'Osteoporosis postmenopáusica' },
+    { code: 'M79.3', desc: 'Parestesia, no especificada' },
+    { code: 'M79.1', desc: 'Mialgia' },
+    { code: 'S22.0', desc: 'Fractura de vértebra torácica' },
+    { code: 'S72.0', desc: 'Fractura del cuello del fémur' },
+    { code: 'S82.8', desc: 'Fractura de la pierna' },
+    { code: 'S06.9', desc: 'Traumatismo intracraneal, no especificado' },
+    { code: 'S09.9', desc: 'Lesión de la cabeza, no especificada' },
+    { code: 'T14.0', desc: 'Herida superficial de región del cuerpo no especificada' },
+    { code: 'T88.9', desc: 'Complicación, no especificada' },
+    { code: 'R07.9', desc: 'Dolor torácico, no especificado' },
+    { code: 'R50.9', desc: 'Fiebre, no especificada' },
+    { code: 'R10.9', desc: 'Dolor abdominal y pélvico, no especificado' },
+    { code: 'R55', desc: 'Síncope y colapso' },
+    { code: 'R60.9', desc: 'Edema, no especificado' },
+    { code: 'R63.0', desc: 'Anorexia' },
+    { code: 'R65.9', desc: 'Síndrome de respuesta inflamatoria sistémica' },
+    { code: 'Z96.6', desc: 'Presencia de dispositivo de fijación ortopédica' },
+    { code: 'Z87.0', desc: 'Antecedente de enfermedades del sistema respiratorio' },
+    { code: 'Z95.1', desc: 'Presencia de bypass aortocoronario' },
+    { code: 'U07.1', desc: 'COVID-19, virus identificado' },
+    { code: 'U07.2', desc: 'COVID-19, virus no identificado' },
+    { code: 'B34.2', desc: 'Infección por coronavirus, no especificada' },
+];
+
+/* ═══════════════════════════════════════════
+   CIE-10 Searchable Dropdown Functions
+   ═══════════════════════════════════════════ */
+function abrirCIE10() {
+    const dropdown = document.getElementById('cie10Dropdown');
+    const input = document.getElementById('diagnosticoPrincipal');
+    const rect = input.getBoundingClientRect();
+    dropdown.style.top = rect.bottom + 'px';
+    dropdown.style.left = rect.left + 'px';
+    dropdown.style.width = rect.width + 'px';
+    _cie10AutoFilling = false;
+    filtrarCIE10();
+    dropdown.classList.add('open');
+}
+
+let _cie10AutoFilling = false; // flag to prevent oninput during auto-fill
+let _searchDebounce = null; // debounce for patient search
+
+function filtrarCIE10() {
+    if (_cie10AutoFilling) return;
+    const input = document.getElementById('diagnosticoPrincipal');
+    const dropdown = document.getElementById('cie10Dropdown');
+    const rect = input.getBoundingClientRect();
+    dropdown.style.top = rect.bottom + 'px';
+    dropdown.style.left = rect.left + 'px';
+    dropdown.style.width = rect.width + 'px';
+    const term = input.value.toLowerCase().trim();
+    if (!term) { renderCIE10List(CIE10); dropdown.classList.add('open'); return; }
+    // Split term by '–' or '-' to separate code from description if auto-filled
+    const parts = term.split(/\s*[–\-]\s*/);
+    const codePart = parts[0].trim();
+    const descPart = parts.length > 1 ? parts.slice(1).join('–').trim() : '';
+    const filtered = CIE10.filter(c => {
+        const cCode = c.code.toLowerCase();
+        const cDesc = c.desc.toLowerCase();
+        // Match if code starts with typed code part, or description contains any part
+        return cCode.includes(codePart) || cDesc.includes(codePart) || 
+               (descPart && (cCode.includes(descPart) || cDesc.includes(descPart)));
+    });
+    renderCIE10List(filtered);
+    dropdown.classList.add('open');
+}
+
+function renderCIE10List(lista) {
+    const dropdown = document.getElementById('cie10Dropdown');
+    if (lista.length === 0) {
+        dropdown.innerHTML = '<div class="no-results">Sin resultados</div>';
+        return;
+    }
+    dropdown.innerHTML = lista.map(c =>
+        `<div class="dropdown-item" onclick="seleccionarCIE10('${c.code}', '${c.desc.replace(/'/g, "\\'")}')"` +
+        `><span class="code">${c.code}</span><span class="desc">${c.desc}</span></div>`
+    ).join('');
+}
+
+function seleccionarCIE10(code, desc) {
+    document.getElementById('diagnosticoPrincipal').value = `${code} – ${desc}`;
+    document.getElementById('diagnosticoCodigo').value = code;
+    document.getElementById('cie10Dropdown').classList.remove('open');
+}
+
+// Close CIE-10 dropdown on click outside
+document.addEventListener('click', e => {
+    const container = document.getElementById('cie10Container');
+    if (container && !container.contains(e.target)) {
+        document.getElementById('cie10Dropdown').classList.remove('open');
+    }
+});
+
+// Close CIE-10 dropdown on modal scroll
+document.querySelectorAll('.modal-body').forEach(mb => {
+    mb.addEventListener('scroll', () => {
+        document.getElementById('cie10Dropdown').classList.remove('open');
+    });
+});
+
+// Close CIE-10 dropdown on window resize
+window.addEventListener('resize', () => {
+    document.getElementById('cie10Dropdown').classList.remove('open');
+});
+
+/* ═══════════════════════════════════════════
+   Admisión field IDs for auto-populate
+   ═══════════════════════════════════════════ */
+const ADM_FIELDS = [
+    'admNumAdmision','admFechaIngreso','admFechaNacimiento','admEdad',
+    'admGenero','admEps','admServicio','admHabitacion',
+    'admMedico','admDiagnostico','admDireccion','admTelefono','admFamiliar'
+];
+
+// Map admisión object keys → form field IDs
+const ADM_MAP = {
+    numAdmision: 'admNumAdmision',
+    fechaIngreso: 'admFechaIngreso',
+    fechaNacimiento: 'admFechaNacimiento',
+    edad: 'admEdad',
+    genero: 'admGenero',
+    eps: 'admEps',
+    servicio: 'admServicio',
+    habitacion: 'admHabitacion',
+    medico: 'admMedico',
+    diagnostico: 'admDiagnostico',
+    direccion: 'admDireccion',
+    telefono: 'admTelefono',
+    familiarNombre: 'admFamiliar'
+};
+
+function limpiarCamposAdmision() {
+    ADM_FIELDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+}
+
+function llenarCamposAdmision(p) {
+    // N° Admisión
+    document.getElementById('admNumAdmision').value = p.numAdmision || '';
+    // Fecha Ingreso — format nicely
+    if (p.fechaIngreso) {
+        const d = new Date(p.fechaIngreso);
+        document.getElementById('admFechaIngreso').value = d.toLocaleDateString('es-ES', {day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'});
+    } else {
+        document.getElementById('admFechaIngreso').value = '';
+    }
+    // Fecha Nacimiento
+    if (p.fechaNacimiento) {
+        const d = new Date(p.fechaNacimiento);
+        document.getElementById('admFechaNacimiento').value = d.toLocaleDateString('es-ES', {day:'2-digit',month:'2-digit',year:'numeric'});
+    } else {
+        document.getElementById('admFechaNacimiento').value = '';
+    }
+    // Edad
+    document.getElementById('admEdad').value = p.edad || '';
+    // Género
+    document.getElementById('admGenero').value = p.genero || '';
+    // EPS
+    document.getElementById('admEps').value = p.eps || '';
+    // Servicio
+    document.getElementById('admServicio').value = p.servicio || '';
+    // Habitación
+    document.getElementById('admHabitacion').value = p.habitacion || '';
+    // Médico
+    document.getElementById('admMedico').value = p.medico || '';
+    // Diagnóstico (código + descripción)
+    let dx = '';
+    if (p.diagnosticoCodigo && p.diagnostico) dx = p.diagnosticoCodigo + ' – ' + p.diagnostico;
+    else if (p.diagnostico) dx = p.diagnostico;
+    else if (p.diagnosticoCodigo) dx = p.diagnosticoCodigo;
+    document.getElementById('admDiagnostico').value = dx;
+    // Dirección completa (dirección + barrio + municipio + departamento)
+    const dirParts = [p.direccion, p.barrio, p.municipio, p.departamento].filter(Boolean);
+    document.getElementById('admDireccion').value = dirParts.join(', ') || '';
+    // Teléfono
+    document.getElementById('admTelefono').value = p.telefono || '';
+    // Familiar / Acudiente (nombre + parentesco + teléfono)
+    const famParts = [];
+    if (p.familiarNombre) famParts.push(p.familiarNombre);
+    if (p.familiarParentesco) famParts.push('(' + p.familiarParentesco + ')');
+    if (p.familiarTelefono) famParts.push('Tel: ' + p.familiarTelefono);
+    document.getElementById('admFamiliar').value = famParts.join(' ') || '';
+}
+
+/* ═══════════════════════════════════════════
+   Patient Search (by documento, nombre or numAdmision)
+   Searches active patients from admisiones
+   ═══════════════════════════════════════════ */
+function buscarPaciente() {
+    const termino = document.getElementById('pacienteBuscar').value.trim().toLowerCase();
+    const infoDiv = document.getElementById('pacienteInfo');
+    const hiddenId = document.getElementById('pacienteId');
+    
+    // Clear any stale toasts from previous searches
+    document.getElementById('toastContainer').innerHTML = '';
+    
+    if (!termino) {
+        infoDiv.className = 'patient-info-inline';
+        infoDiv.style.display = 'none';
+        hiddenId.value = '';
+        limpiarCamposAdmision();
+        return;
+    }
+    
+    // Only active patients from admisiones (not Egresado)
+    const pacientes = getPacientes().filter(p => p.estado !== 'Egresado');
+    
+    // 1) Exact numAdmision match
+    let paciente = pacientes.find(p => (p.numAdmision || '').toLowerCase() === termino);
+    
+    // 2) Exact documento match (case-insensitive)
+    if (!paciente) {
+        paciente = pacientes.find(p => p.documento.toLowerCase() === termino);
+    }
+    
+    // 3) Partial documento match
+    if (!paciente) {
+        paciente = pacientes.find(p => p.documento.toLowerCase().includes(termino));
+    }
+    
+    // 4) Partial numAdmision match
+    if (!paciente) {
+        paciente = pacientes.find(p => (p.numAdmision || '').toLowerCase().includes(termino));
+    }
+    
+    // 5) Nombre/apellido partial match (any part of name contains term)
+    if (!paciente) {
+        paciente = pacientes.find(p => p.nombre.toLowerCase().includes(termino));
+    }
+    
+    // 6) Multi-word: every word must match somewhere in nombre, documento or numAdmision
+    if (!paciente) {
+        const palabras = termino.split(/\s+/);
+        if (palabras.length > 1) {
+            paciente = pacientes.find(p => {
+                const nom = p.nombre.toLowerCase();
+                const doc = p.documento.toLowerCase();
+                const adm = (p.numAdmision || '').toLowerCase();
+                return palabras.every(w => nom.includes(w) || doc.includes(w) || adm.includes(w));
+            });
+        }
+    }
+    
+    if (paciente) {
+        hiddenId.value = String(paciente.id);
+        infoDiv.className = 'patient-info-inline found';
+        // Show patient info summary
+        let ingresoStr = 'N/A';
+        if (paciente.fechaIngreso) {
+            const d = new Date(paciente.fechaIngreso);
+            ingresoStr = d.toLocaleDateString('es-ES', {day:'2-digit', month:'2-digit', year:'numeric'})
+                + ' ' + d.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+        }
+        let admStr = paciente.numAdmision ? 'Adm: ' + paciente.numAdmision + ' — ' : '';
+        infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${paciente.nombre}</strong> — ${admStr}Doc: ${paciente.documento} — EPS: ${paciente.eps||'N/A'} — Ingreso: ${ingresoStr}`;
+        
+        // ═══ AUTO-POPULATE ALL admisión fields ═══
+        llenarCamposAdmision(paciente);
+        
+        // Also auto-fill the CIE-10 diagnóstico from admisión as suggestion
+        if (paciente.diagnosticoCodigo && paciente.diagnostico) {
+            _cie10AutoFilling = true;
+            document.getElementById('diagnosticoPrincipal').value = paciente.diagnosticoCodigo + ' – ' + paciente.diagnostico;
+            document.getElementById('diagnosticoCodigo').value = paciente.diagnosticoCodigo;
+            _cie10AutoFilling = false;
+        }
+        
+        // Auto-select médico from admisión if available in dropdown
+        if (paciente.medico) {
+            const medSelect = document.getElementById('medicoTratante');
+            // Try to find matching médico in dropdown options
+            for (let i = 0; i < medSelect.options.length; i++) {
+                if (medSelect.options[i].value === paciente.medico) {
+                    medSelect.value = paciente.medico;
+                    break;
+                }
+            }
+        }
+        
+        showToast('Datos de admisión cargados automáticamente', 'success', true);
+    } else {
+        hiddenId.value = '';
+        infoDiv.className = 'patient-info-inline not-found';
+        infoDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Paciente no encontrado en admisiones activas. Verifique documento, nombre o número de admisión.';
+        limpiarCamposAdmision();
+        showToast('Paciente no encontrado', 'error', true);
+    }
+}
+
+// Also search on Enter key
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('pacienteBuscar').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); clearTimeout(_searchDebounce); buscarPaciente(); }
+    });
+});
+
+/* ═══════════════════════════════════════════
+   Médico Tratante Dropdown (from nexus_usuarios)
+   ═══════════════════════════════════════════ */
+function loadMedicosSelect(selectedValue='') {
+    const sel = document.getElementById('medicoTratante');
+    const usuarios = getUsuarios();
+    
+    // Filter users with médico role
+    const medicos = usuarios.filter(u => {
+        const rol = (u.rol || '').toLowerCase();
+        return rol.includes('médico') || rol.includes('medico') || rol.includes('doctor');
+    });
+    
+    sel.innerHTML = '<option value="">-- Seleccionar Médico --</option>';
+    
+    if (medicos.length === 0) {
+        sel.innerHTML += '<option value="" disabled>Sin médicos registrados</option>';
+    }
+    
+    // Group by especialidad
+    const grouped = {};
+    medicos.forEach(m => {
+        const esp = m.especialidad || 'Sin especialidad';
+        if (!grouped[esp]) grouped[esp] = [];
+        grouped[esp].push(m);
+    });
+    
+    Object.keys(grouped).sort().forEach(esp => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = esp;
+        grouped[esp].forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.nombre;
+            opt.textContent = m.nombre;
+            if (m.nombre === selectedValue) opt.selected = true;
+            optgroup.appendChild(opt);
+        });
+        sel.appendChild(optgroup);
+    });
+}
+
+/* ═══════════════════════════════════════════
+   Toast
+   ═══════════════════════════════════════════ */
+function showToast(msg, type='info', clearPrevious=false) {
+  const container = document.getElementById('toastContainer');
+  if (clearPrevious) container.innerHTML = '';
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  const icons = {success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle'};
+  t.innerHTML = `<i class="fas ${icons[type]}"></i> ${msg}`;
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+// Render table
+function renderTabla() {
+  const historias = getHistorias();
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const filterEstado = document.getElementById('filterEstado').value;
+  
+  let filtered = historias.filter(h => {
+    const matchSearch = !search || h.numeroHistoria.toLowerCase().includes(search) || h.nombrePaciente.toLowerCase().includes(search) || h.diagnosticoPrincipal.toLowerCase().includes(search) || (h.documentoPaciente||'').toLowerCase().includes(search) || (h.numAdmision||'').toLowerCase().includes(search);
+    const matchEstado = !filterEstado || h.estado === filterEstado;
+    return matchSearch && matchEstado;
+  });
+  
+  filtered.sort((a,b) => new Date(b.fechaApertura) - new Date(a.fechaApertura));
+  
+  const tbody = document.getElementById('tablaHistorias');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8"><i class="fas fa-folder-open"></i> No se encontraron historias clínicas</td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(h => `
+      <tr>
+        <td><strong style="color:#00b4d8">${h.numeroHistoria}</strong></td>
+        <td>${h.nombrePaciente}</td>
+        <td>${h.documentoPaciente||'—'}</td>
+        <td>${h.diagnosticoPrincipal||'—'}</td>
+        <td>${h.medicoTratante||'—'}</td>
+        <td>${h.fechaApertura}</td>
+        <td><span class="badge ${h.estado==='Abierta'?'badge-apertura':'badge-cerrada'}">${h.estado}</span></td>
+        <td>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <button class="btn-action btn-pdf" onclick="generarPDFHistoria('${h.id}')" title="Descargar PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button class="btn-action btn-edit" onclick="editarHistoria('${h.id}')" title="Editar historia"><i class="fas fa-edit"></i> Editar</button>
+            <button class="btn-action btn-view" onclick="verDetalle('${h.id}')" title="Ver detalle"><i class="fas fa-eye"></i></button>
+            ${h.estado==='Abierta'?`<button class="btn-action btn-close-hc" onclick="cambiarEstado('${h.id}','Cerrada')" title="Cerrar historia"><i class="fas fa-lock"></i></button>`:`<button class="btn-action btn-open-hc" onclick="cambiarEstado('${h.id}','Abierta')" title="Reabrir historia"><i class="fas fa-unlock"></i></button>`}
+            <button class="btn-action btn-delete" onclick="eliminarHistoria('${h.id}')" title="Eliminar historia"><i class="fas fa-trash"></i> Eliminar</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+  
+  // Stats
+  document.getElementById('statTotal').textContent = historias.length;
+  document.getElementById('statAbiertas').textContent = historias.filter(h => h.estado === 'Abierta').length;
+  document.getElementById('statCerradas').textContent = historias.filter(h => h.estado === 'Cerrada').length;
+  document.getElementById('statHoy').textContent = historias.filter(h => h.fechaApertura === today).length;
+}
+
+// Open create modal
+function abrirModalCrear() {
+  document.getElementById('modalTitulo').textContent = 'Nueva Historia Clínica';
+  // Clear patient search
+  document.getElementById('pacienteBuscar').value = '';
+  document.getElementById('pacienteId').value = '';
+  document.getElementById('pacienteInfo').className = 'patient-info-inline';
+  document.getElementById('pacienteInfo').style.display = 'none';
+  // Clear admisión fields
+  limpiarCamposAdmision();
+  // Load médico dropdown
+  loadMedicosSelect();
+  // Clear all other fields
+  ['especialidad','tipoAtencion','diagnosticosSecundarios','antecedentesPersonales','antecedentesFamiliares','antecedentesQuirurgicos','alergias','motivoConsulta','enfermedadActual','examenFisico','planTratamiento','observaciones'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  // Clear CIE-10 fields
+  document.getElementById('diagnosticoPrincipal').value = '';
+  document.getElementById('diagnosticoCodigo').value = '';
+  document.getElementById('cie10Dropdown').classList.remove('open');
+  
+  // Set fecha and hora to current
+  const ahora = new Date();
+  document.getElementById('fechaHistoria').value = ahora.toISOString().split('T')[0];
+  document.getElementById('horaHistoria').value = ahora.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit', hour12:false});
+  
+  document.getElementById('modalForm').dataset.editId = '';
+  document.getElementById('modalForm').classList.add('active');
+}
+
+// Edit
+function editarHistoria(id) {
+  const h = getHistorias().find(x => x.id === id);
+  if (!h) return;
+  document.getElementById('modalTitulo').textContent = 'Editar Historia Clínica';
+  
+  // Populate patient search from existing data
+  const paciente = getPacientes().find(p => String(p.id) === String(h.pacienteId));
+  if (paciente) {
+      document.getElementById('pacienteBuscar').value = paciente.documento;
+      document.getElementById('pacienteId').value = String(paciente.id);
+      const infoDiv = document.getElementById('pacienteInfo');
+      infoDiv.className = 'patient-info-inline found';
+      let ingresoStr = 'N/A';
+      if (paciente.fechaIngreso) {
+          const d = new Date(paciente.fechaIngreso);
+          ingresoStr = d.toLocaleDateString('es-ES', {day:'2-digit', month:'2-digit', year:'numeric'})
+              + ' ' + d.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+      }
+      let admStr = paciente.numAdmision ? 'Adm: ' + paciente.numAdmision + ' — ' : '';
+      infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${paciente.nombre}</strong> — ${admStr}Doc: ${paciente.documento} — EPS: ${paciente.eps||'N/A'} — Ingreso: ${ingresoStr}`;
+      // Populate admisión fields from live data
+      llenarCamposAdmision(paciente);
+  } else {
+      document.getElementById('pacienteBuscar').value = h.documentoPaciente || h.nombrePaciente;
+      document.getElementById('pacienteId').value = String(h.pacienteId);
+      const infoDiv = document.getElementById('pacienteInfo');
+      infoDiv.className = 'patient-info-inline found';
+      infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${h.nombrePaciente}</strong> — Doc: ${h.documentoPaciente||'N/A'} — Ingreso: N/A`;
+      // Restore saved admisión data from history record
+      const savedAdm = h.admisionData || {};
+      ADM_FIELDS.forEach(fid => {
+          const el = document.getElementById(fid);
+          if (el) el.value = savedAdm[fid] || '';
+      });
+  }
+  
+  // Load médico dropdown with selection
+  loadMedicosSelect(h.medicoTratante);
+  
+  // Set especialidad and tipoAtencion
+  document.getElementById('especialidad').value = h.especialidad || '';
+  document.getElementById('tipoAtencion').value = h.tipoAtencion || '';
+  
+  // Set fecha and hora
+  document.getElementById('fechaHistoria').value = h.fecha || '';
+  document.getElementById('horaHistoria').value = h.hora || '';
+  
+  // Set CIE-10 diagnóstico
+  _cie10AutoFilling = true;
+  document.getElementById('diagnosticoPrincipal').value = h.diagnosticoPrincipal || '';
+  // Try to extract code from stored value (format: "R50.9 – Fiebre, no especificada")
+  const dxMatch = (h.diagnosticoPrincipal || '').match(/^([A-Z]\d+\.?\d*)\s*[–\-]/i);
+  document.getElementById('diagnosticoCodigo').value = dxMatch ? dxMatch[1].toUpperCase() : '';
+  _cie10AutoFilling = false;
+  document.getElementById('cie10Dropdown').classList.remove('open');
+  
+  // Set textarea fields
+  ['diagnosticosSecundarios','antecedentesPersonales','antecedentesFamiliares','antecedentesQuirurgicos','alergias','motivoConsulta','enfermedadActual','examenFisico','planTratamiento','observaciones'].forEach(field => {
+    const el = document.getElementById(field);
+    if (el) el.value = h[field] || '';
+  });
+  
+  document.getElementById('modalForm').dataset.editId = id;
+  document.getElementById('modalForm').classList.add('active');
+}
+
+// Save
+function guardarHistoria() {
+  const pacienteId = document.getElementById('pacienteId').value;
+  if (!pacienteId) {
+    showToast('Paciente no encontrado — busque un paciente válido antes de guardar', 'error');
+    return;
+  }
+  const paciente = getPacientes().find(p => String(p.id) === String(pacienteId));
+  if (!paciente) {
+    showToast('Paciente no encontrado — intente buscar el paciente nuevamente', 'error');
+    return;
+  }
+  
+  const diagnostico = document.getElementById('diagnosticoPrincipal').value.trim();
+  const medico = document.getElementById('medicoTratante').value;
+  if (!diagnostico) { showToast('Ingrese el diagnóstico principal', 'error'); return; }
+  if (!medico) { showToast('Seleccione el médico tratante', 'error'); return; }
+  
+  const historias = getHistorias();
+  const editId = document.getElementById('modalForm').dataset.editId;
+  
+  const fecha = document.getElementById('fechaHistoria').value;
+  const hora = document.getElementById('horaHistoria').value;
+  if (!fecha) { showToast('Ingrese la fecha', 'error'); return; }
+  if (!hora) { showToast('Ingrese la hora', 'error'); return; }
+  
+  // Collect admisión data (read-only, stored for record)
+  const admData = {};
+  ADM_FIELDS.forEach(fid => {
+      const el = document.getElementById(fid);
+      admData[fid] = el ? el.value : '';
+  });
+  
+  const data = {
+    pacienteId,
+    nombrePaciente: paciente.nombre,
+    documentoPaciente: paciente.documento,
+    numAdmision: paciente.numAdmision || '',
+    fecha,
+    hora,
+    medicoTratante: medico,
+    especialidad: document.getElementById('especialidad').value,
+    tipoAtencion: document.getElementById('tipoAtencion').value,
+    diagnosticoPrincipal: diagnostico,
+    diagnosticosSecundarios: document.getElementById('diagnosticosSecundarios').value,
+    antecedentesPersonales: document.getElementById('antecedentesPersonales').value,
+    antecedentesFamiliares: document.getElementById('antecedentesFamiliares').value,
+    antecedentesQuirurgicos: document.getElementById('antecedentesQuirurgicos').value,
+    alergias: document.getElementById('alergias').value,
+    motivoConsulta: document.getElementById('motivoConsulta').value,
+    enfermedadActual: document.getElementById('enfermedadActual').value,
+    examenFisico: document.getElementById('examenFisico').value,
+    planTratamiento: document.getElementById('planTratamiento').value,
+    observaciones: document.getElementById('observaciones').value,
+    // Store admisión snapshot for detail view
+    admisionData: admData
+  };
+  
+  if (editId) {
+    const idx = historias.findIndex(h => h.id === editId);
+    if (idx > -1) { Object.assign(historias[idx], data); }
+    showToast('Historia clínica actualizada', 'success');
+  } else {
+    const num = incrementContador();
+    const year = new Date().getFullYear();
+    historias.push({
+      id: 'hc_' + Date.now(),
+      numeroHistoria: 'HC-' + year + '-' + String(num).padStart(4, '0'),
+      fechaApertura: today,
+      estado: 'Abierta',
+      ...data
+    });
+    showToast('Historia clínica creada exitosamente', 'success');
+  }
+  
+  saveHistorias(historias);
+  cerrarModal('modalForm');
+  renderTabla();
+}
+
+// Detail
+function verDetalle(id) {
+  const h = getHistorias().find(x => x.id === id);
+  if (!h) return;
+  document.getElementById('detalleTitulo').textContent = 'Historia Clínica ' + h.numeroHistoria;
+  
+  // ═══ Admisión data section ═══
+  const adm = h.admisionData || {};
+  const admFields = [
+    ['N° Admisión', adm.admNumAdmision],
+    ['Fecha de Ingreso', adm.admFechaIngreso],
+    ['Fecha de Nacimiento', adm.admFechaNacimiento],
+    ['Edad', adm.admEdad],
+    ['Género', adm.admGenero],
+    ['EPS', adm.admEps],
+    ['Servicio', adm.admServicio],
+    ['Habitación', adm.admHabitacion],
+    ['Médico (Admisión)', adm.admMedico],
+    ['Diagnóstico (Admisión)', adm.admDiagnostico],
+    ['Dirección Completa', adm.admDireccion],
+    ['Teléfono', adm.admTelefono],
+    ['Familiar / Acudiente', adm.admFamiliar],
+  ];
+  
+  // Clinical fields
+  const clinicalFields = [
+    ['Número de Historia', h.numeroHistoria],
+    ['Paciente', h.nombrePaciente],
+    ['Documento', h.documentoPaciente||'—'],
+    ['Fecha', h.fecha||'—'],
+    ['Hora', h.hora||'—'],
+    ['Médico Tratante', h.medicoTratante],
+    ['Especialidad', h.especialidad||'—'],
+    ['Tipo de Atención', h.tipoAtencion||'—'],
+    ['Fecha Apertura', h.fechaApertura],
+    ['Estado', h.estado],
+    ['Diagnóstico Principal', h.diagnosticoPrincipal],
+    ['Diagnósticos Secundarios', h.diagnosticosSecundarios||'—'],
+    ['Alergias', h.alergias||'—'],
+  ];
+  const textAreas = [
+    ['Antecedentes Personales', h.antecedentesPersonales],
+    ['Antecedentes Familiares', h.antecedentesFamiliares],
+    ['Antecedentes Quirúrgicos', h.antecedentesQuirurgicos],
+    ['Motivo de Consulta', h.motivoConsulta],
+    ['Enfermedad Actual', h.enfermedadActual],
+    ['Examen Físico', h.examenFisico],
+    ['Plan de Tratamiento', h.planTratamiento],
+    ['Observaciones', h.observaciones],
+  ];
+  
+  let html = '<div class="detail-section"><h3><i class="fas fa-database"></i> Datos de Admisión</h3>';
+  admFields.forEach(([l,v]) => {
+    html += `<div class="detail-field"><span class="label adm-label">${l}:</span><span class="value adm-value">${v||'—'}</span></div>`;
+  });
+  html += '</div>';
+  
+  html += '<div class="detail-section"><h3><i class="fas fa-id-card"></i> Información Clínica General</h3>';
+  clinicalFields.forEach(([l,v]) => { html += `<div class="detail-field"><span class="label">${l}:</span><span class="value">${v||'—'}</span></div>`; });
+  html += '</div>';
+  
+  textAreas.forEach(([title, content]) => {
+    html += `<div class="detail-section"><h3><i class="fas fa-notes-medical"></i> ${title}</h3><div class="value" style="white-space:pre-wrap;font-size:.85rem;color:#c8d6e5">${content||'Sin registro'}</div></div>`;
+  });
+  
+  document.getElementById('detalleContenido').innerHTML = html;
+  document.getElementById('modalDetalle').dataset.historiaId = id;
+  document.getElementById('modalDetalle').classList.add('active');
+}
+
+/* ═══════════════════════════════════════════
+   PDF Download — generates printable HTML and opens print dialog
+   ═══════════════════════════════════════════ */
+function descargarPDF() {
+  const modal = document.getElementById('modalDetalle');
+  const hid = modal.dataset.historiaId;
+  const h = getHistorias().find(x => x.id === hid);
+  if (!h) { showToast('No se encontró la historia', 'error'); return; }
+
+  const adm = h.admisionData || {};
+
+  function row(label, value) {
+    return `<tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:600;color:#333;width:200px">${label}</td><td style="padding:6px 10px;border:1px solid #ccc;color:#555">${value || '—'}</td></tr>`;
+  }
+  function section(title) {
+    return `</table><h3 style="margin:18px 0 8px;color:#14375a;border-bottom:2px solid #14375a;padding-bottom:4px">${title}</h3><table style="width:100%;border-collapse:collapse">`;
+  }
+
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>HC ${h.numeroHistoria}</title>
+  <style>
+    @page{size:A4;margin:15mm}
+    body{font-family:Arial,Helvetica,sans-serif;color:#222;margin:0;padding:10px;font-size:12px}
+    h1{color:#14375a;font-size:18px;margin:0 0 4px}
+    h2{color:#14375a;font-size:15px;margin:14px 0 6px}
+    h3{color:#14375a;font-size:13px;margin:14px 0 6px}
+    table{width:100%;border-collapse:collapse;margin-bottom:8px}
+    td{padding:6px 10px;border:1px solid #ccc;font-size:11px}
+    .header-bar{background:#14375a;color:#fff;padding:10px 16px;border-radius:6px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+    .header-bar h1{color:#fff;font-size:16px;margin:0}
+    .header-bar span{color:#90e0ef;font-size:11px}
+    .section-title{background:#e8f0f8;color:#14375a;font-weight:700;padding:8px 10px;border-radius:4px;margin:14px 0 8px;font-size:12px}
+    .text-block{border:1px solid #ccc;border-radius:4px;padding:10px;margin-bottom:10px;white-space:pre-wrap;font-size:11px;color:#444;min-height:40px}
+    .footer{margin-top:20px;border-top:1px solid #ccc;padding-top:8px;font-size:10px;color:#888;text-align:center}
+  </style></head><body>`;
+
+  // Header
+  html += encabezadoIPS('Historia Clínica', h.numeroHistoria || '');
+
+  // Admisión section
+  html += `<div class="section-title"><i class="fas fa-database"></i> DATOS DE ADMISIÓN</div><table>`;
+  html += row('N° Admisión', adm.admNumAdmision);
+  html += row('Fecha de Ingreso', adm.admFechaIngreso);
+  html += row('Fecha de Nacimiento', adm.admFechaNacimiento);
+  html += row('Edad', adm.admEdad);
+  html += row('Género', adm.admGenero);
+  html += row('EPS', adm.admEps);
+  html += row('Servicio', adm.admServicio);
+  html += row('Habitación', adm.admHabitacion);
+  html += row('Médico (Admisión)', adm.admMedico);
+  html += row('Diagnóstico (Admisión)', adm.admDiagnostico);
+  html += row('Dirección Completa', adm.admDireccion);
+  html += row('Teléfono', adm.admTelefono);
+  html += row('Familiar / Acudiente', adm.admFamiliar);
+  html += `</table>`;
+
+  // Clinical info section
+  html += `<div class="section-title"><i class="fas fa-id-card"></i> INFORMACIÓN CLÍNICA GENERAL</div><table>`;
+  html += row('Número de Historia', h.numeroHistoria);
+  html += row('Paciente', h.nombrePaciente);
+  html += row('Documento', h.documentoPaciente);
+  html += row('N° Admisión', h.numAdmision);
+  html += row('Fecha', h.fecha);
+  html += row('Hora', h.hora);
+  html += row('Médico Tratante', h.medicoTratante);
+  html += row('Especialidad', h.especialidad);
+  html += row('Tipo de Atención', h.tipoAtencion);
+  html += row('Fecha Apertura', h.fechaApertura);
+  html += row('Estado', h.estado);
+  html += row('Diagnóstico Principal', h.diagnosticoPrincipal);
+  html += row('Diagnósticos Secundarios', h.diagnosticosSecundarios);
+  html += row('Alergias', h.alergias);
+  html += `</table>`;
+
+  // Text sections
+  const textSections = [
+    ['Antecedentes Personales', h.antecedentesPersonales],
+    ['Antecedentes Familiares', h.antecedentesFamiliares],
+    ['Antecedentes Quirúrgicos', h.antecedentesQuirurgicos],
+    ['Motivo de Consulta', h.motivoConsulta],
+    ['Enfermedad Actual', h.enfermedadActual],
+    ['Examen Físico', h.examenFisico],
+    ['Plan de Tratamiento', h.planTratamiento],
+    ['Observaciones', h.observaciones],
+  ];
+  textSections.forEach(([title, content]) => {
+    html += `<div class="section-title">${title.toUpperCase()}</div>`;
+    html += `<div class="text-block">${content || 'Sin registro'}</div>`;
+  });
+
+  // Footer
+  html += pieIPS();
+  html += `</body></html>`;
+
+  // Open in new window for printing
+  const printWin = window.open('', '_blank', 'width=900,height=700');
+  printWin.document.write(html);
+  printWin.document.close();
+  printWin.focus();
+  setTimeout(() => { printWin.print(); }, 400);
+}
+
+/* ═══ Direct PDF from table row (no need to open detail modal first) ═══ */
+function generarPDFHistoria(id) {
+  const h = getHistorias().find(x => x.id === id);
+  if (!h) { showToast('No se encontró la historia', 'error'); return; }
+  // Reuse the same PDF generation logic by temporarily setting the modal data
+  document.getElementById('modalDetalle').dataset.historiaId = id;
+  descargarPDF();
+}
+function cambiarEstado(id, nuevoEstado) {
+  const historias = getHistorias();
+  const idx = historias.findIndex(h => h.id === id);
+  if (idx > -1) {
+    historias[idx].estado = nuevoEstado;
+    if (nuevoEstado === 'Cerrada') historias[idx].fechaCierre = today;
+    else delete historias[idx].fechaCierre;
+    saveHistorias(historias);
+    showToast(`Historia ${nuevoEstado === 'Cerrada' ? 'cerrada' : 'reabierta'}`, 'success');
+    renderTabla();
+  }
+}
+
+// Delete
+function eliminarHistoria(id) {
+  if (!confirm('¿Eliminar esta historia clínica? Esta acción no se puede deshacer.')) return;
+  const historias = getHistorias().filter(h => h.id !== id);
+  saveHistorias(historias);
+  showToast('Historia clínica eliminada', 'success');
+  renderTabla();
+}
+
+// Modal close
+function cerrarModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// Events
+document.getElementById('searchInput').addEventListener('input', renderTabla);
+document.getElementById('filterEstado').addEventListener('change', renderTabla);
+
+// Init
+renderTabla();
+</script>
+
+    <!-- MATRIZ GLOBAL DE PERMISOS -->
+    <script>
+        (function () {
+            function aplicar() {
+                if (!window.NX) return;
+                NX.iniciar('historia_clinica', { C: ['abrirModalCrear'], E: ['editarHistoria', 'guardarHistoria', 'cambiarEstado'], B: ['eliminarHistoria'] });
+                NX.filtrarNavegacion();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', aplicar);
+            } else { aplicar(); }
+        })();
+    
+/* ════════════════════════════════════════════════════════════
+   DATOS DE LA IPS EN PDF / IMPRESIONES
+   Lee la información guardada en Configuración → Información de la IPS
+   ════════════════════════════════════════════════════════════ */
+function obtenerDatosIPS() {
+  try {
+    var h = JSON.parse(localStorage.getItem('nexus_hospital') || '{}');
+    return h && typeof h === 'object' ? h : {};
+  } catch (e) { return {}; }
+}
+
+function escaparIPS(txt) {
+  return String(txt == null ? '' : txt)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* Encabezado institucional (logo + datos de la IPS) para documentos HTML imprimibles */
+function encabezadoIPS(tituloDoc, refDoc) {
+  var h = obtenerDatosIPS();
+  var nombre = escaparIPS(h.nombre || 'NEXUSMED IPS Domiciliaria');
+  var lineas = [];
+  if (h.direccion) lineas.push(escaparIPS(h.direccion));
+  var contacto = [];
+  if (h.telefono) contacto.push('Tel: ' + escaparIPS(h.telefono));
+  if (h.email) contacto.push(escaparIPS(h.email));
+  if (contacto.length) lineas.push(contacto.join(' &nbsp;·&nbsp; '));
+  var legal = [];
+  if (h.nit) legal.push('NIT: ' + escaparIPS(h.nit));
+  if (h.codigo) legal.push('Cód. Habilitación: ' + escaparIPS(h.codigo));
+  if (legal.length) lineas.push(legal.join(' &nbsp;·&nbsp; '));
+
+  var logoHtml = '';
+  if (h.logo && String(h.logo).indexOf('data:image') === 0) {
+    logoHtml = '<td style="width:110px;vertical-align:middle;border:none;padding:0 12px 0 0">' +
+               '<img src="' + escaparIPS(h.logo) + '" alt="Logo de la IPS" style="max-width:100px;max-height:62px;object-fit:contain">' +
+               '</td>';
+  }
+
+  var derecha = '';
+  if (tituloDoc || refDoc) {
+    derecha = '<td style="vertical-align:middle;border:none;text-align:right;padding:0">' +
+              (tituloDoc ? '<div style="font-size:12px;font-weight:700;color:#14375a;text-transform:uppercase;letter-spacing:.5px">' + escaparIPS(tituloDoc) + '</div>' : '') +
+              (refDoc ? '<div style="font-size:10px;color:#666;margin-top:3px">' + escaparIPS(refDoc) + '</div>' : '') +
+              '</td>';
+  }
+
+  return '<table style="width:100%;border-collapse:collapse;border:none;margin:0 0 10px"><tr>' +
+    logoHtml +
+    '<td style="vertical-align:middle;border:none;padding:0">' +
+      '<div style="font-size:15px;font-weight:700;color:#14375a;line-height:1.2">' + nombre + '</div>' +
+      (lineas.length ? '<div style="font-size:10px;color:#555;line-height:1.5;margin-top:3px">' + lineas.join('<br>') + '</div>' : '') +
+    '</td>' +
+    derecha +
+  '</tr></table><div style="border-bottom:2px solid #14375a;margin-bottom:12px"></div>';
+}
+
+/* Pie de página institucional */
+function pieIPS() {
+  var h = obtenerDatosIPS();
+  var nombre = escaparIPS(h.nombre || 'NEXUSMED IPS Domiciliaria');
+  var datos = [];
+  if (h.nit) datos.push('NIT: ' + escaparIPS(h.nit));
+  if (h.codigo) datos.push('Cód. Habilitación: ' + escaparIPS(h.codigo));
+  if (h.telefono) datos.push('Tel: ' + escaparIPS(h.telefono));
+  if (h.direccion) datos.push(escaparIPS(h.direccion));
+  var f = new Date();
+  return '<div style="margin-top:20px;border-top:1px solid #ccc;padding-top:8px;font-size:9.5px;color:#777;text-align:center;line-height:1.6">' +
+    '<strong>' + nombre + '</strong>' + (datos.length ? '<br>' + datos.join(' &nbsp;·&nbsp; ') : '') +
+    '<br>Documento generado el ' + f.toLocaleDateString('es-ES') + ' a las ' + f.toLocaleTimeString('es-ES') + ' por NEXUSMED' +
+    '</div>';
+}
+
+</script>
+</body>
+</html>

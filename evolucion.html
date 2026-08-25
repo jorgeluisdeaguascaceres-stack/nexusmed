@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUSMED - Evolución</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0a1628;color:#c8d6e5;min-height:100vh}
+
+/* Header */
+.header{background:linear-gradient(135deg,#0d2137,#122a45);padding:12px 30px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1a3a5c;position:sticky;top:0;z-index:100}
+.header .logo{display:flex;align-items:center;gap:10px}
+.header .logo h1{font-size:1.3rem;font-weight:700;color:#00b4d8;letter-spacing:1px}
+.header .logo span{font-size:.7rem;color:#5a7a9a;font-weight:300}
+.header .user-info{display:flex;align-items:center;gap:12px;color:#90e0ef;font-size:.85rem}
+.header .user-info i{color:#00b4d8}
+.header .btn-logout{background:transparent;border:1px solid #ff3860;color:#ff3860;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.75rem;transition:.3s}
+.header .btn-logout:hover{background:#ff3860;color:#fff}
+
+/* Nav */
+.nav{background:#0d2137;padding:8px 20px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #1a3a5c}
+.nav a{text-decoration:none;color:#5a7a9a;font-size:.75rem;padding:6px 12px;border-radius:6px;transition:.3s;border:1px solid transparent}
+.nav a:hover{color:#00b4d8;border-color:#1a3a5c;background:rgba(0,180,216,.05)}
+.nav a.active{color:#00b4d8;background:rgba(0,180,216,.1);border-color:#00b4d8}
+
+/* Main */
+.main{padding:25px 30px;max-width:1400px;margin:0 auto}
+
+.page-title{font-size:1.5rem;font-weight:700;color:#90e0ef;margin-bottom:5px;display:flex;align-items:center;gap:10px}
+.page-title i{color:#00b4d8}
+.page-subtitle{color:#5a7a9a;font-size:.85rem;margin-bottom:25px}
+
+/* Stats Row */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:25px}
+.stat-card{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:10px;padding:18px;text-align:center}
+.stat-card .stat-num{font-size:1.8rem;font-weight:700;color:#00b4d8}
+.stat-card .stat-label{font-size:.72rem;color:#5a7a9a;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+
+/* Toolbar */
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.search-box{flex:1;min-width:250px;position:relative}
+.search-box input{width:100%;padding:10px 14px 10px 38px;background:#0d2137;border:1px solid #1a3a5c;border-radius:8px;color:#c8d6e5;font-size:.85rem;outline:none;transition:.3s}
+.search-box input:focus{border-color:#00b4d8}
+.search-box i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#5a7a9a}
+.btn-primary{background:linear-gradient(135deg,#0077b6,#00b4d8);color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px;transition:.3s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(0,180,216,.3)}
+
+.filter-select{padding:10px 12px;background:#0d2137;border:1px solid #1a3a5c;border-radius:8px;color:#c8d6e5;font-size:.82rem;outline:none}
+.filter-select:focus{border-color:#00b4d8}
+
+/* Table */
+.table-container{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{background:#122a45;color:#90e0ef;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;padding:14px 16px;text-align:left;border-bottom:1px solid #1a3a5c}
+td{padding:12px 16px;border-bottom:1px solid rgba(26,58,92,.5);font-size:.82rem;color:#c8d6e5}
+tr:hover td{background:rgba(0,180,216,.03)}
+.empty-row td{text-align:center;color:#5a7a9a;padding:40px;font-style:italic}
+
+.badge{padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600}
+.badge-manana{background:rgba(255,209,102,.15);color:#ffd166}
+.badge-tarde{background:rgba(255,107,107,.15);color:#ff6b6b}
+.badge-noche{background:rgba(114,137,218,.15);color:#7289da}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;justify-content:center;align-items:flex-start;padding:30px 20px;overflow-y:auto}
+.modal-overlay.active{display:flex}
+.modal{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:14px;width:100%;max-width:900px;padding:0;animation:modalIn .3s}
+@keyframes modalIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{padding:20px 25px;border-bottom:1px solid #1a3a5c;display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:1.1rem;color:#90e0ef;display:flex;align-items:center;gap:8px}
+.modal-header h2 i{color:#00b4d8}
+.modal-close{background:none;border:none;color:#5a7a9a;font-size:1.3rem;cursor:pointer;transition:.3s}
+.modal-close:hover{color:#ff3860}
+.modal-body{padding:25px;max-height:75vh;overflow-y:auto;overflow-x:hidden;position:relative}
+.modal-footer{padding:15px 25px;border-top:1px solid #1a3a5c;display:flex;justify-content:flex-end;gap:10px}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:.75rem;color:#90e0ef;font-weight:500;text-transform:uppercase;letter-spacing:.3px}
+.form-group input,.form-group select,.form-group textarea{padding:10px 12px;background:#0a1628;border:1px solid #1a3a5c;border-radius:8px;color:#c8d6e5;font-size:.85rem;font-family:'Inter',sans-serif;outline:none;transition:.3s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#00b4d8}
+.form-group textarea{resize:vertical;min-height:80px}
+
+/* Read-only fields from admisión */
+.form-group input.readonly-adm,.form-group select.readonly-adm,.form-group textarea.readonly-adm{
+  background:rgba(0,180,216,.04);
+  border:1px solid #14375a;
+  color:#7ab8d4;
+  cursor:default;
+  opacity:.88;
+}
+.form-group input.readonly-adm:focus,.form-group select.readonly-adm:focus,.form-group textarea.readonly-adm:focus{
+  border-color:#14375a;
+  outline:none;
+  box-shadow:none;
+}
+.form-group label.label-adm{
+  color:#4a8aa5;
+  position:relative;
+}
+.form-group label.label-adm::after{
+  content:' (Admisión)';
+  font-size:.6rem;
+  text-transform:none;
+  letter-spacing:0;
+  font-weight:400;
+  opacity:.7;
+}
+
+/* Admisión data section separator */
+.adm-section-header{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 0 4px 0;
+  margin-top:4px;
+  border-bottom:1px dashed #1a3a5c;
+}
+.adm-section-header i{color:#00b4d8;font-size:.7rem}
+.adm-section-header span{color:#4a8aa5;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+.clinical-section-header{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 0 4px 0;
+  margin-top:8px;
+  border-bottom:1px dashed #1a3a5c;
+}
+.clinical-section-header i{color:#90e0ef;font-size:.7rem}
+.clinical-section-header span{color:#90e0ef;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+.btn-secondary{background:transparent;border:1px solid #1a3a5c;color:#90e0ef;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:.85rem;transition:.3s}
+.btn-secondary:hover{border-color:#00b4d8;color:#00b4d8}
+.btn-danger{background:transparent;border:1px solid #ff3860;color:#ff3860;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.8rem;transition:.3s}
+.btn-danger:hover{background:#ff3860;color:#fff}
+
+/* Prominent action buttons for table */
+.btn-action{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.75rem;font-weight:500;border:1px solid transparent;transition:all .25s;font-family:'Inter',sans-serif;white-space:nowrap}
+.btn-action:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.3)}
+.btn-pdf{background:linear-gradient(135deg,#1b4332,#2d6a4f);color:#95d5b2;border:1px solid #40916c}
+.btn-pdf:hover{background:linear-gradient(135deg,#2d6a4f,#40916c);color:#d8f3dc}
+.btn-edit{background:linear-gradient(135deg,#0d2137,#1a3a5c);color:#90e0ef;border:1px solid #00b4d8}
+.btn-edit:hover{background:#00b4d8;color:#fff}
+.btn-view{background:transparent;color:#5a7a9a;border:1px solid #1a3a5c;padding:6px 8px}
+.btn-view:hover{color:#00b4d8;border-color:#00b4d8}
+.btn-delete{background:linear-gradient(135deg,#3d0c11,#5c1a24);color:#ff6b6b;border:1px solid #ff3860}
+.btn-delete:hover{background:#ff3860;color:#fff}
+
+/* Searchable-select (CIE-10) */
+.searchable-select { position: relative; }
+.searchable-select input { width: 100%; background-color: #0a1628; border: 1px solid #1a3a5c; color: #e0e0e0; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; transition: border-color 0.3s; }
+.searchable-select input:focus { outline: none; border-color: #00b4d8; box-shadow: 0 0 8px rgba(0, 180, 216, 0.3); }
+.searchable-select .dropdown-list { display: none; position: fixed; max-height: 280px; overflow-y: auto; background-color: #0d2137; border: 1px solid #00b4d8; border-radius: 0 0 8px 8px; z-index: 500; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); min-width: 320px; }
+.searchable-select .dropdown-list.open { display: block; }
+.searchable-select .dropdown-item { padding: 8px 12px; cursor: pointer; font-size: 13px; color: #c0c0c0; transition: all 0.15s; border-bottom: 1px solid #0a1628; }
+.searchable-select .dropdown-item:hover { background-color: #122a45; color: #00b4d8; }
+.searchable-select .dropdown-item .code { color: #00b4d8; font-weight: 700; margin-right: 6px; }
+.searchable-select .dropdown-item .desc { color: #90e0ef; }
+.searchable-select .no-results { padding: 12px; color: #5a7a9a; font-size: 13px; text-align: center; }
+
+/* Patient search inline */
+.patient-search-row { display: flex; gap: 10px; align-items: flex-end; }
+.patient-search-row input { flex: 1; }
+.patient-search-row .btn-buscar { background: linear-gradient(135deg,#0077b6,#00b4d8); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: .85rem; font-weight: 600; transition: .3s; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+.patient-search-row .btn-buscar:hover { box-shadow: 0 4px 15px rgba(0,180,216,.3); }
+.patient-info-inline { margin-top: 6px; padding: 8px 12px; border-radius: 8px; font-size: .8rem; display: none; }
+.patient-info-inline.found { display: block; background: rgba(0,180,216,.08); border: 1px solid #00b4d8; color: #90e0ef; }
+.patient-info-inline.not-found { display: block; background: rgba(255,56,96,.08); border: 1px solid #ff3860; color: #ff3860; }
+
+/* Detail */
+.detail-section{margin-bottom:20px}
+.detail-section h3{color:#00b4d8;font-size:.9rem;margin-bottom:10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1a3a5c;padding-bottom:8px}
+.detail-field{display:grid;grid-template-columns:180px 1fr;gap:8px;margin-bottom:8px;font-size:.82rem}
+.detail-field .label{color:#5a7a9a;font-weight:500}
+.detail-field .value{color:#c8d6e5}
+.detail-field .label.adm-label{color:#4a8aa5}
+.detail-field .value.adm-value{color:#7ab8d4}
+
+/* Toast */
+.toast-container{position:fixed;top:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{padding:14px 20px;border-radius:10px;font-size:.82rem;display:flex;align-items:center;gap:10px;animation:toastIn .3s;min-width:280px;box-shadow:0 5px 20px rgba(0,0,0,.3)}
+.toast.success{background:linear-gradient(135deg,#0d4a2e,#0d2137);border:1px solid #48c78e;color:#48c78e}
+.toast.error{background:linear-gradient(135deg,#4a0d1a,#0d2137);border:1px solid #ff3860;color:#ff3860}
+.toast.info{background:linear-gradient(135deg,#0d3a4a,#0d2137);border:1px solid #00b4d8;color:#00b4d8}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+/* SOAP section labels */
+.soap-section-header{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 0 4px 0;
+  margin-top:4px;
+  border-bottom:1px dashed #1a3a5c;
+}
+.soap-section-header i{color:#90e0ef;font-size:.7rem}
+.soap-section-header span{color:#90e0ef;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+@media(max-width:768px){
+.form-grid{grid-template-columns:1fr}
+.stats-row{grid-template-columns:1fr 1fr}
+.nav{gap:4px}.nav a{font-size:.68rem;padding:4px 8px}
+}
+</style>
+    <script src="permisos.js"></script>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Header -->
+<header class="header">
+  <div class="logo">
+    <h1><i class="fas fa-heartbeat"></i> NEXUSMED</h1>
+    <span>plataforma que conecta todo</span>
+  </div>
+  <div class="user-info">
+    <i class="fas fa-user-circle"></i>
+    <span id="userName">Admin</span>
+    <span style="color:#5a7a9a">|</span>
+    <span id="userRole" style="color:#5a7a9a">Administrador</span>
+  </div>
+  <button class="btn-logout" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Salir</button>
+</header>
+
+<!-- Nav -->
+<nav class="nav">
+  <a href="menu.html"><i class="fas fa-home"></i> Inicio</a>
+  <a href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+  <a href="pacientes.html"><i class="fas fa-users"></i> Pacientes</a>
+  <a href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
+  <a href="evolucion.html" class="active"><i class="fas fa-notes-medical"></i> Evolución</a>
+  <a href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enfermería</a>
+  <a href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
+  <a href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
+  <a href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+  <a href="egresados.html"><i class="fas fa-door-closed"></i> Egresados</a>
+  <a href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
+  <a href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+</nav>
+
+<!-- Main -->
+<main class="main">
+  <h1 class="page-title"><i class="fas fa-notes-medical"></i> Evolución</h1>
+  <p class="page-subtitle">Notas de evolución diaria de pacientes — Formato SOAP (Subjetivo, Objetivo, Análisis, Plan)</p>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">Total Evoluciones</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statHoy">0</div>
+      <div class="stat-label">Registradas Hoy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statManana">0</div>
+      <div class="stat-label">Turno Mañana</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statTarde">0</div>
+      <div class="stat-label">Turno Tarde</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Buscar por paciente, diagnóstico o número de evolución...">
+    </div>
+    <select class="filter-select" id="filterTurno">
+      <option value="">Todos los turnos</option>
+      <option value="Mañana">Mañana</option>
+      <option value="Tarde">Tarde</option>
+      <option value="Noche">Noche</option>
+    </select>
+    <button class="btn-primary" onclick="abrirModalCrear()"><i class="fas fa-plus"></i> Nueva Evolución</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>N° Evolución</th>
+          <th>Paciente</th>
+          <th>Documento</th>
+          <th>Diagnóstico</th>
+          <th>Profesional</th>
+          <th>Fecha / Turno</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaEvoluciones"></tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Modal Crear/Editar -->
+<div class="modal-overlay" id="modalForm">
+  <div class="modal">
+    <div class="modal-header">
+      <h2><i class="fas fa-notes-medical"></i> <span id="modalTitulo">Nueva Evolución</span></h2>
+      <button class="modal-close" onclick="cerrarModal('modalForm')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <!-- Patient search by Documento, Nombre or N° Admisión -->
+        <div class="form-group full">
+          <label>Paciente (Buscar por Documento, Nombre o N° Admisión)</label>
+          <div class="patient-search-row">
+            <input type="text" id="pacienteBuscar" placeholder="Ingrese documento, nombre o número de admisión..." autocomplete="off">
+            <button class="btn-buscar" onclick="buscarPaciente()"><i class="fas fa-search"></i> Buscar</button>
+          </div>
+          <div class="patient-info-inline" id="pacienteInfo"></div>
+          <input type="hidden" id="pacienteId" value="">
+        </div>
+
+        <!-- ═══ ADMISIÓN DATA SECTION ═══ -->
+        <div class="adm-section-header">
+          <i class="fas fa-database"></i>
+          <span>Datos de Admisión (solo lectura — provienen del registro de admisión)</span>
+        </div>
+
+        <div class="form-group">
+          <label class="label-adm">N° Admisión</label>
+          <input type="text" id="admNumAdmision" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Fecha de Ingreso</label>
+          <input type="text" id="admFechaIngreso" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Fecha de Nacimiento</label>
+          <input type="text" id="admFechaNacimiento" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Edad</label>
+          <input type="text" id="admEdad" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Género</label>
+          <input type="text" id="admGenero" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">EPS</label>
+          <input type="text" id="admEps" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Servicio</label>
+          <input type="text" id="admServicio" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Habitación</label>
+          <input type="text" id="admHabitacion" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Médico (Admisión)</label>
+          <input type="text" id="admMedico" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Diagnóstico (Admisión)</label>
+          <input type="text" id="admDiagnostico" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group full">
+          <label class="label-adm">Dirección Completa</label>
+          <input type="text" id="admDireccion" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Teléfono</label>
+          <input type="text" id="admTelefono" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Familiar / Acudiente</label>
+          <input type="text" id="admFamiliar" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+
+        <!-- ═══ CLINICAL ASSESSMENT SECTION ═══ -->
+        <div class="clinical-section-header">
+          <i class="fas fa-stethoscope"></i>
+          <span>Evaluación Clínica — Datos editables</span>
+        </div>
+
+        <!-- Fecha, Hora, Turno -->
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="fechaEvolucion" required>
+        </div>
+        <div class="form-group">
+          <label>Hora</label>
+          <input type="time" id="horaEvolucion" required>
+        </div>
+        <div class="form-group">
+          <label>Turno</label>
+          <select id="turnoEvolucion">
+            <option value="">-- Seleccionar --</option>
+            <option>Mañana</option>
+            <option>Tarde</option>
+            <option>Noche</option>
+          </select>
+        </div>
+        <!-- Profesional dropdown from nexus_usuarios -->
+        <div class="form-group">
+          <label>Profesional</label>
+          <select id="profesionalEvolucion">
+            <option value="">-- Seleccionar Profesional --</option>
+          </select>
+        </div>
+        <!-- Diagnóstico Principal as CIE-10 searchable dropdown -->
+        <div class="form-group full">
+          <label>Diagnóstico Principal (CIE-10)</label>
+          <div class="searchable-select" id="cie10Container">
+            <input type="text" id="diagnosticoPrincipal" placeholder="Buscar código o descripción CIE-10..." autocomplete="off" onfocus="abrirCIE10()" oninput="filtrarCIE10()">
+            <input type="hidden" id="diagnosticoCodigo" value="">
+            <div class="dropdown-list" id="cie10Dropdown"></div>
+          </div>
+        </div>
+
+        <!-- ═══ SOAP SECTION ═══ -->
+        <div class="soap-section-header">
+          <i class="fas fa-clipboard-list"></i>
+          <span>Nota de Evolución — Formato SOAP</span>
+        </div>
+
+        <div class="form-group full">
+          <label><strong style="color:#00b4d8">S</strong> — Subjetivo</label>
+          <textarea id="subjetivo" rows="4" placeholder="Relato del paciente, síntomas referidos, motivo de consulta actual, cambios percibidos..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label><strong style="color:#00b4d8">O</strong> — Objetivo</label>
+          <textarea id="objetivo" rows="4" placeholder="Hallazgos físicos, signos vitales (TA, FC, FR, T°), examen físico, resultados paraclínicos..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label><strong style="color:#00b4d8">A</strong> — Análisis / Evaluación</label>
+          <textarea id="analisis" rows="3" placeholder="Interpretación clínica, impresión diagnóstica, evolución del cuadro, juicio médico..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label><strong style="color:#00b4d8">P</strong> — Plan</label>
+          <textarea id="plan" rows="4" placeholder="Plan terapéutico, medicamentos ajustados, estudios solicitados, interconsultas, criterios de egreso..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="cerrarModal('modalForm')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEvolucion()"><i class="fas fa-save"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal-overlay" id="modalDetalle">
+  <div class="modal" style="max-width:900px">
+    <div class="modal-header">
+      <h2><i class="fas fa-notes-medical"></i> <span id="detalleTitulo">Detalle Evolución</span></h2>
+      <button class="modal-close" onclick="cerrarModal('modalDetalle')">×</button>
+    </div>
+    <div class="modal-body" id="detalleContenido"></div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="descargarPDF()" style="margin-right:10px"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
+      <button class="btn-secondary" onclick="cerrarModal('modalDetalle')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Session check
+const sesion = JSON.parse(localStorage.getItem('nexus_sesion') || 'null');
+if (!sesion) { window.location.href = 'index.html'; }
+else { document.getElementById('userName').textContent = sesion.usuario; document.getElementById('userRole').textContent = sesion.rol; }
+
+function cerrarSesion() { localStorage.removeItem('nexus_sesion'); window.location.href = 'index.html'; }
+
+// Data
+function getEvoluciones() { return JSON.parse(localStorage.getItem('nexus_evoluciones') || '[]'); }
+function saveEvoluciones(e) { localStorage.setItem('nexus_evoluciones', JSON.stringify(e)); }
+function getPacientes() { return JSON.parse(localStorage.getItem('nexus_pacientes') || '[]'); }
+function getUsuarios() { return JSON.parse(localStorage.getItem('nexus_usuarios') || '[]'); }
+function getContador() { return parseInt(localStorage.getItem('nexus_contador_evo') || '0'); }
+function incrementContador() { const c = getContador() + 1; localStorage.setItem('nexus_contador_evo', c.toString()); return c; }
+
+const today = new Date().toISOString().split('T')[0];
+
+/* ═══════════════════════════════════════════
+   CIE-10 Data
+   ═══════════════════════════════════════════ */
+const CIE10 = [
+    { code: 'J18.9', desc: 'Neumonía, no especificada' },
+    { code: 'J06.9', desc: 'Infección aguda de vías respiratorias superiores' },
+    { code: 'J22', desc: 'Infección aguda de vías respiratorias inferiores' },
+    { code: 'J44.1', desc: 'EPOC con exacerbación aguda' },
+    { code: 'J44.0', desc: 'EPOC con infección respiratoria aguda' },
+    { code: 'J96.0', desc: 'Insuficiencia respiratoria aguda' },
+    { code: 'J96.1', desc: 'Insuficiencia respiratoria crónica' },
+    { code: 'J84.9', desc: 'Enfermedad pulmonar intersticial' },
+    { code: 'I10', desc: 'Hipertensión arterial esencial' },
+    { code: 'I11.9', desc: 'Enfermedad cardíaca hipertensiva sin insuficiencia cardíaca' },
+    { code: 'I50.9', desc: 'Insuficiencia cardíaca, no especificada' },
+    { code: 'I50.0', desc: 'Insuficiencia cardíaca congestiva' },
+    { code: 'I48', desc: 'Fibrilación y aleteo auricular' },
+    { code: 'I21.9', desc: 'Infarto agudo de miocardio, no especificado' },
+    { code: 'I25.1', desc: 'Enfermedad aterosclerótica del corazón' },
+    { code: 'I63.9', desc: 'Accidente cerebrovascular, no especificado' },
+    { code: 'I67.9', desc: 'Enfermedad cerebrovascular, no especificada' },
+    { code: 'I69.9', desc: 'Secuelas de enfermedad cerebrovascular' },
+    { code: 'E11.9', desc: 'Diabetes mellitus tipo 2 sin complicaciones' },
+    { code: 'E11.5', desc: 'Diabetes tipo 2 con trastornos circulatorios' },
+    { code: 'E11.6', desc: 'Diabetes tipo 2 con otras complicaciones' },
+    { code: 'E10.9', desc: 'Diabetes mellitus tipo 1 sin complicaciones' },
+    { code: 'E14.9', desc: 'Diabetes mellitus no especificada' },
+    { code: 'E78.5', desc: 'Dislipidemia, no especificada' },
+    { code: 'E87.5', desc: 'Hiperpotasemia' },
+    { code: 'E87.6', desc: 'Hipopotasemia' },
+    { code: 'E46', desc: 'Desnutrición proteico-calórica no especificada' },
+    { code: 'N18.9', desc: 'Enfermedad renal crónica, no especificada' },
+    { code: 'N17.9', desc: 'Insuficiencia renal aguda, no especificada' },
+    { code: 'N19', desc: 'Enfermedad renal, no especificada' },
+    { code: 'N39.0', desc: 'Infección de vías urinarias, sitio no especificado' },
+    { code: 'N40', desc: 'Hiperplasia prostática benigna' },
+    { code: 'K70.3', desc: 'Cirrosis hepática alcohólica' },
+    { code: 'K72.9', desc: 'Insuficiencia hepática, no especificada' },
+    { code: 'K74.6', desc: 'Cirrosis hepática, otra y no especificada' },
+    { code: 'K80.0', desc: 'Cálculo de la vesícula biliar con colecistitis aguda' },
+    { code: 'K80.1', desc: 'Cálculo de la vesícula biliar con otra colecistitis' },
+    { code: 'K92.2', desc: 'Hemorragia gastrointestinal, no especificada' },
+    { code: 'K35.9', desc: 'Apendicitis aguda, no especificada' },
+    { code: 'K56.6', desc: 'Obstrucción intestinal, no especificada' },
+    { code: 'K59.0', desc: 'Estreñimiento' },
+    { code: 'K21.0', desc: 'Reflujo gastroesofágico con esofagitis' },
+    { code: 'A09', desc: 'Gastroenteritis y colitis de presunto origen infeccioso' },
+    { code: 'A41.9', desc: 'Sepsis, no especificada' },
+    { code: 'A04.7', desc: 'Enterocolitis por Clostridium difficile' },
+    { code: 'B34.9', desc: 'Infección viral, no especificada' },
+    { code: 'B95.1', desc: 'Streptococcus, causa de enfermedades clasificadas en otros capítulos' },
+    { code: 'B96.2', desc: 'Escherichia coli, causa de enfermedades' },
+    { code: 'C34.9', desc: 'Neoplasia maligna de pulmón, no especificada' },
+    { code: 'C18.9', desc: 'Neoplasia maligna del colon, no especificada' },
+    { code: 'C50.9', desc: 'Neoplasia maligna de mama, no especificada' },
+    { code: 'C61', desc: 'Neoplasia maligna de la próstata' },
+    { code: 'C79.9', desc: 'Metástasis, no especificada' },
+    { code: 'C95.9', desc: 'Leucemia, no especificada' },
+    { code: 'D50.9', desc: 'Anemia por deficiencia de hierro, no especificada' },
+    { code: 'D46.9', desc: 'Síndrome mielodisplásico, no especificado' },
+    { code: 'D64.9', desc: 'Anemia, no especificada' },
+    { code: 'G40.9', desc: 'Epilepsia, no especificada' },
+    { code: 'G43.9', desc: 'Migraña, no especificada' },
+    { code: 'G47.3', desc: 'Apnea obstructiva del sueño' },
+    { code: 'G82.9', desc: 'Parálisis, no especificada' },
+    { code: 'G89.1', desc: 'Dolor crónico, no clasificado en otra parte' },
+    { code: 'F03', desc: 'Demencia, no especificada' },
+    { code: 'F10.1', desc: 'Trastorno por uso de alcohol – uso perjudicial' },
+    { code: 'F17.2', desc: 'Dependencia de tabaco' },
+    { code: 'F32.9', desc: 'Episodio depresivo, no especificado' },
+    { code: 'F41.1', desc: 'Trastorno de ansiedad generalizada' },
+    { code: 'F41.9', desc: 'Trastorno de ansiedad, no especificado' },
+    { code: 'M54.5', desc: 'Lumbalgia baja' },
+    { code: 'M54.1', desc: 'Radiculopatía' },
+    { code: 'M81.0', desc: 'Osteoporosis postmenopáusica' },
+    { code: 'M79.3', desc: 'Parestesia, no especificada' },
+    { code: 'M79.1', desc: 'Mialgia' },
+    { code: 'S22.0', desc: 'Fractura de vértebra torácica' },
+    { code: 'S72.0', desc: 'Fractura del cuello del fémur' },
+    { code: 'S82.8', desc: 'Fractura de la pierna' },
+    { code: 'S06.9', desc: 'Traumatismo intracraneal, no especificado' },
+    { code: 'S09.9', desc: 'Lesión de la cabeza, no especificada' },
+    { code: 'T14.0', desc: 'Herida superficial de región del cuerpo no especificada' },
+    { code: 'T88.9', desc: 'Complicación, no especificada' },
+    { code: 'R07.9', desc: 'Dolor torácico, no especificado' },
+    { code: 'R50.9', desc: 'Fiebre, no especificada' },
+    { code: 'R10.9', desc: 'Dolor abdominal y pélvico, no especificado' },
+    { code: 'R55', desc: 'Síncope y colapso' },
+    { code: 'R60.9', desc: 'Edema, no especificado' },
+    { code: 'R63.0', desc: 'Anorexia' },
+    { code: 'R65.9', desc: 'Síndrome de respuesta inflamatoria sistémica' },
+    { code: 'Z96.6', desc: 'Presencia de dispositivo de fijación ortopédica' },
+    { code: 'Z87.0', desc: 'Antecedente de enfermedades del sistema respiratorio' },
+    { code: 'Z95.1', desc: 'Presencia de bypass aortocoronario' },
+    { code: 'U07.1', desc: 'COVID-19, virus identificado' },
+    { code: 'U07.2', desc: 'COVID-19, virus no identificado' },
+    { code: 'B34.2', desc: 'Infección por coronavirus, no especificada' },
+];
+
+/* ═══════════════════════════════════════════
+   CIE-10 Searchable Dropdown Functions
+   ═══════════════════════════════════════════ */
+function abrirCIE10() {
+    const dropdown = document.getElementById('cie10Dropdown');
+    const input = document.getElementById('diagnosticoPrincipal');
+    const rect = input.getBoundingClientRect();
+    dropdown.style.top = rect.bottom + 'px';
+    dropdown.style.left = rect.left + 'px';
+    dropdown.style.width = rect.width + 'px';
+    _cie10AutoFilling = false;
+    filtrarCIE10();
+    dropdown.classList.add('open');
+}
+
+let _cie10AutoFilling = false;
+let _searchDebounce = null;
+
+function filtrarCIE10() {
+    if (_cie10AutoFilling) return;
+    const input = document.getElementById('diagnosticoPrincipal');
+    const dropdown = document.getElementById('cie10Dropdown');
+    const rect = input.getBoundingClientRect();
+    dropdown.style.top = rect.bottom + 'px';
+    dropdown.style.left = rect.left + 'px';
+    dropdown.style.width = rect.width + 'px';
+    const term = input.value.toLowerCase().trim();
+    if (!term) { renderCIE10List(CIE10); dropdown.classList.add('open'); return; }
+    const parts = term.split(/\s*[–\-]\s*/);
+    const codePart = parts[0].trim();
+    const descPart = parts.length > 1 ? parts.slice(1).join('–').trim() : '';
+    const filtered = CIE10.filter(c => {
+        const cCode = c.code.toLowerCase();
+        const cDesc = c.desc.toLowerCase();
+        return cCode.includes(codePart) || cDesc.includes(codePart) ||
+               (descPart && (cCode.includes(descPart) || cDesc.includes(descPart)));
+    });
+    renderCIE10List(filtered);
+    dropdown.classList.add('open');
+}
+
+function renderCIE10List(lista) {
+    const dropdown = document.getElementById('cie10Dropdown');
+    if (lista.length === 0) {
+        dropdown.innerHTML = '<div class="no-results">Sin resultados</div>';
+        return;
+    }
+    dropdown.innerHTML = lista.map(c =>
+        `<div class="dropdown-item" onclick="seleccionarCIE10('${c.code}', '${c.desc.replace(/'/g, "\\'")}')"` +
+        `><span class="code">${c.code}</span><span class="desc">${c.desc}</span></div>`
+    ).join('');
+}
+
+function seleccionarCIE10(code, desc) {
+    document.getElementById('diagnosticoPrincipal').value = `${code} – ${desc}`;
+    document.getElementById('diagnosticoCodigo').value = code;
+    document.getElementById('cie10Dropdown').classList.remove('open');
+}
+
+// Close CIE-10 dropdown on click outside
+document.addEventListener('click', e => {
+    const container = document.getElementById('cie10Container');
+    if (container && !container.contains(e.target)) {
+        document.getElementById('cie10Dropdown').classList.remove('open');
+    }
+});
+
+// Close CIE-10 dropdown on modal scroll
+document.querySelectorAll('.modal-body').forEach(mb => {
+    mb.addEventListener('scroll', () => {
+        document.getElementById('cie10Dropdown').classList.remove('open');
+    });
+});
+
+// Close CIE-10 dropdown on window resize
+window.addEventListener('resize', () => {
+    document.getElementById('cie10Dropdown').classList.remove('open');
+});
+
+/* ═══════════════════════════════════════════
+   Admisión field IDs for auto-populate
+   ═══════════════════════════════════════════ */
+const ADM_FIELDS = [
+    'admNumAdmision','admFechaIngreso','admFechaNacimiento','admEdad',
+    'admGenero','admEps','admServicio','admHabitacion',
+    'admMedico','admDiagnostico','admDireccion','admTelefono','admFamiliar'
+];
+
+const ADM_MAP = {
+    numAdmision: 'admNumAdmision',
+    fechaIngreso: 'admFechaIngreso',
+    fechaNacimiento: 'admFechaNacimiento',
+    edad: 'admEdad',
+    genero: 'admGenero',
+    eps: 'admEps',
+    servicio: 'admServicio',
+    habitacion: 'admHabitacion',
+    medico: 'admMedico',
+    diagnostico: 'admDiagnostico',
+    direccion: 'admDireccion',
+    telefono: 'admTelefono',
+    familiarNombre: 'admFamiliar'
+};
+
+function limpiarCamposAdmision() {
+    ADM_FIELDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+}
+
+function llenarCamposAdmision(p) {
+    document.getElementById('admNumAdmision').value = p.numAdmision || '';
+    if (p.fechaIngreso) {
+        const d = new Date(p.fechaIngreso);
+        document.getElementById('admFechaIngreso').value = d.toLocaleDateString('es-ES', {day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'});
+    } else {
+        document.getElementById('admFechaIngreso').value = '';
+    }
+    if (p.fechaNacimiento) {
+        const d = new Date(p.fechaNacimiento);
+        document.getElementById('admFechaNacimiento').value = d.toLocaleDateString('es-ES', {day:'2-digit',month:'2-digit',year:'numeric'});
+    } else {
+        document.getElementById('admFechaNacimiento').value = '';
+    }
+    document.getElementById('admEdad').value = p.edad || '';
+    document.getElementById('admGenero').value = p.genero || '';
+    document.getElementById('admEps').value = p.eps || '';
+    document.getElementById('admServicio').value = p.servicio || '';
+    document.getElementById('admHabitacion').value = p.habitacion || '';
+    document.getElementById('admMedico').value = p.medico || '';
+    let dx = '';
+    if (p.diagnosticoCodigo && p.diagnostico) dx = p.diagnosticoCodigo + ' – ' + p.diagnostico;
+    else if (p.diagnostico) dx = p.diagnostico;
+    else if (p.diagnosticoCodigo) dx = p.diagnosticoCodigo;
+    document.getElementById('admDiagnostico').value = dx;
+    const dirParts = [p.direccion, p.barrio, p.municipio, p.departamento].filter(Boolean);
+    document.getElementById('admDireccion').value = dirParts.join(', ') || '';
+    document.getElementById('admTelefono').value = p.telefono || '';
+    const famParts = [];
+    if (p.familiarNombre) famParts.push(p.familiarNombre);
+    if (p.familiarParentesco) famParts.push('(' + p.familiarParentesco + ')');
+    if (p.familiarTelefono) famParts.push('Tel: ' + p.familiarTelefono);
+    document.getElementById('admFamiliar').value = famParts.join(' ') || '';
+}
+
+/* ═══════════════════════════════════════════
+   Patient Search (by documento, nombre or numAdmision)
+   ═══════════════════════════════════════════ */
+function buscarPaciente() {
+    const termino = document.getElementById('pacienteBuscar').value.trim().toLowerCase();
+    const infoDiv = document.getElementById('pacienteInfo');
+    const hiddenId = document.getElementById('pacienteId');
+
+    document.getElementById('toastContainer').innerHTML = '';
+
+    if (!termino) {
+        infoDiv.className = 'patient-info-inline';
+        infoDiv.style.display = 'none';
+        hiddenId.value = '';
+        limpiarCamposAdmision();
+        return;
+    }
+
+    const pacientes = getPacientes().filter(p => p.estado !== 'Egresado');
+
+    // 1) Exact numAdmision match
+    let paciente = pacientes.find(p => (p.numAdmision || '').toLowerCase() === termino);
+    // 2) Exact documento match
+    if (!paciente) {
+        paciente = pacientes.find(p => p.documento.toLowerCase() === termino);
+    }
+    // 3) Partial documento match
+    if (!paciente) {
+        paciente = pacientes.find(p => p.documento.toLowerCase().includes(termino));
+    }
+    // 4) Partial numAdmision match
+    if (!paciente) {
+        paciente = pacientes.find(p => (p.numAdmision || '').toLowerCase().includes(termino));
+    }
+    // 5) Nombre/apellido partial match
+    if (!paciente) {
+        paciente = pacientes.find(p => p.nombre.toLowerCase().includes(termino));
+    }
+    // 6) Multi-word: every word must match somewhere
+    if (!paciente) {
+        const palabras = termino.split(/\s+/);
+        if (palabras.length > 1) {
+            paciente = pacientes.find(p => {
+                const nom = p.nombre.toLowerCase();
+                const doc = p.documento.toLowerCase();
+                const adm = (p.numAdmision || '').toLowerCase();
+                return palabras.every(w => nom.includes(w) || doc.includes(w) || adm.includes(w));
+            });
+        }
+    }
+
+    if (paciente) {
+        hiddenId.value = String(paciente.id);
+        infoDiv.className = 'patient-info-inline found';
+
+        let ingresoStr = 'N/A';
+        if (paciente.fechaIngreso) {
+            const d = new Date(paciente.fechaIngreso);
+            ingresoStr = d.toLocaleDateString('es-ES', {day:'2-digit', month:'2-digit', year:'numeric'})
+                + ' ' + d.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+        }
+        let admStr = paciente.numAdmision ? 'Adm: ' + paciente.numAdmision + ' — ' : '';
+        infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${paciente.nombre}</strong> — ${admStr}Doc: ${paciente.documento} — EPS: ${paciente.eps||'N/A'} — Ingreso: ${ingresoStr}`;
+
+        // ═══ AUTO-POPULATE ALL admisión fields ═══
+        llenarCamposAdmision(paciente);
+
+        // Also auto-fill the CIE-10 diagnóstico from admisión as suggestion
+        if (paciente.diagnosticoCodigo && paciente.diagnostico) {
+            _cie10AutoFilling = true;
+            document.getElementById('diagnosticoPrincipal').value = paciente.diagnosticoCodigo + ' – ' + paciente.diagnostico;
+            document.getElementById('diagnosticoCodigo').value = paciente.diagnosticoCodigo;
+            _cie10AutoFilling = false;
+        }
+
+        showToast('Datos de admisión cargados automáticamente', 'success', true);
+    } else {
+        hiddenId.value = '';
+        infoDiv.className = 'patient-info-inline not-found';
+        infoDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Paciente no encontrado en admisiones activas. Verifique documento, nombre o número de admisión.';
+        limpiarCamposAdmision();
+        showToast('Paciente no encontrado', 'error', true);
+    }
+}
+
+// Search on Enter key
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('pacienteBuscar').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); clearTimeout(_searchDebounce); buscarPaciente(); }
+    });
+});
+
+/* ═══════════════════════════════════════════
+   Profesional Dropdown (from nexus_usuarios)
+   ═══════════════════════════════════════════ */
+function loadProfesionalesSelect(selectedValue='') {
+    const sel = document.getElementById('profesionalEvolucion');
+    const usuarios = getUsuarios();
+
+    // Filter users with clinical roles
+    const profesionales = usuarios.filter(u => {
+        const rol = (u.rol || '').toLowerCase();
+        return rol.includes('médico') || rol.includes('medico') || rol.includes('doctor') ||
+               rol.includes('enfermero') || rol.includes('enfermera') || rol.includes('terapeuta') ||
+               rol.includes('fisioterapeuta') || rol.includes('nutricionista') || rol.includes('psicólogo') ||
+               rol.includes('psicologa') || rol.includes('odontólogo') || rol.includes('odontologo');
+    });
+
+    sel.innerHTML = '<option value="">-- Seleccionar Profesional --</option>';
+
+    if (profesionales.length === 0) {
+        sel.innerHTML += '<option value="" disabled>Sin profesionales registrados</option>';
+    }
+
+    // Group by rol
+    const grouped = {};
+    profesionales.forEach(p => {
+        const rol = p.rol || 'Sin rol';
+        if (!grouped[rol]) grouped[rol] = [];
+        grouped[rol].push(p);
+    });
+
+    Object.keys(grouped).sort().forEach(rol => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = rol;
+        grouped[rol].forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.nombre;
+            opt.textContent = p.nombre + (p.especialidad ? ' — ' + p.especialidad : '');
+            if (p.nombre === selectedValue) opt.selected = true;
+            optgroup.appendChild(opt);
+        });
+        sel.appendChild(optgroup);
+    });
+}
+
+/* ═══════════════════════════════════════════
+   Toast
+   ═══════════════════════════════════════════ */
+function showToast(msg, type='info', clearPrevious=false) {
+  const container = document.getElementById('toastContainer');
+  if (clearPrevious) container.innerHTML = '';
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  const icons = {success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle'};
+  t.innerHTML = `<i class="fas ${icons[type]}"></i> ${msg}`;
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+/* ═══════════════════════════════════════════
+   Render table
+   ═══════════════════════════════════════════ */
+function renderTabla() {
+  const evoluciones = getEvoluciones();
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const filterTurno = document.getElementById('filterTurno').value;
+
+  let filtered = evoluciones.filter(e => {
+    const matchSearch = !search || e.numeroEvolucion.toLowerCase().includes(search) || e.nombrePaciente.toLowerCase().includes(search) || e.diagnosticoPrincipal.toLowerCase().includes(search) || (e.documentoPaciente||'').toLowerCase().includes(search) || (e.numAdmision||'').toLowerCase().includes(search);
+    const matchTurno = !filterTurno || e.turno === filterTurno;
+    return matchSearch && matchTurno;
+  });
+
+  filtered.sort((a,b) => new Date(b.fecha + 'T' + (b.hora||'00:00')) - new Date(a.fecha + 'T' + (a.hora||'00:00')));
+
+  const tbody = document.getElementById('tablaEvoluciones');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="fas fa-clipboard-list"></i> No se encontraron notas de evolución</td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(e => {
+        let turnoBadge = '';
+        if (e.turno === 'Mañana') turnoBadge = '<span class="badge badge-manana">Mañana</span>';
+        else if (e.turno === 'Tarde') turnoBadge = '<span class="badge badge-tarde">Tarde</span>';
+        else if (e.turno === 'Noche') turnoBadge = '<span class="badge badge-noche">Noche</span>';
+        else turnoBadge = '<span style="color:#5a7a9a">—</span>';
+        return `
+      <tr>
+        <td><strong style="color:#00b4d8">${e.numeroEvolucion}</strong></td>
+        <td>${e.nombrePaciente}</td>
+        <td>${e.documentoPaciente||'—'}</td>
+        <td>${e.diagnosticoPrincipal||'—'}</td>
+        <td>${e.profesional||'—'}</td>
+        <td>${e.fecha||'—'} ${turnoBadge}</td>
+        <td>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <button class="btn-action btn-pdf" onclick="generarPDFEvolucion('${e.id}')" title="Descargar PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button class="btn-action btn-edit" onclick="editarEvolucion('${e.id}')" title="Editar evolución"><i class="fas fa-edit"></i> Editar</button>
+            <button class="btn-action btn-view" onclick="verDetalle('${e.id}')" title="Ver detalle"><i class="fas fa-eye"></i></button>
+            <button class="btn-action btn-delete" onclick="eliminarEvolucion('${e.id}')" title="Eliminar evolución"><i class="fas fa-trash"></i> Eliminar</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Stats
+  document.getElementById('statTotal').textContent = evoluciones.length;
+  document.getElementById('statHoy').textContent = evoluciones.filter(e => e.fecha === today).length;
+  document.getElementById('statManana').textContent = evoluciones.filter(e => e.turno === 'Mañana').length;
+  document.getElementById('statTarde').textContent = evoluciones.filter(e => e.turno === 'Tarde').length;
+}
+
+/* ═══════════════════════════════════════════
+   Open create modal
+   ═══════════════════════════════════════════ */
+function abrirModalCrear() {
+  document.getElementById('modalTitulo').textContent = 'Nueva Evolución';
+  // Clear patient search
+  document.getElementById('pacienteBuscar').value = '';
+  document.getElementById('pacienteId').value = '';
+  document.getElementById('pacienteInfo').className = 'patient-info-inline';
+  document.getElementById('pacienteInfo').style.display = 'none';
+  // Clear admisión fields
+  limpiarCamposAdmision();
+  // Load profesional dropdown
+  loadProfesionalesSelect();
+  // Clear clinical fields
+  ['fechaEvolucion','horaEvolucion','turnoEvolucion','diagnosticoPrincipal','diagnosticoCodigo','subjetivo','objetivo','analisis','plan'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('cie10Dropdown').classList.remove('open');
+
+  // Set fecha and hora to current
+  const ahora = new Date();
+  document.getElementById('fechaEvolucion').value = ahora.toISOString().split('T')[0];
+  document.getElementById('horaEvolucion').value = ahora.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit', hour12:false});
+  // Auto-detect turno
+  const h = ahora.getHours();
+  if (h >= 6 && h < 14) document.getElementById('turnoEvolucion').value = 'Mañana';
+  else if (h >= 14 && h < 22) document.getElementById('turnoEvolucion').value = 'Tarde';
+  else document.getElementById('turnoEvolucion').value = 'Noche';
+
+  document.getElementById('modalForm').dataset.editId = '';
+  document.getElementById('modalForm').classList.add('active');
+}
+
+/* ═══════════════════════════════════════════
+   Edit evolución
+   ═══════════════════════════════════════════ */
+function editarEvolucion(id) {
+  const e = getEvoluciones().find(x => x.id === id);
+  if (!e) return;
+  document.getElementById('modalTitulo').textContent = 'Editar Evolución';
+
+  // Populate patient search from existing data
+  const paciente = getPacientes().find(p => String(p.id) === String(e.pacienteId));
+  if (paciente) {
+      document.getElementById('pacienteBuscar').value = paciente.documento;
+      document.getElementById('pacienteId').value = String(paciente.id);
+      const infoDiv = document.getElementById('pacienteInfo');
+      infoDiv.className = 'patient-info-inline found';
+      let ingresoStr = 'N/A';
+      if (paciente.fechaIngreso) {
+          const d = new Date(paciente.fechaIngreso);
+          ingresoStr = d.toLocaleDateString('es-ES', {day:'2-digit', month:'2-digit', year:'numeric'})
+              + ' ' + d.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+      }
+      let admStr = paciente.numAdmision ? 'Adm: ' + paciente.numAdmision + ' — ' : '';
+      infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${paciente.nombre}</strong> — ${admStr}Doc: ${paciente.documento} — EPS: ${paciente.eps||'N/A'} — Ingreso: ${ingresoStr}`;
+      llenarCamposAdmision(paciente);
+  } else {
+      document.getElementById('pacienteBuscar').value = e.documentoPaciente || e.nombrePaciente;
+      document.getElementById('pacienteId').value = String(e.pacienteId);
+      const infoDiv = document.getElementById('pacienteInfo');
+      infoDiv.className = 'patient-info-inline found';
+      infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${e.nombrePaciente}</strong> — Doc: ${e.documentoPaciente||'N/A'} — Ingreso: N/A`;
+      const savedAdm = e.admisionData || {};
+      ADM_FIELDS.forEach(fid => {
+          const el = document.getElementById(fid);
+          if (el) el.value = savedAdm[fid] || '';
+      });
+  }
+
+  // Load profesional dropdown with selection
+  loadProfesionalesSelect(e.profesional);
+
+  // Set fecha, hora, turno
+  document.getElementById('fechaEvolucion').value = e.fecha || '';
+  document.getElementById('horaEvolucion').value = e.hora || '';
+  document.getElementById('turnoEvolucion').value = e.turno || '';
+
+  // Set CIE-10 diagnóstico
+  _cie10AutoFilling = true;
+  document.getElementById('diagnosticoPrincipal').value = e.diagnosticoPrincipal || '';
+  const dxMatch = (e.diagnosticoPrincipal || '').match(/^([A-Z]\d+\.?\d*)\s*[–\-]/i);
+  document.getElementById('diagnosticoCodigo').value = dxMatch ? dxMatch[1].toUpperCase() : '';
+  _cie10AutoFilling = false;
+  document.getElementById('cie10Dropdown').classList.remove('open');
+
+  // Set SOAP fields
+  document.getElementById('subjetivo').value = e.subjetivo || '';
+  document.getElementById('objetivo').value = e.objetivo || '';
+  document.getElementById('analisis').value = e.analisis || '';
+  document.getElementById('plan').value = e.plan || '';
+
+  document.getElementById('modalForm').dataset.editId = id;
+  document.getElementById('modalForm').classList.add('active');
+}
+
+/* ═══════════════════════════════════════════
+   Save evolución
+   ═══════════════════════════════════════════ */
+function guardarEvolucion() {
+  const pacienteId = document.getElementById('pacienteId').value;
+  if (!pacienteId) {
+    showToast('Paciente no encontrado — busque un paciente válido antes de guardar', 'error');
+    return;
+  }
+  const paciente = getPacientes().find(p => String(p.id) === String(pacienteId));
+  if (!paciente) {
+    showToast('Paciente no encontrado — intente buscar el paciente nuevamente', 'error');
+    return;
+  }
+
+  const diagnostico = document.getElementById('diagnosticoPrincipal').value.trim();
+  const profesional = document.getElementById('profesionalEvolucion').value;
+  const turno = document.getElementById('turnoEvolucion').value;
+  if (!diagnostico) { showToast('Ingrese el diagnóstico principal', 'error'); return; }
+  if (!profesional) { showToast('Seleccione el profesional', 'error'); return; }
+  if (!turno) { showToast('Seleccione el turno', 'error'); return; }
+
+  const fecha = document.getElementById('fechaEvolucion').value;
+  const hora = document.getElementById('horaEvolucion').value;
+  if (!fecha) { showToast('Ingrese la fecha', 'error'); return; }
+  if (!hora) { showToast('Ingrese la hora', 'error'); return; }
+
+  // At least one SOAP field must have content
+  const subjetivo = document.getElementById('subjetivo').value.trim();
+  const objetivo = document.getElementById('objetivo').value.trim();
+  const analisis = document.getElementById('analisis').value.trim();
+  const plan = document.getElementById('plan').value.trim();
+  if (!subjetivo && !objetivo && !analisis && !plan) {
+    showToast('Complete al menos un campo del formato SOAP', 'error');
+    return;
+  }
+
+  // Collect admisión data (read-only, stored for record)
+  const admData = {};
+  ADM_FIELDS.forEach(fid => {
+      const el = document.getElementById(fid);
+      admData[fid] = el ? el.value : '';
+  });
+
+  const evoluciones = getEvoluciones();
+  const editId = document.getElementById('modalForm').dataset.editId;
+
+  const data = {
+    pacienteId,
+    nombrePaciente: paciente.nombre,
+    documentoPaciente: paciente.documento,
+    numAdmision: paciente.numAdmision || '',
+    fecha,
+    hora,
+    turno,
+    profesional,
+    diagnosticoPrincipal: diagnostico,
+    subjetivo,
+    objetivo,
+    analisis,
+    plan,
+    admisionData: admData
+  };
+
+  if (editId) {
+    const idx = evoluciones.findIndex(e => e.id === editId);
+    if (idx > -1) { Object.assign(evoluciones[idx], data); }
+    showToast('Evolución actualizada', 'success');
+  } else {
+    const num = incrementContador();
+    const year = new Date().getFullYear();
+    evoluciones.push({
+      id: 'evo_' + Date.now(),
+      numeroEvolucion: 'EVO-' + year + '-' + String(num).padStart(4, '0'),
+      fechaRegistro: today,
+      ...data
+    });
+    showToast('Nota de evolución creada exitosamente', 'success');
+  }
+
+  saveEvoluciones(evoluciones);
+  cerrarModal('modalForm');
+  renderTabla();
+}
+
+/* ═══════════════════════════════════════════
+   Detail view
+   ═══════════════════════════════════════════ */
+function verDetalle(id) {
+  const e = getEvoluciones().find(x => x.id === id);
+  if (!e) return;
+  document.getElementById('detalleTitulo').textContent = 'Nota de Evolución ' + e.numeroEvolucion;
+
+  const adm = e.admisionData || {};
+  const admFields = [
+    ['N° Admisión', adm.admNumAdmision],
+    ['Fecha de Ingreso', adm.admFechaIngreso],
+    ['Fecha de Nacimiento', adm.admFechaNacimiento],
+    ['Edad', adm.admEdad],
+    ['Género', adm.admGenero],
+    ['EPS', adm.admEps],
+    ['Servicio', adm.admServicio],
+    ['Habitación', adm.admHabitacion],
+    ['Médico (Admisión)', adm.admMedico],
+    ['Diagnóstico (Admisión)', adm.admDiagnostico],
+    ['Dirección Completa', adm.admDireccion],
+    ['Teléfono', adm.admTelefono],
+    ['Familiar / Acudiente', adm.admFamiliar],
+  ];
+
+  const clinicalFields = [
+    ['Número de Evolución', e.numeroEvolucion],
+    ['Paciente', e.nombrePaciente],
+    ['Documento', e.documentoPaciente||'—'],
+    ['N° Admisión', e.numAdmision||'—'],
+    ['Fecha', e.fecha||'—'],
+    ['Hora', e.hora||'—'],
+    ['Turno', e.turno||'—'],
+    ['Profesional', e.profesional],
+    ['Diagnóstico Principal', e.diagnosticoPrincipal],
+    ['Fecha de Registro', e.fechaRegistro||'—'],
+  ];
+
+  let html = '<div class="detail-section"><h3><i class="fas fa-database"></i> Datos de Admisión</h3>';
+  admFields.forEach(([l,v]) => {
+    html += `<div class="detail-field"><span class="label adm-label">${l}:</span><span class="value adm-value">${v||'—'}</span></div>`;
+  });
+  html += '</div>';
+
+  html += '<div class="detail-section"><h3><i class="fas fa-id-card"></i> Información Clínica</h3>';
+  clinicalFields.forEach(([l,v]) => { html += `<div class="detail-field"><span class="label">${l}:</span><span class="value">${v||'—'}</span></div>`; });
+  html += '</div>';
+
+  // SOAP sections
+  const soapSections = [
+    ['S — Subjetivo', e.subjetivo],
+    ['O — Objetivo', e.objetivo],
+    ['A — Análisis / Evaluación', e.analisis],
+    ['P — Plan', e.plan],
+  ];
+  soapSections.forEach(([title, content]) => {
+    html += `<div class="detail-section"><h3><i class="fas fa-notes-medical"></i> ${title}</h3><div class="value" style="white-space:pre-wrap;font-size:.85rem;color:#c8d6e5">${content||'Sin registro'}</div></div>`;
+  });
+
+  document.getElementById('detalleContenido').innerHTML = html;
+  document.getElementById('modalDetalle').dataset.evolucionId = id;
+  document.getElementById('modalDetalle').classList.add('active');
+}
+
+/* ═══════════════════════════════════════════
+   PDF Download — generates printable HTML and opens print dialog
+   ═══════════════════════════════════════════ */
+function descargarPDF() {
+  const modal = document.getElementById('modalDetalle');
+  const eid = modal.dataset.evolucionId;
+  const e = getEvoluciones().find(x => x.id === eid);
+  if (!e) { showToast('No se encontró la evolución', 'error'); return; }
+
+  const adm = e.admisionData || {};
+
+  function row(label, value) {
+    return `<tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:600;color:#333;width:200px">${label}</td><td style="padding:6px 10px;border:1px solid #ccc;color:#555">${value || '—'}</td></tr>`;
+  }
+
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>EVO ${e.numeroEvolucion}</title>
+  <style>
+    @page{size:A4;margin:15mm}
+    body{font-family:Arial,Helvetica,sans-serif;color:#222;margin:0;padding:10px;font-size:12px}
+    h1{color:#14375a;font-size:18px;margin:0 0 4px}
+    h2{color:#14375a;font-size:15px;margin:14px 0 6px}
+    h3{color:#14375a;font-size:13px;margin:14px 0 6px}
+    table{width:100%;border-collapse:collapse;margin-bottom:8px}
+    td{padding:6px 10px;border:1px solid #ccc;font-size:11px}
+    .header-bar{background:#14375a;color:#fff;padding:10px 16px;border-radius:6px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+    .header-bar h1{color:#fff;font-size:16px;margin:0}
+    .header-bar span{color:#90e0ef;font-size:11px}
+    .section-title{background:#e8f0f8;color:#14375a;font-weight:700;padding:8px 10px;border-radius:4px;margin:14px 0 8px;font-size:12px}
+    .text-block{border:1px solid #ccc;border-radius:4px;padding:10px;margin-bottom:10px;white-space:pre-wrap;font-size:11px;color:#444;min-height:40px}
+    .soap-label{display:inline-block;background:#14375a;color:#fff;font-weight:700;padding:2px 10px;border-radius:3px;margin-right:6px;font-size:11px}
+    .footer{margin-top:20px;border-top:1px solid #ccc;padding-top:8px;font-size:10px;color:#888;text-align:center}
+  </style></head><body>`;
+
+  // Header
+  html += encabezadoIPS('Nota de Evolución', e.numeroEvolucion || '');
+
+  // Admisión section
+  html += `<div class="section-title"><i class="fas fa-database"></i> DATOS DE ADMISIÓN</div><table>`;
+  html += row('N° Admisión', adm.admNumAdmision);
+  html += row('Fecha de Ingreso', adm.admFechaIngreso);
+  html += row('Fecha de Nacimiento', adm.admFechaNacimiento);
+  html += row('Edad', adm.admEdad);
+  html += row('Género', adm.admGenero);
+  html += row('EPS', adm.admEps);
+  html += row('Servicio', adm.admServicio);
+  html += row('Habitación', adm.admHabitacion);
+  html += row('Médico (Admisión)', adm.admMedico);
+  html += row('Diagnóstico (Admisión)', adm.admDiagnostico);
+  html += row('Dirección Completa', adm.admDireccion);
+  html += row('Teléfono', adm.admTelefono);
+  html += row('Familiar / Acudiente', adm.admFamiliar);
+  html += `</table>`;
+
+  // Clinical info section
+  html += `<div class="section-title"><i class="fas fa-id-card"></i> INFORMACIÓN CLÍNICA</div><table>`;
+  html += row('Número de Evolución', e.numeroEvolucion);
+  html += row('Paciente', e.nombrePaciente);
+  html += row('Documento', e.documentoPaciente);
+  html += row('N° Admisión', e.numAdmision);
+  html += row('Fecha', e.fecha);
+  html += row('Hora', e.hora);
+  html += row('Turno', e.turno);
+  html += row('Profesional', e.profesional);
+  html += row('Diagnóstico Principal', e.diagnosticoPrincipal);
+  html += row('Fecha de Registro', e.fechaRegistro);
+  html += `</table>`;
+
+  // SOAP sections
+  html += `<div class="section-title"><i class="fas fa-clipboard-list"></i> NOTA DE EVOLUCIÓN — FORMATO SOAP</div>`;
+  const soapPdf = [
+    ['S', 'SUBJETIVO', e.subjetivo],
+    ['O', 'OBJETIVO', e.objetivo],
+    ['A', 'ANÁLISIS / EVALUACIÓN', e.analisis],
+    ['P', 'PLAN', e.plan],
+  ];
+  soapPdf.forEach(([letter, title, content]) => {
+    html += `<h3><span class="soap-label">${letter}</span> ${title}</h3>`;
+    html += `<div class="text-block">${content || 'Sin registro'}</div>`;
+  });
+
+  // Footer
+  html += pieIPS();
+  html += `</body></html>`;
+
+  const printWin = window.open('', '_blank', 'width=900,height=700');
+  printWin.document.write(html);
+  printWin.document.close();
+  printWin.focus();
+  setTimeout(() => { printWin.print(); }, 400);
+}
+
+/* ═══ Direct PDF from table row ═══ */
+function generarPDFEvolucion(id) {
+  const e = getEvoluciones().find(x => x.id === id);
+  if (!e) { showToast('No se encontró la evolución', 'error'); return; }
+  document.getElementById('modalDetalle').dataset.evolucionId = id;
+  descargarPDF();
+}
+
+/* ═══════════════════════════════════════════
+   Delete evolución
+   ═══════════════════════════════════════════ */
+function eliminarEvolucion(id) {
+  if (!confirm('¿Eliminar esta nota de evolución? Esta acción no se puede deshacer.')) return;
+  const evoluciones = getEvoluciones().filter(e => e.id !== id);
+  saveEvoluciones(evoluciones);
+  showToast('Nota de evolución eliminada', 'success');
+  renderTabla();
+}
+
+// Modal close
+function cerrarModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// Events
+document.getElementById('searchInput').addEventListener('input', renderTabla);
+document.getElementById('filterTurno').addEventListener('change', renderTabla);
+
+// Init
+renderTabla();
+</script>
+
+    <!-- MATRIZ GLOBAL DE PERMISOS -->
+    <script>
+        (function () {
+            function aplicar() {
+                if (!window.NX) return;
+                NX.iniciar('evoluciones', { C: ['abrirModalCrear'], E: ['editarEvolucion', 'guardarEvolucion'], B: ['eliminarEvolucion'] });
+                NX.filtrarNavegacion();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', aplicar);
+            } else { aplicar(); }
+        })();
+    
+/* ════════════════════════════════════════════════════════════
+   DATOS DE LA IPS EN PDF / IMPRESIONES
+   Lee la información guardada en Configuración → Información de la IPS
+   ════════════════════════════════════════════════════════════ */
+function obtenerDatosIPS() {
+  try {
+    var h = JSON.parse(localStorage.getItem('nexus_hospital') || '{}');
+    return h && typeof h === 'object' ? h : {};
+  } catch (e) { return {}; }
+}
+
+function escaparIPS(txt) {
+  return String(txt == null ? '' : txt)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* Encabezado institucional (logo + datos de la IPS) para documentos HTML imprimibles */
+function encabezadoIPS(tituloDoc, refDoc) {
+  var h = obtenerDatosIPS();
+  var nombre = escaparIPS(h.nombre || 'NEXUSMED IPS Domiciliaria');
+  var lineas = [];
+  if (h.direccion) lineas.push(escaparIPS(h.direccion));
+  var contacto = [];
+  if (h.telefono) contacto.push('Tel: ' + escaparIPS(h.telefono));
+  if (h.email) contacto.push(escaparIPS(h.email));
+  if (contacto.length) lineas.push(contacto.join(' &nbsp;·&nbsp; '));
+  var legal = [];
+  if (h.nit) legal.push('NIT: ' + escaparIPS(h.nit));
+  if (h.codigo) legal.push('Cód. Habilitación: ' + escaparIPS(h.codigo));
+  if (legal.length) lineas.push(legal.join(' &nbsp;·&nbsp; '));
+
+  var logoHtml = '';
+  if (h.logo && String(h.logo).indexOf('data:image') === 0) {
+    logoHtml = '<td style="width:110px;vertical-align:middle;border:none;padding:0 12px 0 0">' +
+               '<img src="' + escaparIPS(h.logo) + '" alt="Logo de la IPS" style="max-width:100px;max-height:62px;object-fit:contain">' +
+               '</td>';
+  }
+
+  var derecha = '';
+  if (tituloDoc || refDoc) {
+    derecha = '<td style="vertical-align:middle;border:none;text-align:right;padding:0">' +
+              (tituloDoc ? '<div style="font-size:12px;font-weight:700;color:#14375a;text-transform:uppercase;letter-spacing:.5px">' + escaparIPS(tituloDoc) + '</div>' : '') +
+              (refDoc ? '<div style="font-size:10px;color:#666;margin-top:3px">' + escaparIPS(refDoc) + '</div>' : '') +
+              '</td>';
+  }
+
+  return '<table style="width:100%;border-collapse:collapse;border:none;margin:0 0 10px"><tr>' +
+    logoHtml +
+    '<td style="vertical-align:middle;border:none;padding:0">' +
+      '<div style="font-size:15px;font-weight:700;color:#14375a;line-height:1.2">' + nombre + '</div>' +
+      (lineas.length ? '<div style="font-size:10px;color:#555;line-height:1.5;margin-top:3px">' + lineas.join('<br>') + '</div>' : '') +
+    '</td>' +
+    derecha +
+  '</tr></table><div style="border-bottom:2px solid #14375a;margin-bottom:12px"></div>';
+}
+
+/* Pie de página institucional */
+function pieIPS() {
+  var h = obtenerDatosIPS();
+  var nombre = escaparIPS(h.nombre || 'NEXUSMED IPS Domiciliaria');
+  var datos = [];
+  if (h.nit) datos.push('NIT: ' + escaparIPS(h.nit));
+  if (h.codigo) datos.push('Cód. Habilitación: ' + escaparIPS(h.codigo));
+  if (h.telefono) datos.push('Tel: ' + escaparIPS(h.telefono));
+  if (h.direccion) datos.push(escaparIPS(h.direccion));
+  var f = new Date();
+  return '<div style="margin-top:20px;border-top:1px solid #ccc;padding-top:8px;font-size:9.5px;color:#777;text-align:center;line-height:1.6">' +
+    '<strong>' + nombre + '</strong>' + (datos.length ? '<br>' + datos.join(' &nbsp;·&nbsp; ') : '') +
+    '<br>Documento generado el ' + f.toLocaleDateString('es-ES') + ' a las ' + f.toLocaleTimeString('es-ES') + ' por NEXUSMED' +
+    '</div>';
+}
+
+</script>
+</body>
+</html>

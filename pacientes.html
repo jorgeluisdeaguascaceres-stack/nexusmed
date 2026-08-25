@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUSMED - Centro de Consulta de Pacientes</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #0a1628; color: #e0e0e0; min-height: 100vh; overflow-x: hidden; }
+
+        /* ===== HEADER ===== */
+        .header { background: linear-gradient(135deg, #0d2137, #1a3a5c); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00b4d8; box-shadow: 0 2px 15px rgba(0, 180, 216, 0.2); }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .brand-icon { width: 32px; height: 32px; }
+        .brand-icon svg { width: 100%; height: 100%; }
+        .brand-name { font-size: 24px; font-weight: 800; color: #00b4d8; letter-spacing: 3px; }
+        .brand-name span { color: #90e0ef; font-weight: 300; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00b4d8, #0077b6); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; }
+        .user-name { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+        .user-role { font-size: 11px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-header { background-color: #1a3a5c; color: #00b4d8; border: 1px solid #00b4d8; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s; text-decoration: none; font-family: 'Inter', sans-serif; }
+        .btn-header:hover { background-color: #00b4d8; color: #0a1628; }
+        .btn-cerrar { background-color: transparent; color: #ff3860; border: 1px solid #ff3860; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s; font-family: 'Inter', sans-serif; }
+        .btn-cerrar:hover { background-color: #ff3860; color: #fff; }
+
+        /* ===== NAV ===== */
+        .nav-bar { background: #0d2137; padding: 8px 30px; display: flex; gap: 5px; border-bottom: 1px solid #1a3a5c; flex-wrap: wrap; }
+        .nav-item { padding: 8px 16px; border-radius: 6px; font-size: 13px; color: #5a7a9a; cursor: pointer; transition: all 0.3s; text-decoration: none; display: flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; }
+        .nav-item:hover { color: #00b4d8; background-color: rgba(0, 180, 216, 0.1); }
+        .nav-item.active { color: #00b4d8; background-color: rgba(0, 180, 216, 0.15); border: 1px solid rgba(0, 180, 216, 0.3); }
+
+        /* ===== MAIN CONTAINER ===== */
+        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
+
+        /* ===== HERO TITLE ===== */
+        .hero-title { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; }
+        .hero-title h2 { font-size: 28px; font-weight: 900; color: #00b4d8; letter-spacing: 1px; }
+        .hero-title .hero-badge { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
+        .hero-subtitle { font-size: 13px; color: #5a7a9a; margin-bottom: 20px; letter-spacing: 0.5px; }
+
+        /* ===== FILTERS ===== */
+        .filters-section { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+        .filter-group { display: flex; flex-direction: column; }
+        .filter-group label { font-size: 10px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; font-weight: 700; }
+        .filter-group select, .filter-group input { background-color: #0a1628; border: 1px solid #1a3a5c; color: #e0e0e0; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; }
+        .filter-group select:focus, .filter-group input:focus { outline: none; border-color: #00b4d8; box-shadow: 0 0 8px rgba(0, 180, 216, 0.3); }
+
+        /* ===== TOOLBAR ===== */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+        .search-box { position: relative; flex: 1; max-width: 400px; }
+        .search-box input { width: 100%; background-color: #0a1628; border: 1px solid #1a3a5c; color: #e0e0e0; padding: 10px 12px 10px 40px; border-radius: 10px; font-size: 14px; font-family: 'Inter', sans-serif; transition: all 0.3s; }
+        .search-box input:focus { outline: none; border-color: #00b4d8; box-shadow: 0 0 12px rgba(0, 180, 216, 0.3); }
+        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #5a7a9a; font-size: 14px; }
+
+        /* ===== STATS ROW ===== */
+        .stats { display: flex; gap: 10px; flex-wrap: wrap; }
+        .stat-card { background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 12px; padding: 12px 18px; text-align: center; min-width: 90px; transition: all 0.3s; }
+        .stat-card:hover { border-color: #00b4d8; box-shadow: 0 0 12px rgba(0, 180, 216, 0.2); }
+        .stat-number { font-size: 24px; font-weight: 900; color: #00b4d8; }
+        .stat-label { font-size: 9px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 2px; }
+        .stat-card.stat-activos .stat-number { color: #00b4d8; }
+        .stat-card.stat-criticos .stat-number { color: #ff3860; }
+        .stat-card.stat-egresados .stat-number { color: #48c78e; }
+        .stat-card.stat-observacion .stat-number { color: #ffb700; }
+
+        /* ===== TABLE SECTION ===== */
+        .table-section { background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 180, 216, 0.05); }
+        .table-header-bar { padding: 14px 20px; border-bottom: 1px solid #1a3a5c; display: flex; justify-content: space-between; align-items: center; background: rgba(0, 180, 216, 0.03); }
+        .table-header-bar h3 { color: #90e0ef; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .table-header-bar .record-count { font-size: 11px; color: #5a7a9a; font-weight: 400; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background-color: #0a1628; }
+        thead th { padding: 12px 16px; text-align: left; font-size: 10px; color: #00b4d8; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 2px solid #1a3a5c; font-weight: 800; white-space: nowrap; }
+        tbody tr { border-bottom: 1px solid rgba(26, 58, 92, 0.5); transition: all 0.2s; }
+        tbody tr:hover { background-color: rgba(0, 180, 216, 0.08); }
+        tbody td { padding: 11px 16px; font-size: 13px; color: #c0c0c0; }
+
+        /* ===== BADGES ===== */
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-activo { background-color: rgba(0, 180, 216, 0.15); color: #00b4d8; border: 1px solid rgba(0, 180, 216, 0.4); }
+        .badge-observacion { background-color: rgba(255, 183, 3, 0.15); color: #ffb700; border: 1px solid rgba(255, 183, 3, 0.4); }
+        .badge-critico { background-color: rgba(255, 56, 96, 0.15); color: #ff3860; border: 1px solid rgba(255, 56, 96, 0.4); animation: pulseCritical 2s infinite; }
+        .badge-egresado { background-color: rgba(72, 199, 142, 0.15); color: #48c78e; border: 1px solid rgba(72, 199, 142, 0.4); }
+        @keyframes pulseCritical { 0%, 100% { box-shadow: none; } 50% { box-shadow: 0 0 8px rgba(255, 56, 96, 0.4); } }
+
+        /* ===== CONSULTAR BUTTON ===== */
+        .btn-consultar { padding: 7px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700; transition: all 0.3s; font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 10px rgba(0, 180, 216, 0.3); }
+        .btn-consultar:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(0, 180, 216, 0.5); background: linear-gradient(135deg, #00cfe9, #0090cc); }
+        .btn-consultar:active { transform: translateY(0); }
+
+        .empty-state { text-align: center; padding: 40px; color: #5a7a9a; }
+        .empty-state .icon { font-size: 50px; margin-bottom: 12px; }
+
+        /* ===== CONSULTA MODAL - THE COMMAND CENTER ===== */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(5, 10, 20, 0.85); z-index: 1000; justify-content: center; align-items: flex-start; padding: 20px; overflow-y: auto; backdrop-filter: blur(4px); }
+        .modal-overlay.active { display: flex; }
+
+        .consulta-modal { background: linear-gradient(160deg, #0d2137 0%, #122a45 40%, #1a3a5c 100%); border: 2px solid #00b4d8; border-radius: 20px; width: 95%; max-width: 900px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 60px rgba(0, 180, 216, 0.15); position: relative; overflow: hidden; margin-top: 10px; }
+
+        /* Animated border glow */
+        .consulta-modal::before { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; border-radius: 22px; background: linear-gradient(45deg, transparent, #00b4d8, transparent, #0077b6, transparent); background-size: 400% 400%; z-index: -1; animation: borderGlow 4s ease infinite; opacity: 0.5; }
+        @keyframes borderGlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* Modal Header */
+        .consulta-modal-header { padding: 24px 28px 18px; border-bottom: 1px solid rgba(0, 180, 216, 0.2); background: linear-gradient(135deg, rgba(0, 180, 216, 0.08), transparent); }
+        .consulta-modal-header .close-btn { position: absolute; top: 18px; right: 22px; background: rgba(255, 56, 96, 0.15); border: 1px solid rgba(255, 56, 96, 0.4); color: #ff3860; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; font-size: 16px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .consulta-modal-header .close-btn:hover { background: #ff3860; color: #fff; }
+        .consulta-modal-header .modal-title { font-size: 20px; font-weight: 800; color: #00b4d8; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .consulta-modal-header .modal-title .cmd-icon { font-size: 22px; }
+
+        /* Patient Info Card in Modal */
+        .paciente-info-card { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid #1a3a5c; border-radius: 12px; padding: 16px; }
+        .paciente-info-item { display: flex; flex-direction: column; }
+        .paciente-info-item .p-label { font-size: 9px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 2px; }
+        .paciente-info-item .p-value { font-size: 14px; color: #e0e0e0; font-weight: 600; }
+        .paciente-info-item .p-value.highlight { color: #00b4d8; }
+
+        /* Date Range Section */
+        .date-range-section { padding: 20px 28px; border-bottom: 1px solid rgba(26, 58, 92, 0.5); }
+        .date-range-title { font-size: 12px; color: #90e0ef; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .date-range-row { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
+        .date-field { display: flex; flex-direction: column; flex: 1; min-width: 180px; }
+        .date-field label { font-size: 10px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; font-weight: 700; }
+        .date-field input[type="date"] { background-color: #0a1628; border: 1px solid #1a3a5c; color: #e0e0e0; padding: 10px 14px; border-radius: 10px; font-size: 14px; font-family: 'Inter', sans-serif; transition: all 0.3s; }
+        .date-field input[type="date"]:focus { outline: none; border-color: #00b4d8; box-shadow: 0 0 12px rgba(0, 180, 216, 0.3); }
+        .btn-search-records { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; border: none; padding: 10px 28px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 700; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3); display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .btn-search-records:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(0, 180, 216, 0.5); background: linear-gradient(135deg, #00cfe9, #0090cc); }
+        .btn-search-records:active { transform: translateY(0); }
+        .btn-search-records:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Results Section */
+        .results-section { padding: 0 28px 24px; }
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; margin-top: 18px; }
+        .results-header h4 { color: #90e0ef; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px; }
+        .results-header .total-count { background: rgba(0, 180, 216, 0.15); color: #00b4d8; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .btn-pdf { background: linear-gradient(135deg, #48c78e, #2da36e); color: #fff; border: none; padding: 10px 22px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 700; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(72, 199, 142, 0.3); display: flex; align-items: center; gap: 6px; }
+        .btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(72, 199, 142, 0.5); }
+        .btn-pdf:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .no-results { text-align: center; padding: 30px; color: #5a7a9a; font-size: 14px; }
+        .no-results i { font-size: 36px; display: block; margin-bottom: 10px; color: #1a3a5c; }
+
+        /* Record Type Card */
+        .record-type-card { background: rgba(0, 0, 0, 0.25); border: 1px solid #1a3a5c; border-radius: 12px; margin-bottom: 10px; transition: all 0.3s; overflow: hidden; }
+        .record-type-card:hover { border-color: rgba(0, 180, 216, 0.4); }
+        .record-type-card.has-records { border-color: rgba(0, 180, 216, 0.3); }
+        .record-type-card.no-records { opacity: 0.5; }
+
+        .rtc-header { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; gap: 12px; }
+        .rtc-checkbox { position: relative; width: 22px; height: 22px; flex-shrink: 0; }
+        .rtc-checkbox input[type="checkbox"] { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2; }
+        .rtc-checkbox .checkmark { position: absolute; top: 0; left: 0; width: 22px; height: 22px; background: #0a1628; border: 2px solid #1a3a5c; border-radius: 6px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .rtc-checkbox input:checked + .checkmark { background: linear-gradient(135deg, #00b4d8, #0077b6); border-color: #00b4d8; }
+        .rtc-checkbox input:checked + .checkmark::after { content: '✓'; color: #fff; font-size: 13px; font-weight: 700; }
+        .rtc-checkbox input:disabled + .checkmark { opacity: 0.3; cursor: not-allowed; }
+
+        .rtc-icon { font-size: 18px; width: 38px; height: 38px; background: rgba(0, 180, 216, 0.08); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .rtc-info { flex: 1; }
+        .rtc-name { font-size: 14px; font-weight: 700; color: #e0e0e0; }
+        .rtc-count { font-size: 11px; color: #5a7a9a; margin-top: 1px; }
+        .rtc-count strong { color: #00b4d8; font-weight: 800; font-size: 13px; }
+        .rtc-expand { font-size: 12px; color: #5a7a9a; transition: transform 0.3s; flex-shrink: 0; }
+        .rtc-expand.open { transform: rotate(180deg); }
+
+        .rtc-visualizar-btn { background: rgba(0, 180, 216, 0.12); color: #00b4d8; border: 1px solid rgba(0, 180, 216, 0.3); padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.3s; white-space: nowrap; }
+        .rtc-visualizar-btn:hover { background: #00b4d8; color: #0a1628; }
+
+        /* Expanded Record List */
+        .rtc-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .rtc-body.open { max-height: 600px; overflow-y: auto; }
+        .rtc-body-inner { padding: 0 16px 14px; }
+        .record-item { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(26, 58, 92, 0.4); border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 12px; transition: all 0.2s; }
+        .record-item:hover { border-color: rgba(0, 180, 216, 0.3); background: rgba(0, 180, 216, 0.04); }
+        .record-item .ri-icon { font-size: 12px; color: #00b4d8; }
+        .record-item .ri-info { flex: 1; font-size: 12px; color: #c0c0c0; }
+        .record-item .ri-info strong { color: #e0e0e0; }
+        .record-item .ri-date { font-size: 11px; color: #5a7a9a; white-space: nowrap; }
+        .record-item .ri-preview-btn { background: rgba(0, 180, 216, 0.1); color: #00b4d8; border: 1px solid rgba(0, 180, 216, 0.3); padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.2s; white-space: nowrap; }
+        .record-item .ri-preview-btn:hover { background: #00b4d8; color: #0a1628; }
+
+        /* ===== DETAIL PREVIEW MODAL ===== */
+        .preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(5, 10, 20, 0.9); z-index: 2000; justify-content: center; align-items: flex-start; padding: 20px; overflow-y: auto; backdrop-filter: blur(6px); }
+        .preview-overlay.active { display: flex; }
+        .preview-modal { background: linear-gradient(160deg, #0d2137, #1a3a5c); border: 2px solid #00b4d8; border-radius: 16px; width: 95%; max-width: 700px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); margin-top: 10px; overflow: hidden; }
+        .preview-header { padding: 16px 22px; border-bottom: 1px solid rgba(0, 180, 216, 0.2); display: flex; justify-content: space-between; align-items: center; background: rgba(0, 180, 216, 0.05); }
+        .preview-header h3 { color: #00b4d8; font-size: 16px; font-weight: 700; }
+        .preview-close { background: rgba(255, 56, 96, 0.15); border: 1px solid rgba(255, 56, 96, 0.4); color: #ff3860; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .preview-close:hover { background: #ff3860; color: #fff; }
+        .preview-body { padding: 20px 22px; max-height: 70vh; overflow-y: auto; }
+        .preview-field { margin-bottom: 12px; }
+        .preview-field .pf-label { font-size: 9px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 3px; }
+        .preview-field .pf-value { font-size: 13px; color: #e0e0e0; line-height: 1.5; }
+        .preview-field .pf-value.empty { color: #5a7a9a; font-style: italic; }
+
+        /* ===== TOAST ===== */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; }
+        .toast { padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4); }
+        .toast-success { background: linear-gradient(135deg, #48c78e, #38a06d); color: #fff; }
+        .toast-info { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; }
+        .toast-error { background: linear-gradient(135deg, #ff3860, #d4234a); color: #fff; }
+        .toast-warning { background: linear-gradient(135deg, #ffb700, #e0a500); color: #0a1628; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a1628; }
+        ::-webkit-scrollbar-thumb { background: #1a3a5c; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00b4d8; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 10px; }
+            .toolbar { flex-direction: column; }
+            .date-range-row { flex-direction: column; }
+            .paciente-info-card { grid-template-columns: 1fr 1fr; }
+            .consulta-modal { width: 98%; border-radius: 14px; }
+        }
+
+        /* ===== LOADING SPINNER ===== */
+        .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== PDF STYLES (printed page) ===== */
+        .pdf-page { font-family: 'Inter', Arial, sans-serif; color: #222; background: #fff; padding: 30px 40px; max-width: 800px; margin: 0 auto; }
+        .pdf-page h1 { font-size: 22px; color: #0077b6; border-bottom: 3px solid #00b4d8; padding-bottom: 8px; margin-bottom: 16px; }
+        .pdf-page h2 { font-size: 16px; color: #0077b6; margin: 18px 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+        .pdf-page h3 { font-size: 13px; color: #0a1628; margin: 10px 0 4px; font-weight: 700; }
+        .pdf-page .pdf-patient-header { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 16px; background: #f0f8ff; padding: 12px; border-radius: 6px; border: 1px solid #cce5ff; }
+        .pdf-page .pdf-field { margin-bottom: 6px; }
+        .pdf-page .pdf-field .pfl { font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .pdf-page .pdf-field .pfv { font-size: 12px; color: #222; }
+        .pdf-page .pdf-record { margin-bottom: 14px; page-break-inside: avoid; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; background: #fafafa; }
+        .pdf-page .pdf-record .record-type-label { font-size: 14px; font-weight: 800; color: #0077b6; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .pdf-page .pdf-divider { border-top: 2px dashed #00b4d8; margin: 14px 0; }
+        .pdf-page .pdf-footer { text-align: center; font-size: 10px; color: #888; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 8px; }
+        @media print {
+            body { background: #fff !important; }
+            .pdf-page { padding: 15px 25px; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="permisos.js"></script>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="brand-icon"><svg viewBox="0 0 40 40" fill="none"><path d="M20 4 L20 36" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/><path d="M20 10 L10 4" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/><path d="M20 10 L30 4" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/><circle cx="20" cy="36" r="3" fill="#00b4d8"/></svg></div>
+            <div class="brand-name">NEXUS<span>MED</span></div>
+        </div>
+        <div class="header-right">
+            <div class="user-info"><div class="user-avatar" id="userAvatar">A</div><div><span class="user-name" id="userName">Admin</span><br><span class="user-role" id="userRole">ADMIN</span></div></div>
+            <a href="menu.html" class="btn-header"><i class="fas fa-arrow-left"></i> Menú</a>
+            <button class="btn-cerrar" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Salir</button>
+        </div>
+    </div>
+
+    <!-- NAV -->
+    <nav class="nav-bar">
+        <a class="nav-item" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
+        <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+        <a class="nav-item active" href="pacientes.html"><i class="fas fa-users"></i> Pacientes</a>
+        <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
+        <a class="nav-item" href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
+        <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enfermería</a>
+        <a class="nav-item" href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
+        <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
+        <a class="nav-item" href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+        <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresados</a>
+        <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
+        <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+    </nav>
+
+    <!-- TOAST -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- MAIN CONTENT -->
+    <div class="container">
+        <div class="hero-title">
+            <h2><i class="fas fa-satellite-dish"></i> Centro de Consulta</h2>
+            <div class="hero-badge"><i class="fas fa-bolt"></i> Command Hub</div>
+        </div>
+        <p class="hero-subtitle">Consulte y consolide toda la información clínica de cualquier paciente del sistema NEXUSMED IPS Domiciliaria</p>
+
+        <!-- FILTERS -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <label>Estado</label>
+                <select id="filtroEstado" onchange="aplicarFiltros()">
+                    <option value="">Todos</option>
+                    <option value="Activo">Activo</option>
+                    <option value="Observación">Observación</option>
+                    <option value="Crítico">Crítico</option>
+                    <option value="Egresado">Egresado</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Servicio</label>
+                <select id="filtroServicio" onchange="aplicarFiltros()">
+                    <option value="">Todos</option>
+                    <option value="Emergencia">Emergencia</option>
+                    <option value="UCI">UCI</option>
+                    <option value="Cirugía">Cirugía</option>
+                    <option value="Medicina Interna">Medicina Interna</option>
+                    <option value="Pediatría">Pediatría</option>
+                    <option value="Obstetricia">Obstetricia</option>
+                    <option value="Traumatología">Traumatología</option>
+                    <option value="Oncología">Oncología</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Género</label>
+                <select id="filtroGenero" onchange="aplicarFiltros()">
+                    <option value="">Todos</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <div class="search-box">
+                <span class="search-icon"><i class="fas fa-search"></i></span>
+                <input type="text" id="busqueda" placeholder="Buscar por nombre, documento o diagnóstico..." onkeyup="aplicarFiltros()">
+            </div>
+            <div class="stats">
+                <div class="stat-card"><div class="stat-number" id="totalPacientes">0</div><div class="stat-label">Total</div></div>
+                <div class="stat-card stat-activos"><div class="stat-number" id="activosPacientes">0</div><div class="stat-label">Activos</div></div>
+                <div class="stat-card stat-observacion"><div class="stat-number" id="observacionPacientes">0</div><div class="stat-label">Observación</div></div>
+                <div class="stat-card stat-criticos"><div class="stat-number" id="criticosPacientes">0</div><div class="stat-label">Críticos</div></div>
+                <div class="stat-card stat-egresados"><div class="stat-number" id="egresadosPacientes">0</div><div class="stat-label">Egresados</div></div>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-section">
+            <div class="table-header-bar">
+                <h3><i class="fas fa-users"></i> Registro Unificado de Pacientes <span class="record-count" id="tableCount"></span></h3>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nº Adm.</th>
+                            <th>Documento</th>
+                            <th>Nombre</th>
+                            <th>Edad</th>
+                            <th>Género</th>
+                            <th>Servicio</th>
+                            <th>Diagnóstico</th>
+                            <th>Estado</th>
+                            <th style="text-align:center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaPacientes"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="emptyState" style="display:none">
+                <div class="icon"><i class="fas fa-user-slash"></i></div>
+                <p>No hay pacientes registrados en el sistema</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONSULTA MODAL - THE COMMAND CENTER                          -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="modalConsulta">
+        <div class="consulta-modal">
+            <div class="consulta-modal-header">
+                <button class="close-btn" onclick="cerrarConsulta()" title="Cerrar"><i class="fas fa-times"></i></button>
+                <div class="modal-title"><span class="cmd-icon"><i class="fas fa-satellite-dish"></i></span> CONSULTA INTEGRAL DE PACIENTE</div>
+                <div class="paciente-info-card" id="pacienteInfoCard">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+
+            <!-- Date Range -->
+            <div class="date-range-section">
+                <div class="date-range-title"><i class="fas fa-calendar-alt"></i> Rango de Fechas de Búsqueda</div>
+                <div class="date-range-row">
+                    <div class="date-field">
+                        <label><i class="fas fa-play"></i> Fecha Inicio</label>
+                        <input type="date" id="fechaInicio">
+                    </div>
+                    <div class="date-field">
+                        <label><i class="fas fa-stop"></i> Fecha Final</label>
+                        <input type="date" id="fechaFinal">
+                    </div>
+                    <button class="btn-search-records" id="btnConsultar" onclick="ejecutarConsulta()">
+                        <i class="fas fa-search"></i> CONSULTAR
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="results-section" id="resultsSection">
+                <div class="results-header" id="resultsHeader" style="display:none">
+                    <h4><i class="fas fa-layer-group"></i> Registros Encontrados <span class="total-count" id="totalCount">0</span></h4>
+                    <button class="btn-pdf" id="btnPdf" onclick="generarPDFConsolidado()" disabled>
+                        <i class="fas fa-file-pdf"></i> Generar PDF Consolidado
+                    </button>
+                </div>
+                <div id="recordTypeCards">
+                    <!-- Initial state -->
+                    <div class="no-results" id="noResults">
+                        <i class="fas fa-search"></i>
+                        Seleccione el rango de fechas y presione <strong>CONSULTAR</strong> para buscar los registros clínicos del paciente
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PREVIEW MODAL                                                -->
+    <!-- ============================================================ -->
+    <div class="preview-overlay" id="modalPreview">
+        <div class="preview-modal">
+            <div class="preview-header">
+                <h3 id="previewTitle"><i class="fas fa-eye"></i> Vista Previa</h3>
+                <button class="preview-close" onclick="cerrarPreview()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="preview-body" id="previewBody">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT                                                   -->
+    <!-- ============================================================ -->
+    <script>
+    /* ===== SESSION CHECK ===== */
+    const sesion = JSON.parse(localStorage.getItem('nexus_sesion'));
+    if (!sesion || !sesion.logueado) window.location.href = 'index.html';
+    else {
+        document.getElementById('userName').textContent = sesion.nombre;
+        document.getElementById('userRole').textContent = sesion.rol.toUpperCase();
+        document.getElementById('userAvatar').textContent = sesion.nombre.charAt(0);
+    }
+
+    /* ===== STORAGE KEYS ===== */
+    const PACIENTES_KEY = 'nexus_pacientes';
+    const HISTORIAS_KEY = 'nexus_historias_clinicas';
+    const EVOLUCIONES_KEY = 'nexus_evoluciones';
+    const NOTAS_KEY = 'nexus_notas_enfermeria';
+    const TERAPIAS_KEY = 'nexus_terapias';
+    const EPICRISIS_KEY = 'nexus_epicrisis';
+    const CITAS_KEY = 'nexus_citas';
+
+    /* ===== CURRENT STATE ===== */
+    let _currentPaciente = null;
+    let _consultaResults = {};
+
+    /* ===== DATA ACCESSORS ===== */
+    function getPacientes() { return JSON.parse(localStorage.getItem(PACIENTES_KEY) || '[]'); }
+    function getHistorias() { return JSON.parse(localStorage.getItem(HISTORIAS_KEY) || '[]'); }
+    function getEvoluciones() { return JSON.parse(localStorage.getItem(EVOLUCIONES_KEY) || '[]'); }
+    function getNotas() { return JSON.parse(localStorage.getItem(NOTAS_KEY) || '[]'); }
+    function getTerapias() { return JSON.parse(localStorage.getItem(TERAPIAS_KEY) || '[]'); }
+    function getEpicrisis() { return JSON.parse(localStorage.getItem(EPICRISIS_KEY) || '[]'); }
+    function getCitas() { return JSON.parse(localStorage.getItem(CITAS_KEY) || '[]'); }
+
+    /* ===== RECORD TYPE DEFINITIONS ===== */
+    const RECORD_TYPES = [
+        { key: 'historias', label: 'Historias Clínicas', icon: 'fa-file-medical', color: '#00b4d8' },
+        { key: 'evoluciones', label: 'Evoluciones', icon: 'fa-notes-medical', color: '#90e0ef' },
+        { key: 'notas', label: 'Notas de Enfermería', icon: 'fa-user-nurse', color: '#48c78e' },
+        { key: 'terapias', label: 'Terapias', icon: 'fa-hand-holding-medical', color: '#ffb700' },
+        { key: 'epicrisis', label: 'Epicrisis', icon: 'fa-file-alt', color: '#ff6b8a' },
+        { key: 'citas', label: 'Citas', icon: 'fa-calendar-check', color: '#a78bfa' }
+    ];
+
+    /* ===== INIT ===== */
+    document.addEventListener('DOMContentLoaded', function() {
+        aplicarFiltros();
+        actualizarEstadisticas();
+    });
+
+    /* ===== FILTERS & TABLE ===== */
+    function aplicarFiltros() {
+        var termino = document.getElementById('busqueda').value.toLowerCase().trim();
+        var estado = document.getElementById('filtroEstado').value;
+        var servicio = document.getElementById('filtroServicio').value;
+        var genero = document.getElementById('filtroGenero').value;
+        var pacientes = getPacientes();
+        if (estado) pacientes = pacientes.filter(function(p) { return p.estado === estado; });
+        if (servicio) pacientes = pacientes.filter(function(p) { return p.servicio === servicio; });
+        if (genero) pacientes = pacientes.filter(function(p) { return p.genero === genero; });
+        if (termino) pacientes = pacientes.filter(function(p) {
+            return p.nombre.toLowerCase().includes(termino) ||
+                   p.documento.toLowerCase().includes(termino) ||
+                   (p.diagnostico && p.diagnostico.toLowerCase().includes(termino));
+        });
+        cargarTabla(pacientes);
+    }
+
+    function cargarTabla(pacientes) {
+        var tbody = document.getElementById('tablaPacientes');
+        var emptyState = document.getElementById('emptyState');
+        tbody.innerHTML = '';
+        document.getElementById('tableCount').textContent = pacientes.length > 0 ? '(' + pacientes.length + ' registros)' : '';
+        if (pacientes.length === 0) { emptyState.style.display = 'block'; return; }
+        emptyState.style.display = 'none';
+
+        pacientes.forEach(function(p) {
+            var tr = document.createElement('tr');
+            var badgeClass = 'badge-activo';
+            if (p.estado === 'Observación') badgeClass = 'badge-observacion';
+            if (p.estado === 'Crítico') badgeClass = 'badge-critico';
+            if (p.estado === 'Egresado') badgeClass = 'badge-egresado';
+
+            var diagDisplay = p.diagnostico || '—';
+            if (diagDisplay.length > 30) diagDisplay = diagDisplay.substring(0, 28) + '...';
+
+            tr.innerHTML =
+                '<td><strong style="color:#00b4d8">' + p.numAdmision + '</strong></td>' +
+                '<td>' + p.documento + '</td>' +
+                '<td><strong>' + p.nombre + '</strong></td>' +
+                '<td>' + p.edad + '</td>' +
+                '<td>' + p.genero + '</td>' +
+                '<td>' + p.servicio + '</td>' +
+                '<td>' + diagDisplay + '</td>' +
+                '<td><span class="badge ' + badgeClass + '">' + p.estado + '</span></td>' +
+                '<td style="text-align:center"><button class="btn-consultar" onclick="abrirConsulta(' + p.id + ')"><i class="fas fa-satellite-dish"></i> CONSULTAR</button></td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    function actualizarEstadisticas() {
+        var pacientes = getPacientes();
+        document.getElementById('totalPacientes').textContent = pacientes.length;
+        document.getElementById('activosPacientes').textContent = pacientes.filter(function(p) { return p.estado === 'Activo'; }).length;
+        document.getElementById('observacionPacientes').textContent = pacientes.filter(function(p) { return p.estado === 'Observación'; }).length;
+        document.getElementById('criticosPacientes').textContent = pacientes.filter(function(p) { return p.estado === 'Crítico'; }).length;
+        document.getElementById('egresadosPacientes').textContent = pacientes.filter(function(p) { return p.estado === 'Egresado'; }).length;
+    }
+
+    /* ===== OPEN CONSULTA MODAL ===== */
+    function abrirConsulta(pacienteId) {
+        var pacientes = getPacientes();
+        var p = pacientes.find(function(x) { return String(x.id) === String(pacienteId); });
+        if (!p) { mostrarToast('Paciente no encontrado', 'error'); return; }
+        _currentPaciente = p;
+        _consultaResults = {};
+
+        // Fill patient info card
+        var card = document.getElementById('pacienteInfoCard');
+        card.innerHTML =
+            '<div class="paciente-info-item"><div class="p-label">Nº Admisión</div><div class="p-value highlight">' + p.numAdmision + '</div></div>' +
+            '<div class="paciente-info-item"><div class="p-label">Documento</div><div class="p-value">' + p.documento + '</div></div>' +
+            '<div class="paciente-info-item"><div class="p-label">Nombre</div><div class="p-value highlight">' + p.nombre + '</div></div>' +
+            '<div class="paciente-info-item"><div class="p-label">Edad / Género</div><div class="p-value">' + p.edad + ' años / ' + p.genero + '</div></div>' +
+            '<div class="paciente-info-item"><div class="p-label">Servicio</div><div class="p-value">' + p.servicio + '</div></div>' +
+            '<div class="paciente-info-item"><div class="p-label">Médico</div><div class="p-value">' + (p.medico || '—') + '</div></div>' +
+            '<div class="paciente-info-item"><div class="p-label">Estado</div><div class="p-value">' + p.estado + '</div></div>' +
+            '<div class="paciente-info-item"><div class="p-label">Diagnóstico</div><div class="p-value">' + (p.diagnostico || '—') + '</div></div>';
+
+        // Set default date range (admission date to today or admission to discharge)
+        var fechaInicio = document.getElementById('fechaInicio');
+        var fechaFinal = document.getElementById('fechaFinal');
+        if (p.fechaIngreso) {
+            var fi = new Date(p.fechaIngreso);
+            fechaInicio.value = fi.toISOString().split('T')[0];
+        } else {
+            fechaInicio.value = '';
+        }
+        if (p.estado === 'Egresado' && p.fechaSalida) {
+            var ff = new Date(p.fechaSalida);
+            fechaFinal.value = ff.toISOString().split('T')[0];
+        } else {
+            fechaFinal.value = new Date().toISOString().split('T')[0];
+        }
+
+        // Reset results
+        document.getElementById('resultsHeader').style.display = 'none';
+        document.getElementById('recordTypeCards').innerHTML =
+            '<div class="no-results" id="noResults">' +
+            '<i class="fas fa-search"></i>' +
+            'Seleccione el rango de fechas y presione <strong>CONSULTAR</strong> para buscar los registros clínicos del paciente' +
+            '</div>';
+        document.getElementById('btnPdf').disabled = true;
+
+        document.getElementById('modalConsulta').classList.add('active');
+    }
+
+    function cerrarConsulta() {
+        document.getElementById('modalConsulta').classList.remove('active');
+        _currentPaciente = null;
+        _consultaResults = {};
+    }
+
+    /* ===== EXECUTE CONSULTA ===== */
+    function ejecutarConsulta() {
+        if (!_currentPaciente) return;
+
+        var fechaInicio = document.getElementById('fechaInicio').value;
+        var fechaFinal = document.getElementById('fechaFinal').value;
+
+        if (!fechaInicio || !fechaFinal) {
+            mostrarToast('Seleccione fecha inicio y fecha final', 'warning');
+            return;
+        }
+
+        var dInicio = new Date(fechaInicio + 'T00:00:00');
+        var dFinal = new Date(fechaFinal + 'T23:59:59');
+
+        if (dInicio > dFinal) {
+            mostrarToast('La fecha inicio no puede ser mayor a la fecha final', 'warning');
+            return;
+        }
+
+        // Show loading state
+        var btn = document.getElementById('btnConsultar');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Buscando...';
+
+        var pid = String(_currentPaciente.id);
+        var pNombre = _currentPaciente.nombre.toLowerCase().trim();
+
+        // Query all stores
+        setTimeout(function() {
+            _consultaResults = {};
+
+            // Historias Clínicas
+            _consultaResults.historias = getHistorias().filter(function(h) {
+                return String(h.pacienteId) === pid && fechaEnRango(h.fecha || h.fechaApertura || h.fechaRegistro, dInicio, dFinal);
+            });
+
+            // Evoluciones
+            _consultaResults.evoluciones = getEvoluciones().filter(function(e) {
+                return String(e.pacienteId) === pid && fechaEnRango(e.fecha, dInicio, dFinal);
+            });
+
+            // Notas de Enfermería
+            _consultaResults.notas = getNotas().filter(function(n) {
+                return String(n.pacienteId) === pid && fechaEnRango(n.fecha, dInicio, dFinal);
+            });
+
+            // Terapias
+            _consultaResults.terapias = getTerapias().filter(function(t) {
+                return String(t.pacienteId) === pid && fechaEnRango(t.fecha, dInicio, dFinal);
+            });
+
+            // Epicrisis
+            _consultaResults.epicrisis = getEpicrisis().filter(function(ep) {
+                return String(ep.pacienteId) === pid && fechaEnRango(ep.fechaEgreso || ep.fechaRegistro, dInicio, dFinal);
+            });
+
+            // Citas - uses patient name match
+            _consultaResults.citas = getCitas().filter(function(c) {
+                var cNombre = (c.paciente || '').toLowerCase().trim();
+                return (cNombre === pNombre || cNombre.includes(pNombre) || pNombre.includes(cNombre)) && fechaEnRango(c.fecha, dInicio, dFinal);
+            });
+
+            renderResults();
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-search"></i> CONSULTAR';
+
+            var total = Object.values(_consultaResults).reduce(function(sum, arr) { return sum + arr.length; }, 0);
+            mostrarToast('Búsqueda completada: ' + total + ' registros encontrados', 'success');
+        }, 400);
+    }
+
+    function fechaEnRango(fechaStr, dInicio, dFinal) {
+        if (!fechaStr) return false;
+        var d = new Date(fechaStr);
+        if (isNaN(d.getTime())) return false;
+        return d >= dInicio && d <= dFinal;
+    }
+
+    /* ===== RENDER RESULTS ===== */
+    function renderResults() {
+        var container = document.getElementById('recordTypeCards');
+        container.innerHTML = '';
+
+        var totalRegistros = 0;
+        var anyChecked = false;
+
+        RECORD_TYPES.forEach(function(rt) {
+            var records = _consultaResults[rt.key] || [];
+            totalRegistros += records.length;
+            var hasRecords = records.length > 0;
+
+            var card = document.createElement('div');
+            card.className = 'record-type-card ' + (hasRecords ? 'has-records' : 'no-records');
+            card.id = 'rtc-' + rt.key;
+
+            // Header
+            var header = document.createElement('div');
+            header.className = 'rtc-header';
+            header.innerHTML =
+                '<div class="rtc-checkbox">' +
+                    '<input type="checkbox" id="chk-' + rt.key + '" ' + (hasRecords ? '' : 'disabled') + ' onchange="onCheckChange()">' +
+                    '<span class="checkmark"></span>' +
+                '</div>' +
+                '<div class="rtc-icon" style="color:' + rt.color + '"><i class="fas ' + rt.icon + '"></i></div>' +
+                '<div class="rtc-info">' +
+                    '<div class="rtc-name">' + rt.label + '</div>' +
+                    '<div class="rtc-count">' + (hasRecords ? '<strong>' + records.length + '</strong> registro(s) encontrado(s)' : 'Sin registros en este rango') + '</div>' +
+                '</div>' +
+                (hasRecords ? '<button class="rtc-visualizar-btn" onclick="visualizarTipo(\'' + rt.key + '\')" title="Vista previa de todos los registros"><i class="fas fa-eye"></i> Visualizar</button>' : '') +
+                (hasRecords ? '<div class="rtc-expand" onclick="toggleExpand(\'' + rt.key + '\')" id="expand-' + rt.key + '"><i class="fas fa-chevron-down"></i></div>' : '');
+
+            // Toggle expand on header click (except buttons and checkbox)
+            if (hasRecords) {
+                header.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'INPUT' || e.target.closest('.rtc-visualizar-btn') || e.target.closest('.rtc-checkbox')) return;
+                    toggleExpand(rt.key);
+                });
+            }
+
+            card.appendChild(header);
+
+            // Body (record list)
+            if (hasRecords) {
+                var body = document.createElement('div');
+                body.className = 'rtc-body';
+                body.id = 'body-' + rt.key;
+
+                var inner = document.createElement('div');
+                inner.className = 'rtc-body-inner';
+
+                records.forEach(function(rec, idx) {
+                    var item = document.createElement('div');
+                    item.className = 'record-item';
+                    item.innerHTML =
+                        '<span class="ri-icon"><i class="fas ' + rt.icon + '"></i></span>' +
+                        '<div class="ri-info">' + getRecordSummary(rt.key, rec) + '</div>' +
+                        '<span class="ri-date">' + formatFechaCorta(getRecordDate(rt.key, rec)) + '</span>' +
+                        '<button class="ri-preview-btn" onclick="previewRecord(\'' + rt.key + '\', ' + idx + ')"><i class="fas fa-eye"></i> Ver</button>';
+                    inner.appendChild(item);
+                });
+
+                body.appendChild(inner);
+                card.appendChild(body);
+            }
+
+            container.appendChild(card);
+        });
+
+        // Update header
+        document.getElementById('resultsHeader').style.display = 'flex';
+        document.getElementById('totalCount').textContent = totalRegistros;
+        document.getElementById('btnPdf').disabled = totalRegistros === 0;
+        onCheckChange();
+    }
+
+    /* ===== RECORD SUMMARIES ===== */
+    function getRecordSummary(type, rec) {
+        switch (type) {
+            case 'historias':
+                return '<strong>HC ' + (rec.numeroHistoria || '—') + '</strong> — ' + (rec.diagnosticoPrincipal || rec.motivoConsulta || '—');
+            case 'evoluciones':
+                return '<strong>Ev.</strong> ' + (rec.diagnosticoPrincipal || '—') + ' — ' + (rec.profesional || '—');
+            case 'notas':
+                return '<strong>Nota</strong> ' + (rec.turno || '') + ' — ' + (rec.enfermera || '—') + ' — ' + (rec.estadoPaciente || '').substring(0, 30);
+            case 'terapias':
+                return '<strong>Sesión ' + (rec.sesionNumero || '?') + '/' + (rec.totalSesiones || '?') + '</strong> — ' + (rec.tipoTerapia || '—');
+            case 'epicrisis':
+                return '<strong>Epicrisis</strong> — ' + (rec.tipoEgreso || '—') + ' → ' + (rec.destinoEgreso || '—');
+            case 'citas':
+                return '<strong>Cita</strong> — ' + (rec.especialidad || '—') + ' — ' + (rec.medico || '—') + ' [' + (rec.estado || '') + ']';
+            default:
+                return 'Registro';
+        }
+    }
+
+    function getRecordDate(type, rec) {
+        switch (type) {
+            case 'historias': return rec.fecha || rec.fechaApertura || rec.fechaRegistro;
+            case 'evoluciones': return rec.fecha;
+            case 'notas': return rec.fecha;
+            case 'terapias': return rec.fecha;
+            case 'epicrisis': return rec.fechaEgreso || rec.fechaRegistro;
+            case 'citas': return rec.fecha;
+            default: return null;
+        }
+    }
+
+    function formatFechaCorta(fechaStr) {
+        if (!fechaStr) return '—';
+        var d = new Date(fechaStr);
+        if (isNaN(d.getTime())) return '—';
+        return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    /* ===== TOGGLE EXPAND ===== */
+    function toggleExpand(key) {
+        var body = document.getElementById('body-' + key);
+        var expand = document.getElementById('expand-' + key);
+        if (!body) return;
+        if (body.classList.contains('open')) {
+            body.classList.remove('open');
+            if (expand) expand.classList.remove('open');
+        } else {
+            body.classList.add('open');
+            if (expand) expand.classList.add('open');
+        }
+    }
+
+    /* ===== CHECKBOX CHANGE ===== */
+    function onCheckChange() {
+        var any = false;
+        RECORD_TYPES.forEach(function(rt) {
+            var chk = document.getElementById('chk-' + rt.key);
+            if (chk && chk.checked) any = true;
+        });
+        document.getElementById('btnPdf').disabled = !any;
+    }
+
+    /* ===== VISUALIZAR (Preview all records of a type) ===== */
+    function visualizarTipo(key) {
+        var records = _consultaResults[key] || [];
+        if (records.length === 0) return;
+
+        var rt = RECORD_TYPES.find(function(r) { return r.key === key; });
+        var title = 'Vista Previa: ' + rt.label + ' (' + records.length + ')';
+        document.getElementById('previewTitle').innerHTML = '<i class="fas ' + rt.icon + '" style="color:' + rt.color + '"></i> ' + title;
+
+        var body = document.getElementById('previewBody');
+        body.innerHTML = '';
+
+        records.forEach(function(rec, idx) {
+            var section = document.createElement('div');
+            section.className = 'preview-record-section';
+            section.style.cssText = 'border: 1px solid #1a3a5c; border-radius: 10px; padding: 14px; margin-bottom: 12px; background: rgba(0,0,0,0.2);';
+            section.innerHTML = '<h4 style="color:#00b4d8; font-size:13px; margin-bottom:10px;"><i class="fas ' + rt.icon + '"></i> Registro #' + (idx + 1) + '</h4>' + buildPreviewFields(key, rec);
+            body.appendChild(section);
+        });
+
+        document.getElementById('modalPreview').classList.add('active');
+    }
+
+    /* ===== PREVIEW SINGLE RECORD ===== */
+    function previewRecord(key, idx) {
+        var records = _consultaResults[key] || [];
+        if (!records[idx]) return;
+
+        var rt = RECORD_TYPES.find(function(r) { return r.key === key; });
+        document.getElementById('previewTitle').innerHTML = '<i class="fas ' + rt.icon + '" style="color:' + rt.color + '"></i> ' + rt.label + ' — Registro #' + (idx + 1);
+
+        var body = document.getElementById('previewBody');
+        body.innerHTML = buildPreviewFields(key, records[idx]);
+
+        document.getElementById('modalPreview').classList.add('active');
+    }
+
+    function buildPreviewFields(key, rec) {
+        var html = '';
+        var fields = getPreviewFieldDefs(key);
+        fields.forEach(function(f) {
+            var val = rec[f.key];
+            if (val === undefined || val === null || val === '') {
+                html += '<div class="preview-field"><div class="pf-label">' + f.label + '</div><div class="pf-value empty">—</div></div>';
+            } else {
+                var display = f.date ? formatFechaCorta(val) : (f.iso ? new Date(val).toLocaleString('es-ES') : String(val));
+                html += '<div class="preview-field"><div class="pf-label">' + f.label + '</div><div class="pf-value">' + display + '</div></div>';
+            }
+        });
+        return html;
+    }
+
+    function getPreviewFieldDefs(key) {
+        switch (key) {
+            case 'historias': return [
+                { key: 'numeroHistoria', label: 'Nº Historia' },
+                { key: 'fechaApertura', label: 'Fecha Apertura', date: true },
+                { key: 'fecha', label: 'Fecha Registro', iso: true },
+                { key: 'hora', label: 'Hora' },
+                { key: 'medicoTratante', label: 'Médico Tratante' },
+                { key: 'especialidad', label: 'Especialidad' },
+                { key: 'tipoAtencion', label: 'Tipo Atención' },
+                { key: 'diagnosticoPrincipal', label: 'Diagnóstico Principal' },
+                { key: 'diagnosticosSecundarios', label: 'Diagnósticos Secundarios' },
+                { key: 'antecedentesPersonales', label: 'Antecedentes Personales' },
+                { key: 'antecedentesFamiliares', label: 'Antecedentes Familiares' },
+                { key: 'alergias', label: 'Alergias' },
+                { key: 'motivoConsulta', label: 'Motivo de Consulta' },
+                { key: 'enfermedadActual', label: 'Enfermedad Actual' },
+                { key: 'examenFisico', label: 'Examen Físico' },
+                { key: 'planTratamiento', label: 'Plan de Tratamiento' },
+                { key: 'observaciones', label: 'Observaciones' }
+            ];
+            case 'evoluciones': return [
+                { key: 'fecha', label: 'Fecha', date: true },
+                { key: 'hora', label: 'Hora' },
+                { key: 'turno', label: 'Turno' },
+                { key: 'profesional', label: 'Profesional' },
+                { key: 'diagnosticoPrincipal', label: 'Diagnóstico Principal' },
+                { key: 'subjetivo', label: 'Subjetivo' },
+                { key: 'objetivo', label: 'Objetivo' },
+                { key: 'analisis', label: 'Análisis' },
+                { key: 'plan', label: 'Plan' }
+            ];
+            case 'notas': return [
+                { key: 'fecha', label: 'Fecha', date: true },
+                { key: 'hora', label: 'Hora' },
+                { key: 'turno', label: 'Turno' },
+                { key: 'enfermera', label: 'Enfermera' },
+                { key: 'estadoPaciente', label: 'Estado del Paciente' },
+                { key: 'signosVitales', label: 'Signos Vitales' },
+                { key: 'procedimientos', label: 'Procedimientos' },
+                { key: 'descripcionProcedimientos', label: 'Descripción de Procedimientos' }
+            ];
+            case 'terapias': return [
+                { key: 'fecha', label: 'Fecha', date: true },
+                { key: 'hora', label: 'Hora' },
+                { key: 'turno', label: 'Turno' },
+                { key: 'terapeuta', label: 'Terapeuta' },
+                { key: 'tipoTerapia', label: 'Tipo de Terapia' },
+                { key: 'estadoTerapia', label: 'Estado' },
+                { key: 'frecuencia', label: 'Frecuencia' },
+                { key: 'sesionNumero', label: 'Sesión Nº' },
+                { key: 'totalSesiones', label: 'Total Sesiones' },
+                { key: 'indicacionDiagnostica', label: 'Indicación Diagnóstica' },
+                { key: 'objetivosTratamiento', label: 'Objetivos del Tratamiento' },
+                { key: 'descripcionSesion', label: 'Descripción de Sesión' },
+                { key: 'observaciones', label: 'Observaciones' },
+                { key: 'planProximaSesion', label: 'Plan Próxima Sesión' }
+            ];
+            case 'epicrisis': return [
+                { key: 'numEpicrisis', label: 'Nº Epicrisis' },
+                { key: 'fechaEgreso', label: 'Fecha Egreso', iso: true },
+                { key: 'tipoEgreso', label: 'Tipo de Egreso' },
+                { key: 'destinoEgreso', label: 'Destino de Egreso' },
+                { key: 'medicoResponsable', label: 'Médico Responsable' },
+                { key: 'dxIngresoDisplay', label: 'Dx Ingreso' },
+                { key: 'dxEgresoDisplay', label: 'Dx Egreso' },
+                { key: 'resumenHospitalizacion', label: 'Resumen Hospitalización' },
+                { key: 'terapiasRecibidas', label: 'Terapias Recibidas' },
+                { key: 'complicaciones', label: 'Complicaciones' },
+                { key: 'instruccionesPostEgreso', label: 'Instrucciones Post-Egreso' },
+                { key: 'diagnosticosSecundarios', label: 'Diagnósticos Secundarios' },
+                { key: 'medicamentosEgreso', label: 'Medicamentos al Egreso' },
+                { key: 'condicionFuncional', label: 'Condición Funcional' }
+            ];
+            case 'citas': return [
+                { key: 'fecha', label: 'Fecha', date: true },
+                { key: 'hora', label: 'Hora' },
+                { key: 'medico', label: 'Médico' },
+                { key: 'especialidad', label: 'Especialidad' },
+                { key: 'motivo', label: 'Motivo' },
+                { key: 'consultorio', label: 'Consultorio' },
+                { key: 'estado', label: 'Estado' }
+            ];
+            default: return [];
+        }
+    }
+
+    function cerrarPreview() {
+        document.getElementById('modalPreview').classList.remove('active');
+    }
+
+    /* ===== PDF GENERATION ===== */
+    function generarPDFConsolidado() {
+        var selectedTypes = [];
+        RECORD_TYPES.forEach(function(rt) {
+            var chk = document.getElementById('chk-' + rt.key);
+            if (chk && chk.checked && _consultaResults[rt.key] && _consultaResults[rt.key].length > 0) {
+                selectedTypes.push(rt);
+            }
+        });
+
+        if (selectedTypes.length === 0) {
+            mostrarToast('Seleccione al menos un tipo de registro', 'warning');
+            return;
+        }
+
+        if (!_currentPaciente) return;
+
+        var p = _currentPaciente;
+        var fechaInicio = document.getElementById('fechaInicio').value;
+        var fechaFinal = document.getElementById('fechaFinal').value;
+
+        // Build HTML for PDF
+        var html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>NEXUSMED - Consulta Consolidada</title>';
+        html += '<style>';
+        html += 'body { font-family: Inter, Arial, sans-serif; color: #222; background: #fff; margin: 0; padding: 20px; }';
+        html += '.pdf-page { max-width: 800px; margin: 0 auto; }';
+        html += '.pdf-header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid #00b4d8; padding-bottom: 12px; }';
+        html += '.pdf-header h1 { font-size: 20px; color: #0077b6; margin: 0 0 4px; letter-spacing: 2px; }';
+        html += '.pdf-header .subtitle { font-size: 12px; color: #666; }';
+        html += '.pdf-patient-box { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #f0f8ff; padding: 12px; border-radius: 6px; border: 1px solid #cce5ff; margin-bottom: 16px; }';
+        html += '.pdf-patient-box .f { margin-bottom: 4px; }';
+        html += '.pdf-patient-box .l { font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }';
+        html += '.pdf-patient-box .v { font-size: 12px; color: #222; font-weight: 600; }';
+        html += '.pdf-range { font-size: 11px; color: #444; margin-bottom: 14px; background: #f9f9f9; padding: 8px 12px; border-radius: 4px; border-left: 3px solid #00b4d8; }';
+        html += '.pdf-section { margin-bottom: 18px; page-break-inside: avoid; }';
+        html += '.pdf-section h2 { font-size: 15px; color: #0077b6; margin: 0 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px; display: flex; align-items: center; gap: 6px; }';
+        html += '.pdf-section h2 .count { font-size: 11px; color: #888; font-weight: 400; }';
+        html += '.pdf-record { margin-bottom: 12px; border: 1px solid #e8e8e8; border-radius: 6px; padding: 12px; background: #fafafa; page-break-inside: avoid; }';
+        html += '.pdf-record .rec-header { font-size: 12px; font-weight: 700; color: #0077b6; margin-bottom: 6px; }';
+        html += '.pdf-record .field { margin-bottom: 4px; }';
+        html += '.pdf-record .field .fl { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }';
+        html += '.pdf-record .field .fv { font-size: 11px; color: #333; line-height: 1.4; }';
+        html += '.pdf-divider { border-top: 2px dashed #00b4d8; margin: 16px 0; }';
+        html += '.pdf-footer { text-align: center; font-size: 9px; color: #999; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 8px; }';
+        html += '@media print { body { padding: 10px; } .pdf-page { padding: 0; } }';
+        html += '</style></head><body>';
+
+        html += '<div class="pdf-page">';
+
+        // Header
+        html += encabezadoIPS('Consulta consolidada de historia clínica', '');
+
+        // Patient info
+        html += '<div class="pdf-patient-box">';
+        html += '<div class="f"><div class="l">Paciente</div><div class="v">' + p.nombre + '</div></div>';
+        html += '<div class="f"><div class="l">Documento</div><div class="v">' + p.documento + '</div></div>';
+        html += '<div class="f"><div class="l">Nº Admisión</div><div class="v">' + p.numAdmision + '</div></div>';
+        html += '<div class="f"><div class="l">Edad / Género</div><div class="v">' + p.edad + ' años / ' + p.genero + '</div></div>';
+        html += '<div class="f"><div class="l">Servicio</div><div class="v">' + p.servicio + '</div></div>';
+        html += '<div class="f"><div class="l">Médico</div><div class="v">' + (p.medico || '—') + '</div></div>';
+        html += '<div class="f"><div class="l">Estado</div><div class="v">' + p.estado + '</div></div>';
+        html += '<div class="f"><div class="l">Diagnóstico</div><div class="v">' + (p.diagnostico || '—') + '</div></div>';
+        html += '</div>';
+
+        // Date range
+        html += '<div class="pdf-range"><strong>Período de Consulta:</strong> ' + formatFechaCorta(fechaInicio) + ' — ' + formatFechaCorta(fechaFinal) + '</div>';
+
+        // Records by type
+        selectedTypes.forEach(function(rt, sti) {
+            var records = _consultaResults[rt.key];
+            html += '<div class="pdf-section">';
+            html += '<h2>' + rt.label + ' <span class="count">(' + records.length + ' registro' + (records.length !== 1 ? 's' : '') + ')</span></h2>';
+
+            records.forEach(function(rec, idx) {
+                html += '<div class="pdf-record">';
+                html += '<div class="rec-header">Registro #' + (idx + 1) + ' — ' + formatFechaCorta(getRecordDate(rt.key, rec)) + '</div>';
+
+                var fields = getPreviewFieldDefs(rt.key);
+                fields.forEach(function(f) {
+                    var val = rec[f.key];
+                    if (val !== undefined && val !== null && val !== '') {
+                        var display = f.date ? formatFechaCorta(val) : (f.iso ? new Date(val).toLocaleString('es-ES') : String(val));
+                        html += '<div class="field"><div class="fl">' + f.label + '</div><div class="fv">' + display + '</div></div>';
+                    }
+                });
+
+                html += '</div>';
+            });
+
+            html += '</div>';
+            if (sti < selectedTypes.length - 1) {
+                html += '<div class="pdf-divider"></div>';
+            }
+        });
+
+        // Footer
+        html += pieIPS();
+        html += '<div style="font-size:9px;color:#999;text-align:center;margin-top:4px">Este documento es confidencial y de uso exclusivamente clínico.</div>';
+
+        html += '</div></body></html>';
+
+        // Open in new window and trigger print
+        var win = window.open('', '_blank');
+        if (!win) {
+            mostrarToast('Permita las ventanas emergentes para generar el PDF', 'error');
+            return;
+        }
+        win.document.write(html);
+        win.document.close();
+        setTimeout(function() { win.print(); }, 500);
+        mostrarToast('Documento consolidado generado. Use Ctrl+P para imprimir o guardar como PDF.', 'success');
+    }
+
+    /* ===== MODAL EVENT HANDLERS ===== */
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (document.getElementById('modalPreview').classList.contains('active')) {
+                cerrarPreview();
+            } else if (document.getElementById('modalConsulta').classList.contains('active')) {
+                cerrarConsulta();
+            }
+        }
+    });
+
+    document.getElementById('modalConsulta').addEventListener('click', function(e) {
+        if (e.target === document.getElementById('modalConsulta')) cerrarConsulta();
+    });
+
+    document.getElementById('modalPreview').addEventListener('click', function(e) {
+        if (e.target === document.getElementById('modalPreview')) cerrarPreview();
+    });
+
+    /* ===== UTILITIES ===== */
+    function cerrarSesion() {
+        localStorage.removeItem('nexus_sesion');
+        window.location.href = 'index.html';
+    }
+
+    function mostrarToast(msg, tipo) {
+        tipo = tipo || 'info';
+        var c = document.getElementById('toastContainer');
+        var t = document.createElement('div');
+        t.className = 'toast toast-' + tipo;
+        t.innerHTML = '<i class="fas ' + (tipo === 'success' ? 'fa-check-circle' : tipo === 'error' ? 'fa-exclamation-circle' : tipo === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle') + '"></i> ' + msg;
+        c.appendChild(t);
+        setTimeout(function() { t.remove(); }, 3500);
+    }
+    </script>
+
+    <!-- MATRIZ GLOBAL DE PERMISOS -->
+    <script>
+        (function () {
+            function aplicar() { if (window.NX) NX.filtrarMenu(); }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', aplicar);
+            } else { aplicar(); }
+        })();
+    
+/* ════════════════════════════════════════════════════════════
+   DATOS DE LA IPS EN PDF / IMPRESIONES
+   Lee la información guardada en Configuración → Información de la IPS
+   ════════════════════════════════════════════════════════════ */
+function obtenerDatosIPS() {
+  try {
+    var h = JSON.parse(localStorage.getItem('nexus_hospital') || '{}');
+    return h && typeof h === 'object' ? h : {};
+  } catch (e) { return {}; }
+}
+
+function escaparIPS(txt) {
+  return String(txt == null ? '' : txt)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* Encabezado institucional (logo + datos de la IPS) para documentos HTML imprimibles */
+function encabezadoIPS(tituloDoc, refDoc) {
+  var h = obtenerDatosIPS();
+  var nombre = escaparIPS(h.nombre || 'NEXUSMED IPS Domiciliaria');
+  var lineas = [];
+  if (h.direccion) lineas.push(escaparIPS(h.direccion));
+  var contacto = [];
+  if (h.telefono) contacto.push('Tel: ' + escaparIPS(h.telefono));
+  if (h.email) contacto.push(escaparIPS(h.email));
+  if (contacto.length) lineas.push(contacto.join(' &nbsp;·&nbsp; '));
+  var legal = [];
+  if (h.nit) legal.push('NIT: ' + escaparIPS(h.nit));
+  if (h.codigo) legal.push('Cód. Habilitación: ' + escaparIPS(h.codigo));
+  if (legal.length) lineas.push(legal.join(' &nbsp;·&nbsp; '));
+
+  var logoHtml = '';
+  if (h.logo && String(h.logo).indexOf('data:image') === 0) {
+    logoHtml = '<td style="width:110px;vertical-align:middle;border:none;padding:0 12px 0 0">' +
+               '<img src="' + escaparIPS(h.logo) + '" alt="Logo de la IPS" style="max-width:100px;max-height:62px;object-fit:contain">' +
+               '</td>';
+  }
+
+  var derecha = '';
+  if (tituloDoc || refDoc) {
+    derecha = '<td style="vertical-align:middle;border:none;text-align:right;padding:0">' +
+              (tituloDoc ? '<div style="font-size:12px;font-weight:700;color:#14375a;text-transform:uppercase;letter-spacing:.5px">' + escaparIPS(tituloDoc) + '</div>' : '') +
+              (refDoc ? '<div style="font-size:10px;color:#666;margin-top:3px">' + escaparIPS(refDoc) + '</div>' : '') +
+              '</td>';
+  }
+
+  return '<table style="width:100%;border-collapse:collapse;border:none;margin:0 0 10px"><tr>' +
+    logoHtml +
+    '<td style="vertical-align:middle;border:none;padding:0">' +
+      '<div style="font-size:15px;font-weight:700;color:#14375a;line-height:1.2">' + nombre + '</div>' +
+      (lineas.length ? '<div style="font-size:10px;color:#555;line-height:1.5;margin-top:3px">' + lineas.join('<br>') + '</div>' : '') +
+    '</td>' +
+    derecha +
+  '</tr></table><div style="border-bottom:2px solid #14375a;margin-bottom:12px"></div>';
+}
+
+/* Pie de página institucional */
+function pieIPS() {
+  var h = obtenerDatosIPS();
+  var nombre = escaparIPS(h.nombre || 'NEXUSMED IPS Domiciliaria');
+  var datos = [];
+  if (h.nit) datos.push('NIT: ' + escaparIPS(h.nit));
+  if (h.codigo) datos.push('Cód. Habilitación: ' + escaparIPS(h.codigo));
+  if (h.telefono) datos.push('Tel: ' + escaparIPS(h.telefono));
+  if (h.direccion) datos.push(escaparIPS(h.direccion));
+  var f = new Date();
+  return '<div style="margin-top:20px;border-top:1px solid #ccc;padding-top:8px;font-size:9.5px;color:#777;text-align:center;line-height:1.6">' +
+    '<strong>' + nombre + '</strong>' + (datos.length ? '<br>' + datos.join(' &nbsp;·&nbsp; ') : '') +
+    '<br>Documento generado el ' + f.toLocaleDateString('es-ES') + ' a las ' + f.toLocaleTimeString('es-ES') + ' por NEXUSMED' +
+    '</div>';
+}
+
+</script>
+</body>
+</html>

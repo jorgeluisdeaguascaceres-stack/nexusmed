@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUSMED - Terapias</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0a1628;color:#c8d6e5;min-height:100vh}
+
+/* Header */
+.header{background:linear-gradient(135deg,#0d2137,#122a45);padding:12px 30px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1a3a5c;position:sticky;top:0;z-index:100}
+.header .logo{display:flex;align-items:center;gap:10px}
+.header .logo h1{font-size:1.3rem;font-weight:700;color:#00b4d8;letter-spacing:1px}
+.header .logo span{font-size:.7rem;color:#5a7a9a;font-weight:300}
+.header .user-info{display:flex;align-items:center;gap:12px;color:#90e0ef;font-size:.85rem}
+.header .user-info i{color:#00b4d8}
+.header .btn-logout{background:transparent;border:1px solid #ff3860;color:#ff3860;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.75rem;transition:.3s}
+.header .btn-logout:hover{background:#ff3860;color:#fff}
+
+/* Nav */
+.nav{background:#0d2137;padding:8px 20px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #1a3a5c}
+.nav a{text-decoration:none;color:#5a7a9a;font-size:.75rem;padding:6px 12px;border-radius:6px;transition:.3s;border:1px solid transparent}
+.nav a:hover{color:#00b4d8;border-color:#1a3a5c;background:rgba(0,180,216,.05)}
+.nav a.active{color:#00b4d8;background:rgba(0,180,216,.1);border-color:#00b4d8}
+
+/* Main */
+.main{padding:25px 30px;max-width:1400px;margin:0 auto}
+
+.page-title{font-size:1.5rem;font-weight:700;color:#90e0ef;margin-bottom:5px;display:flex;align-items:center;gap:10px}
+.page-title i{color:#00b4d8}
+.page-subtitle{color:#5a7a9a;font-size:.85rem;margin-bottom:25px}
+
+/* Stats Row */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:25px}
+.stat-card{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:10px;padding:18px;text-align:center}
+.stat-card .stat-num{font-size:1.8rem;font-weight:700;color:#00b4d8}
+.stat-card .stat-label{font-size:.72rem;color:#5a7a9a;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+
+/* Toolbar */
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.search-box{flex:1;min-width:250px;position:relative}
+.search-box input{width:100%;padding:10px 14px 10px 38px;background:#0d2137;border:1px solid #1a3a5c;border-radius:8px;color:#c8d6e5;font-size:.85rem;outline:none;transition:.3s}
+.search-box input:focus{border-color:#00b4d8}
+.search-box i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#5a7a9a}
+.btn-primary{background:linear-gradient(135deg,#0077b6,#00b4d8);color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px;transition:.3s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(0,180,216,.3)}
+
+.filter-select{padding:10px 12px;background:#0d2137;border:1px solid #1a3a5c;border-radius:8px;color:#c8d6e5;font-size:.82rem;outline:none}
+.filter-select:focus{border-color:#00b4d8}
+
+/* Table */
+.table-container{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{background:#122a45;color:#90e0ef;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;padding:14px 16px;text-align:left;border-bottom:1px solid #1a3a5c}
+td{padding:12px 16px;border-bottom:1px solid rgba(26,58,92,.5);font-size:.82rem;color:#c8d6e5}
+tr:hover td{background:rgba(0,180,216,.03)}
+.empty-row td{text-align:center;color:#5a7a9a;padding:40px;font-style:italic}
+
+.badge{padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600;white-space:nowrap}
+.badge-manana{background:rgba(255,209,102,.15);color:#ffd166}
+.badge-tarde{background:rgba(255,107,107,.15);color:#ff6b6b}
+.badge-noche{background:rgba(114,137,218,.15);color:#7289da}
+
+/* Therapy type badges */
+.badge-fisica{background:rgba(0,119,182,.15);color:#0077b6}
+.badge-ocupacional{background:rgba(144,224,239,.15);color:#90e0ef}
+.badge-respiratoria{background:rgba(0,180,216,.15);color:#00b4d8}
+.badge-lenguaje{background:rgba(72,199,142,.15);color:#48c78e}
+.badge-nutricion{background:rgba(255,183,0,.15);color:#ffb700}
+.badge-psicologia{background:rgba(178,102,255,.15);color:#b266ff}
+
+/* Therapy state badges */
+.badge-programada{background:rgba(255,209,102,.15);color:#ffd166}
+.badge-encurso{background:rgba(0,180,216,.15);color:#00b4d8}
+.badge-completada{background:rgba(72,199,142,.15);color:#48c78e}
+.badge-suspendida{background:rgba(255,56,96,.15);color:#ff3860}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;justify-content:center;align-items:flex-start;padding:30px 20px;overflow-y:auto}
+.modal-overlay.active{display:flex}
+.modal{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:14px;width:100%;max-width:960px;padding:0;animation:modalIn .3s}
+@keyframes modalIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{padding:20px 25px;border-bottom:1px solid #1a3a5c;display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:1.1rem;color:#90e0ef;display:flex;align-items:center;gap:8px}
+.modal-header h2 i{color:#00b4d8}
+.modal-close{background:none;border:none;color:#5a7a9a;font-size:1.3rem;cursor:pointer;transition:.3s}
+.modal-close:hover{color:#ff3860}
+.modal-body{padding:25px;max-height:75vh;overflow-y:auto;overflow-x:hidden;position:relative}
+.modal-footer{padding:15px 25px;border-top:1px solid #1a3a5c;display:flex;justify-content:flex-end;gap:10px}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:.75rem;color:#90e0ef;font-weight:500;text-transform:uppercase;letter-spacing:.3px}
+.form-group input,.form-group select,.form-group textarea{padding:10px 12px;background:#0a1628;border:1px solid #1a3a5c;border-radius:8px;color:#c8d6e5;font-size:.85rem;font-family:'Inter',sans-serif;outline:none;transition:.3s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#00b4d8}
+.form-group textarea{resize:vertical;min-height:80px}
+
+/* Read-only fields from admisión */
+.form-group input.readonly-adm,.form-group select.readonly-adm,.form-group textarea.readonly-adm{
+  background:rgba(0,180,216,.04);
+  border:1px solid #14375a;
+  color:#7ab8d4;
+  cursor:default;
+  opacity:.88;
+}
+.form-group input.readonly-adm:focus,.form-group select.readonly-adm:focus,.form-group textarea.readonly-adm:focus{
+  border-color:#14375a;
+  outline:none;
+  box-shadow:none;
+}
+.form-group label.label-adm{
+  color:#4a8aa5;
+  position:relative;
+}
+.form-group label.label-adm::after{
+  content:' (Admisión)';
+  font-size:.6rem;
+  text-transform:none;
+  letter-spacing:0;
+  font-weight:400;
+  opacity:.7;
+}
+
+/* Admisión data section separator */
+.adm-section-header{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 0 4px 0;
+  margin-top:4px;
+  border-bottom:1px dashed #1a3a5c;
+}
+.adm-section-header i{color:#00b4d8;font-size:.7rem}
+.adm-section-header span{color:#4a8aa5;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+.clinical-section-header{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 0 4px 0;
+  margin-top:8px;
+  border-bottom:1px dashed #1a3a5c;
+}
+.clinical-section-header i{color:#90e0ef;font-size:.7rem}
+.clinical-section-header span{color:#90e0ef;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+.btn-secondary{background:transparent;border:1px solid #1a3a5c;color:#90e0ef;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:.85rem;transition:.3s}
+.btn-secondary:hover{border-color:#00b4d8;color:#00b4d8}
+
+/* Prominent action buttons for table */
+.btn-action{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.75rem;font-weight:500;border:1px solid transparent;transition:all .25s;font-family:'Inter',sans-serif;white-space:nowrap}
+.btn-action:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.3)}
+.btn-pdf{background:linear-gradient(135deg,#1b4332,#2d6a4f);color:#95d5b2;border:1px solid #40916c}
+.btn-pdf:hover{background:linear-gradient(135deg,#2d6a4f,#40916c);color:#d8f3dc}
+.btn-edit{background:linear-gradient(135deg,#0d2137,#1a3a5c);color:#90e0ef;border:1px solid #00b4d8}
+.btn-edit:hover{background:#00b4d8;color:#fff}
+.btn-view{background:transparent;color:#5a7a9a;border:1px solid #1a3a5c;padding:6px 8px}
+.btn-view:hover{color:#00b4d8;border-color:#00b4d8}
+.btn-delete{background:linear-gradient(135deg,#3d0c11,#5c1a24);color:#ff6b6b;border:1px solid #ff3860}
+.btn-delete:hover{background:#ff3860;color:#fff}
+
+/* Patient search inline */
+.patient-search-row{display:flex;gap:10px;align-items:flex-end}
+.patient-search-row input{flex:1}
+.patient-search-row .btn-buscar{background:linear-gradient(135deg,#0077b6,#00b4d8);color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;transition:.3s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.patient-search-row .btn-buscar:hover{box-shadow:0 4px 15px rgba(0,180,216,.3)}
+.patient-info-inline{margin-top:6px;padding:8px 12px;border-radius:8px;font-size:.8rem;display:none}
+.patient-info-inline.found{display:block;background:rgba(0,180,216,.08);border:1px solid #00b4d8;color:#90e0ef}
+.patient-info-inline.not-found{display:block;background:rgba(255,56,96,.08);border:1px solid #ff3860;color:#ff3860}
+
+/* ═══ Tipo de Terapia Visual Cards ═══ */
+.terapia-section-header{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 0 4px 0;
+  margin-top:4px;
+  border-bottom:1px dashed #1a3a5c;
+}
+.terapia-section-header i{color:#00b4d8;font-size:.7rem}
+.terapia-section-header span{color:#00b4d8;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+.tipo-terapia-grid{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:8px;
+}
+.tipo-option{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:12px 6px;
+  background:#0a1628;
+  border:2px solid #1a3a5c;
+  border-radius:10px;
+  cursor:pointer;
+  transition:.25s;
+  user-select:none;
+  text-align:center;
+}
+.tipo-option:hover{border-color:#00b4d8;background:rgba(0,180,216,.05)}
+.tipo-option input[type=radio]{display:none}
+.tipo-option .tipo-icon{font-size:1.2rem;transition:.25s}
+.tipo-option .tipo-label{font-size:.7rem;font-weight:600;letter-spacing:.3px;line-height:1.2}
+
+/* Selected states for each therapy type */
+.tipo-option.selected-fisica{border-color:#0077b6;background:rgba(0,119,182,.12)}
+.tipo-option.selected-fisica .tipo-icon{color:#0077b6}
+.tipo-option.selected-fisica .tipo-label{color:#0077b6}
+
+.tipo-option.selected-ocupacional{border-color:#90e0ef;background:rgba(144,224,239,.12)}
+.tipo-option.selected-ocupacional .tipo-icon{color:#90e0ef}
+.tipo-option.selected-ocupacional .tipo-label{color:#90e0ef}
+
+.tipo-option.selected-respiratoria{border-color:#00b4d8;background:rgba(0,180,216,.12)}
+.tipo-option.selected-respiratoria .tipo-icon{color:#00b4d8}
+.tipo-option.selected-respiratoria .tipo-label{color:#00b4d8}
+
+.tipo-option.selected-lenguaje{border-color:#48c78e;background:rgba(72,199,142,.12)}
+.tipo-option.selected-lenguaje .tipo-icon{color:#48c78e}
+.tipo-option.selected-lenguaje .tipo-label{color:#48c78e}
+
+.tipo-option.selected-nutricion{border-color:#ffb700;background:rgba(255,183,0,.12)}
+.tipo-option.selected-nutricion .tipo-icon{color:#ffb700}
+.tipo-option.selected-nutricion .tipo-label{color:#ffb700}
+
+.tipo-option.selected-psicologia{border-color:#b266ff;background:rgba(178,102,255,.12)}
+.tipo-option.selected-psicologia .tipo-icon{color:#b266ff}
+.tipo-option.selected-psicologia .tipo-label{color:#b266ff}
+
+/* ═══ Estado de Terapia Visual Cards ═══ */
+.estado-terapia-grid{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+.estado-terapia-option{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:10px 8px;
+  background:#0a1628;
+  border:2px solid #1a3a5c;
+  border-radius:8px;
+  cursor:pointer;
+  transition:.25s;
+  user-select:none;
+  text-align:center;
+}
+.estado-terapia-option:hover{border-color:#00b4d8;background:rgba(0,180,216,.05)}
+.estado-terapia-option input[type=radio]{display:none}
+.estado-terapia-option .estado-icon{font-size:1rem}
+.estado-terapia-option .estado-label{font-size:.78rem;font-weight:600;letter-spacing:.3px}
+
+.estado-terapia-option.selected-programada{border-color:#ffd166;background:rgba(255,209,102,.1)}
+.estado-terapia-option.selected-programada .estado-icon{color:#ffd166}
+.estado-terapia-option.selected-programada .estado-label{color:#ffd166}
+
+.estado-terapia-option.selected-encurso{border-color:#00b4d8;background:rgba(0,180,216,.1)}
+.estado-terapia-option.selected-encurso .estado-icon{color:#00b4d8}
+.estado-terapia-option.selected-encurso .estado-label{color:#00b4d8}
+
+.estado-terapia-option.selected-completada{border-color:#48c78e;background:rgba(72,199,142,.1)}
+.estado-terapia-option.selected-completada .estado-icon{color:#48c78e}
+.estado-terapia-option.selected-completada .estado-label{color:#48c78e}
+
+.estado-terapia-option.selected-suspendida{border-color:#ff3860;background:rgba(255,56,96,.1)}
+.estado-terapia-option.selected-suspendida .estado-icon{color:#ff3860}
+.estado-terapia-option.selected-suspendida .estado-label{color:#ff3860}
+
+/* Detail modal */
+.detail-section{margin-bottom:20px}
+.detail-section h3{color:#00b4d8;font-size:.9rem;margin-bottom:10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1a3a5c;padding-bottom:8px}
+.detail-field{display:grid;grid-template-columns:200px 1fr;gap:8px;margin-bottom:8px;font-size:.82rem}
+.detail-field .label{color:#5a7a9a;font-weight:500}
+.detail-field .value{color:#c8d6e5}
+.detail-field .label.adm-label{color:#4a8aa5}
+.detail-field .value.adm-value{color:#7ab8d4}
+.detail-text-block{white-space:pre-wrap;font-size:.85rem;color:#c8d6e5;background:#0a1628;padding:12px;border-radius:8px;border:1px solid #1a3a5c;margin-top:4px}
+
+/* Toast */
+.toast-container{position:fixed;top:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{padding:14px 20px;border-radius:10px;font-size:.82rem;display:flex;align-items:center;gap:10px;animation:toastIn .3s;min-width:280px;box-shadow:0 5px 20px rgba(0,0,0,.3)}
+.toast.success{background:linear-gradient(135deg,#0d4a2e,#0d2137);border:1px solid #48c78e;color:#48c78e}
+.toast.error{background:linear-gradient(135deg,#4a0d1a,#0d2137);border:1px solid #ff3860;color:#ff3860}
+.toast.info{background:linear-gradient(135deg,#0d3a4a,#0d2137);border:1px solid #00b4d8;color:#00b4d8}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+/* Scrollbar */
+.modal-body::-webkit-scrollbar{width:6px}
+.modal-body::-webkit-scrollbar-track{background:#0a1628}
+.modal-body::-webkit-scrollbar-thumb{background:#1a3a5c;border-radius:3px}
+.modal-body::-webkit-scrollbar-thumb:hover{background:#00b4d8}
+
+@media(max-width:768px){
+.form-grid{grid-template-columns:1fr}
+.tipo-terapia-grid{grid-template-columns:1fr 1fr 1fr}
+.estado-terapia-grid{grid-template-columns:1fr 1fr}
+.stats-row{grid-template-columns:1fr 1fr}
+.nav{gap:4px}.nav a{font-size:.68rem;padding:4px 8px}
+}
+@media(max-width:480px){
+.tipo-terapia-grid{grid-template-columns:1fr 1fr}
+.estado-terapia-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+    <script src="permisos.js"></script>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Header -->
+<header class="header">
+  <div class="logo">
+    <h1><i class="fas fa-heartbeat"></i> NEXUSMED</h1>
+    <span>plataforma que conecta todo</span>
+  </div>
+  <div class="user-info">
+    <i class="fas fa-user-circle"></i>
+    <span id="userName">Admin</span>
+    <span style="color:#5a7a9a">|</span>
+    <span id="userRole" style="color:#5a7a9a">Administrador</span>
+  </div>
+  <button class="btn-logout" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Salir</button>
+</header>
+
+<!-- Nav -->
+<nav class="nav">
+  <a href="menu.html"><i class="fas fa-home"></i> Inicio</a>
+  <a href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+  <a href="pacientes.html"><i class="fas fa-users"></i> Pacientes</a>
+  <a href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
+  <a href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
+  <a href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enfermería</a>
+  <a href="terapias.html" class="active"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
+  <a href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
+  <a href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+  <a href="egresados.html"><i class="fas fa-door-closed"></i> Egresados</a>
+  <a href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
+  <a href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+</nav>
+
+<!-- Main -->
+<main class="main">
+  <h1 class="page-title"><i class="fas fa-hand-holding-medical"></i> Terapias</h1>
+  <p class="page-subtitle">Registro y seguimiento de sesiones de terapia domiciliaria — Física, Ocupacional, Respiratoria, Lenguaje, Nutrición, Psicología</p>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">Total Terapias</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statHoy">0</div>
+      <div class="stat-label">Sesiones Hoy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statEnCurso">0</div>
+      <div class="stat-label">En Curso</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statCompletadas">0</div>
+      <div class="stat-label">Completadas</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Buscar por paciente, número, terapeuta o admisión...">
+    </div>
+    <select class="filter-select" id="filterTipo">
+      <option value="">Todos los tipos</option>
+      <option value="Física">Física</option>
+      <option value="Ocupacional">Ocupacional</option>
+      <option value="Respiratoria">Respiratoria</option>
+      <option value="Lenguaje">Lenguaje</option>
+      <option value="Nutrición">Nutrición</option>
+      <option value="Psicología">Psicología</option>
+    </select>
+    <select class="filter-select" id="filterEstado">
+      <option value="">Todos los estados</option>
+      <option value="Programada">Programada</option>
+      <option value="En Curso">En Curso</option>
+      <option value="Completada">Completada</option>
+      <option value="Suspendida">Suspendida</option>
+    </select>
+    <select class="filter-select" id="filterTurno">
+      <option value="">Todos los turnos</option>
+      <option value="Mañana">Mañana</option>
+      <option value="Tarde">Tarde</option>
+      <option value="Noche">Noche</option>
+    </select>
+    <button class="btn-primary" onclick="abrirModalCrear()"><i class="fas fa-plus"></i> Nueva Terapia</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>N° Terapia</th>
+          <th>Paciente</th>
+          <th>Tipo</th>
+          <th>Estado</th>
+          <th>Terapeuta</th>
+          <th>Fecha / Turno</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaTerapias"></tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Modal Crear/Editar -->
+<div class="modal-overlay" id="modalForm">
+  <div class="modal">
+    <div class="modal-header">
+      <h2><i class="fas fa-hand-holding-medical"></i> <span id="modalTitulo">Nueva Terapia</span></h2>
+      <button class="modal-close" onclick="cerrarModal('modalForm')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <!-- Patient search -->
+        <div class="form-group full">
+          <label>Paciente (Buscar por Documento, Nombre o N° Admisión)</label>
+          <div class="patient-search-row">
+            <input type="text" id="pacienteBuscar" placeholder="Ingrese documento, nombre o número de admisión..." autocomplete="off">
+            <button class="btn-buscar" onclick="buscarPaciente()"><i class="fas fa-search"></i> Buscar</button>
+          </div>
+          <div class="patient-info-inline" id="pacienteInfo"></div>
+          <input type="hidden" id="pacienteId" value="">
+        </div>
+
+        <!-- ═══ ADMISIÓN DATA SECTION ═══ -->
+        <div class="adm-section-header">
+          <i class="fas fa-database"></i>
+          <span>Datos de Admisión (solo lectura — provienen del registro de admisión)</span>
+        </div>
+
+        <div class="form-group">
+          <label class="label-adm">N° Admisión</label>
+          <input type="text" id="admNumAdmision" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Fecha de Ingreso</label>
+          <input type="text" id="admFechaIngreso" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Fecha de Nacimiento</label>
+          <input type="text" id="admFechaNacimiento" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Edad</label>
+          <input type="text" id="admEdad" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Género</label>
+          <input type="text" id="admGenero" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">EPS</label>
+          <input type="text" id="admEps" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Servicio</label>
+          <input type="text" id="admServicio" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Habitación</label>
+          <input type="text" id="admHabitacion" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Médico (Admisión)</label>
+          <input type="text" id="admMedico" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Diagnóstico (Admisión)</label>
+          <input type="text" id="admDiagnostico" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group full">
+          <label class="label-adm">Dirección Completa</label>
+          <input type="text" id="admDireccion" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Teléfono</label>
+          <input type="text" id="admTelefono" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label class="label-adm">Familiar / Acudiente</label>
+          <input type="text" id="admFamiliar" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+        </div>
+
+        <!-- ═══ CLINICAL DATA SECTION ═══ -->
+        <div class="clinical-section-header">
+          <i class="fas fa-stethoscope"></i>
+          <span>Datos Clínicos — Editables</span>
+        </div>
+
+        <!-- Fecha, Hora, Turno -->
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="fechaTerapia" required>
+        </div>
+        <div class="form-group">
+          <label>Hora</label>
+          <input type="time" id="horaTerapia" required>
+        </div>
+        <div class="form-group">
+          <label>Turno</label>
+          <select id="turnoTerapia">
+            <option value="">-- Seleccionar --</option>
+            <option>Mañana</option>
+            <option>Tarde</option>
+            <option>Noche</option>
+          </select>
+        </div>
+        <!-- Terapeuta dropdown -->
+        <div class="form-group">
+          <label>Terapeuta</label>
+          <select id="terapeutaSelect">
+            <option value="">-- Seleccionar Terapeuta --</option>
+          </select>
+        </div>
+
+        <!-- ═══ TIPO DE TERAPIA ═══ -->
+        <div class="terapia-section-header">
+          <i class="fas fa-hand-holding-medical"></i>
+          <span>Tipo de Terapia</span>
+        </div>
+
+        <div class="tipo-terapia-grid">
+          <div class="tipo-option" onclick="seleccionarTipo(this,'Física')" data-tipo="Física">
+            <input type="radio" name="tipoTerapia" value="Física">
+            <i class="fas fa-person-walking tipo-icon" style="color:#5a7a9a"></i>
+            <span class="tipo-label" style="color:#5a7a9a">Física</span>
+          </div>
+          <div class="tipo-option" onclick="seleccionarTipo(this,'Ocupacional')" data-tipo="Ocupacional">
+            <input type="radio" name="tipoTerapia" value="Ocupacional">
+            <i class="fas fa-hands tipo-icon" style="color:#5a7a9a"></i>
+            <span class="tipo-label" style="color:#5a7a9a">Ocupacional</span>
+          </div>
+          <div class="tipo-option" onclick="seleccionarTipo(this,'Respiratoria')" data-tipo="Respiratoria">
+            <input type="radio" name="tipoTerapia" value="Respiratoria">
+            <i class="fas fa-lungs tipo-icon" style="color:#5a7a9a"></i>
+            <span class="tipo-label" style="color:#5a7a9a">Respiratoria</span>
+          </div>
+          <div class="tipo-option" onclick="seleccionarTipo(this,'Lenguaje')" data-tipo="Lenguaje">
+            <input type="radio" name="tipoTerapia" value="Lenguaje">
+            <i class="fas fa-comment-medical tipo-icon" style="color:#5a7a9a"></i>
+            <span class="tipo-label" style="color:#5a7a9a">Lenguaje</span>
+          </div>
+          <div class="tipo-option" onclick="seleccionarTipo(this,'Nutrición')" data-tipo="Nutrición">
+            <input type="radio" name="tipoTerapia" value="Nutrición">
+            <i class="fas fa-apple-whole tipo-icon" style="color:#5a7a9a"></i>
+            <span class="tipo-label" style="color:#5a7a9a">Nutrición</span>
+          </div>
+          <div class="tipo-option" onclick="seleccionarTipo(this,'Psicología')" data-tipo="Psicología">
+            <input type="radio" name="tipoTerapia" value="Psicología">
+            <i class="fas fa-brain tipo-icon" style="color:#5a7a9a"></i>
+            <span class="tipo-label" style="color:#5a7a9a">Psicología</span>
+          </div>
+        </div>
+
+        <!-- ═══ ESTADO DE TERAPIA ═══ -->
+        <div class="form-group full">
+          <label style="color:#ffd166"><i class="fas fa-clipboard-check"></i> Estado de la Terapia</label>
+          <div class="estado-terapia-grid">
+            <div class="estado-terapia-option" onclick="seleccionarEstadoTerapia(this,'Programada')" data-estado="Programada">
+              <input type="radio" name="estadoTerapia" value="Programada">
+              <i class="fas fa-clock estado-icon" style="color:#5a7a9a"></i>
+              <span class="estado-label" style="color:#5a7a9a">Programada</span>
+            </div>
+            <div class="estado-terapia-option" onclick="seleccionarEstadoTerapia(this,'En Curso')" data-estado="En Curso">
+              <input type="radio" name="estadoTerapia" value="En Curso">
+              <i class="fas fa-spinner estado-icon" style="color:#5a7a9a"></i>
+              <span class="estado-label" style="color:#5a7a9a">En Curso</span>
+            </div>
+            <div class="estado-terapia-option" onclick="seleccionarEstadoTerapia(this,'Completada')" data-estado="Completada">
+              <input type="radio" name="estadoTerapia" value="Completada">
+              <i class="fas fa-check-circle estado-icon" style="color:#5a7a9a"></i>
+              <span class="estado-label" style="color:#5a7a9a">Completada</span>
+            </div>
+            <div class="estado-terapia-option" onclick="seleccionarEstadoTerapia(this,'Suspendida')" data-estado="Suspendida">
+              <input type="radio" name="estadoTerapia" value="Suspendida">
+              <i class="fas fa-ban estado-icon" style="color:#5a7a9a"></i>
+              <span class="estado-label" style="color:#5a7a9a">Suspendida</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Frecuencia and Sesiones -->
+        <div class="form-group">
+          <label>Frecuencia</label>
+          <select id="frecuenciaTerapia">
+            <option value="">-- Seleccionar --</option>
+            <option>Diaria</option>
+            <option>3 veces/semana</option>
+            <option>2 veces/semana</option>
+            <option>Semanal</option>
+            <option>Quincenal</option>
+            <option>Mensual</option>
+            <option>Única</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Sesión N°</label>
+          <input type="number" id="sesionNumero" placeholder="1" min="1">
+        </div>
+        <div class="form-group">
+          <label>Total Sesiones Planificadas</label>
+          <input type="number" id="totalSesiones" placeholder="10" min="1">
+        </div>
+
+        <!-- ═══ CLINICAL TEXTAREAS ═══ -->
+        <div class="clinical-section-header" style="margin-top:8px">
+          <i class="fas fa-notes-medical"></i>
+          <span>Indicación y Plan Terapéutico</span>
+        </div>
+
+        <div class="form-group full">
+          <label>Indicación Diagnóstica / Terapéutica</label>
+          <textarea id="indicacionDiagnostica" rows="3" placeholder="Diagnóstico o indicación terapéutica que fundamenta la sesión..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Objetivos del Tratamiento</label>
+          <textarea id="objetivosTratamiento" rows="3" placeholder="Objetivos específicos de la terapia para esta sesión y el plan global..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Descripción de la Sesión</label>
+          <textarea id="descripcionSesion" rows="4" placeholder="Actividades realizadas, técnicas empleadas, ejercicios, respuesta del paciente, tiempo de sesión..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Observaciones</label>
+          <textarea id="observacionesTerapia" rows="3" placeholder="Observaciones adicionales, tolerancia del paciente, eventos durante la sesión..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Plan Próxima Sesión</label>
+          <textarea id="planProximaSesion" rows="3" placeholder="Plan para la siguiente sesión, modificaciones al tratamiento, metas a corto plazo..."></textarea>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="cerrarModal('modalForm')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarTerapia()"><i class="fas fa-save"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal-overlay" id="modalDetalle">
+  <div class="modal" style="max-width:960px">
+    <div class="modal-header">
+      <h2><i class="fas fa-hand-holding-medical"></i> <span id="detalleTitulo">Detalle de Terapia</span></h2>
+      <button class="modal-close" onclick="cerrarModal('modalDetalle')">×</button>
+    </div>
+    <div class="modal-body" id="detalleContenido"></div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="descargarPDF()" style="margin-right:10px"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
+      <button class="btn-secondary" onclick="cerrarModal('modalDetalle')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// Session check
+// ═══════════════════════════════════════════
+const sesion = JSON.parse(localStorage.getItem('nexus_sesion') || 'null');
+if (!sesion) { window.location.href = 'index.html'; }
+else { document.getElementById('userName').textContent = sesion.usuario; document.getElementById('userRole').textContent = sesion.rol; }
+
+function cerrarSesion() { localStorage.removeItem('nexus_sesion'); window.location.href = 'index.html'; }
+
+// ═══════════════════════════════════════════
+// Data helpers
+// ═══════════════════════════════════════════
+function getTerapias() { return JSON.parse(localStorage.getItem('nexus_terapias') || '[]'); }
+function saveTerapias(t) { localStorage.setItem('nexus_terapias', JSON.stringify(t)); }
+function getPacientes() { return JSON.parse(localStorage.getItem('nexus_pacientes') || '[]'); }
+function getUsuarios() { return JSON.parse(localStorage.getItem('nexus_usuarios') || '[]'); }
+function getContador() { return parseInt(localStorage.getItem('nexus_contador_te') || '0'); }
+function incrementContador() { const c = getContador() + 1; localStorage.setItem('nexus_contador_te', c.toString()); return c; }
+
+const today = new Date().toISOString().split('T')[0];
+
+// ═══════════════════════════════════════════
+// Admisión field IDs for auto-populate
+// ═══════════════════════════════════════════
+const ADM_FIELDS = [
+    'admNumAdmision','admFechaIngreso','admFechaNacimiento','admEdad',
+    'admGenero','admEps','admServicio','admHabitacion',
+    'admMedico','admDiagnostico','admDireccion','admTelefono','admFamiliar'
+];
+
+const ADM_MAP = {
+    numAdmision: 'admNumAdmision',
+    fechaIngreso: 'admFechaIngreso',
+    fechaNacimiento: 'admFechaNacimiento',
+    edad: 'admEdad',
+    genero: 'admGenero',
+    eps: 'admEps',
+    servicio: 'admServicio',
+    habitacion: 'admHabitacion',
+    medico: 'admMedico',
+    diagnostico: 'admDiagnostico',
+    direccion: 'admDireccion',
+    telefono: 'admTelefono',
+    familiarNombre: 'admFamiliar'
+};
+
+function limpiarCamposAdmision() {
+    ADM_FIELDS.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+}
+
+function llenarCamposAdmision(p) {
+    document.getElementById('admNumAdmision').value = p.numAdmision || '';
+    if (p.fechaIngreso) {
+        const d = new Date(p.fechaIngreso);
+        document.getElementById('admFechaIngreso').value = d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+    } else { document.getElementById('admFechaIngreso').value = ''; }
+    if (p.fechaNacimiento) {
+        const d = new Date(p.fechaNacimiento);
+        document.getElementById('admFechaNacimiento').value = d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
+    } else { document.getElementById('admFechaNacimiento').value = ''; }
+    document.getElementById('admEdad').value = p.edad || '';
+    document.getElementById('admGenero').value = p.genero || '';
+    document.getElementById('admEps').value = p.eps || '';
+    document.getElementById('admServicio').value = p.servicio || '';
+    document.getElementById('admHabitacion').value = p.habitacion || '';
+    document.getElementById('admMedico').value = p.medico || '';
+    let dx = '';
+    if (p.diagnosticoCodigo && p.diagnostico) dx = p.diagnosticoCodigo + ' – ' + p.diagnostico;
+    else if (p.diagnostico) dx = p.diagnostico;
+    else if (p.diagnosticoCodigo) dx = p.diagnosticoCodigo;
+    document.getElementById('admDiagnostico').value = dx;
+    const dirParts = [p.direccion, p.barrio, p.municipio, p.departamento].filter(Boolean);
+    document.getElementById('admDireccion').value = dirParts.join(', ') || '';
+    document.getElementById('admTelefono').value = p.telefono || '';
+    const famParts = [];
+    if (p.familiarNombre) famParts.push(p.familiarNombre);
+    if (p.familiarParentesco) famParts.push('(' + p.familiarParentesco + ')');
+    if (p.familiarTelefono) famParts.push('Tel: ' + p.familiarTelefono);
+    document.getElementById('admFamiliar').value = famParts.join(' ') || '';
+}
+
+// ═══════════════════════════════════════════
+// Patient Search
+// ═══════════════════════════════════════════
+function buscarPaciente() {
+    const termino = document.getElementById('pacienteBuscar').value.trim().toLowerCase();
+    const infoDiv = document.getElementById('pacienteInfo');
+    const hiddenId = document.getElementById('pacienteId');
+
+    document.getElementById('toastContainer').innerHTML = '';
+
+    if (!termino) {
+        infoDiv.className = 'patient-info-inline';
+        infoDiv.style.display = 'none';
+        hiddenId.value = '';
+        limpiarCamposAdmision();
+        return;
+    }
+
+    const pacientes = getPacientes().filter(p => p.estado !== 'Egresado');
+
+    let paciente = null;
+    // 1) Exact numAdmision
+    paciente = pacientes.find(p => (p.numAdmision || '').toLowerCase() === termino);
+    // 2) Exact documento
+    if (!paciente) paciente = pacientes.find(p => p.documento.toLowerCase() === termino);
+    // 3) Partial documento
+    if (!paciente) paciente = pacientes.find(p => p.documento.toLowerCase().includes(termino));
+    // 4) Partial numAdmision
+    if (!paciente) paciente = pacientes.find(p => (p.numAdmision || '').toLowerCase().includes(termino));
+    // 5) Nombre partial
+    if (!paciente) paciente = pacientes.find(p => p.nombre.toLowerCase().includes(termino));
+    // 6) Multi-word
+    if (!paciente) {
+        const palabras = termino.split(/\s+/);
+        if (palabras.length > 1) {
+            paciente = pacientes.find(p => {
+                const nom = p.nombre.toLowerCase();
+                const doc = p.documento.toLowerCase();
+                const adm = (p.numAdmision || '').toLowerCase();
+                return palabras.every(w => nom.includes(w) || doc.includes(w) || adm.includes(w));
+            });
+        }
+    }
+
+    if (paciente) {
+        hiddenId.value = String(paciente.id);
+        infoDiv.className = 'patient-info-inline found';
+        let ingresoStr = 'N/A';
+        if (paciente.fechaIngreso) {
+            const d = new Date(paciente.fechaIngreso);
+            ingresoStr = d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+        }
+        let admStr = paciente.numAdmision ? 'Adm: ' + paciente.numAdmision + ' — ' : '';
+        infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${paciente.nombre}</strong> — ${admStr}Doc: ${paciente.documento} — EPS: ${paciente.eps||'N/A'} — Ingreso: ${ingresoStr}`;
+        llenarCamposAdmision(paciente);
+        showToast('Datos de admisión cargados automáticamente', 'success', true);
+    } else {
+        hiddenId.value = '';
+        infoDiv.className = 'patient-info-inline not-found';
+        infoDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Paciente no encontrado en admisiones activas. Verifique documento, nombre o número de admisión.';
+        limpiarCamposAdmision();
+        showToast('Paciente no encontrado', 'error', true);
+    }
+}
+
+// Search on Enter key
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('pacienteBuscar').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); buscarPaciente(); }
+    });
+});
+
+// ═══════════════════════════════════════════
+// Terapeuta Dropdown (from nexus_usuarios)
+// ═══════════════════════════════════════════
+function loadTerapeutasSelect(selectedValue='') {
+    const sel = document.getElementById('terapeutaSelect');
+    const usuarios = getUsuarios();
+
+    // Filter users with therapy-related roles
+    const terapeutas = usuarios.filter(u => {
+        const rol = (u.rol || '').toLowerCase();
+        return rol.includes('terapeuta') || rol.includes('fisioterapeuta') || rol.includes('terapista') ||
+               rol.includes('ocupacional') || rol.includes('fonoaudiolog') || rol.includes('fonoaudiólogo') ||
+               rol.includes('nutricionista') || rol.includes('psicolog') || rol.includes('kinesiolog') ||
+               rol.includes('kinesiólogo') || rol.includes('fisioterap') || rol.includes('lenguaje');
+    });
+
+    sel.innerHTML = '<option value="">-- Seleccionar Terapeuta --</option>';
+
+    if (terapeutas.length === 0) {
+        sel.innerHTML += '<option value="" disabled>Sin terapeutas registrados</option>';
+    }
+
+    // Group by rol
+    const grouped = {};
+    terapeutas.forEach(p => {
+        const rol = p.rol || 'Sin rol';
+        if (!grouped[rol]) grouped[rol] = [];
+        grouped[rol].push(p);
+    });
+
+    Object.keys(grouped).sort().forEach(rol => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = rol;
+        grouped[rol].forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.nombre;
+            opt.textContent = p.nombre + (p.especialidad ? ' — ' + p.especialidad : '');
+            if (p.nombre === selectedValue) opt.selected = true;
+            optgroup.appendChild(opt);
+        });
+        sel.appendChild(optgroup);
+    });
+}
+
+// ═══════════════════════════════════════════
+// Tipo de Terapia selection
+// ═══════════════════════════════════════════
+let _tipoSeleccionado = '';
+
+const TIPO_CLASS_MAP = {
+    'Física': 'selected-fisica',
+    'Ocupacional': 'selected-ocupacional',
+    'Respiratoria': 'selected-respiratoria',
+    'Lenguaje': 'selected-lenguaje',
+    'Nutrición': 'selected-nutricion',
+    'Psicología': 'selected-psicologia'
+};
+
+const TIPO_COLOR_MAP = {
+    'Física': '#0077b6',
+    'Ocupacional': '#90e0ef',
+    'Respiratoria': '#00b4d8',
+    'Lenguaje': '#48c78e',
+    'Nutrición': '#ffb700',
+    'Psicología': '#b266ff'
+};
+
+const TIPO_ICON_MAP = {
+    'Física': 'fa-person-walking',
+    'Ocupacional': 'fa-hands',
+    'Respiratoria': 'fa-lungs',
+    'Lenguaje': 'fa-comment-medical',
+    'Nutrición': 'fa-apple-whole',
+    'Psicología': 'fa-brain'
+};
+
+function seleccionarTipo(el, tipo) {
+    // Clear all selections
+    document.querySelectorAll('.tipo-option').forEach(opt => {
+        Object.values(TIPO_CLASS_MAP).forEach(cls => opt.classList.remove(cls));
+        opt.querySelector('.tipo-icon').style.color = '#5a7a9a';
+        opt.querySelector('.tipo-label').style.color = '#5a7a9a';
+    });
+    // Set selected
+    const selClass = TIPO_CLASS_MAP[tipo] || '';
+    if (selClass) el.classList.add(selClass);
+    el.querySelector('input[type=radio]').checked = true;
+    _tipoSeleccionado = tipo;
+}
+
+function clearTipoSeleccion() {
+    _tipoSeleccionado = '';
+    document.querySelectorAll('.tipo-option').forEach(opt => {
+        Object.values(TIPO_CLASS_MAP).forEach(cls => opt.classList.remove(cls));
+        opt.querySelector('.tipo-icon').style.color = '#5a7a9a';
+        opt.querySelector('.tipo-label').style.color = '#5a7a9a';
+        opt.querySelector('input[type=radio]').checked = false;
+    });
+}
+
+function setTipoSeleccionado(tipo) {
+    clearTipoSeleccion();
+    if (tipo && TIPO_CLASS_MAP[tipo]) {
+        const el = document.querySelector(`.tipo-option[data-tipo="${tipo}"]`);
+        if (el) seleccionarTipo(el, tipo);
+    }
+}
+
+// ═══════════════════════════════════════════
+// Estado de Terapia selection
+// ═══════════════════════════════════════════
+let _estadoTerapiaSeleccionado = '';
+
+const ESTADO_CLASS_MAP = {
+    'Programada': 'selected-programada',
+    'En Curso': 'selected-encurso',
+    'Completada': 'selected-completada',
+    'Suspendida': 'selected-suspendida'
+};
+
+function seleccionarEstadoTerapia(el, estado) {
+    // Clear all selections
+    document.querySelectorAll('.estado-terapia-option').forEach(opt => {
+        Object.values(ESTADO_CLASS_MAP).forEach(cls => opt.classList.remove(cls));
+        opt.querySelector('.estado-icon').style.color = '#5a7a9a';
+        opt.querySelector('.estado-label').style.color = '#5a7a9a';
+    });
+    // Set selected
+    const selClass = ESTADO_CLASS_MAP[estado] || '';
+    if (selClass) el.classList.add(selClass);
+    el.querySelector('input[type=radio]').checked = true;
+    _estadoTerapiaSeleccionado = estado;
+}
+
+function clearEstadoTerapiaSeleccion() {
+    _estadoTerapiaSeleccionado = '';
+    document.querySelectorAll('.estado-terapia-option').forEach(opt => {
+        Object.values(ESTADO_CLASS_MAP).forEach(cls => opt.classList.remove(cls));
+        opt.querySelector('.estado-icon').style.color = '#5a7a9a';
+        opt.querySelector('.estado-label').style.color = '#5a7a9a';
+        opt.querySelector('input[type=radio]').checked = false;
+    });
+}
+
+function setEstadoTerapiaSeleccionado(estado) {
+    clearEstadoTerapiaSeleccion();
+    if (estado && ESTADO_CLASS_MAP[estado]) {
+        const el = document.querySelector(`.estado-terapia-option[data-estado="${estado}"]`);
+        if (el) seleccionarEstadoTerapia(el, estado);
+    }
+}
+
+// ═══════════════════════════════════════════
+// Toast
+// ═══════════════════════════════════════════
+function showToast(msg, type='info', clearPrevious=false) {
+    const container = document.getElementById('toastContainer');
+    if (clearPrevious) container.innerHTML = '';
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    const icons = {success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle'};
+    t.innerHTML = `<i class="fas ${icons[type]}"></i> ${msg}`;
+    container.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+}
+
+// ═══════════════════════════════════════════
+// Render table
+// ═══════════════════════════════════════════
+function renderTabla() {
+    const terapias = getTerapias();
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const filterTipo = document.getElementById('filterTipo').value;
+    const filterEstado = document.getElementById('filterEstado').value;
+    const filterTurno = document.getElementById('filterTurno').value;
+
+    let filtered = terapias.filter(t => {
+        const matchSearch = !search ||
+            (t.numeroTerapia||'').toLowerCase().includes(search) ||
+            (t.nombrePaciente||'').toLowerCase().includes(search) ||
+            (t.documentoPaciente||'').toLowerCase().includes(search) ||
+            (t.terapeuta||'').toLowerCase().includes(search) ||
+            (t.numAdmision||'').toLowerCase().includes(search) ||
+            (t.tipoTerapia||'').toLowerCase().includes(search);
+        const matchTipo = !filterTipo || t.tipoTerapia === filterTipo;
+        const matchEstado = !filterEstado || t.estadoTerapia === filterEstado;
+        const matchTurno = !filterTurno || t.turno === filterTurno;
+        return matchSearch && matchTipo && matchEstado && matchTurno;
+    });
+
+    filtered.sort((a,b) => new Date(b.fecha + 'T' + (b.hora||'00:00')) - new Date(a.fecha + 'T' + (a.hora||'00:00')));
+
+    const tbody = document.getElementById('tablaTerapias');
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="fas fa-hand-holding-medical"></i> No se encontraron terapias</td></tr>';
+    } else {
+        tbody.innerHTML = filtered.map(t => {
+            let turnoBadge = '';
+            if (t.turno === 'Mañana') turnoBadge = '<span class="badge badge-manana">Mañana</span>';
+            else if (t.turno === 'Tarde') turnoBadge = '<span class="badge badge-tarde">Tarde</span>';
+            else if (t.turno === 'Noche') turnoBadge = '<span class="badge badge-noche">Noche</span>';
+            else turnoBadge = '<span style="color:#5a7a9a">—</span>';
+
+            // Tipo badge
+            const tipoBadgeClass = {
+                'Física':'badge-fisica','Ocupacional':'badge-ocupacional','Respiratoria':'badge-respiratoria',
+                'Lenguaje':'badge-lenguaje','Nutrición':'badge-nutricion','Psicología':'badge-psicologia'
+            }[t.tipoTerapia] || '';
+            const tipoIcon = TIPO_ICON_MAP[t.tipoTerapia] || 'fa-hand-holding-medical';
+            let tipoBadge = tipoBadgeClass
+                ? `<span class="badge ${tipoBadgeClass}"><i class="fas ${tipoIcon}" style="font-size:.55rem;margin-right:3px"></i>${t.tipoTerapia}</span>`
+                : `<span style="color:#5a7a9a">—</span>`;
+
+            // Estado badge
+            const estadoBadgeClass = {
+                'Programada':'badge-programada','En Curso':'badge-encurso','Completada':'badge-completada','Suspendida':'badge-suspendida'
+            }[t.estadoTerapia] || '';
+            let estadoBadge = estadoBadgeClass
+                ? `<span class="badge ${estadoBadgeClass}">${t.estadoTerapia}</span>`
+                : `<span style="color:#5a7a9a">—</span>`;
+
+            return `
+            <tr>
+                <td><strong style="color:#00b4d8">${t.numeroTerapia||''}</strong></td>
+                <td>${t.nombrePaciente||'—'}</td>
+                <td>${tipoBadge}</td>
+                <td>${estadoBadge}</td>
+                <td>${t.terapeuta||'—'}</td>
+                <td>${t.fecha||'—'} ${turnoBadge}</td>
+                <td>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                        <button class="btn-action btn-pdf" onclick="generarPDFTerapia('${t.id}')" title="Descargar PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                        <button class="btn-action btn-edit" onclick="editarTerapia('${t.id}')" title="Editar terapia"><i class="fas fa-edit"></i> Editar</button>
+                        <button class="btn-action btn-view" onclick="verDetalle('${t.id}')" title="Ver detalle"><i class="fas fa-eye"></i></button>
+                        <button class="btn-action btn-delete" onclick="eliminarTerapia('${t.id}')" title="Eliminar terapia"><i class="fas fa-trash"></i> Eliminar</button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // Stats
+    document.getElementById('statTotal').textContent = terapias.length;
+    document.getElementById('statHoy').textContent = terapias.filter(t => t.fecha === today).length;
+    document.getElementById('statEnCurso').textContent = terapias.filter(t => t.estadoTerapia === 'En Curso').length;
+    document.getElementById('statCompletadas').textContent = terapias.filter(t => t.estadoTerapia === 'Completada').length;
+}
+
+// ═══════════════════════════════════════════
+// Open create modal
+// ═══════════════════════════════════════════
+function abrirModalCrear() {
+    document.getElementById('modalTitulo').textContent = 'Nueva Terapia';
+    // Clear patient search
+    document.getElementById('pacienteBuscar').value = '';
+    document.getElementById('pacienteId').value = '';
+    document.getElementById('pacienteInfo').className = 'patient-info-inline';
+    document.getElementById('pacienteInfo').style.display = 'none';
+    // Clear admisión fields
+    limpiarCamposAdmision();
+    // Load terapeuta dropdown
+    loadTerapeutasSelect();
+    // Clear clinical fields
+    ['fechaTerapia','horaTerapia','turnoTerapia','terapeutaSelect','frecuenciaTerapia','sesionNumero','totalSesiones',
+     'indicacionDiagnostica','objetivosTratamiento','descripcionSesion','observacionesTerapia','planProximaSesion'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    // Clear tipo de terapia
+    clearTipoSeleccion();
+    // Clear estado de terapia
+    clearEstadoTerapiaSeleccion();
+
+    // Set fecha and hora to current
+    const ahora = new Date();
+    document.getElementById('fechaTerapia').value = ahora.toISOString().split('T')[0];
+    document.getElementById('horaTerapia').value = ahora.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit', hour12:false});
+    // Auto-detect turno
+    const h = ahora.getHours();
+    if (h >= 6 && h < 14) document.getElementById('turnoTerapia').value = 'Mañana';
+    else if (h >= 14 && h < 22) document.getElementById('turnoTerapia').value = 'Tarde';
+    else document.getElementById('turnoTerapia').value = 'Noche';
+
+    document.getElementById('modalForm').dataset.editId = '';
+    document.getElementById('modalForm').classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// Edit terapia
+// ═══════════════════════════════════════════
+function editarTerapia(id) {
+    const t = getTerapias().find(x => x.id === id);
+    if (!t) return;
+    document.getElementById('modalTitulo').textContent = 'Editar Terapia';
+
+    // Populate patient search
+    const paciente = getPacientes().find(p => String(p.id) === String(t.pacienteId));
+    if (paciente) {
+        document.getElementById('pacienteBuscar').value = paciente.documento;
+        document.getElementById('pacienteId').value = String(paciente.id);
+        const infoDiv = document.getElementById('pacienteInfo');
+        infoDiv.className = 'patient-info-inline found';
+        let ingresoStr = 'N/A';
+        if (paciente.fechaIngreso) {
+            const d = new Date(paciente.fechaIngreso);
+            ingresoStr = d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+        }
+        let admStr = paciente.numAdmision ? 'Adm: ' + paciente.numAdmision + ' — ' : '';
+        infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${paciente.nombre}</strong> — ${admStr}Doc: ${paciente.documento} — EPS: ${paciente.eps||'N/A'} — Ingreso: ${ingresoStr}`;
+        llenarCamposAdmision(paciente);
+    } else {
+        document.getElementById('pacienteBuscar').value = t.documentoPaciente || t.nombrePaciente || '';
+        document.getElementById('pacienteId').value = String(t.pacienteId);
+        const infoDiv = document.getElementById('pacienteInfo');
+        infoDiv.className = 'patient-info-inline found';
+        infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${t.nombrePaciente || '—'}</strong> — Doc: ${t.documentoPaciente||'N/A'}`;
+        const savedAdm = t.admisionData || {};
+        ADM_FIELDS.forEach(fid => { const el = document.getElementById(fid); if (el) el.value = savedAdm[fid] || ''; });
+    }
+
+    // Load terapeuta dropdown with selection
+    loadTerapeutasSelect(t.terapeuta);
+
+    // Set fecha, hora, turno
+    document.getElementById('fechaTerapia').value = t.fecha || '';
+    document.getElementById('horaTerapia').value = t.hora || '';
+    document.getElementById('turnoTerapia').value = t.turno || '';
+
+    // Set tipo de terapia
+    setTipoSeleccionado(t.tipoTerapia);
+
+    // Set estado de terapia
+    setEstadoTerapiaSeleccionado(t.estadoTerapia);
+
+    // Set frecuencia and sesiones
+    document.getElementById('frecuenciaTerapia').value = t.frecuencia || '';
+    document.getElementById('sesionNumero').value = t.sesionNumero || '';
+    document.getElementById('totalSesiones').value = t.totalSesiones || '';
+
+    // Set clinical textareas
+    document.getElementById('indicacionDiagnostica').value = t.indicacionDiagnostica || '';
+    document.getElementById('objetivosTratamiento').value = t.objetivosTratamiento || '';
+    document.getElementById('descripcionSesion').value = t.descripcionSesion || '';
+    document.getElementById('observacionesTerapia').value = t.observaciones || '';
+    document.getElementById('planProximaSesion').value = t.planProximaSesion || '';
+
+    document.getElementById('modalForm').dataset.editId = id;
+    document.getElementById('modalForm').classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// Save terapia
+// ═══════════════════════════════════════════
+function guardarTerapia() {
+    const pacienteId = document.getElementById('pacienteId').value;
+    if (!pacienteId) {
+        showToast('Paciente no encontrado — busque un paciente válido antes de guardar', 'error');
+        return;
+    }
+    const paciente = getPacientes().find(p => String(p.id) === String(pacienteId));
+    if (!paciente) {
+        showToast('Paciente no encontrado — intente buscar el paciente nuevamente', 'error');
+        return;
+    }
+
+    const terapeuta = document.getElementById('terapeutaSelect').value;
+    const turno = document.getElementById('turnoTerapia').value;
+    const tipo = _tipoSeleccionado;
+    const estado = _estadoTerapiaSeleccionado;
+
+    if (!terapeuta) { showToast('Seleccione el terapeuta', 'error'); return; }
+    if (!turno) { showToast('Seleccione el turno', 'error'); return; }
+    if (!tipo) { showToast('Seleccione el tipo de terapia', 'error'); return; }
+    if (!estado) { showToast('Seleccione el estado de la terapia', 'error'); return; }
+
+    const fecha = document.getElementById('fechaTerapia').value;
+    const hora = document.getElementById('horaTerapia').value;
+    if (!fecha) { showToast('Ingrese la fecha', 'error'); return; }
+    if (!hora) { showToast('Ingrese la hora', 'error'); return; }
+
+    const descripcion = document.getElementById('descripcionSesion').value.trim();
+    if (!descripcion) {
+        showToast('Complete la descripción de la sesión', 'error');
+        return;
+    }
+
+    // Collect admisión data
+    const admData = {};
+    ADM_FIELDS.forEach(fid => { const el = document.getElementById(fid); admData[fid] = el ? el.value : ''; });
+
+    const terapias = getTerapias();
+    const editId = document.getElementById('modalForm').dataset.editId;
+
+    const data = {
+        pacienteId,
+        nombrePaciente: paciente.nombre,
+        documentoPaciente: paciente.documento,
+        numAdmision: paciente.numAdmision || '',
+        fecha, hora, turno,
+        terapeuta,
+        tipoTerapia: tipo,
+        estadoTerapia: estado,
+        frecuencia: document.getElementById('frecuenciaTerapia').value,
+        sesionNumero: document.getElementById('sesionNumero').value,
+        totalSesiones: document.getElementById('totalSesiones').value,
+        indicacionDiagnostica: document.getElementById('indicacionDiagnostica').value.trim(),
+        objetivosTratamiento: document.getElementById('objetivosTratamiento').value.trim(),
+        descripcionSesion: descripcion,
+        observaciones: document.getElementById('observacionesTerapia').value.trim(),
+        planProximaSesion: document.getElementById('planProximaSesion').value.trim(),
+        admisionData: admData
+    };
+
+    if (editId) {
+        const idx = terapias.findIndex(t => t.id === editId);
+        if (idx > -1) { Object.assign(terapias[idx], data); }
+        showToast('Terapia actualizada exitosamente', 'success');
+    } else {
+        const num = incrementContador();
+        const year = new Date().getFullYear();
+        terapias.push({
+            id: 'te_' + Date.now(),
+            numeroTerapia: 'TE-' + year + '-' + String(num).padStart(4, '0'),
+            fechaRegistro: today,
+            ...data
+        });
+        showToast('Terapia creada exitosamente', 'success');
+    }
+
+    saveTerapias(terapias);
+    cerrarModal('modalForm');
+    renderTabla();
+}
+
+// ═══════════════════════════════════════════
+// Detail view
+// ═══════════════════════════════════════════
+function verDetalle(id) {
+    const t = getTerapias().find(x => x.id === id);
+    if (!t) return;
+    document.getElementById('detalleTitulo').textContent = 'Terapia ' + (t.numeroTerapia || '');
+
+    const adm = t.admisionData || {};
+
+    const admFields = [
+        ['N° Admisión', adm.admNumAdmision],
+        ['Fecha de Ingreso', adm.admFechaIngreso],
+        ['Fecha de Nacimiento', adm.admFechaNacimiento],
+        ['Edad', adm.admEdad],
+        ['Género', adm.admGenero],
+        ['EPS', adm.admEps],
+        ['Servicio', adm.admServicio],
+        ['Habitación', adm.admHabitacion],
+        ['Médico (Admisión)', adm.admMedico],
+        ['Diagnóstico (Admisión)', adm.admDiagnostico],
+        ['Dirección Completa', adm.admDireccion],
+        ['Teléfono', adm.admTelefono],
+        ['Familiar / Acudiente', adm.admFamiliar],
+    ];
+
+    const clinicalFields = [
+        ['Número de Terapia', t.numeroTerapia],
+        ['Paciente', t.nombrePaciente],
+        ['Documento', t.documentoPaciente||'—'],
+        ['N° Admisión', t.numAdmision||'—'],
+        ['Fecha', t.fecha||'—'],
+        ['Hora', t.hora||'—'],
+        ['Turno', t.turno||'—'],
+        ['Terapeuta', t.terapeuta],
+        ['Tipo de Terapia', t.tipoTerapia||'—'],
+        ['Estado', t.estadoTerapia||'—'],
+        ['Frecuencia', t.frecuencia||'—'],
+        ['Sesión N°', t.sesionNumero ? t.sesionNumero + ' / ' + (t.totalSesiones||'?') : '—'],
+        ['Fecha de Registro', t.fechaRegistro||'—'],
+    ];
+
+    let html = '<div class="detail-section"><h3><i class="fas fa-database"></i> Datos de Admisión</h3>';
+    admFields.forEach(([l,v]) => {
+        html += `<div class="detail-field"><span class="label adm-label">${l}:</span><span class="value adm-value">${v||'—'}</span></div>`;
+    });
+    html += '</div>';
+
+    html += '<div class="detail-section"><h3><i class="fas fa-id-card"></i> Información Clínica</h3>';
+    clinicalFields.forEach(([l,v]) => {
+        let valDisplay = v;
+        if (l === 'Tipo de Terapia' && v && TIPO_COLOR_MAP[v]) {
+            valDisplay = `<span style="color:${TIPO_COLOR_MAP[v]};font-weight:600"><i class="fas ${TIPO_ICON_MAP[v]||''}" style="font-size:.7rem;vertical-align:middle;margin-right:4px"></i>${v}</span>`;
+        }
+        if (l === 'Estado' && v) {
+            const estadoColors = {'Programada':'#ffd166','En Curso':'#00b4d8','Completada':'#48c78e','Suspendida':'#ff3860'};
+            valDisplay = `<span style="color:${estadoColors[v]||'#c8d6e5'};font-weight:600"><i class="fas fa-circle" style="font-size:.5rem;vertical-align:middle;margin-right:4px"></i>${v}</span>`;
+        }
+        html += `<div class="detail-field"><span class="label">${l}:</span><span class="value">${valDisplay||'—'}</span></div>`;
+    });
+    html += '</div>';
+
+    // Clinical text blocks
+    const textBlocks = [
+        ['Indicación Diagnóstica / Terapéutica', t.indicacionDiagnostica, 'fa-stethoscope'],
+        ['Objetivos del Tratamiento', t.objetivosTratamiento, 'fa-bullseye'],
+        ['Descripción de la Sesión', t.descripcionSesion, 'fa-clipboard-list'],
+        ['Observaciones', t.observaciones, 'fa-eye'],
+        ['Plan Próxima Sesión', t.planProximaSesion, 'fa-calendar-check'],
+    ];
+
+    textBlocks.forEach(([title, content, icon]) => {
+        if (content) {
+            html += `<div class="detail-section"><h3><i class="fas ${icon}"></i> ${title}</h3>`;
+            html += `<div class="detail-text-block">${content}</div></div>`;
+        }
+    });
+
+    document.getElementById('detalleContenido').innerHTML = html;
+    document.getElementById('modalDetalle').dataset.terapiaId = id;
+    document.getElementById('modalDetalle').classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// PDF Download — generates printable HTML
+// ═══════════════════════════════════════════
+function descargarPDF() {
+    const modal = document.getElementById('modalDetalle');
+    const tid = modal.dataset.terapiaId;
+    const t = getTerapias().find(x => x.id === tid);
+    if (!t) { showToast('No se encontró la terapia', 'error'); return; }
+
+    const adm = t.admisionData || {};
+
+    function row(label, value) {
+        return `<tr><td style="padding:6px 10px;border:1px solid #ccc;font-weight:600;color:#333;width:220px">${label}</td><td style="padding:6px 10px;border:1px solid #ccc;color:#555">${value || '—'}</td></tr>`;
+    }
+
+    const tipoColors = {'Física':'#0077b6','Ocupacional':'#90e0ef','Respiratoria':'#00b4d8','Lenguaje':'#48c78e','Nutrición':'#ffb700','Psicología':'#b266ff'};
+    const estadoColors = {'Programada':'#ffd166','En Curso':'#00b4d8','Completada':'#48c78e','Suspendida':'#ff3860'};
+
+    let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>TE ${t.numeroTerapia}</title>
+    <style>
+      @page{size:A4;margin:15mm}
+      body{font-family:Arial,Helvetica,sans-serif;color:#222;margin:0;padding:10px;font-size:12px}
+      h1{color:#14375a;font-size:18px;margin:0 0 4px}
+      h2{color:#14375a;font-size:15px;margin:14px 0 6px}
+      table{width:100%;border-collapse:collapse;margin-bottom:8px}
+      td{padding:6px 10px;border:1px solid #ccc;font-size:11px}
+      .header-bar{background:#14375a;color:#fff;padding:10px 16px;border-radius:6px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+      .header-bar h1{color:#fff;font-size:16px;margin:0}
+      .header-bar span{color:#90e0ef;font-size:11px}
+      .section-title{background:#e8f0f8;color:#14375a;font-weight:700;padding:8px 10px;border-radius:4px;margin:14px 0 8px;font-size:12px}
+      .text-block{border:1px solid #ccc;border-radius:4px;padding:10px;margin-bottom:10px;white-space:pre-wrap;font-size:11px;color:#444;min-height:40px}
+      .badge-pdf{display:inline-block;padding:4px 14px;border-radius:20px;font-weight:700;font-size:11px;color:#fff}
+      .footer{margin-top:20px;border-top:1px solid #ccc;padding-top:8px;font-size:10px;color:#888;text-align:center}
+    </style></head><body>`;
+
+    // Header
+    html += encabezadoIPS('Terapia', t.numeroTerapia || '');
+
+    // Admisión
+    html += `<div class="section-title">DATOS DE ADMISIÓN</div><table>`;
+    html += row('N° Admisión', adm.admNumAdmision);
+    html += row('Fecha de Ingreso', adm.admFechaIngreso);
+    html += row('Fecha de Nacimiento', adm.admFechaNacimiento);
+    html += row('Edad', adm.admEdad);
+    html += row('Género', adm.admGenero);
+    html += row('EPS', adm.admEps);
+    html += row('Servicio', adm.admServicio);
+    html += row('Habitación', adm.admHabitacion);
+    html += row('Médico (Admisión)', adm.admMedico);
+    html += row('Diagnóstico (Admisión)', adm.admDiagnostico);
+    html += row('Dirección Completa', adm.admDireccion);
+    html += row('Teléfono', adm.admTelefono);
+    html += row('Familiar / Acudiente', adm.admFamiliar);
+    html += `</table>`;
+
+    // Clinical info
+    html += `<div class="section-title">INFORMACIÓN DE TERAPIA</div><table>`;
+    html += row('Número de Terapia', t.numeroTerapia);
+    html += row('Paciente', t.nombrePaciente);
+    html += row('Documento', t.documentoPaciente);
+    html += row('N° Admisión', t.numAdmision);
+    html += row('Fecha', t.fecha);
+    html += row('Hora', t.hora);
+    html += row('Turno', t.turno);
+    html += row('Terapeuta', t.terapeuta);
+    const tipoColor = tipoColors[t.tipoTerapia] || '#333';
+    html += row('Tipo de Terapia', `<span class="badge-pdf" style="background:${tipoColor}">${t.tipoTerapia||'—'}</span>`);
+    const estColor = estadoColors[t.estadoTerapia] || '#333';
+    html += row('Estado', `<span class="badge-pdf" style="background:${estColor}">${t.estadoTerapia||'—'}</span>`);
+    html += row('Frecuencia', t.frecuencia);
+    html += row('Sesión N°', t.sesionNumero ? t.sesionNumero + ' / ' + (t.totalSesiones||'?') : '—');
+    html += row('Fecha de Registro', t.fechaRegistro);
+    html += `</table>`;
+
+    // Text blocks
+    const sections = [
+        ['INDICACIÓN DIAGNÓSTICA / TERAPÉUTICA', t.indicacionDiagnostica],
+        ['OBJETIVOS DEL TRATAMIENTO', t.objetivosTratamiento],
+        ['DESCRIPCIÓN DE LA SESIÓN', t.descripcionSesion],
+        ['OBSERVACIONES', t.observaciones],
+        ['PLAN PRÓXIMA SESIÓN', t.planProximaSesion],
+    ];
+
+    sections.forEach(([title, content]) => {
+        if (content) {
+            html += `<div class="section-title">${title}</div>`;
+            html += `<div class="text-block">${content}</div>`;
+        }
+    });
+
+    // Footer
+    html += pieIPS();
+    html += `</body></html>`;
+
+    const printWin = window.open('', '_blank', 'width=900,height=700');
+    printWin.document.write(html);
+    printWin.document.close();
+    printWin.focus();
+    setTimeout(() => { printWin.print(); }, 400);
+}
+
+// Direct PDF from table row
+function generarPDFTerapia(id) {
+    const t = getTerapias().find(x => x.id === id);
+    if (!t) { showToast('No se encontró la terapia', 'error'); return; }
+    document.getElementById('modalDetalle').dataset.terapiaId = id;
+    descargarPDF();
+}
+
+// ═══════════════════════════════════════════
+// Delete terapia
+// ═══════════════════════════════════════════
+function eliminarTerapia(id) {
+    if (!confirm('¿Eliminar esta terapia? Esta acción no se puede deshacer.')) return;
+    const terapias = getTerapias().filter(t => t.id !== id);
+    saveTerapias(terapias);
+    showToast('Terapia eliminada', 'success');
+    renderTabla();
+}
+
+// Modal close
+function cerrarModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// Events
+document.getElementById('searchInput').addEventListener('input', renderTabla);
+document.getElementById('filterTipo').addEventListener('change', renderTabla);
+document.getElementById('filterEstado').addEventListener('change', renderTabla);
+document.getElementById('filterTurno').addEventListener('change', renderTabla);
+
+// Init
+renderTabla();
+</script>
+
+    <!-- MATRIZ GLOBAL DE PERMISOS -->
+    <script>
+        (function () {
+            function aplicar() {
+                if (!window.NX) return;
+                NX.iniciar('terapia', { C: ['abrirModalCrear'], E: ['editarTerapia', 'guardarTerapia'], B: ['eliminarTerapia'] });
+                NX.filtrarNavegacion();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', aplicar);
+            } else { aplicar(); }
+        })();
+    
+/* ════════════════════════════════════════════════════════════
+   DATOS DE LA IPS EN PDF / IMPRESIONES
+   Lee la información guardada en Configuración → Información de la IPS
+   ════════════════════════════════════════════════════════════ */
+function obtenerDatosIPS() {
+  try {
+    var h = JSON.parse(localStorage.getItem('nexus_hospital') || '{}');
+    return h && typeof h === 'object' ? h : {};
+  } catch (e) { return {}; }
+}
+
+function escaparIPS(txt) {
+  return String(txt == null ? '' : txt)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* Encabezado institucional (logo + datos de la IPS) para documentos HTML imprimibles */
+function encabezadoIPS(tituloDoc, refDoc) {
+  var h = obtenerDatosIPS();
+  var nombre = escaparIPS(h.nombre || 'NEXUSMED IPS Domiciliaria');
+  var lineas = [];
+  if (h.direccion) lineas.push(escaparIPS(h.direccion));
+  var contacto = [];
+  if (h.telefono) contacto.push('Tel: ' + escaparIPS(h.telefono));
+  if (h.email) contacto.push(escaparIPS(h.email));
+  if (contacto.length) lineas.push(contacto.join(' &nbsp;·&nbsp; '));
+  var legal = [];
+  if (h.nit) legal.push('NIT: ' + escaparIPS(h.nit));
+  if (h.codigo) legal.push('Cód. Habilitación: ' + escaparIPS(h.codigo));
+  if (legal.length) lineas.push(legal.join(' &nbsp;·&nbsp; '));
+
+  var logoHtml = '';
+  if (h.logo && String(h.logo).indexOf('data:image') === 0) {
+    logoHtml = '<td style="width:110px;vertical-align:middle;border:none;padding:0 12px 0 0">' +
+               '<img src="' + escaparIPS(h.logo) + '" alt="Logo de la IPS" style="max-width:100px;max-height:62px;object-fit:contain">' +
+               '</td>';
+  }
+
+  var derecha = '';
+  if (tituloDoc || refDoc) {
+    derecha = '<td style="vertical-align:middle;border:none;text-align:right;padding:0">' +
+              (tituloDoc ? '<div style="font-size:12px;font-weight:700;color:#14375a;text-transform:uppercase;letter-spacing:.5px">' + escaparIPS(tituloDoc) + '</div>' : '') +
+              (refDoc ? '<div style="font-size:10px;color:#666;margin-top:3px">' + escaparIPS(refDoc) + '</div>' : '') +
+              '</td>';
+  }
+
+  return '<table style="width:100%;border-collapse:collapse;border:none;margin:0 0 10px"><tr>' +
+    logoHtml +
+    '<td style="vertical-align:middle;border:none;padding:0">' +
+      '<div style="font-size:15px;font-weight:700;color:#14375a;line-height:1.2">' + nombre + '</div>' +
+      (lineas.length ? '<div style="font-size:10px;color:#555;line-height:1.5;margin-top:3px">' + lineas.join('<br>') + '</div>' : '') +
+    '</td>' +
+    derecha +
+  '</tr></table><div style="border-bottom:2px solid #14375a;margin-bottom:12px"></div>';
+}
+
+/* Pie de página institucional */
+function pieIPS() {
+  var h = obtenerDatosIPS();
+  var nombre = escaparIPS(h.nombre || 'NEXUSMED IPS Domiciliaria');
+  var datos = [];
+  if (h.nit) datos.push('NIT: ' + escaparIPS(h.nit));
+  if (h.codigo) datos.push('Cód. Habilitación: ' + escaparIPS(h.codigo));
+  if (h.telefono) datos.push('Tel: ' + escaparIPS(h.telefono));
+  if (h.direccion) datos.push(escaparIPS(h.direccion));
+  var f = new Date();
+  return '<div style="margin-top:20px;border-top:1px solid #ccc;padding-top:8px;font-size:9.5px;color:#777;text-align:center;line-height:1.6">' +
+    '<strong>' + nombre + '</strong>' + (datos.length ? '<br>' + datos.join(' &nbsp;·&nbsp; ') : '') +
+    '<br>Documento generado el ' + f.toLocaleDateString('es-ES') + ' a las ' + f.toLocaleTimeString('es-ES') + ' por NEXUSMED' +
+    '</div>';
+}
+
+</script>
+</body>
+</html>
