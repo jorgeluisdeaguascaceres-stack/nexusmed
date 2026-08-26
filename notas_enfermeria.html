@@ -89,6 +89,14 @@ tr:hover td{background:rgba(0,180,216,.03)}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#00b4d8}
 .form-group textarea{resize:vertical;min-height:80px}
 
+/* Identidad del paciente — destacada */
+.identity-banner{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:15px;background:linear-gradient(135deg,rgba(0,180,216,.12),rgba(0,180,216,.03));border:1px solid #00b4d8;border-radius:10px;padding:14px 16px;margin:4px 0 2px}
+.identity-banner .form-group{margin:0}
+.identity-banner label{display:block;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:#00b4d8;margin-bottom:6px;font-weight:700}
+.identity-banner input{width:100%;box-sizing:border-box;background:rgba(10,22,40,.75)!important;border:1px solid #1a3a5c!important;color:#e8f6fb!important;font-size:1.02rem!important;font-weight:700!important;padding:11px 12px;border-radius:8px;cursor:default;opacity:1!important}
+.identity-banner input::placeholder{color:#5a7a9a;font-weight:400}
+@media(max-width:768px){.identity-banner{grid-template-columns:1fr}}
+
 /* Read-only fields from admisión */
 .form-group input.readonly-adm,.form-group select.readonly-adm,.form-group textarea.readonly-adm{
   background:rgba(0,180,216,.04);
@@ -476,6 +484,18 @@ tr:hover td{background:rgba(0,180,216,.03)}
         </div>
 
         <!-- ═══ ADMISIÓN DATA SECTION ═══ -->
+        <!-- ═══ IDENTIDAD DEL PACIENTE ═══ -->
+        <div class="identity-banner">
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Nombre Completo del Paciente</label>
+            <input type="text" id="admNombreCompleto" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-id-card"></i> Documento / Cédula</label>
+            <input type="text" id="admDocumento" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+          </div>
+        </div>
+
         <div class="adm-section-header">
           <i class="fas fa-database"></i>
           <span>Datos de Admisión (solo lectura — provienen del registro de admisión)</span>
@@ -768,12 +788,15 @@ const today = new Date().toISOString().split('T')[0];
 // Admisión field IDs for auto-populate
 // ═══════════════════════════════════════════
 const ADM_FIELDS = [
+    'admNombreCompleto','admDocumento',
     'admNumAdmision','admFechaIngreso','admFechaNacimiento','admEdad',
     'admGenero','admEps','admServicio','admHabitacion',
     'admMedico','admDiagnostico','admDireccion','admTelefono','admFamiliar'
 ];
 
 const ADM_MAP = {
+    nombre: 'admNombreCompleto',
+    documento: 'admDocumento',
     numAdmision: 'admNumAdmision',
     fechaIngreso: 'admFechaIngreso',
     fechaNacimiento: 'admFechaNacimiento',
@@ -794,6 +817,8 @@ function limpiarCamposAdmision() {
 }
 
 function llenarCamposAdmision(p) {
+    document.getElementById('admNombreCompleto').value = p.nombre || '';
+    document.getElementById('admDocumento').value = p.documento || '';
     document.getElementById('admNumAdmision').value = p.numAdmision || '';
     if (p.fechaIngreso) {
         const d = new Date(p.fechaIngreso);
@@ -1166,6 +1191,11 @@ function editarNota(id) {
         infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${n.nombrePaciente}</strong> — Doc: ${n.documentoPaciente||'N/A'} — Ingreso: N/A`;
         const savedAdm = n.admisionData || {};
         ADM_FIELDS.forEach(fid => { const el = document.getElementById(fid); if (el) el.value = savedAdm[fid] || ''; });
+        // Respaldo de identidad para registros antiguos
+        var _idN = document.getElementById('admNombreCompleto');
+        var _idD = document.getElementById('admDocumento');
+        if (_idN && !_idN.value) _idN.value = n.nombrePaciente || '';
+        if (_idD && !_idD.value) _idD.value = n.documentoPaciente || '';
     }
 
     // Load enfermera dropdown with selection
@@ -1290,6 +1320,8 @@ function verDetalle(id) {
 
     const adm = n.admisionData || {};
     const admFields = [
+        ['Nombre Completo', adm.admNombreCompleto],
+        ['Documento / Cédula', adm.admDocumento],
         ['N° Admisión', adm.admNumAdmision],
         ['Fecha de Ingreso', adm.admFechaIngreso],
         ['Fecha de Nacimiento', adm.admFechaNacimiento],
@@ -1418,6 +1450,8 @@ function descargarPDF() {
 
     // Admisión
     html += `<div class="section-title">DATOS DE ADMISIÓN</div><table>`;
+    html += row('Nombre Completo', adm.admNombreCompleto);
+    html += row('Documento / Cédula', adm.admDocumento);
     html += row('N° Admisión', adm.admNumAdmision);
     html += row('Fecha de Ingreso', adm.admFechaIngreso);
     html += row('Fecha de Nacimiento', adm.admFechaNacimiento);

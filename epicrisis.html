@@ -85,6 +85,14 @@ tr:hover td{background:rgba(0,180,216,.03)}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#00b4d8}
 .form-group textarea{resize:vertical;min-height:80px}
 
+/* Identidad del paciente — destacada */
+.identity-banner{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:15px;background:linear-gradient(135deg,rgba(0,180,216,.12),rgba(0,180,216,.03));border:1px solid #00b4d8;border-radius:10px;padding:14px 16px;margin:4px 0 2px}
+.identity-banner .form-group{margin:0}
+.identity-banner label{display:block;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:#00b4d8;margin-bottom:6px;font-weight:700}
+.identity-banner input{width:100%;box-sizing:border-box;background:rgba(10,22,40,.75)!important;border:1px solid #1a3a5c!important;color:#e8f6fb!important;font-size:1.02rem!important;font-weight:700!important;padding:11px 12px;border-radius:8px;cursor:default;opacity:1!important}
+.identity-banner input::placeholder{color:#5a7a9a;font-weight:400}
+@media(max-width:768px){.identity-banner{grid-template-columns:1fr}}
+
 /* Read-only fields from admisión */
 .form-group input.readonly-adm,.form-group select.readonly-adm,.form-group textarea.readonly-adm{
   background:rgba(0,180,216,.04);border:1px solid #14375a;color:#7ab8d4;cursor:default;opacity:.88
@@ -413,6 +421,18 @@ tr:hover td{background:rgba(0,180,216,.03)}
         </div>
 
         <!-- Admisión Data -->
+        <!-- ═══ IDENTIDAD DEL PACIENTE ═══ -->
+        <div class="identity-banner">
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Nombre Completo del Paciente</label>
+            <input type="text" id="admNombreCompleto" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-id-card"></i> Documento / Cédula</label>
+            <input type="text" id="admDocumento" class="readonly-adm" readonly tabindex="-1" placeholder="—">
+          </div>
+        </div>
+
         <div class="adm-section-header"><i class="fas fa-door-open"></i><span>Datos de la Admisión</span></div>
 
         <div class="form-group">
@@ -737,12 +757,15 @@ const CIE10 = [
 // ADM_FIELDS & ADM_MAP
 // ═══════════════════════════════════════════
 const ADM_FIELDS = [
+  'admNombreCompleto','admDocumento',
   'admNumAdmision','admFechaIngreso','admFechaNacimiento','admEdad',
   'admGenero','admEps','admServicio','admHabitacion',
   'admMedico','admDiagnostico','admDireccion','admTelefono','admFamiliar'
 ];
 
 const ADM_MAP = {
+  nombre: 'admNombreCompleto',
+  documento: 'admDocumento',
   numAdmision: 'admNumAdmision',
   fechaIngreso: 'admFechaIngreso',
   fechaNacimiento: 'admFechaNacimiento',
@@ -939,6 +962,8 @@ function limpiarCamposAdmision() {
 }
 
 function llenarCamposAdmision(p) {
+  document.getElementById('admNombreCompleto').value = p.nombre || '';
+  document.getElementById('admDocumento').value = p.documento || '';
   document.getElementById('admNumAdmision').value = p.numAdmision || '';
   if (p.fechaIngreso) {
     const d = new Date(p.fechaIngreso);
@@ -1386,9 +1411,14 @@ function editarEpicrisis(id) {
   if (epi.admData) {
     ADM_FIELDS.forEach(function(fid) {
       var el = document.getElementById(fid);
-      if (el) el.value = epi.admData[fid] || '';
+      if (el && epi.admData[fid]) el.value = epi.admData[fid];
     });
   }
+  // Respaldo de identidad para registros antiguos
+  var _idN = document.getElementById('admNombreCompleto');
+  var _idD = document.getElementById('admDocumento');
+  if (_idN && !_idN.value) _idN.value = epi.pacienteNombre || '';
+  if (_idD && !_idD.value) _idD.value = epi.pacienteDocumento || '';
 
   // CIE-10 Ingreso
   document.getElementById('cie10IngresoDisplay').value = epi.dxIngresoDisplay || '';
@@ -1453,7 +1483,7 @@ function verDetalle(id) {
   html += '<h3><i class="fas fa-door-open"></i> Datos de Admisión</h3>';
   if (epi.admData) {
     const admLabels = {
-      admNumAdmision: 'N° Admisión',
+      admNombreCompleto: 'Nombre Completo', admDocumento: 'Documento / Cédula', admNumAdmision: 'N° Admisión',
       admFechaIngreso: 'Fecha Ingreso',
       admFechaNacimiento: 'Fecha Nacimiento',
       admEdad: 'Edad',
@@ -1622,7 +1652,7 @@ function descargarPDF() {
   // Admisión data
   if (epi.admData) {
     html += '<h2>Datos de Admisión</h2>';
-    var admLabels = { admNumAdmision:'N° Admisión', admFechaIngreso:'Fecha Ingreso', admFechaNacimiento:'Fecha Nacimiento', admEdad:'Edad', admGenero:'Género', admEps:'EPS', admServicio:'Servicio', admHabitacion:'Habitación', admMedico:'Médico Tratante', admDiagnostico:'Diagnóstico', admDireccion:'Dirección', admTelefono:'Teléfono', admFamiliar:'Familiar' };
+    var admLabels = { admNombreCompleto:'Nombre Completo', admDocumento:'Documento / Cédula', admNumAdmision:'N° Admisión', admFechaIngreso:'Fecha Ingreso', admFechaNacimiento:'Fecha Nacimiento', admEdad:'Edad', admGenero:'Género', admEps:'EPS', admServicio:'Servicio', admHabitacion:'Habitación', admMedico:'Médico Tratante', admDiagnostico:'Diagnóstico', admDireccion:'Dirección', admTelefono:'Teléfono', admFamiliar:'Familiar' };
     for (var key in admLabels) {
       if (epi.admData[key]) html += '<div class="field"><span class="label">' + admLabels[key] + ':</span><span class="value">' + epi.admData[key] + '</span></div>';
     }
