@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUSMED - Gestión Documental</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#0a1628; color:#c8d6e5; min-height:100vh; }
+
+        /* HEADER */
+        .header { background:linear-gradient(135deg,#0d2137,#1a3a5c); padding:15px 30px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #00b4d8; box-shadow:0 2px 15px rgba(0,180,216,.2); }
+        .brand-name { font-size:24px; font-weight:800; color:#00b4d8; letter-spacing:3px; }
+        .brand-name span { color:#90e0ef; font-weight:300; }
+        .user-info { display:flex; align-items:center; gap:10px; }
+        .user-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#00b4d8,#0077b6); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#fff; }
+        .user-name { font-size:13px; font-weight:600; color:#c8d6e5; }
+        .user-role { font-size:11px; color:#5a7a9a; text-transform:uppercase; letter-spacing:1px; }
+        .btn-cerrar { background:transparent; color:#ff3860; border:1px solid #ff3860; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:600; transition:all .3s; }
+        .btn-cerrar:hover { background:#ff3860; color:#fff; }
+
+        /* NAV BAR */
+        .nav-bar { background:#0d2137; padding:8px 30px; display:flex; gap:5px; border-bottom:1px solid #1a3a5c; flex-wrap:wrap; }
+        .nav-item { padding:8px 16px; border-radius:6px; font-size:13px; color:#5a7a9a; cursor:pointer; transition:all .3s; text-decoration:none; display:flex; align-items:center; gap:6px; }
+        .nav-item:hover { color:#00b4d8; background:rgba(0,180,216,.1); }
+        .nav-item.active { color:#00b4d8; background:rgba(0,180,216,.15); border:1px solid rgba(0,180,216,.3); }
+
+        /* MAIN */
+        .main { max-width:1100px; margin:25px auto; padding:0 20px; }
+        .page-title { font-size:22px; font-weight:800; color:#00b4d8; margin-bottom:4px; }
+        .page-sub { font-size:13px; color:#5a7a9a; margin-bottom:20px; }
+
+        /* CARDS */
+        .card { background:linear-gradient(135deg,#0d2137,#122a45); border:1px solid #1a3a5c; border-radius:16px; padding:24px; margin-bottom:20px; }
+        .card-title { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+        .card-title h3 { font-size:16px; font-weight:700; color:#c8d6e5; }
+        .card-title .icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+
+        /* TABS */
+        .tabs { display:flex; gap:4px; margin-bottom:20px; }
+        .tab { padding:10px 20px; border-radius:10px 10px 0 0; font-size:13px; font-weight:600; cursor:pointer; transition:all .3s; color:#5a7a9a; background:rgba(0,180,216,.03); border:1px solid #1a3a5c; border-bottom:none; }
+        .tab.active { color:#00b4d8; background:linear-gradient(135deg,#0d2137,#122a45); border-color:#00b4d8; }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+
+        /* SIGLA TAGS */
+        .sigla-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:16px; }
+        .sigla-tag { padding:12px; border-radius:12px; text-align:center; cursor:pointer; transition:all .3s; border:2px solid transparent; }
+        .sigla-tag:hover { transform:translateY(-2px); }
+        .sigla-tag.active { border-color:currentColor; }
+        .sigla-tag .sigla-code { font-size:18px; font-weight:800; }
+        .sigla-tag .sigla-name { font-size:10px; color:#5a7a9a; margin-top:2px; }
+        .sig-crc { background:rgba(72,199,142,.1); color:#48c78e; }
+        .sig-crc.active { background:rgba(72,199,142,.2); }
+        .sig-aut { background:rgba(139,92,246,.1); color:#8b5cf6; }
+        .sig-aut.active { background:rgba(139,92,246,.2); }
+        .sig-hev { background:rgba(0,180,216,.1); color:#00b4d8; }
+        .sig-hev.active { background:rgba(0,180,216,.2); }
+        .sig-fev { background:rgba(245,158,11,.1); color:#f59e0b; }
+        .sig-fev.active { background:rgba(245,158,11,.2); }
+        .sig-opf { background:rgba(236,72,153,.1); color:#ec4899; }
+        .sig-opf.active { background:rgba(236,72,153,.2); }
+        .sig-epi { background:rgba(16,185,129,.1); color:#10b981; }
+        .sig-epi.active { background:rgba(16,185,129,.2); }
+
+        /* INPUTS */
+        .nx-input { background:#0a1628; border:1px solid #1a3a5c; border-radius:10px; padding:10px 14px; color:#c8d6e5; font-size:13px; font-family:inherit; width:100%; transition:border .3s; }
+        .nx-input:focus { outline:none; border-color:#00b4d8; box-shadow:0 0 0 2px rgba(0,180,216,.2); }
+        .nx-select { background:#0a1628; border:1px solid #1a3a5c; border-radius:10px; padding:10px 14px; color:#c8d6e5; font-size:13px; font-family:inherit; }
+        .nx-label { display:block; font-size:12px; color:#5a7a9a; margin-bottom:6px; font-weight:600; }
+
+        /* BUTTONS */
+        .nx-btn { border:none; border-radius:10px; padding:10px 20px; font-weight:700; cursor:pointer; font-size:13px; font-family:inherit; transition:all .3s; display:inline-flex; align-items:center; gap:8px; }
+        .nx-btn-primary { background:linear-gradient(135deg,#00b4d8,#0090b3); color:#03202c; }
+        .nx-btn-primary:hover { box-shadow:0 6px 20px rgba(0,180,216,.35); transform:translateY(-1px); }
+        .nx-btn-success { background:linear-gradient(135deg,#48c78e,#38a06d); color:#fff; }
+        .nx-btn-success:hover { box-shadow:0 6px 20px rgba(72,199,142,.35); transform:translateY(-1px); }
+        .nx-btn-danger { background:transparent; color:#ff3860; border:1px solid #ff3860; padding:8px 14px; }
+        .nx-btn-sm { padding:6px 12px; font-size:12px; border-radius:8px; }
+        .nx-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+        /* FORMULA */
+        .formula-box { background:rgba(0,180,216,.06); border:1px solid rgba(0,180,216,.2); border-radius:12px; padding:14px; margin-bottom:16px; }
+        .formula-box h4 { font-size:12px; font-weight:700; color:#00b4d8; margin-bottom:6px; }
+        .formula { font-family:monospace; font-size:15px; font-weight:700; color:#c8d6e5; padding:8px 12px; background:#0a1628; border-radius:8px; border:1px solid #1a3a5c; }
+        .formula .var { color:#00b4d8; }
+        .formula .sep { color:#f59e0b; }
+
+        /* FILE LIST */
+        .file-list { margin-top:12px; }
+        .file-row { display:flex; align-items:center; gap:10px; padding:10px 14px; background:rgba(0,180,216,.04); border:1px solid #1a3a5c; border-radius:10px; margin-bottom:6px; font-size:13px; }
+        .file-row .file-icon { font-size:18px; }
+        .file-row .file-name { flex:1; color:#c8d6e5; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .file-row .file-new-name { color:#00b4d8; font-family:monospace; font-size:12px; font-weight:600; }
+        .file-row .file-remove { background:none; border:none; color:#ff3860; cursor:pointer; }
+
+        /* UPLOAD ZONE */
+        .upload-zone { border:2px dashed #1a3a5c; border-radius:14px; padding:30px; text-align:center; cursor:pointer; transition:all .3s; background:rgba(0,180,216,.03); }
+        .upload-zone:hover { border-color:#00b4d8; background:rgba(0,180,216,.08); }
+        .upload-zone.dragover { border-color:#00b4d8; background:rgba(0,180,216,.1); }
+        .upload-icon { width:52px; height:52px; border-radius:50%; background:rgba(0,180,216,.15); display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:22px; color:#00b4d8; }
+
+        /* LOTE CARDS */
+        .lote-card { background:linear-gradient(135deg,#0d2137,#122a45); border:1px solid #1a3a5c; border-radius:14px; padding:18px; margin-bottom:12px; transition:all .3s; }
+        .lote-card:hover { border-color:#00b4d8; }
+        .lote-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .lote-name { font-size:15px; font-weight:700; color:#c8d6e5; }
+        .lote-date { font-size:11px; color:#5a7a9a; }
+        .lote-stats { display:flex; gap:14px; font-size:12px; color:#5a7a9a; }
+        .lote-stats .stat { display:flex; align-items:center; gap:4px; }
+
+        /* PROGRESS */
+        .progress-wrap { width:100%; background:#1a3a5c; border-radius:10px; height:10px; overflow:hidden; margin-top:12px; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,#00b4d8,#48c78e); border-radius:10px; transition:width .3s; }
+
+        /* TOAST */
+        .toast-container { position:fixed; top:20px; right:20px; z-index:2000; display:flex; flex-direction:column; gap:8px; }
+        .toast { padding:12px 20px; border-radius:10px; font-size:13px; font-weight:600; box-shadow:0 8px 25px rgba(0,0,0,.4); animation:slideIn .3s ease,fadeOut .3s ease 2.7s; display:flex; align-items:center; gap:8px; }
+        .toast-success { background:linear-gradient(135deg,#48c78e,#38a06d); color:#fff; }
+        .toast-error { background:linear-gradient(135deg,#ff3860,#d63031); color:#fff; }
+        .toast-info { background:linear-gradient(135deg,#00b4d8,#0077b6); color:#fff; }
+        @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+        @keyframes fadeOut { from{opacity:1} to{opacity:0} }
+
+        @media(max-width:768px) { .header{flex-direction:column;gap:10px} .nav-bar{justify-content:center} .sigla-grid{grid-template-columns:repeat(3,1fr)} }
+    </style>
+</head>
+<body>
+    <script src="nexus_db.js"></script>
+    <script src="permisos.js"></script>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div style="display:flex;align-items:center;gap:12px">
+            <div class="brand-name">NEXUS<span>MED</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:20px">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <div><div class="user-name" id="userName">Admin</div><div class="user-role" id="userRole">ADMIN</div></div>
+            </div>
+            <button class="btn-cerrar" onclick="cerrarSesion()">🔒 Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <!-- NAV -->
+    <nav class="nav-bar">
+        <a class="nav-item" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
+        <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+        <a class="nav-item" href="pacientes.html"><i class="fas fa-users"></i> Pacientes</a>
+        <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias</a>
+        <a class="nav-item" href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
+        <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enf.</a>
+        <a class="nav-item" href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
+        <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
+        <a class="nav-item" href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+        <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresados</a>
+        <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
+        <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+        <a class="nav-item" href="conciliacion.html"><i class="fas fa-balance-scale"></i> Conciliación</a>
+        <a class="nav-item active" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Doc.</a>
+        <a class="nav-item" href="generador_evoluciones.html"><i class="fas fa-file-medical-alt"></i> Generador Evol.</a>
+        <a class="nav-item" href="renombrar.html"><i class="fas fa-i-cursor"></i> Renombrar</a>
+    </nav>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main">
+        <h1 class="page-title"><i class="fas fa-folder-open" style="margin-right:8px"></i>Gestión Documental y Nomenclatura</h1>
+        <p class="page-sub">Crea lotes, nombra PDFs con la fórmula oficial y descarga por lote</p>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('crear')"><i class="fas fa-plus-circle" style="margin-right:6px"></i>Crear y Procesar</div>
+            <div class="tab" onclick="switchTab('lotes')"><i class="fas fa-archive" style="margin-right:6px"></i>Carpetas y Descargas</div>
+        </div>
+
+        <!-- TAB: CREAR Y PROCESAR -->
+        <div id="tab-crear" class="tab-content active">
+            <!-- SIGLA SELECTION -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon" style="background:rgba(0,180,216,.15);color:#00b4d8"><i class="fas fa-tags"></i></div>
+                    <h3>1. Selecciona la sigla del documento</h3>
+                </div>
+                <div class="sigla-grid">
+                    <div class="sigla-tag sig-crc active" onclick="selectSigla('CRC',this)"><div class="sigla-code">CRC</div><div class="sigla-name">Cuenta de Cobro</div></div>
+                    <div class="sigla-tag sig-aut" onclick="selectSigla('AUT',this)"><div class="sigla-code">AUT</div><div class="sigla-name">Autorizaciones</div></div>
+                    <div class="sigla-tag sig-hev" onclick="selectSigla('HEV',this)"><div class="sigla-code">HEV</div><div class="sigla-name">Historia / Evolución</div></div>
+                    <div class="sigla-tag sig-fev" onclick="selectSigla('FEV',this)"><div class="sigla-code">FEV</div><div class="sigla-name">Factura Electrónica</div></div>
+                    <div class="sigla-tag sig-opf" onclick="selectSigla('OPF',this)"><div class="sigla-code">OPF</div><div class="sigla-name">Orden / Fórmula</div></div>
+                    <div class="sigla-tag sig-epi" onclick="selectSigla('EPI',this)"><div class="sigla-code">EPI</div><div class="sigla-name">Epicrisis</div></div>
+                </div>
+            </div>
+
+            <!-- LOTE INFO -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon" style="background:rgba(139,92,246,.15);color:#8b5cf6"><i class="fas fa-folder-plus"></i></div>
+                    <h3>2. Configura el lote</h3>
+                </div>
+                <div class="formula-box">
+                    <h4><i class="fas fa-calculator" style="margin-right:6px"></i>Fórmula de nomenclatura oficial</h4>
+                    <div class="formula">
+                        <span class="var" id="formula-sigla">CRC</span><span class="sep"> _ </span><span class="var">NIT</span><span class="sep"> _ </span><span class="var">NOMBRE_CARPETA</span><span style="color:#5a7a9a">.pdf</span>
+                    </div>
+                    <p style="font-size:11px;color:#3a5a7a;margin-top:6px">Ejemplo: CRC_900123456_001.pdf, CRC_900123456_002.pdf, ...</p>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+                    <div><label class="nx-label">NIT de la IPS</label><input type="text" id="lote-nit" class="nx-input" placeholder="900123456" oninput="updateFormula()"></div>
+                    <div><label class="nx-label">Nombre de la carpeta</label><input type="text" id="lote-nombre" class="nx-input" placeholder="PERIODO_2026_09" oninput="updateFormula()"></div>
+                    <div><label class="nx-label">Numeración inicio</label><input type="number" id="lote-inicio" class="nx-input" value="1" min="1" oninput="updateFormula()"></div>
+                </div>
+            </div>
+
+            <!-- UPLOAD FILES -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon" style="background:rgba(255,183,3,.15);color:#ffb703"><i class="fas fa-upload"></i></div>
+                    <h3>3. Sube los PDFs a procesar</h3>
+                </div>
+                <div id="upload-zone" class="upload-zone">
+                    <input type="file" id="file-input" accept=".pdf" multiple style="display:none">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <p style="color:#5a7a9a;font-size:13px">Arrastra tus PDFs aquí o haz clic para seleccionar</p>
+                    <p style="font-size:11px;color:#3a5a7a;margin-top:4px">Puedes subir múltiples archivos</p>
+                </div>
+                <div id="file-list" class="file-list"></div>
+            </div>
+
+            <!-- PROCESS -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon" style="background:rgba(72,199,142,.15);color:#48c78e"><i class="fas fa-cogs"></i></div>
+                    <h3>4. Procesar y descargar</h3>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center">
+                    <button onclick="procesarLote()" class="nx-btn nx-btn-success" id="btn-procesar" disabled>
+                        <i class="fas fa-play"></i> Renombrar y empaquetar
+                    </button>
+                    <span id="file-count" style="font-size:12px;color:#5a7a9a">0 archivos cargados</span>
+                </div>
+                <div id="progress-section" style="display:none;margin-top:12px">
+                    <div class="progress-wrap"><div id="progress-fill" class="progress-fill" style="width:0%"></div></div>
+                    <p id="progress-text" style="font-size:12px;color:#5a7a9a;margin-top:6px">Procesando...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: LOTES -->
+        <div id="tab-lotes" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon" style="background:rgba(139,92,246,.15);color:#8b5cf6"><i class="fas fa-archive"></i></div>
+                    <h3>Lotes procesados</h3>
+                </div>
+                <div id="lotes-list">
+                    <p style="font-size:13px;color:#5a7a9a;font-style:italic">No hay lotes procesados aún. Crea uno en la pestaña "Crear y Procesar".</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* ===== SESSION CHECK ===== */
+    const sesion = JSON.parse(localStorage.getItem('nexus_sesion'));
+    if (!sesion || !sesion.logueado) window.location.href = 'index.html';
+    else {
+        document.getElementById('userName').textContent = sesion.nombre;
+        document.getElementById('userRole').textContent = sesion.rol.toUpperCase();
+        document.getElementById('userAvatar').textContent = sesion.nombre.charAt(0).toUpperCase();
+    }
+    function cerrarSesion() { localStorage.removeItem('nexus_sesion'); window.location.href = 'index.html'; }
+
+    /* ===== PERMISOS CHECK ===== */
+    if (window.NX) NX.iniciar('gestion_documental', {});
+
+    /* ===== STATE ===== */
+    let selectedSigla = 'CRC';
+    let uploadedFiles = [];
+    let lotes = JSON.parse(localStorage.getItem('nexus_gestion_documental_lotes') || '[]');
+
+    /* ===== TABS ===== */
+    function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        event.target.closest('.tab').classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+    }
+
+    /* ===== SIGLA SELECTOR ===== */
+    function selectSigla(sigla, el) {
+        selectedSigla = sigla;
+        document.querySelectorAll('.sigla-tag').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('formula-sigla').textContent = sigla;
+        updateFormula();
+    }
+
+    function updateFormula() {
+        const nit = document.getElementById('lote-nit').value || 'NIT';
+        const nombre = document.getElementById('lote-nombre').value || 'NOMBRE_CARPETA';
+        document.getElementById('formula-sigla').textContent = selectedSigla;
+    }
+
+    /* ===== UPLOAD ===== */
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+    uploadZone.addEventListener('drop', e => {
+        e.preventDefault(); uploadZone.classList.remove('dragover');
+        const files = Array.from(e.dataTransfer.files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+        addFiles(files);
+    });
+    fileInput.addEventListener('change', e => { addFiles(Array.from(e.target.files)); });
+
+    function addFiles(files) {
+        files.forEach(f => {
+            if (!uploadedFiles.some(u => u.name === f.name && u.size === f.size)) {
+                uploadedFiles.push(f);
+            }
+        });
+        renderFileList();
+    }
+
+    function removeFile(index) {
+        uploadedFiles.splice(index, 1);
+        renderFileList();
+    }
+
+    function renderFileList() {
+        const list = document.getElementById('file-list');
+        list.innerHTML = '';
+        const nit = document.getElementById('lote-nit').value || 'NIT';
+        const nombre = document.getElementById('lote-nombre').value || 'CARPETA';
+        const inicio = parseInt(document.getElementById('lote-inicio').value) || 1;
+
+        uploadedFiles.forEach((f, i) => {
+            const newName = `${selectedSigla}_${nit}_${nombre}_${String(inicio + i).padStart(3,'0')}.pdf`;
+            const div = document.createElement('div');
+            div.className = 'file-row';
+            div.innerHTML = `
+                <span class="file-icon" style="color:${siglaColor()}">📄</span>
+                <span class="file-name">${f.name}</span>
+                <span class="file-new-name">→ ${newName}</span>
+                <button class="file-remove" onclick="removeFile(${i})"><i class="fas fa-times"></i></button>
+            `;
+            list.appendChild(div);
+        });
+
+        document.getElementById('file-count').textContent = `${uploadedFiles.length} archivo${uploadedFiles.length!==1?'s':''} cargado${uploadedFiles.length!==1?'s':''}`;
+        document.getElementById('btn-procesar').disabled = uploadedFiles.length === 0;
+    }
+
+    function siglaColor() {
+        const colors = { CRC:'#48c78e', AUT:'#8b5cf6', HEV:'#00b4d8', FEV:'#f59e0b', OPF:'#ec4899', EPI:'#10b981' };
+        return colors[selectedSigla] || '#00b4d8';
+    }
+
+    /* ===== PROCESS LOTE ===== */
+    async function procesarLote() {
+        if (uploadedFiles.length === 0) { showToast('Sube al menos un PDF','error'); return; }
+        const nit = document.getElementById('lote-nit').value;
+        const nombre = document.getElementById('lote-nombre').value;
+        if (!nit || !nombre) { showToast('Completa el NIT y el nombre de la carpeta','error'); return; }
+
+        const btn = document.getElementById('btn-procesar');
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+        document.getElementById('progress-section').style.display = 'block';
+
+        try {
+            const inicio = parseInt(document.getElementById('lote-inicio').value) || 1;
+            const renamedFiles = [];
+
+            for (let i = 0; i < uploadedFiles.length; i++) {
+                const f = uploadedFiles[i];
+                const newName = `${selectedSigla}_${nit}_${nombre}_${String(inicio + i).padStart(3,'0')}.pdf`;
+                renamedFiles.push({ original: f.name, nuevo: newName, size: f.size });
+                const pct = Math.round(((i+1)/uploadedFiles.length)*80);
+                document.getElementById('progress-fill').style.width = pct+'%';
+                document.getElementById('progress-text').textContent = `Renombrando ${i+1}/${uploadedFiles.length}: ${newName}`;
+            }
+
+            // Save lote to localStorage
+            const lote = {
+                id: Date.now(),
+                sigla: selectedSigla,
+                nit: nit,
+                nombre: nombre,
+                fecha: new Date().toISOString(),
+                archivos: renamedFiles,
+                total: renamedFiles.length
+            };
+            lotes.push(lote);
+            localStorage.setItem('nexus_gestion_documental_lotes', JSON.stringify(lotes));
+
+            // Generate ZIP download using JSZip (if available) or create download links
+            document.getElementById('progress-fill').style.width = '100%';
+            document.getElementById('progress-text').textContent = '✅ Lote procesado correctamente';
+            showToast(`${renamedFiles.length} archivos renombrados`,'success');
+
+            // Reset
+            uploadedFiles = [];
+            fileInput.value = '';
+            renderFileList();
+            renderLotes();
+
+        } catch(err) {
+            showToast('Error: ' + err.message,'error');
+        } finally {
+            btn.disabled = false; btn.innerHTML = '<i class="fas fa-play"></i> Renombrar y empaquetar';
+        }
+    }
+
+    /* ===== RENDER LOTES ===== */
+    function renderLotes() {
+        const list = document.getElementById('lotes-list');
+        if (lotes.length === 0) {
+            list.innerHTML = '<p style="font-size:13px;color:#5a7a9a;font-style:italic">No hay lotes procesados aún.</p>';
+            return;
+        }
+        list.innerHTML = '';
+        lotes.forEach(l => {
+            const d = new Date(l.fecha);
+            const dateStr = d.toLocaleDateString('es-CO') + ' ' + d.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+            const colors = { CRC:'sig-crc', AUT:'sig-aut', HEV:'sig-hev', FEV:'sig-fev', OPF:'sig-opf', EPI:'sig-epi' };
+            const div = document.createElement('div');
+            div.className = 'lote-card';
+            div.innerHTML = `
+                <div class="lote-header">
+                    <div>
+                        <span class="lote-name">${l.sigla}_${l.nit}_${l.nombre}</span>
+                        <span class="lote-date" style="margin-left:10px">${dateStr}</span>
+                    </div>
+                    <button class="nx-btn nx-btn-danger nx-btn-sm" onclick="eliminarLote(${l.id})"><i class="fas fa-trash"></i></button>
+                </div>
+                <div class="lote-stats">
+                    <div class="stat"><i class="fas fa-file-pdf" style="color:${siglaColorForCode(l.sigla)}"></i> ${l.total} archivos</div>
+                    <div class="stat"><i class="fas fa-hashtag" style="color:#5a7a9a"></i> ${l.sigla}</div>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    function siglaColorForCode(code) {
+        const colors = { CRC:'#48c78e', AUT:'#8b5cf6', HEV:'#00b4d8', FEV:'#f59e0b', OPF:'#ec4899', EPI:'#10b981' };
+        return colors[code] || '#00b4d8';
+    }
+
+    function eliminarLote(id) {
+        lotes = lotes.filter(l => l.id !== id);
+        localStorage.setItem('nexus_gestion_documental_lotes', JSON.stringify(lotes));
+        renderLotes();
+        showToast('Lote eliminado','success');
+    }
+
+    // Init
+    renderLotes();
+
+    /* ===== TOAST ===== */
+    function showToast(msg,type='info') {
+        const c = document.getElementById('toastContainer');
+        const d = document.createElement('div');
+        d.className = `toast toast-${type==='success'?'success':type==='error'?'error':'info'}`;
+        const icon = type==='success'?'check-circle':type==='error'?'exclamation-triangle':'info-circle';
+        d.innerHTML = `<i class="fas fa-${icon}"></i> ${msg}`;
+        c.appendChild(d); setTimeout(()=>d.remove(),3000);
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUSMED - Renombrar Archivos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#0a1628; color:#c8d6e5; min-height:100vh; }
+
+        /* HEADER */
+        .header { background:linear-gradient(135deg,#0d2137,#1a3a5c); padding:15px 30px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #00b4d8; box-shadow:0 2px 15px rgba(0,180,216,.2); }
+        .brand-name { font-size:24px; font-weight:800; color:#00b4d8; letter-spacing:3px; }
+        .brand-name span { color:#90e0ef; font-weight:300; }
+        .user-info { display:flex; align-items:center; gap:10px; }
+        .user-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#00b4d8,#0077b6); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#fff; }
+        .user-name { font-size:13px; font-weight:600; color:#c8d6e5; }
+        .user-role { font-size:11px; color:#5a7a9a; text-transform:uppercase; letter-spacing:1px; }
+        .btn-cerrar { background:transparent; color:#ff3860; border:1px solid #ff3860; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:600; transition:all .3s; }
+        .btn-cerrar:hover { background:#ff3860; color:#fff; }
+
+        /* NAV BAR */
+        .nav-bar { background:#0d2137; padding:8px 30px; display:flex; gap:5px; border-bottom:1px solid #1a3a5c; flex-wrap:wrap; }
+        .nav-item { padding:8px 16px; border-radius:6px; font-size:13px; color:#5a7a9a; cursor:pointer; transition:all .3s; text-decoration:none; display:flex; align-items:center; gap:6px; }
+        .nav-item:hover { color:#00b4d8; background:rgba(0,180,216,.1); }
+        .nav-item.active { color:#00b4d8; background:rgba(0,180,216,.15); border:1px solid rgba(0,180,216,.3); }
+
+        /* MAIN */
+        .main { max-width:1000px; margin:25px auto; padding:0 20px; }
+        .page-title { font-size:22px; font-weight:800; color:#00b4d8; margin-bottom:4px; }
+        .page-sub { font-size:13px; color:#5a7a9a; margin-bottom:20px; }
+
+        /* CARDS */
+        .card { background:linear-gradient(135deg,#0d2137,#122a45); border:1px solid #1a3a5c; border-radius:16px; padding:24px; margin-bottom:20px; }
+        .card-title { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+        .card-title h3 { font-size:16px; font-weight:700; color:#c8d6e5; }
+        .card-title .icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+
+        /* INPUTS */
+        .nx-input { background:#0a1628; border:1px solid #1a3a5c; border-radius:10px; padding:10px 14px; color:#c8d6e5; font-size:13px; font-family:inherit; width:100%; transition:border .3s; }
+        .nx-input:focus { outline:none; border-color:#00b4d8; box-shadow:0 0 0 2px rgba(0,180,216,.2); }
+        .nx-select { background:#0a1628; border:1px solid #1a3a5c; border-radius:10px; padding:10px 14px; color:#c8d6e5; font-size:13px; font-family:inherit; }
+        .nx-label { display:block; font-size:12px; color:#5a7a9a; margin-bottom:6px; font-weight:600; }
+
+        /* BUTTONS */
+        .nx-btn { border:none; border-radius:10px; padding:10px 20px; font-weight:700; cursor:pointer; font-size:13px; font-family:inherit; transition:all .3s; display:inline-flex; align-items:center; gap:8px; }
+        .nx-btn-primary { background:linear-gradient(135deg,#00b4d8,#0090b3); color:#03202c; }
+        .nx-btn-primary:hover { box-shadow:0 6px 20px rgba(0,180,216,.35); transform:translateY(-1px); }
+        .nx-btn-success { background:linear-gradient(135deg,#48c78e,#38a06d); color:#fff; }
+        .nx-btn-success:hover { box-shadow:0 6px 20px rgba(72,199,142,.35); transform:translateY(-1px); }
+        .nx-btn-danger { background:transparent; color:#ff3860; border:1px solid #ff3860; padding:8px 14px; }
+        .nx-btn-sm { padding:6px 12px; font-size:12px; border-radius:8px; }
+        .nx-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+        /* UPLOAD ZONE */
+        .upload-zone { border:2px dashed #1a3a5c; border-radius:14px; padding:30px; text-align:center; cursor:pointer; transition:all .3s; background:rgba(0,180,216,.03); }
+        .upload-zone:hover { border-color:#00b4d8; background:rgba(0,180,216,.08); }
+        .upload-zone.dragover { border-color:#00b4d8; background:rgba(0,180,216,.1); }
+        .upload-icon { width:52px; height:52px; border-radius:50%; background:rgba(0,180,216,.15); display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:22px; color:#00b4d8; }
+
+        /* FILE LIST */
+        .file-list { margin-top:12px; }
+        .file-row { display:flex; align-items:center; gap:10px; padding:10px 14px; background:rgba(0,180,216,.04); border:1px solid #1a3a5c; border-radius:10px; margin-bottom:6px; font-size:13px; }
+        .file-row:hover { border-color:rgba(0,180,216,.3); }
+        .file-row .file-num { width:28px; text-align:center; font-size:11px; font-weight:700; color:#5a7a9a; }
+        .file-row .file-icon { font-size:18px; }
+        .file-row .file-name { flex:1; color:#c8d6e5; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .file-row .file-arrow { color:#00b4d8; font-size:14px; }
+        .file-row .file-new-name { color:#00b4d8; font-family:monospace; font-size:12px; font-weight:600; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .file-row .file-remove { background:none; border:none; color:#ff3860; cursor:pointer; }
+        .file-row .file-edit { background:none; border:none; color:#00b4d8; cursor:pointer; font-size:12px; }
+
+        /* PATTERN CONFIG */
+        .pattern-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .pattern-preview { background:rgba(0,180,216,.06); border:1px solid rgba(0,180,216,.2); border-radius:12px; padding:14px; }
+        .pattern-preview h4 { font-size:12px; font-weight:700; color:#00b4d8; margin-bottom:8px; }
+        .pattern-preview .example { font-family:monospace; font-size:14px; font-weight:700; color:#c8d6e5; padding:8px 12px; background:#0a1628; border-radius:8px; border:1px solid #1a3a5c; }
+        .pattern-preview .example .var { color:#00b4d8; }
+        .pattern-preview .example .sep { color:#f59e0b; }
+
+        .var-tag { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; transition:all .2s; margin:2px; }
+        .var-tag:hover { transform:scale(1.05); }
+        .var-tag.sigla { background:rgba(72,199,142,.1); color:#48c78e; }
+        .var-tag.nit { background:rgba(139,92,246,.1); color:#8b5cf6; }
+        .var-tag.nombre { background:rgba(0,180,216,.1); color:#00b4d8; }
+        .var-tag.num { background:rgba(245,158,11,.1); color:#f59e0b; }
+        .var-tag.fecha { background:rgba(236,72,153,.1); color:#ec4899; }
+
+        /* PROGRESS */
+        .progress-wrap { width:100%; background:#1a3a5c; border-radius:10px; height:10px; overflow:hidden; margin-top:12px; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,#00b4d8,#48c78e); border-radius:10px; transition:width .3s; }
+
+        /* TOAST */
+        .toast-container { position:fixed; top:20px; right:20px; z-index:2000; display:flex; flex-direction:column; gap:8px; }
+        .toast { padding:12px 20px; border-radius:10px; font-size:13px; font-weight:600; box-shadow:0 8px 25px rgba(0,0,0,.4); animation:slideIn .3s ease,fadeOut .3s ease 2.7s; display:flex; align-items:center; gap:8px; }
+        .toast-success { background:linear-gradient(135deg,#48c78e,#38a06d); color:#fff; }
+        .toast-error { background:linear-gradient(135deg,#ff3860,#d63031); color:#fff; }
+        .toast-info { background:linear-gradient(135deg,#00b4d8,#0077b6); color:#fff; }
+        @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+        @keyframes fadeOut { from{opacity:1} to{opacity:0} }
+
+        @media(max-width:768px) { .header{flex-direction:column;gap:10px} .nav-bar{justify-content:center} .pattern-grid{grid-template-columns:1fr} }
+    </style>
+</head>
+<body>
+    <script src="nexus_db.js"></script>
+    <script src="permisos.js"></script>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div style="display:flex;align-items:center;gap:12px">
+            <div class="brand-name">NEXUS<span>MED</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:20px">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <div><div class="user-name" id="userName">Admin</div><div class="user-role" id="userRole">ADMIN</div></div>
+            </div>
+            <button class="btn-cerrar" onclick="cerrarSesion()">🔒 Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <!-- NAV -->
+    <nav class="nav-bar">
+        <a class="nav-item" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
+        <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+        <a class="nav-item" href="pacientes.html"><i class="fas fa-users"></i> Pacientes</a>
+        <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias</a>
+        <a class="nav-item" href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
+        <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enf.</a>
+        <a class="nav-item" href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
+        <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
+        <a class="nav-item" href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+        <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresados</a>
+        <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
+        <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+        <a class="nav-item" href="conciliacion.html"><i class="fas fa-balance-scale"></i> Conciliación</a>
+        <a class="nav-item" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Doc.</a>
+        <a class="nav-item" href="generador_evoluciones.html"><i class="fas fa-file-medical-alt"></i> Generador Evol.</a>
+        <a class="nav-item active" href="renombrar.html"><i class="fas fa-i-cursor"></i> Renombrar</a>
+    </nav>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main">
+        <h1 class="page-title"><i class="fas fa-i-cursor" style="margin-right:8px"></i>Renombrar Archivos</h1>
+        <p class="page-sub">Renombra archivos masivamente con patrones personalizados y descarga en ZIP</p>
+
+        <!-- PATTERN CONFIG -->
+        <div class="card">
+            <div class="card-title">
+                <div class="icon" style="background:rgba(0,180,216,.15);color:#00b4d8"><i class="fas fa-pencil-ruler"></i></div>
+                <h3>1. Define el patrón de renombrado</h3>
+            </div>
+            <div class="pattern-grid">
+                <div>
+                    <label class="nx-label">Patrón de nombre</label>
+                    <input type="text" id="pattern" class="nx-input" placeholder="{SIGLA}_{NIT}_{NOMBRE}_{NUM}" value="{SIGLA}_{NIT}_{NOMBRE}_{NUM}" oninput="updatePreview()">
+                    <p style="font-size:11px;color:#3a5a7a;margin-top:6px">Haz clic en una variable para insertarla:</p>
+                    <div style="margin-top:4px">
+                        <span class="var-tag sigla" onclick="insertVar('{SIGLA}')">🏷️ SIGLA</span>
+                        <span class="var-tag nit" onclick="insertVar('{NIT}')">🏢 NIT</span>
+                        <span class="var-tag nombre" onclick="insertVar('{NOMBRE}')">📁 NOMBRE</span>
+                        <span class="var-tag num" onclick="insertVar('{NUM}')">🔢 NUM</span>
+                        <span class="var-tag fecha" onclick="insertVar('{FECHA}')">📅 FECHA</span>
+                    </div>
+                </div>
+                <div class="pattern-preview">
+                    <h4><i class="fas fa-eye" style="margin-right:6px"></i>Vista previa</h4>
+                    <div class="example" id="pattern-preview">CRC_900123456_PERIODO_2026_09_001.pdf</div>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-top:16px">
+                <div><label class="nx-label">SIGLA</label><input type="text" id="var-sigla" class="nx-input" value="CRC" oninput="updatePreview()"></div>
+                <div><label class="nx-label">NIT</label><input type="text" id="var-nit" class="nx-input" value="900123456" oninput="updatePreview()"></div>
+                <div><label class="nx-label">NOMBRE</label><input type="text" id="var-nombre" class="nx-input" value="PERIODO_2026_09" oninput="updatePreview()"></div>
+                <div><label class="nx-label">Numeración inicio</label><input type="number" id="var-num-start" class="nx-input" value="1" min="0" oninput="updatePreview()"></div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-end;margin-top:12px">
+                <div style="flex:0.5"><label class="nx-label">Dígitos numeración</label><input type="number" id="var-num-digits" class="nx-input" value="3" min="1" max="10" oninput="updatePreview()"></div>
+                <div style="flex:0.5"><label class="nx-label">Separador</label>
+                    <select id="var-separator" class="nx-select" onchange="updatePreview()">
+                        <option value="_">_ (guion bajo)</option>
+                        <option value="-">- (guion medio)</option>
+                        <option value=".">. (punto)</option>
+                        <option value="">(sin separador)</option>
+                    </select>
+                </div>
+                <div style="flex:1"><label class="nx-label">Mantener extensión original</label>
+                    <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#c8d6e5;cursor:pointer;margin-top:4px"><input type="checkbox" id="keep-ext" checked style="accent-color:#00b4d8"> Sí, mantener .pdf, .jpg, etc.</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- UPLOAD FILES -->
+        <div class="card">
+            <div class="card-title">
+                <div class="icon" style="background:rgba(255,183,3,.15);color:#ffb703"><i class="fas fa-upload"></i></div>
+                <h3>2. Sube los archivos a renombrar</h3>
+            </div>
+            <div id="upload-zone" class="upload-zone">
+                <input type="file" id="file-input" multiple style="display:none">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <p style="color:#5a7a9a;font-size:13px">Arrastra tus archivos aquí o haz clic para seleccionar</p>
+                <p style="font-size:11px;color:#3a5a7a;margin-top:4px">Cualquier tipo de archivo</p>
+            </div>
+            <div id="file-list" class="file-list"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+                <span id="file-count" style="font-size:12px;color:#5a7a9a">0 archivos</span>
+                <button onclick="clearFiles()" class="nx-btn nx-btn-danger nx-btn-sm" style="display:none" id="btn-clear"><i class="fas fa-trash"></i> Limpiar todo</button>
+            </div>
+        </div>
+
+        <!-- PROCESS -->
+        <div class="card">
+            <div class="card-title">
+                <div class="icon" style="background:rgba(72,199,142,.15);color:#48c78e"><i class="fas fa-download"></i></div>
+                <h3>3. Renombrar y descargar</h3>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center">
+                <button onclick="renombrarYDescargar()" class="nx-btn nx-btn-success" id="btn-rename" disabled>
+                    <i class="fas fa-i-cursor"></i> Renombrar y descargar ZIP
+                </button>
+            </div>
+            <div id="progress-section" style="display:none;margin-top:12px">
+                <div class="progress-wrap"><div id="progress-fill" class="progress-fill" style="width:0%"></div></div>
+                <p id="progress-text" style="font-size:12px;color:#5a7a9a;margin-top:6px">Procesando...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JSZip for ZIP generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script>
+    /* ===== SESSION CHECK ===== */
+    const sesion = JSON.parse(localStorage.getItem('nexus_sesion'));
+    if (!sesion || !sesion.logueado) window.location.href = 'index.html';
+    else {
+        document.getElementById('userName').textContent = sesion.nombre;
+        document.getElementById('userRole').textContent = sesion.rol.toUpperCase();
+        document.getElementById('userAvatar').textContent = sesion.nombre.charAt(0).toUpperCase();
+    }
+    function cerrarSesion() { localStorage.removeItem('nexus_sesion'); window.location.href = 'index.html'; }
+
+    /* ===== PERMISOS CHECK ===== */
+    if (window.NX) NX.iniciar('renombrar', {});
+
+    /* ===== STATE ===== */
+    let uploadedFiles = [];
+
+    /* ===== VARIABLES ===== */
+    function insertVar(varName) {
+        const input = document.getElementById('pattern');
+        const pos = input.selectionStart;
+        const before = input.value.substring(0, pos);
+        const after = input.value.substring(pos);
+        input.value = before + varName + after;
+        input.focus();
+        input.setSelectionRange(pos + varName.length, pos + varName.length);
+        updatePreview();
+    }
+
+    function updatePreview() {
+        const pattern = document.getElementById('pattern').value;
+        const sigla = document.getElementById('var-sigla').value || 'CRC';
+        const nit = document.getElementById('var-nit').value || '900123456';
+        const nombre = document.getElementById('var-nombre').value || 'CARPETA';
+        const numStart = parseInt(document.getElementById('var-num-start').value) || 1;
+        const numDigits = parseInt(document.getElementById('var-num-digits').value) || 3;
+        const fecha = new Date().toISOString().split('T')[0];
+
+        let preview = pattern
+            .replace('{SIGLA}', sigla)
+            .replace('{NIT}', nit)
+            .replace('{NOMBRE}', nombre)
+            .replace('{NUM}', String(numStart).padStart(numDigits, '0'))
+            .replace('{FECHA}', fecha);
+
+        if (document.getElementById('keep-ext').checked) preview += '.pdf';
+
+        document.getElementById('pattern-preview').textContent = preview;
+
+        // Update file list previews
+        renderFileList();
+    }
+
+    /* ===== UPLOAD ===== */
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+    uploadZone.addEventListener('drop', e => {
+        e.preventDefault(); uploadZone.classList.remove('dragover');
+        addFiles(Array.from(e.dataTransfer.files));
+    });
+    fileInput.addEventListener('change', e => { addFiles(Array.from(e.target.files)); });
+
+    function addFiles(files) {
+        files.forEach(f => {
+            if (!uploadedFiles.some(u => u.name === f.name && u.size === f.size && u.lastModified === f.lastModified)) {
+                uploadedFiles.push(f);
+            }
+        });
+        renderFileList();
+    }
+
+    function removeFile(index) {
+        uploadedFiles.splice(index, 1);
+        renderFileList();
+    }
+
+    function clearFiles() {
+        uploadedFiles = [];
+        fileInput.value = '';
+        renderFileList();
+    }
+
+    function getNewName(index, originalName) {
+        const pattern = document.getElementById('pattern').value;
+        const sigla = document.getElementById('var-sigla').value || 'CRC';
+        const nit = document.getElementById('var-nit').value || '900123456';
+        const nombre = document.getElementById('var-nombre').value || 'CARPETA';
+        const numStart = parseInt(document.getElementById('var-num-start').value) || 1;
+        const numDigits = parseInt(document.getElementById('var-num-digits').value) || 3;
+        const fecha = new Date().toISOString().split('T')[0];
+
+        let newName = pattern
+            .replace('{SIGLA}', sigla)
+            .replace('{NIT}', nit)
+            .replace('{NOMBRE}', nombre)
+            .replace('{NUM}', String(numStart + index).padStart(numDigits, '0'))
+            .replace('{FECHA}', fecha);
+
+        if (document.getElementById('keep-ext').checked) {
+            const ext = originalName.includes('.') ? '.' + originalName.split('.').pop() : '';
+            newName += ext;
+        }
+
+        return newName;
+    }
+
+    function getFileIcon(name) {
+        const ext = name.split('.').pop().toLowerCase();
+        const icons = { pdf:'📄', jpg:'🖼️', jpeg:'🖼️', png:'🖼️', doc:'📝', docx:'📝', xls:'📊', xlsx:'📊', zip:'📦' };
+        return icons[ext] || '📎';
+    }
+
+    function renderFileList() {
+        const list = document.getElementById('file-list');
+        list.innerHTML = '';
+
+        uploadedFiles.forEach((f, i) => {
+            const newName = getNewName(i, f.name);
+            const div = document.createElement('div');
+            div.className = 'file-row';
+            div.innerHTML = `
+                <span class="file-num">${i+1}</span>
+                <span class="file-icon">${getFileIcon(f.name)}</span>
+                <span class="file-name">${f.name}</span>
+                <span class="file-arrow">→</span>
+                <span class="file-new-name">${newName}</span>
+                <button class="file-remove" onclick="removeFile(${i})"><i class="fas fa-times"></i></button>
+            `;
+            list.appendChild(div);
+        });
+
+        document.getElementById('file-count').textContent = `${uploadedFiles.length} archivo${uploadedFiles.length!==1?'s':''}`;
+        document.getElementById('btn-rename').disabled = uploadedFiles.length === 0;
+        document.getElementById('btn-clear').style.display = uploadedFiles.length > 0 ? 'inline-flex' : 'none';
+    }
+
+    /* ===== RENAME & DOWNLOAD ===== */
+    async function renombrarYDescargar() {
+        if (uploadedFiles.length === 0) { showToast('Sube al menos un archivo','error'); return; }
+
+        const btn = document.getElementById('btn-rename');
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+        document.getElementById('progress-section').style.display = 'block';
+
+        try {
+            const zip = new JSZip();
+
+            for (let i = 0; i < uploadedFiles.length; i++) {
+                const f = uploadedFiles[i];
+                const newName = getNewName(i, f.name);
+                const content = await f.arrayBuffer();
+                zip.file(newName, content);
+
+                const pct = Math.round(((i+1)/uploadedFiles.length)*90);
+                document.getElementById('progress-fill').style.width = pct+'%';
+                document.getElementById('progress-text').textContent = `Agregando ${i+1}/${uploadedFiles.length}: ${newName}`;
+            }
+
+            document.getElementById('progress-text').textContent = 'Generando ZIP...';
+            const blob = await zip.generateAsync({ type:'blob' }, metadata => {
+                document.getElementById('progress-fill').style.width = (90 + metadata.percent * 0.1) + '%';
+            });
+
+            // Download
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'archivos_renombrados.zip';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            document.getElementById('progress-fill').style.width = '100%';
+            document.getElementById('progress-text').textContent = '✅ ZIP descargado correctamente';
+            showToast(`${uploadedFiles.length} archivos renombrados y descargados`,'success');
+
+        } catch(err) {
+            showToast('Error: ' + err.message,'error');
+            document.getElementById('progress-text').textContent = '❌ Error';
+        } finally {
+            btn.disabled = false; btn.innerHTML = '<i class="fas fa-i-cursor"></i> Renombrar y descargar ZIP';
+        }
+    }
+
+    /* ===== TOAST ===== */
+    function showToast(msg,type='info') {
+        const c = document.getElementById('toastContainer');
+        const d = document.createElement('div');
+        d.className = `toast toast-${type==='success'?'success':type==='error'?'error':'info'}`;
+        const icon = type==='success'?'check-circle':type==='error'?'exclamation-triangle':'info-circle';
+        d.innerHTML = `<i class="fas fa-${icon}"></i> ${msg}`;
+        c.appendChild(d); setTimeout(()=>d.remove(),3000);
+    }
+
+    // Init preview
+    updatePreview();
+    </script>
+</body>
+</html>
