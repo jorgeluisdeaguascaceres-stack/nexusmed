@@ -32,6 +32,11 @@
         .page-title { font-size:22px; font-weight:800; color:#00b4d8; margin-bottom:4px; }
         .page-sub { font-size:13px; color:#5a7a9a; margin-bottom:20px; }
 
+        /* STATUS BAR */
+        .status-bar { background:rgba(72,199,142,.1); border:1px solid rgba(72,199,142,.3); border-radius:12px; padding:12px 18px; margin-bottom:18px; display:flex; align-items:center; gap:10px; font-size:13px; font-weight:600; color:#48c78e; }
+        .status-bar.empty { background:rgba(90,122,154,.1); border-color:rgba(90,122,154,.2); color:#5a7a9a; }
+        .status-bar i { font-size:16px; }
+
         /* CARDS */
         .card { background:linear-gradient(135deg,#0d2137,#122a45); border:1px solid #1a3a5c; border-radius:16px; padding:24px; margin-bottom:20px; }
         .card-title { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
@@ -45,31 +50,43 @@
         .tab-content { display:none; }
         .tab-content.active { display:block; }
 
-        /* SIGLA TAGS */
-        .sigla-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:16px; }
-        .sigla-tag { padding:12px; border-radius:12px; text-align:center; cursor:pointer; transition:all .3s; border:2px solid transparent; }
-        .sigla-tag:hover { transform:translateY(-2px); }
-        .sigla-tag.active { border-color:currentColor; }
-        .sigla-tag .sigla-code { font-size:18px; font-weight:800; }
-        .sigla-tag .sigla-name { font-size:10px; color:#5a7a9a; margin-top:2px; }
-        .sig-crc { background:rgba(72,199,142,.1); color:#48c78e; }
-        .sig-crc.active { background:rgba(72,199,142,.2); }
-        .sig-aut { background:rgba(139,92,246,.1); color:#8b5cf6; }
-        .sig-aut.active { background:rgba(139,92,246,.2); }
-        .sig-hev { background:rgba(0,180,216,.1); color:#00b4d8; }
-        .sig-hev.active { background:rgba(0,180,216,.2); }
-        .sig-fev { background:rgba(245,158,11,.1); color:#f59e0b; }
-        .sig-fev.active { background:rgba(245,158,11,.2); }
-        .sig-opf { background:rgba(236,72,153,.1); color:#ec4899; }
-        .sig-opf.active { background:rgba(236,72,153,.2); }
-        .sig-epi { background:rgba(16,185,129,.1); color:#10b981; }
-        .sig-epi.active { background:rgba(16,185,129,.2); }
-
-        /* INPUTS */
+        /* CONFIG FORM */
+        .config-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
         .nx-input { background:#0a1628; border:1px solid #1a3a5c; border-radius:10px; padding:10px 14px; color:#c8d6e5; font-size:13px; font-family:inherit; width:100%; transition:border .3s; }
         .nx-input:focus { outline:none; border-color:#00b4d8; box-shadow:0 0 0 2px rgba(0,180,216,.2); }
-        .nx-select { background:#0a1628; border:1px solid #1a3a5c; border-radius:10px; padding:10px 14px; color:#c8d6e5; font-size:13px; font-family:inherit; }
+        .nx-select { background:#0a1628; border:1px solid #1a3a5c; border-radius:10px; padding:10px 14px; color:#c8d6e5; font-size:13px; font-family:inherit; width:100%; }
         .nx-label { display:block; font-size:12px; color:#5a7a9a; margin-bottom:6px; font-weight:600; }
+
+        /* FORMULA */
+        .formula-box { background:rgba(0,180,216,.06); border:1px solid rgba(0,180,216,.2); border-radius:12px; padding:14px; margin-bottom:18px; }
+        .formula-box h4 { font-size:12px; font-weight:700; color:#00b4d8; margin-bottom:8px; }
+        .formula { font-family:monospace; font-size:15px; font-weight:700; color:#c8d6e5; padding:8px 12px; background:#0a1628; border-radius:8px; border:1px solid #1a3a5c; display:inline-block; }
+        .formula .v { color:#00b4d8; }
+        .formula .s { color:#f59e0b; }
+
+        /* DOC CARDS GRID */
+        .doc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:18px; }
+        .doc-card { background:linear-gradient(135deg,#0d2137,#122a45); border:2px solid #1a3a5c; border-radius:16px; padding:18px; transition:all .3s; position:relative; }
+        .doc-card:hover { border-color:rgba(0,180,216,.3); transform:translateY(-2px); }
+        .doc-card.saved { border-color:rgba(72,199,142,.3); }
+
+        .doc-card-header { text-align:center; margin-bottom:12px; }
+        .doc-card-icon { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 8px; }
+        .doc-card-code { font-size:20px; font-weight:800; }
+        .doc-card-name { font-size:11px; color:#5a7a9a; margin-top:2px; }
+
+        /* DOC CARD UPLOAD ZONE */
+        .doc-upload-zone { border:2px dashed #1a3a5c; border-radius:12px; padding:16px; text-align:center; cursor:pointer; transition:all .3s; background:rgba(0,180,216,.02); min-height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        .doc-upload-zone:hover { border-color:#00b4d8; background:rgba(0,180,216,.06); }
+        .doc-upload-zone.dragover { border-color:#00b4d8; background:rgba(0,180,216,.1); }
+        .doc-upload-zone.has-file { border-color:rgba(72,199,142,.3); background:rgba(72,199,142,.04); }
+        .doc-upload-zone input[type="file"] { display:none; }
+
+        /* SAVED BADGE */
+        .saved-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(72,199,142,.15); color:#48c78e; font-size:11px; font-weight:700; padding:4px 10px; border-radius:6px; margin-top:8px; }
+        .saved-badge i { font-size:10px; }
+
+        .replace-hint { font-size:11px; color:#5a7a9a; margin-top:6px; font-style:italic; }
 
         /* BUTTONS */
         .nx-btn { border:none; border-radius:10px; padding:10px 20px; font-weight:700; cursor:pointer; font-size:13px; font-family:inherit; transition:all .3s; display:inline-flex; align-items:center; gap:8px; }
@@ -78,53 +95,79 @@
         .nx-btn-success { background:linear-gradient(135deg,#48c78e,#38a06d); color:#fff; }
         .nx-btn-success:hover { box-shadow:0 6px 20px rgba(72,199,142,.35); transform:translateY(-1px); }
         .nx-btn-danger { background:transparent; color:#ff3860; border:1px solid #ff3860; padding:8px 14px; }
+        .nx-btn-danger:hover { background:#ff3860; color:#fff; }
         .nx-btn-sm { padding:6px 12px; font-size:12px; border-radius:8px; }
         .nx-btn:disabled { opacity:.5; cursor:not-allowed; }
 
-        /* FORMULA */
-        .formula-box { background:rgba(0,180,216,.06); border:1px solid rgba(0,180,216,.2); border-radius:12px; padding:14px; margin-bottom:16px; }
-        .formula-box h4 { font-size:12px; font-weight:700; color:#00b4d8; margin-bottom:6px; }
-        .formula { font-family:monospace; font-size:15px; font-weight:700; color:#c8d6e5; padding:8px 12px; background:#0a1628; border-radius:8px; border:1px solid #1a3a5c; }
-        .formula .var { color:#00b4d8; }
-        .formula .sep { color:#f59e0b; }
+        .doc-card-actions { display:flex; gap:6px; margin-top:10px; }
+        .doc-card-actions .nx-btn { flex:1; justify-content:center; font-size:11px; padding:8px 10px; }
 
-        /* FILE LIST */
-        .file-list { margin-top:12px; }
-        .file-row { display:flex; align-items:center; gap:10px; padding:10px 14px; background:rgba(0,180,216,.04); border:1px solid #1a3a5c; border-radius:10px; margin-bottom:6px; font-size:13px; }
-        .file-row .file-icon { font-size:18px; }
-        .file-row .file-name { flex:1; color:#c8d6e5; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .file-row .file-new-name { color:#00b4d8; font-family:monospace; font-size:12px; font-weight:600; }
-        .file-row .file-remove { background:none; border:none; color:#ff3860; cursor:pointer; }
+        /* ACTION BAR */
+        .action-bar { display:flex; gap:12px; margin-top:18px; flex-wrap:wrap; }
 
-        /* UPLOAD ZONE */
-        .upload-zone { border:2px dashed #1a3a5c; border-radius:14px; padding:30px; text-align:center; cursor:pointer; transition:all .3s; background:rgba(0,180,216,.03); }
-        .upload-zone:hover { border-color:#00b4d8; background:rgba(0,180,216,.08); }
-        .upload-zone.dragover { border-color:#00b4d8; background:rgba(0,180,216,.1); }
-        .upload-icon { width:52px; height:52px; border-radius:50%; background:rgba(0,180,216,.15); display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:22px; color:#00b4d8; }
+        /* MODAL */
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:3000; justify-content:center; align-items:center; }
+        .modal-overlay.show { display:flex; }
+        .modal-box { background:linear-gradient(135deg,#0d2137,#1a3a5c); border:1px solid #00b4d8; border-radius:20px; padding:30px; max-width:460px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.5); animation:modalIn .3s ease; }
+        @keyframes modalIn { from{transform:scale(.9);opacity:0} to{transform:scale(1);opacity:1} }
+        .modal-title { font-size:18px; font-weight:800; color:#00b4d8; margin-bottom:6px; }
+        .modal-msg { font-size:14px; color:#c8d6e5; line-height:1.6; margin-bottom:18px; }
+        .modal-file-name { font-family:monospace; color:#48c78e; font-weight:700; }
+        .modal-existing-name { font-family:monospace; color:#ff3860; font-weight:700; text-decoration:line-through; opacity:.7; }
+        .modal-actions { display:flex; gap:10px; }
+        .modal-actions .nx-btn { flex:1; justify-content:center; }
 
-        /* LOTE CARDS */
+        /* LOTE HISTORY */
         .lote-card { background:linear-gradient(135deg,#0d2137,#122a45); border:1px solid #1a3a5c; border-radius:14px; padding:18px; margin-bottom:12px; transition:all .3s; }
         .lote-card:hover { border-color:#00b4d8; }
-        .lote-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .lote-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
         .lote-name { font-size:15px; font-weight:700; color:#c8d6e5; }
         .lote-date { font-size:11px; color:#5a7a9a; }
-        .lote-stats { display:flex; gap:14px; font-size:12px; color:#5a7a9a; }
-        .lote-stats .stat { display:flex; align-items:center; gap:4px; }
+        .lote-docs { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+        .lote-doc-tag { font-size:11px; font-weight:700; padding:3px 10px; border-radius:6px; }
+
+        /* TOAST */
+        .toast-container { position:fixed; top:20px; right:20px; z-index:4000; display:flex; flex-direction:column; gap:8px; }
+        .toast { padding:12px 20px; border-radius:10px; font-size:13px; font-weight:600; box-shadow:0 8px 25px rgba(0,0,0,.4); animation:slideIn .3s ease,fadeOut .3s ease 2.7s; display:flex; align-items:center; gap:8px; }
+        .toast-success { background:linear-gradient(135deg,#48c78e,#38a06d); color:#fff; }
+        .toast-error { background:linear-gradient(135deg,#ff3860,#d63031); color:#fff; }
+        .toast-info { background:linear-gradient(135deg,#00b4d8,#0077b6); color:#fff; }
+        .toast-warn { background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; }
+        @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+        @keyframes fadeOut { from{opacity:1} to{opacity:0} }
 
         /* PROGRESS */
         .progress-wrap { width:100%; background:#1a3a5c; border-radius:10px; height:10px; overflow:hidden; margin-top:12px; }
         .progress-fill { height:100%; background:linear-gradient(90deg,#00b4d8,#48c78e); border-radius:10px; transition:width .3s; }
 
-        /* TOAST */
-        .toast-container { position:fixed; top:20px; right:20px; z-index:2000; display:flex; flex-direction:column; gap:8px; }
-        .toast { padding:12px 20px; border-radius:10px; font-size:13px; font-weight:600; box-shadow:0 8px 25px rgba(0,0,0,.4); animation:slideIn .3s ease,fadeOut .3s ease 2.7s; display:flex; align-items:center; gap:8px; }
-        .toast-success { background:linear-gradient(135deg,#48c78e,#38a06d); color:#fff; }
-        .toast-error { background:linear-gradient(135deg,#ff3860,#d63031); color:#fff; }
-        .toast-info { background:linear-gradient(135deg,#00b4d8,#0077b6); color:#fff; }
-        @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
-        @keyframes fadeOut { from{opacity:1} to{opacity:0} }
+        /* SIGLA COLORS */
+        .sig-crc { background:rgba(72,199,142,.12); color:#48c78e; border-color:rgba(72,199,142,.3); }
+        .sig-crc .doc-card-icon { background:rgba(72,199,142,.15); color:#48c78e; }
+        .sig-crc .doc-card-code { color:#48c78e; }
+        .sig-aut { background:rgba(139,92,246,.12); color:#8b5cf6; border-color:rgba(139,92,246,.3); }
+        .sig-aut .doc-card-icon { background:rgba(139,92,246,.15); color:#8b5cf6; }
+        .sig-aut .doc-card-code { color:#8b5cf6; }
+        .sig-hev { background:rgba(0,180,216,.12); color:#00b4d8; border-color:rgba(0,180,216,.3); }
+        .sig-hev .doc-card-icon { background:rgba(0,180,216,.15); color:#00b4d8; }
+        .sig-hev .doc-card-code { color:#00b4d8; }
+        .sig-fev { background:rgba(245,158,11,.12); color:#f59e0b; border-color:rgba(245,158,11,.3); }
+        .sig-fev .doc-card-icon { background:rgba(245,158,11,.15); color:#f59e0b; }
+        .sig-fev .doc-card-code { color:#f59e0b; }
+        .sig-opf { background:rgba(236,72,153,.12); color:#ec4899; border-color:rgba(236,72,153,.3); }
+        .sig-opf .doc-card-icon { background:rgba(236,72,153,.15); color:#ec4899; }
+        .sig-opf .doc-card-code { color:#ec4899; }
+        .sig-epi { background:rgba(16,185,129,.12); color:#10b981; border-color:rgba(16,185,129,.3); }
+        .sig-epi .doc-card-icon { background:rgba(16,185,129,.15); color:#10b981; }
+        .sig-epi .doc-card-code { color:#10b981; }
 
-        @media(max-width:768px) { .header{flex-direction:column;gap:10px} .nav-bar{justify-content:center} .sigla-grid{grid-template-columns:repeat(3,1fr)} }
+        .lote-tag-crc { background:rgba(72,199,142,.12); color:#48c78e; }
+        .lote-tag-aut { background:rgba(139,92,246,.12); color:#8b5cf6; }
+        .lote-tag-hev { background:rgba(0,180,216,.12); color:#00b4d8; }
+        .lote-tag-fev { background:rgba(245,158,11,.12); color:#f59e0b; }
+        .lote-tag-opf { background:rgba(236,72,153,.12); color:#ec4899; }
+        .lote-tag-epi { background:rgba(16,185,129,.12); color:#10b981; }
+
+        @media(max-width:768px) { .header{flex-direction:column;gap:10px} .nav-bar{justify-content:center} .doc-grid{grid-template-columns:1fr} .config-grid{grid-template-columns:1fr} }
     </style>
 </head>
 <body>
@@ -167,101 +210,255 @@
 
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- MODAL: Anexar o Reemplazar -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <div class="modal-title"><i class="fas fa-exclamation-triangle" style="margin-right:8px;color:#f59e0b"></i>Documento existente</div>
+            <div class="modal-msg">
+                Ya existe un documento guardado para <strong id="modal-sigla-label">CRC</strong>:<br>
+                <span class="modal-existing-name" id="modal-existing-name">archivo_anterior.pdf</span><br><br>
+                Has subido un nuevo archivo:<br>
+                <span class="modal-file-name" id="modal-new-name">nuevo_archivo.pdf</span><br><br>
+                ¿Qué deseas hacer?
+            </div>
+            <div class="modal-actions">
+                <button class="nx-btn nx-btn-success" onclick="modalAction('replace')">
+                    <i class="fas fa-sync-alt"></i> Reemplazar
+                </button>
+                <button class="nx-btn nx-btn-primary" onclick="modalAction('annex')">
+                    <i class="fas fa-plus-circle"></i> Anexar
+                </button>
+                <button class="nx-btn nx-btn-danger" onclick="modalAction('cancel')">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="main">
-        <h1 class="page-title"><i class="fas fa-folder-open" style="margin-right:8px"></i>Gestión Documental y Nomenclatura</h1>
-        <p class="page-sub">Crea lotes, nombra PDFs con la fórmula oficial y descarga por lote</p>
+        <h1 class="page-title"><i class="fas fa-folder-open" style="margin-right:8px"></i>Gestión Documental</h1>
+        <p class="page-sub">Carga, nombra y organiza documentos por lote con nomenclatura oficial</p>
+
+        <!-- STATUS BAR -->
+        <div class="status-bar empty" id="statusBar">
+            <i class="fas fa-info-circle"></i>
+            <span id="statusText">No hay lote activo. Configura los datos y sube documentos.</span>
+        </div>
 
         <!-- TABS -->
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('crear')"><i class="fas fa-plus-circle" style="margin-right:6px"></i>Crear y Procesar</div>
-            <div class="tab" onclick="switchTab('lotes')"><i class="fas fa-archive" style="margin-right:6px"></i>Carpetas y Descargas</div>
+            <div class="tab active" onclick="switchTab('cargar')"><i class="fas fa-upload" style="margin-right:6px"></i>Pantalla A - Carga y creación</div>
+            <div class="tab" onclick="switchTab('historial')"><i class="fas fa-history" style="margin-right:6px"></i>Pantalla B - Consulta histórica</div>
         </div>
 
-        <!-- TAB: CREAR Y PROCESAR -->
-        <div id="tab-crear" class="tab-content active">
-            <!-- SIGLA SELECTION -->
+        <!-- TAB A: CARGA -->
+        <div id="tab-cargar" class="tab-content active">
+            <!-- CONFIG -->
             <div class="card">
                 <div class="card-title">
-                    <div class="icon" style="background:rgba(0,180,216,.15);color:#00b4d8"><i class="fas fa-tags"></i></div>
-                    <h3>1. Selecciona la sigla del documento</h3>
-                </div>
-                <div class="sigla-grid">
-                    <div class="sigla-tag sig-crc active" onclick="selectSigla('CRC',this)"><div class="sigla-code">CRC</div><div class="sigla-name">Cuenta de Cobro</div></div>
-                    <div class="sigla-tag sig-aut" onclick="selectSigla('AUT',this)"><div class="sigla-code">AUT</div><div class="sigla-name">Autorizaciones</div></div>
-                    <div class="sigla-tag sig-hev" onclick="selectSigla('HEV',this)"><div class="sigla-code">HEV</div><div class="sigla-name">Historia / Evolución</div></div>
-                    <div class="sigla-tag sig-fev" onclick="selectSigla('FEV',this)"><div class="sigla-code">FEV</div><div class="sigla-name">Factura Electrónica</div></div>
-                    <div class="sigla-tag sig-opf" onclick="selectSigla('OPF',this)"><div class="sigla-code">OPF</div><div class="sigla-name">Orden / Fórmula</div></div>
-                    <div class="sigla-tag sig-epi" onclick="selectSigla('EPI',this)"><div class="sigla-code">EPI</div><div class="sigla-name">Epicrisis</div></div>
-                </div>
-            </div>
-
-            <!-- LOTE INFO -->
-            <div class="card">
-                <div class="card-title">
-                    <div class="icon" style="background:rgba(139,92,246,.15);color:#8b5cf6"><i class="fas fa-folder-plus"></i></div>
-                    <h3>2. Configura el lote</h3>
+                    <div class="icon" style="background:rgba(139,92,246,.15);color:#8b5cf6"><i class="fas fa-cogs"></i></div>
+                    <h3>Configuración de destino y datos</h3>
                 </div>
                 <div class="formula-box">
                     <h4><i class="fas fa-calculator" style="margin-right:6px"></i>Fórmula de nomenclatura oficial</h4>
                     <div class="formula">
-                        <span class="var" id="formula-sigla">CRC</span><span class="sep"> _ </span><span class="var">NIT</span><span class="sep"> _ </span><span class="var">NOMBRE_CARPETA</span><span style="color:#5a7a9a">.pdf</span>
+                        <span class="v" id="formula-sigla">CRC</span><span class="s"> _ </span><span class="v">NIT</span><span class="s"> _ </span><span class="v">NOMBRE_CARPETA</span><span class="s"> _ </span><span class="v">NUM</span><span style="color:#5a7a9a">.pdf</span>
                     </div>
-                    <p style="font-size:11px;color:#3a5a7a;margin-top:6px">Ejemplo: CRC_900123456_001.pdf, CRC_900123456_002.pdf, ...</p>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-                    <div><label class="nx-label">NIT de la IPS</label><input type="text" id="lote-nit" class="nx-input" placeholder="900123456" oninput="updateFormula()"></div>
-                    <div><label class="nx-label">Nombre de la carpeta</label><input type="text" id="lote-nombre" class="nx-input" placeholder="PERIODO_2026_09" oninput="updateFormula()"></div>
-                    <div><label class="nx-label">Numeración inicio</label><input type="number" id="lote-inicio" class="nx-input" value="1" min="1" oninput="updateFormula()"></div>
+                <div class="config-grid">
+                    <div><label class="nx-label">Nombre de la carpeta (lote)</label><input type="text" id="lote-nombre" class="nx-input" placeholder="FE12410" oninput="updateLote()"></div>
+                    <div><label class="nx-label">NIT de la IPS</label><input type="text" id="lote-nit" class="nx-input" placeholder="900217463" oninput="updateLote()"></div>
+                    <div><label class="nx-label">Bloque de separación</label>
+                        <select id="lote-separador" class="nx-select" onchange="updateLote()">
+                            <option value="_">_ (guion bajo)</option>
+                            <option value="-">- (guion medio)</option>
+                            <option value=".">. (punto)</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <!-- UPLOAD FILES -->
+            <!-- 6 DOC CARDS -->
             <div class="card">
                 <div class="card-title">
-                    <div class="icon" style="background:rgba(255,183,3,.15);color:#ffb703"><i class="fas fa-upload"></i></div>
-                    <h3>3. Sube los PDFs a procesar</h3>
+                    <div class="icon" style="background:rgba(0,180,216,.15);color:#00b4d8"><i class="fas fa-file-pdf"></i></div>
+                    <h3>Documentos del lote</h3>
                 </div>
-                <div id="upload-zone" class="upload-zone">
-                    <input type="file" id="file-input" accept=".pdf" multiple style="display:none">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                    <p style="color:#5a7a9a;font-size:13px">Arrastra tus PDFs aquí o haz clic para seleccionar</p>
-                    <p style="font-size:11px;color:#3a5a7a;margin-top:4px">Puedes subir múltiples archivos</p>
-                </div>
-                <div id="file-list" class="file-list"></div>
-            </div>
+                <div class="doc-grid" id="doc-grid">
+                    <!-- CRC -->
+                    <div class="doc-card sig-crc" id="card-crc" data-sigla="CRC">
+                        <div class="doc-card-header">
+                            <div class="doc-card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                            <div class="doc-card-code">CRC</div>
+                            <div class="doc-card-name">Cuenta de Cobro</div>
+                        </div>
+                        <div class="doc-upload-zone" id="upload-crc" onclick="triggerUpload('CRC')">
+                            <input type="file" id="file-crc" accept=".pdf" onchange="handleFileSelect('CRC',event)">
+                            <i class="fas fa-cloud-upload-alt" style="font-size:20px;color:#5a7a9a;margin-bottom:6px"></i>
+                            <div style="font-size:12px;color:#5a7a9a">Arrastra PDF aquí</div>
+                        </div>
+                        <div id="fileinfo-crc" style="display:none;margin-top:8px">
+                            <div style="font-size:12px;color:#48c78e;font-weight:600" id="filename-crc"></div>
+                            <div class="saved-badge" id="badge-crc" style="display:none"><i class="fas fa-check-circle"></i> Guardado</div>
+                            <div class="replace-hint" id="hint-crc" style="display:none">Añade PDF para reemplazarlo</div>
+                        </div>
+                        <div class="doc-card-actions">
+                            <button class="nx-btn nx-btn-primary nx-btn-sm" onclick="verDocumento('CRC')" id="btn-ver-crc" disabled><i class="fas fa-eye"></i> Ver</button>
+                            <button class="nx-btn nx-btn-success nx-btn-sm" onclick="procesarDocumento('CRC')" id="btn-proc-crc" disabled><i class="fas fa-cog"></i> Procesar</button>
+                        </div>
+                    </div>
 
-            <!-- PROCESS -->
-            <div class="card">
-                <div class="card-title">
-                    <div class="icon" style="background:rgba(72,199,142,.15);color:#48c78e"><i class="fas fa-cogs"></i></div>
-                    <h3>4. Procesar y descargar</h3>
+                    <!-- AUT -->
+                    <div class="doc-card sig-aut" id="card-aut" data-sigla="AUT">
+                        <div class="doc-card-header">
+                            <div class="doc-card-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div class="doc-card-code">AUT</div>
+                            <div class="doc-card-name">Autorizaciones</div>
+                        </div>
+                        <div class="doc-upload-zone" id="upload-aut" onclick="triggerUpload('AUT')">
+                            <input type="file" id="file-aut" accept=".pdf" onchange="handleFileSelect('AUT',event)">
+                            <i class="fas fa-cloud-upload-alt" style="font-size:20px;color:#5a7a9a;margin-bottom:6px"></i>
+                            <div style="font-size:12px;color:#5a7a9a">Arrastra PDF aquí</div>
+                        </div>
+                        <div id="fileinfo-aut" style="display:none;margin-top:8px">
+                            <div style="font-size:12px;color:#8b5cf6;font-weight:600" id="filename-aut"></div>
+                            <div class="saved-badge" id="badge-aut" style="display:none"><i class="fas fa-check-circle"></i> Guardado</div>
+                            <div class="replace-hint" id="hint-aut" style="display:none">Añade PDF para reemplazarlo</div>
+                        </div>
+                        <div class="doc-card-actions">
+                            <button class="nx-btn nx-btn-primary nx-btn-sm" onclick="verDocumento('AUT')" id="btn-ver-aut" disabled><i class="fas fa-eye"></i> Ver</button>
+                            <button class="nx-btn nx-btn-success nx-btn-sm" onclick="procesarDocumento('AUT')" id="btn-proc-aut" disabled><i class="fas fa-cog"></i> Procesar</button>
+                        </div>
+                    </div>
+
+                    <!-- HEV -->
+                    <div class="doc-card sig-hev" id="card-hev" data-sigla="HEV">
+                        <div class="doc-card-header">
+                            <div class="doc-card-icon"><i class="fas fa-notes-medical"></i></div>
+                            <div class="doc-card-code">HEV</div>
+                            <div class="doc-card-name">Historia / Evolución</div>
+                        </div>
+                        <div class="doc-upload-zone" id="upload-hev" onclick="triggerUpload('HEV')">
+                            <input type="file" id="file-hev" accept=".pdf" onchange="handleFileSelect('HEV',event)">
+                            <i class="fas fa-cloud-upload-alt" style="font-size:20px;color:#5a7a9a;margin-bottom:6px"></i>
+                            <div style="font-size:12px;color:#5a7a9a">Arrastra PDF aquí</div>
+                        </div>
+                        <div id="fileinfo-hev" style="display:none;margin-top:8px">
+                            <div style="font-size:12px;color:#00b4d8;font-weight:600" id="filename-hev"></div>
+                            <div class="saved-badge" id="badge-hev" style="display:none"><i class="fas fa-check-circle"></i> Guardado</div>
+                            <div class="replace-hint" id="hint-hev" style="display:none">Añade PDF para reemplazarlo</div>
+                        </div>
+                        <div class="doc-card-actions">
+                            <button class="nx-btn nx-btn-primary nx-btn-sm" onclick="verDocumento('HEV')" id="btn-ver-hev" disabled><i class="fas fa-eye"></i> Ver</button>
+                            <button class="nx-btn nx-btn-success nx-btn-sm" onclick="procesarDocumento('HEV')" id="btn-proc-hev" disabled><i class="fas fa-cog"></i> Procesar</button>
+                        </div>
+                    </div>
+
+                    <!-- FEV -->
+                    <div class="doc-card sig-fev" id="card-fev" data-sigla="FEV">
+                        <div class="doc-card-header">
+                            <div class="doc-card-icon"><i class="fas fa-file-invoice"></i></div>
+                            <div class="doc-card-code">FEV</div>
+                            <div class="doc-card-name">Factura Electrónica</div>
+                        </div>
+                        <div class="doc-upload-zone" id="upload-fev" onclick="triggerUpload('FEV')">
+                            <input type="file" id="file-fev" accept=".pdf" onchange="handleFileSelect('FEV',event)">
+                            <i class="fas fa-cloud-upload-alt" style="font-size:20px;color:#5a7a9a;margin-bottom:6px"></i>
+                            <div style="font-size:12px;color:#5a7a9a">Arrastra PDF aquí</div>
+                        </div>
+                        <div id="fileinfo-fev" style="display:none;margin-top:8px">
+                            <div style="font-size:12px;color:#f59e0b;font-weight:600" id="filename-fev"></div>
+                            <div class="saved-badge" id="badge-fev" style="display:none"><i class="fas fa-check-circle"></i> Guardado</div>
+                            <div class="replace-hint" id="hint-fev" style="display:none">Añade PDF para reemplazarlo</div>
+                        </div>
+                        <div class="doc-card-actions">
+                            <button class="nx-btn nx-btn-primary nx-btn-sm" onclick="verDocumento('FEV')" id="btn-ver-fev" disabled><i class="fas fa-eye"></i> Ver</button>
+                            <button class="nx-btn nx-btn-success nx-btn-sm" onclick="procesarDocumento('FEV')" id="btn-proc-fev" disabled><i class="fas fa-cog"></i> Procesar</button>
+                        </div>
+                    </div>
+
+                    <!-- OPF -->
+                    <div class="doc-card sig-opf" id="card-opf" data-sigla="OPF">
+                        <div class="doc-card-header">
+                            <div class="doc-card-icon"><i class="fas fa-prescription"></i></div>
+                            <div class="doc-card-code">OPF</div>
+                            <div class="doc-card-name">Orden / Fórmula</div>
+                        </div>
+                        <div class="doc-upload-zone" id="upload-opf" onclick="triggerUpload('OPF')">
+                            <input type="file" id="file-opf" accept=".pdf" onchange="handleFileSelect('OPF',event)">
+                            <i class="fas fa-cloud-upload-alt" style="font-size:20px;color:#5a7a9a;margin-bottom:6px"></i>
+                            <div style="font-size:12px;color:#5a7a9a">Arrastra PDF aquí</div>
+                        </div>
+                        <div id="fileinfo-opf" style="display:none;margin-top:8px">
+                            <div style="font-size:12px;color:#ec4899;font-weight:600" id="filename-opf"></div>
+                            <div class="saved-badge" id="badge-opf" style="display:none"><i class="fas fa-check-circle"></i> Guardado</div>
+                            <div class="replace-hint" id="hint-opf" style="display:none">Añade PDF para reemplazarlo</div>
+                        </div>
+                        <div class="doc-card-actions">
+                            <button class="nx-btn nx-btn-primary nx-btn-sm" onclick="verDocumento('OPF')" id="btn-ver-opf" disabled><i class="fas fa-eye"></i> Ver</button>
+                            <button class="nx-btn nx-btn-success nx-btn-sm" onclick="procesarDocumento('OPF')" id="btn-proc-opf" disabled><i class="fas fa-cog"></i> Procesar</button>
+                        </div>
+                    </div>
+
+                    <!-- EPI -->
+                    <div class="doc-card sig-epi" id="card-epi" data-sigla="EPI">
+                        <div class="doc-card-header">
+                            <div class="doc-card-icon"><i class="fas fa-file-medical-alt"></i></div>
+                            <div class="doc-card-code">EPI</div>
+                            <div class="doc-card-name">Epicrisis</div>
+                        </div>
+                        <div class="doc-upload-zone" id="upload-epi" onclick="triggerUpload('EPI')">
+                            <input type="file" id="file-epi" accept=".pdf" onchange="handleFileSelect('EPI',event)">
+                            <i class="fas fa-cloud-upload-alt" style="font-size:20px;color:#5a7a9a;margin-bottom:6px"></i>
+                            <div style="font-size:12px;color:#5a7a9a">Arrastra PDF aquí</div>
+                        </div>
+                        <div id="fileinfo-epi" style="display:none;margin-top:8px">
+                            <div style="font-size:12px;color:#10b981;font-weight:600" id="filename-epi"></div>
+                            <div class="saved-badge" id="badge-epi" style="display:none"><i class="fas fa-check-circle"></i> Guardado</div>
+                            <div class="replace-hint" id="hint-epi" style="display:none">Añade PDF para reemplazarlo</div>
+                        </div>
+                        <div class="doc-card-actions">
+                            <button class="nx-btn nx-btn-primary nx-btn-sm" onclick="verDocumento('EPI')" id="btn-ver-epi" disabled><i class="fas fa-eye"></i> Ver</button>
+                            <button class="nx-btn nx-btn-success nx-btn-sm" onclick="procesarDocumento('EPI')" id="btn-proc-epi" disabled><i class="fas fa-cog"></i> Procesar</button>
+                        </div>
+                    </div>
                 </div>
-                <div style="display:flex;gap:12px;align-items:center">
-                    <button onclick="procesarLote()" class="nx-btn nx-btn-success" id="btn-procesar" disabled>
-                        <i class="fas fa-play"></i> Renombrar y empaquetar
+
+                <!-- ACTION BAR -->
+                <div class="action-bar">
+                    <button class="nx-btn nx-btn-success" onclick="procesarTodo()" id="btn-todo" disabled>
+                        <i class="fas fa-save"></i> Procesar y guardar todo
                     </button>
-                    <span id="file-count" style="font-size:12px;color:#5a7a9a">0 archivos cargados</span>
+                    <button class="nx-btn nx-btn-primary" onclick="descargarZIP()" id="btn-zip" disabled>
+                        <i class="fas fa-file-archive"></i> Descargar ZIP de este lote
+                    </button>
+                    <button class="nx-btn nx-btn-danger nx-btn-sm" onclick="limpiarLote()" id="btn-limpiar" style="display:none">
+                        <i class="fas fa-trash"></i> Limpiar lote
+                    </button>
                 </div>
-                <div id="progress-section" style="display:none;margin-top:12px">
+                <div id="progress-section" style="display:none;margin-top:14px">
                     <div class="progress-wrap"><div id="progress-fill" class="progress-fill" style="width:0%"></div></div>
                     <p id="progress-text" style="font-size:12px;color:#5a7a9a;margin-top:6px">Procesando...</p>
                 </div>
             </div>
         </div>
 
-        <!-- TAB: LOTES -->
-        <div id="tab-lotes" class="tab-content">
+        <!-- TAB B: HISTORIAL -->
+        <div id="tab-historial" class="tab-content">
             <div class="card">
                 <div class="card-title">
-                    <div class="icon" style="background:rgba(139,92,246,.15);color:#8b5cf6"><i class="fas fa-archive"></i></div>
+                    <div class="icon" style="background:rgba(139,92,246,.15);color:#8b5cf6"><i class="fas fa-history"></i></div>
                     <h3>Lotes procesados</h3>
                 </div>
                 <div id="lotes-list">
-                    <p style="font-size:13px;color:#5a7a9a;font-style:italic">No hay lotes procesados aún. Crea uno en la pestaña "Crear y Procesar".</p>
+                    <p style="font-size:13px;color:#5a7a9a;font-style:italic">No hay lotes procesados aún. Crea uno en la Pantalla A.</p>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- JSZip -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
     /* ===== SESSION CHECK ===== */
@@ -278,9 +475,20 @@
     if (window.NX) NX.iniciar('gestion_documental', {});
 
     /* ===== STATE ===== */
-    let selectedSigla = 'CRC';
-    let uploadedFiles = [];
+    const SIGLAS = ['CRC','AUT','HEV','FEV','OPF','EPI'];
+    const SIGLA_NAMES = {CRC:'Cuenta de Cobro',AUT:'Autorizaciones',HEV:'Historia/Evolución',FEV:'Factura Electrónica',OPF:'Orden/Fórmula',EPI:'Epicrisis'};
+    const SIGLA_COLORS = {CRC:'#48c78e',AUT:'#8b5cf6',HEV:'#00b4d8',FEV:'#f59e0b',OPF:'#ec4899',EPI:'#10b981'};
+    const SIGLA_TAG = {CRC:'lote-tag-crc',AUT:'lote-tag-aut',HEV:'lote-tag-hev',FEV:'lote-tag-fev',OPF:'lote-tag-opf',EPI:'lote-tag-epi'};
+
+    // docStore: { CRC: [{name, data(ArrayBuffer), renamed}], AUT: [...], ... }
+    let docStore = {};
+    SIGLAS.forEach(s => docStore[s] = []);
+
     let lotes = JSON.parse(localStorage.getItem('nexus_gestion_documental_lotes') || '[]');
+    let savedCount = 0;
+
+    // Pending modal decision
+    let pendingModal = { sigla: null, file: null, index: null };
 
     /* ===== TABS ===== */
     function switchTab(tab) {
@@ -288,189 +496,323 @@
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         event.target.closest('.tab').classList.add('active');
         document.getElementById('tab-' + tab).classList.add('active');
+        if (tab === 'historial') renderLotes();
     }
 
-    /* ===== SIGLA SELECTOR ===== */
-    function selectSigla(sigla, el) {
-        selectedSigla = sigla;
-        document.querySelectorAll('.sigla-tag').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById('formula-sigla').textContent = sigla;
-        updateFormula();
+    /* ===== LOTE UPDATE ===== */
+    function updateLote() {
+        const nombre = document.getElementById('lote-nombre').value.trim();
+        const nit = document.getElementById('lote-nit').value.trim();
+        const sep = document.getElementById('lote-separador').value;
+        const sepDisplay = sep === '' ? '(sin separador)' : sep;
+        document.getElementById('formula-sigla').textContent = nombre ? 'SIGLA' : 'SIGLA';
+
+        savedCount = SIGLAS.filter(s => docStore[s].length > 0).length;
+
+        const statusBar = document.getElementById('statusBar');
+        const statusText = document.getElementById('statusText');
+        if (nombre && nit) {
+            statusBar.classList.remove('empty');
+            statusText.innerHTML = `<i class="fas fa-folder-open" style="margin-right:4px"></i> Lote activo: <strong>${nombre}</strong> - NIT ${nit} - <strong>${savedCount}</strong> de 6 documentos guardados`;
+        } else {
+            statusBar.classList.add('empty');
+            statusText.innerHTML = '<i class="fas fa-info-circle" style="margin-right:4px"></i> No hay lote activo. Configura los datos y sube documentos.';
+        }
+
+        document.getElementById('btn-todo').disabled = savedCount === 0;
+        document.getElementById('btn-zip').disabled = savedCount === 0;
+        document.getElementById('btn-limpiar').style.display = savedCount > 0 ? 'inline-flex' : 'none';
     }
 
-    function updateFormula() {
-        const nit = document.getElementById('lote-nit').value || 'NIT';
-        const nombre = document.getElementById('lote-nombre').value || 'NOMBRE_CARPETA';
-        document.getElementById('formula-sigla').textContent = selectedSigla;
-    }
-
-    /* ===== UPLOAD ===== */
-    const uploadZone = document.getElementById('upload-zone');
-    const fileInput = document.getElementById('file-input');
-    uploadZone.addEventListener('click', () => fileInput.click());
-    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-    uploadZone.addEventListener('drop', e => {
-        e.preventDefault(); uploadZone.classList.remove('dragover');
-        const files = Array.from(e.dataTransfer.files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
-        addFiles(files);
-    });
-    fileInput.addEventListener('change', e => { addFiles(Array.from(e.target.files)); });
-
-    function addFiles(files) {
-        files.forEach(f => {
-            if (!uploadedFiles.some(u => u.name === f.name && u.size === f.size)) {
-                uploadedFiles.push(f);
+    /* ===== DRAG & DROP SETUP ===== */
+    SIGLAS.forEach(sigla => {
+        const zone = document.getElementById('upload-' + sigla.toLowerCase());
+        zone.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', e => { e.preventDefault(); zone.classList.remove('dragover'); });
+        zone.addEventListener('drop', e => {
+            e.preventDefault(); e.stopPropagation();
+            zone.classList.remove('dragover');
+            const f = e.dataTransfer.files[0];
+            if (f && f.name.toLowerCase().endsWith('.pdf')) {
+                processNewFile(sigla, f);
             }
         });
-        renderFileList();
+    });
+
+    /* ===== TRIGGER FILE INPUT ===== */
+    function triggerUpload(sigla) {
+        document.getElementById('file-' + sigla.toLowerCase()).click();
     }
 
-    function removeFile(index) {
-        uploadedFiles.splice(index, 1);
-        renderFileList();
+    function handleFileSelect(sigla, event) {
+        const f = event.target.files[0];
+        if (f) processNewFile(sigla, f);
     }
 
-    function renderFileList() {
-        const list = document.getElementById('file-list');
-        list.innerHTML = '';
-        const nit = document.getElementById('lote-nit').value || 'NIT';
-        const nombre = document.getElementById('lote-nombre').value || 'CARPETA';
-        const inicio = parseInt(document.getElementById('lote-inicio').value) || 1;
+    /* ===== PROCESS NEW FILE (with modal if exists) ===== */
+    function processNewFile(sigla, file) {
+        const existing = docStore[sigla];
+        if (existing.length > 0) {
+            // SHOW MODAL: Anexar o Reemplazar
+            pendingModal = { sigla, file };
+            document.getElementById('modal-sigla-label').textContent = sigla + ' - ' + SIGLA_NAMES[sigla];
+            document.getElementById('modal-existing-name').textContent = existing.map(d => d.renamed || d.name).join(', ');
+            document.getElementById('modal-new-name').textContent = file.name;
+            document.getElementById('modalOverlay').classList.add('show');
+        } else {
+            // No existing file, just add
+            addFileToStore(sigla, file);
+        }
+    }
 
-        uploadedFiles.forEach((f, i) => {
-            const newName = `${selectedSigla}_${nit}_${nombre}_${String(inicio + i).padStart(3,'0')}.pdf`;
-            const div = document.createElement('div');
-            div.className = 'file-row';
-            div.innerHTML = `
-                <span class="file-icon" style="color:${siglaColor()}">📄</span>
-                <span class="file-name">${f.name}</span>
-                <span class="file-new-name">→ ${newName}</span>
-                <button class="file-remove" onclick="removeFile(${i})"><i class="fas fa-times"></i></button>
-            `;
-            list.appendChild(div);
+    function modalAction(action) {
+        document.getElementById('modalOverlay').classList.remove('show');
+        const { sigla, file } = pendingModal;
+
+        if (action === 'replace') {
+            // Remove all existing, add new
+            docStore[sigla] = [];
+            addFileToStore(sigla, file);
+            showToast(`${sigla}: Documento reemplazado correctamente`, 'info');
+        } else if (action === 'annex') {
+            // Keep existing + add new
+            addFileToStore(sigla, file);
+            showToast(`${sigla}: Documento anexado correctamente`, 'success');
+        } else {
+            // Cancel - reset file input
+            document.getElementById('file-' + sigla.toLowerCase()).value = '';
+            showToast('Operación cancelada', 'warn');
+        }
+        pendingModal = { sigla: null, file: null };
+    }
+
+    async function addFileToStore(sigla, file) {
+        const data = await file.arrayBuffer();
+        const nombre = document.getElementById('lote-nombre').value.trim() || 'LOTE';
+        const nit = document.getElementById('lote-nit').value.trim() || 'NIT';
+        const sep = document.getElementById('lote-separador').value;
+        const num = docStore[sigla].length + 1;
+        const renamed = `${sigla}${sep}${nit}${sep}${nombre}${sep}${String(num).padStart(3,'0')}.pdf`;
+
+        docStore[sigla].push({ name: file.name, data, renamed });
+
+        // Update UI
+        updateCardUI(sigla);
+        updateLote();
+
+        // Reset file input
+        document.getElementById('file-' + sigla.toLowerCase()).value = '';
+    }
+
+    function updateCardUI(sigla) {
+        const files = docStore[sigla];
+        const zone = document.getElementById('upload-' + sigla.toLowerCase());
+        const card = document.getElementById('card-' + sigla.toLowerCase());
+        const info = document.getElementById('fileinfo-' + sigla.toLowerCase());
+        const nameEl = document.getElementById('filename-' + sigla.toLowerCase());
+        const badge = document.getElementById('badge-' + sigla.toLowerCase());
+        const hint = document.getElementById('hint-' + sigla.toLowerCase());
+        const btnVer = document.getElementById('btn-ver-' + sigla.toLowerCase());
+        const btnProc = document.getElementById('btn-proc-' + sigla.toLowerCase());
+
+        if (files.length > 0) {
+            zone.classList.add('has-file');
+            card.classList.add('saved');
+            info.style.display = 'block';
+
+            // Show all file names
+            if (files.length === 1) {
+                nameEl.textContent = files[0].renamed;
+                nameEl.style.color = SIGLA_COLORS[sigla];
+            } else {
+                nameEl.innerHTML = files.map(f => `<div style="margin:2px 0">${f.renamed}</div>`).join('');
+                nameEl.style.color = SIGLA_COLORS[sigla];
+            }
+
+            badge.style.display = 'inline-flex';
+            hint.style.display = 'block';
+            hint.textContent = files.length === 1 ? 'Documento guardado - añade PDF para reemplazarlo' : `${files.length} documentos guardados - añade más o reemplaza`;
+            btnVer.disabled = false;
+            btnProc.disabled = false;
+        } else {
+            zone.classList.remove('has-file');
+            card.classList.remove('saved');
+            info.style.display = 'none';
+            badge.style.display = 'none';
+            hint.style.display = 'none';
+            btnVer.disabled = true;
+            btnProc.disabled = true;
+        }
+    }
+
+    /* ===== VER DOCUMENTO ===== */
+    function verDocumento(sigla) {
+        const files = docStore[sigla];
+        if (files.length === 0) return;
+        // Show last file
+        const last = files[files.length - 1];
+        const blob = new Blob([last.data], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+    }
+
+    /* ===== PROCESAR DOCUMENTO INDIVIDUAL ===== */
+    function procesarDocumento(sigla) {
+        const files = docStore[sigla];
+        if (files.length === 0) return;
+        showToast(`${sigla}: ${files.length} documento(s) procesado(s)`, 'success');
+    }
+
+    /* ===== PROCESAR TODO ===== */
+    async function procesarTodo() {
+        const nombre = document.getElementById('lote-nombre').value.trim();
+        const nit = document.getElementById('lote-nit').value.trim();
+        if (!nombre || !nit) { showToast('Completa el nombre del lote y el NIT', 'error'); return; }
+
+        const btn = document.getElementById('btn-todo');
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        document.getElementById('progress-section').style.display = 'block';
+
+        const totalDocs = SIGLAS.reduce((c,s) => c + docStore[s].length, 0);
+        let processed = 0;
+
+        const loteFiles = [];
+        SIGLAS.forEach(sigla => {
+            docStore[sigla].forEach(f => {
+                loteFiles.push({ sigla, renamed: f.renamed, name: f.name, size: f.data.byteLength });
+                processed++;
+                const pct = Math.round((processed / totalDocs) * 90);
+                document.getElementById('progress-fill').style.width = pct + '%';
+                document.getElementById('progress-text').textContent = `Procesando ${sigla}: ${f.renamed}`;
+            });
         });
 
-        document.getElementById('file-count').textContent = `${uploadedFiles.length} archivo${uploadedFiles.length!==1?'s':''} cargado${uploadedFiles.length!==1?'s':''}`;
-        document.getElementById('btn-procesar').disabled = uploadedFiles.length === 0;
+        // Save to lotes
+        const lote = {
+            id: Date.now(),
+            nombre: nombre,
+            nit: nit,
+            fecha: new Date().toISOString(),
+            documentos: loteFiles,
+            total: loteFiles.length
+        };
+        lotes.push(lote);
+        localStorage.setItem('nexus_gestion_documental_lotes', JSON.stringify(lotes));
+
+        document.getElementById('progress-fill').style.width = '100%';
+        document.getElementById('progress-text').textContent = '✅ Todos los documentos guardados correctamente';
+        showToast(`${totalDocs} documentos procesados y guardados`, 'success');
+
+        btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Procesar y guardar todo';
     }
 
-    function siglaColor() {
-        const colors = { CRC:'#48c78e', AUT:'#8b5cf6', HEV:'#00b4d8', FEV:'#f59e0b', OPF:'#ec4899', EPI:'#10b981' };
-        return colors[selectedSigla] || '#00b4d8';
-    }
+    /* ===== DESCARGAR ZIP ===== */
+    async function descargarZIP() {
+        const nombre = document.getElementById('lote-nombre').value.trim() || 'lote';
+        const totalDocs = SIGLAS.reduce((c,s) => c + docStore[s].length, 0);
+        if (totalDocs === 0) { showToast('No hay documentos para descargar', 'error'); return; }
 
-    /* ===== PROCESS LOTE ===== */
-    async function procesarLote() {
-        if (uploadedFiles.length === 0) { showToast('Sube al menos un PDF','error'); return; }
-        const nit = document.getElementById('lote-nit').value;
-        const nombre = document.getElementById('lote-nombre').value;
-        if (!nit || !nombre) { showToast('Completa el NIT y el nombre de la carpeta','error'); return; }
-
-        const btn = document.getElementById('btn-procesar');
-        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+        const btn = document.getElementById('btn-zip');
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando ZIP...';
         document.getElementById('progress-section').style.display = 'block';
 
         try {
-            const inicio = parseInt(document.getElementById('lote-inicio').value) || 1;
-            const renamedFiles = [];
+            const zip = new JSZip();
+            let count = 0;
 
-            for (let i = 0; i < uploadedFiles.length; i++) {
-                const f = uploadedFiles[i];
-                const newName = `${selectedSigla}_${nit}_${nombre}_${String(inicio + i).padStart(3,'0')}.pdf`;
-                renamedFiles.push({ original: f.name, nuevo: newName, size: f.size });
-                const pct = Math.round(((i+1)/uploadedFiles.length)*80);
-                document.getElementById('progress-fill').style.width = pct+'%';
-                document.getElementById('progress-text').textContent = `Renombrando ${i+1}/${uploadedFiles.length}: ${newName}`;
-            }
+            SIGLAS.forEach(sigla => {
+                docStore[sigla].forEach(f => {
+                    zip.file(f.renamed, f.data);
+                    count++;
+                    const pct = Math.round((count / totalDocs) * 80);
+                    document.getElementById('progress-fill').style.width = pct + '%';
+                    document.getElementById('progress-text').textContent = `Agregando: ${f.renamed}`;
+                });
+            });
 
-            // Save lote to localStorage
-            const lote = {
-                id: Date.now(),
-                sigla: selectedSigla,
-                nit: nit,
-                nombre: nombre,
-                fecha: new Date().toISOString(),
-                archivos: renamedFiles,
-                total: renamedFiles.length
-            };
-            lotes.push(lote);
-            localStorage.setItem('nexus_gestion_documental_lotes', JSON.stringify(lotes));
+            document.getElementById('progress-text').textContent = 'Comprimiendo ZIP...';
+            const blob = await zip.generateAsync({ type: 'blob' }, meta => {
+                document.getElementById('progress-fill').style.width = (80 + meta.percent * 0.2) + '%';
+            });
 
-            // Generate ZIP download using JSZip (if available) or create download links
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `${nombre}_documentos.zip`; a.click();
+            URL.revokeObjectURL(url);
+
             document.getElementById('progress-fill').style.width = '100%';
-            document.getElementById('progress-text').textContent = '✅ Lote procesado correctamente';
-            showToast(`${renamedFiles.length} archivos renombrados`,'success');
-
-            // Reset
-            uploadedFiles = [];
-            fileInput.value = '';
-            renderFileList();
-            renderLotes();
-
+            document.getElementById('progress-text').textContent = '✅ ZIP descargado';
+            showToast('ZIP descargado correctamente', 'success');
         } catch(err) {
-            showToast('Error: ' + err.message,'error');
+            showToast('Error al generar ZIP: ' + err.message, 'error');
         } finally {
-            btn.disabled = false; btn.innerHTML = '<i class="fas fa-play"></i> Renombrar y empaquetar';
+            btn.disabled = false; btn.innerHTML = '<i class="fas fa-file-archive"></i> Descargar ZIP de este lote';
         }
+    }
+
+    /* ===== LIMPIAR LOTE ===== */
+    function limpiarLote() {
+        if (!confirm('¿Seguro que deseas limpiar todos los documentos del lote actual?')) return;
+        SIGLAS.forEach(s => {
+            docStore[s] = [];
+            updateCardUI(s);
+        });
+        updateLote();
+        document.getElementById('progress-section').style.display = 'none';
+        showToast('Lote limpiado', 'info');
     }
 
     /* ===== RENDER LOTES ===== */
     function renderLotes() {
         const list = document.getElementById('lotes-list');
         if (lotes.length === 0) {
-            list.innerHTML = '<p style="font-size:13px;color:#5a7a9a;font-style:italic">No hay lotes procesados aún.</p>';
+            list.innerHTML = '<p style="font-size:13px;color:#5a7a9a;font-style:italic">No hay lotes procesados aún. Crea uno en la Pantalla A.</p>';
             return;
         }
         list.innerHTML = '';
         lotes.forEach(l => {
             const d = new Date(l.fecha);
             const dateStr = d.toLocaleDateString('es-CO') + ' ' + d.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
-            const colors = { CRC:'sig-crc', AUT:'sig-aut', HEV:'sig-hev', FEV:'sig-fev', OPF:'sig-opf', EPI:'sig-epi' };
+            const siglasInLote = [...new Set(l.documentos.map(d => d.sigla))];
             const div = document.createElement('div');
             div.className = 'lote-card';
             div.innerHTML = `
                 <div class="lote-header">
                     <div>
-                        <span class="lote-name">${l.sigla}_${l.nit}_${l.nombre}</span>
+                        <span class="lote-name">${l.nombre}</span>
                         <span class="lote-date" style="margin-left:10px">${dateStr}</span>
                     </div>
                     <button class="nx-btn nx-btn-danger nx-btn-sm" onclick="eliminarLote(${l.id})"><i class="fas fa-trash"></i></button>
                 </div>
-                <div class="lote-stats">
-                    <div class="stat"><i class="fas fa-file-pdf" style="color:${siglaColorForCode(l.sigla)}"></i> ${l.total} archivos</div>
-                    <div class="stat"><i class="fas fa-hashtag" style="color:#5a7a9a"></i> ${l.sigla}</div>
+                <div style="font-size:12px;color:#5a7a9a">NIT: ${l.nit} — ${l.total} documento${l.total!==1?'s':''}</div>
+                <div class="lote-docs">
+                    ${siglasInLote.map(s => `<span class="lote-doc-tag ${SIGLA_TAG[s]}">${s}</span>`).join('')}
                 </div>
             `;
             list.appendChild(div);
         });
     }
 
-    function siglaColorForCode(code) {
-        const colors = { CRC:'#48c78e', AUT:'#8b5cf6', HEV:'#00b4d8', FEV:'#f59e0b', OPF:'#ec4899', EPI:'#10b981' };
-        return colors[code] || '#00b4d8';
-    }
-
     function eliminarLote(id) {
         lotes = lotes.filter(l => l.id !== id);
         localStorage.setItem('nexus_gestion_documental_lotes', JSON.stringify(lotes));
         renderLotes();
-        showToast('Lote eliminado','success');
+        showToast('Lote eliminado', 'success');
+    }
+
+    /* ===== TOAST ===== */
+    function showToast(msg, type='info') {
+        const c = document.getElementById('toastContainer');
+        const d = document.createElement('div');
+        const cls = type==='success'?'toast-success':type==='error'?'toast-error':type==='warn'?'toast-warn':'toast-info';
+        d.className = `toast ${cls}`;
+        const icon = type==='success'?'check-circle':type==='error'?'exclamation-triangle':type==='warn'?'exclamation-circle':'info-circle';
+        d.innerHTML = `<i class="fas fa-${icon}"></i> ${msg}`;
+        c.appendChild(d); setTimeout(()=>d.remove(), 3000);
     }
 
     // Init
-    renderLotes();
-
-    /* ===== TOAST ===== */
-    function showToast(msg,type='info') {
-        const c = document.getElementById('toastContainer');
-        const d = document.createElement('div');
-        d.className = `toast toast-${type==='success'?'success':type==='error'?'error':'info'}`;
-        const icon = type==='success'?'check-circle':type==='error'?'exclamation-triangle':'info-circle';
-        d.innerHTML = `<i class="fas fa-${icon}"></i> ${msg}`;
-        c.appendChild(d); setTimeout(()=>d.remove(),3000);
-    }
+    updateLote();
     </script>
 </body>
 </html>
