@@ -1,818 +1,2005 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUSMED - Gestión Documental</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Inter',sans-serif; background:#0a1628; color:#c8d6e5; min-height:100vh; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUSMED – Gestión Documental</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0a1628;color:#c8d6e5;min-height:100vh}
 
-        /* HEADER */
-        .header { background:linear-gradient(135deg,#0d2137,#1a3a5c); padding:15px 30px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #00b4d8; box-shadow:0 2px 15px rgba(0,180,216,.2); }
-        .brand-name { font-size:24px; font-weight:800; color:#00b4d8; letter-spacing:3px; }
-        .brand-name span { color:#90e0ef; font-weight:300; }
-        .user-info { display:flex; align-items:center; gap:10px; }
-        .user-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#00b4d8,#0077b6); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#fff; }
-        .user-name { font-size:13px; font-weight:600; color:#c8d6e5; }
-        .user-role { font-size:11px; color:#5a7a9a; text-transform:uppercase; letter-spacing:1px; }
-        .btn-cerrar { background:transparent; color:#ff3860; border:1px solid #ff3860; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:600; transition:all .3s; }
-        .btn-cerrar:hover { background:#ff3860; color:#fff; }
+.header{background:linear-gradient(135deg,#0d2137,#1a3a5c);padding:15px 30px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #00b4d8;box-shadow:0 2px 15px rgba(0,180,216,.2)}
+.brand-name{font-size:24px;font-weight:800;color:#00b4d8;letter-spacing:3px}
+.brand-name span{color:#90e0ef;font-weight:300}
+.user-info{display:flex;align-items:center;gap:10px}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#00b4d8,#0077b6);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
+.user-name{font-size:13px;font-weight:600;color:#c8d6e5}
+.user-role{font-size:11px;color:#5a7a9a;text-transform:uppercase;letter-spacing:1px}
+.btn-cerrar{background:transparent;color:#ff3860;border:1px solid #ff3860;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:all .3s}
+.btn-cerrar:hover{background:#ff3860;color:#fff}
 
-        /* NAV BAR */
-        .nav-bar { background:#0d2137; padding:8px 30px; display:flex; gap:5px; border-bottom:1px solid #1a3a5c; flex-wrap:wrap; }
-        .nav-item { padding:8px 16px; border-radius:6px; font-size:13px; color:#5a7a9a; cursor:pointer; transition:all .3s; text-decoration:none; display:flex; align-items:center; gap:6px; }
-        .nav-item:hover { color:#00b4d8; background:rgba(0,180,216,.1); }
-        .nav-item.active { color:#00b4d8; background:rgba(0,180,216,.15); border:1px solid rgba(0,180,216,.3); }
+.nav-bar{background:#0d2137;padding:8px 30px;display:flex;gap:5px;border-bottom:1px solid #1a3a5c;flex-wrap:wrap}
+.nav-item{padding:8px 16px;border-radius:6px;font-size:13px;color:#5a7a9a;cursor:pointer;transition:all .3s;text-decoration:none;display:flex;align-items:center;gap:6px}
+.nav-item:hover{color:#00b4d8;background:rgba(0,180,216,.1)}
+.nav-item.active{color:#00b4d8;background:rgba(0,180,216,.15);border:1px solid rgba(0,180,216,.3)}
 
-        /* MAIN */
-        .main { max-width:1100px; margin:25px auto; padding:0 20px; }
-        .page-title { font-size:22px; font-weight:800; color:#00b4d8; margin-bottom:4px; }
-        .page-sub { font-size:13px; color:#5a7a9a; margin-bottom:20px; }
+.main{max-width:1180px;margin:25px auto;padding:0 20px 64px}
+.top-bar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+h1{font-size:22px;margin:0 0 4px;color:#00b4d8}
+.sub{color:#5a7a9a;font-size:13.5px;margin:0}
+.mode{display:flex;align-items:center;gap:8px;background:#0d2137;border:1px solid #1a3a5c;border-radius:999px;padding:7px 14px;font-size:12.5px;color:#5a7a9a;white-space:nowrap}
+.dot{width:9px;height:9px;border-radius:50%;background:#f59e0b}
+.dot.on{background:#22c55e}
 
-        /* STATUS BAR */
-        .status-bar { background:rgba(72,199,142,.1); border:1px solid rgba(72,199,142,.3); border-radius:12px; padding:12px 18px; margin-bottom:18px; display:flex; align-items:center; gap:10px; font-size:13px; font-weight:600; color:#48c78e; }
-        .status-bar.empty { background:rgba(90,122,154,.1); border-color:rgba(90,122,154,.2); color:#5a7a9a; }
-        .status-bar i { font-size:16px; }
+.tabs{display:flex;gap:8px;margin:20px 0 16px;border-bottom:1px solid #1a3a5c}
+.tab{background:none;border:0;border-bottom:2px solid transparent;color:#5a7a9a;padding:11px 16px;font:600 14px inherit;cursor:pointer}
+.tab.sel{color:#c8d6e5;border-bottom-color:#00b4d8}
+.screen{display:none}.screen.sel{display:block}
 
-        /* CARDS */
-        .card { background:linear-gradient(135deg,#0d2137,#122a45); border:1px solid #1a3a5c; border-radius:16px; padding:24px; margin-bottom:20px; }
-        .card-title { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
-        .card-title h3 { font-size:16px; font-weight:700; color:#c8d6e5; }
-        .card-title .icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.card{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:16px;padding:18px;margin-bottom:16px}
+.card h2{font-size:12.5px;text-transform:uppercase;letter-spacing:.9px;color:#5a7a9a;margin:0 0 14px}
 
-        /* TABS */
-        .tabs { display:flex; gap:4px; margin-bottom:20px; }
-        .tab { padding:10px 20px; border-radius:10px 10px 0 0; font-size:13px; font-weight:600; cursor:pointer; transition:all .3s; color:#5a7a9a; background:rgba(0,180,216,.03); border:1px solid #1a3a5c; border-bottom:none; }
-        .tab.active { color:#00b4d8; background:linear-gradient(135deg,#0d2137,#122a45); border-color:#00b4d8; }
-        .tab-content { display:none; }
-        .tab-content.active { display:block; }
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.fields .wide{grid-column:1/-1}
+label{display:block;font-size:12.5px;color:#5a7a9a;margin-bottom:5px;font-weight:600}
+.nx-input{background:#0a1628;border:1px solid #1a3a5c;color:#c8d6e5;border-radius:10px;padding:10px 12px;font:14px inherit;width:100%;outline:none;transition:border .3s}
+.nx-input:focus{border-color:#00b4d8;box-shadow:0 0 0 2px rgba(0,180,216,.2)}
+.nx-input.bad{border-color:#ef4444}
+.nx-select{background:#0a1628;border:1px solid #1a3a5c;color:#c8d6e5;border-radius:10px;padding:10px 12px;font:14px inherit;width:100%}
+.req::after{content:" *";color:#ef4444}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
 
-        /* CONFIG FORM */
-        .config-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
-        .nx-input { background:#0a1628; border:1px solid #1a3a5c; border-radius:10px; padding:10px 14px; color:#c8d6e5; font-size:13px; font-family:inherit; width:100%; transition:border .3s; }
-        .nx-input:focus { outline:none; border-color:#00b4d8; box-shadow:0 0 0 2px rgba(0,180,216,.2); }
-        .nx-select { background:#0a1628; border:1px solid #1a3a5c; border-radius:10px; padding:10px 14px; color:#c8d6e5; font-size:13px; font-family:inherit; width:100%; }
-        .nx-label { display:block; font-size:12px; color:#5a7a9a; margin-bottom:6px; font-weight:600; }
+.nx-btn{background:#00b4d8;color:#03202c;border:0;border-radius:10px;padding:11px 18px;font:600 14px inherit;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:8px}
+.nx-btn:hover{box-shadow:0 6px 20px rgba(0,180,216,.35);transform:translateY(-1px)}
+.nx-btn.ghost{background:transparent;border:1px solid #1a3a5c;color:#c8d6e5}
+.nx-btn.ghost:hover{border-color:#00b4d8;color:#00b4d8}
+.nx-btn.go{background:linear-gradient(135deg,#48c78e,#38a06d);color:#fff}
+.nx-btn.go:hover{box-shadow:0 6px 20px rgba(72,199,142,.35)}
+.nx-btn.mini{padding:7px 12px;font-size:12.5px;border-radius:8px}
+.nx-btn.danger{background:transparent;border:1px solid #6b2530;color:#ffb4b4}
+.nx-btn.danger:hover{background:#2a1218;border-color:#8e2f3c}
+.nx-btn:disabled{opacity:.42;cursor:not-allowed;transform:none;box-shadow:none}
 
-        /* FORMULA */
-        .formula-box { background:rgba(0,180,216,.06); border:1px solid rgba(0,180,216,.2); border-radius:12px; padding:14px; margin-bottom:18px; }
-        .formula-box h4 { font-size:12px; font-weight:700; color:#00b4d8; margin-bottom:8px; }
-        .formula { font-family:monospace; font-size:15px; font-weight:700; color:#c8d6e5; padding:8px 12px; background:#0a1628; border-radius:8px; border:1px solid #1a3a5c; display:inline-block; }
-        .formula .v { color:#00b4d8; }
-        .formula .s { color:#f59e0b; }
+.active-lote{background:#0f2a1c;border:1px solid #1f5c3c;border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:13.5px;display:none}
+.active-lote.on{display:block}
+.active-lote b{color:#7ee2a8}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 
-        /* DOC CARDS GRID */
-        .doc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:18px; }
-        .doc-card { background:linear-gradient(135deg,#0d2137,#122a45); border:2px solid #1a3a5c; border-radius:16px; padding:18px; transition:all .3s; position:relative; }
-        .doc-card:hover { border-color:rgba(0,180,216,.3); transform:translateY(-2px); }
-        .doc-card.saved { border-color:rgba(72,199,142,.3); }
+.boxes{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.box{background:#0d2137;border:1px solid #1a3a5c;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.box.hot{border-color:#00b4d8;background:#0f2a3a}
+.bhead{display:flex;align-items:center;gap:11px}
+.ico{width:42px;height:50px;flex:0 0 42px;border-radius:6px;background:#c0392b;position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;font:700 10px inherit;color:#fff;letter-spacing:.5px}
+.ico::before{content:"";position:absolute;top:0;right:0;width:12px;height:12px;background:linear-gradient(225deg,#0a1628 50%,transparent 50%)}
+.sigla{font:700 19px inherit;letter-spacing:1.5px}
+.desc{font-size:12.5px;color:#5a7a9a;margin-top:1px}
 
-        .doc-card-header { text-align:center; margin-bottom:12px; }
-        .doc-card-icon { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 8px; }
-        .doc-card-code { font-size:20px; font-weight:800; }
-        .doc-card-name { font-size:11px; color:#5a7a9a; margin-top:2px; }
+.zone{border:2px dashed #1a3a5c;border-radius:10px;padding:14px 10px;text-align:center;font-size:12.5px;color:#5a7a9a;cursor:pointer;background:#0a1628;transition:all .3s}
+.zone:hover{border-color:#00b4d8}
+.zone.dragover{border-color:#00b4d8;background:rgba(0,180,216,.08)}
+.zone.has{border-style:solid;border-color:#2f6b4a;color:#c8d6e5;background:#12251c}
 
-        /* DOC CARD UPLOAD ZONE */
-        .doc-upload-zone { border:2px dashed #1a3a5c; border-radius:12px; padding:16px; text-align:center; cursor:pointer; transition:all .3s; background:rgba(0,180,216,.02); min-height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-        .doc-upload-zone:hover { border-color:#00b4d8; background:rgba(0,180,216,.06); }
-        .doc-upload-zone.dragover { border-color:#00b4d8; background:rgba(0,180,216,.1); }
-        .doc-upload-zone.has-file { border-color:rgba(72,199,142,.3); background:rgba(72,199,142,.04); }
-        .doc-upload-zone input[type="file"] { display:none; }
+.flist{display:flex;flex-direction:column;gap:6px}
+.flist:empty{display:none}
+.fcount{font-size:11.5px;color:#5a7a9a}
+.fitem{display:flex;align-items:center;gap:6px;background:#0a1628;border:1px solid #1a3a5c;border-radius:8px;padding:5px 7px}
+.fnum{flex:0 0 18px;height:18px;border-radius:50%;background:#1f2f4a;color:#9fd0ff;font:700 10.5px ui-monospace,monospace;display:flex;align-items:center;justify-content:center}
+.fname{flex:1 1 auto;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsize{flex:0 0 auto;font-size:11px;color:#5a7a9a}
+.fbtn{background:transparent;border:1px solid #1a3a5c;color:#c8d6e5;border-radius:6px;padding:2px 7px;font-size:12px;line-height:1.3;cursor:pointer;transition:all .2s}
+.fbtn:hover{border-color:#00b4d8;color:#00b4d8}
+.fbtn.del{color:#ffb4b4;border-color:#6b2530}
+.fbtn.del:hover{background:#2a1218;border-color:#8e2f3c}
+.target{font-size:11.5px;color:#9fd0ff;word-break:break-all}
+.brow{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.state{font-size:11.5px;color:#5a7a9a}
+.state.ok{color:#7ee2a8}.state.err{color:#ffb4b4}
+.rowacts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 
-        /* SAVED BADGE */
-        .saved-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(72,199,142,.15); color:#48c78e; font-size:11px; font-weight:700; padding:4px 10px; border-radius:6px; margin-top:8px; }
-        .saved-badge i { font-size:10px; }
+.search{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.search input{max-width:420px}
+.tablebox{overflow:auto;border:1px solid #1a3a5c;border-radius:12px;max-height:560px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{position:sticky;top:0;background:#0a1628;color:#5a7a9a;text-align:left;padding:11px 10px;border-bottom:1px solid #1a3a5c;font-weight:600;white-space:nowrap}
+td{padding:10px;border-bottom:1px solid #0f1d30;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tr.selrow td{background:#132135}
+th.cchk,td.cchk{width:38px;text-align:center;padding-right:0}
+.chk{width:16px;height:16px;accent-color:#00b4d8;cursor:pointer}
 
-        .replace-hint { font-size:11px; color:#5a7a9a; margin-top:6px; font-style:italic; }
+.sig{display:inline-block;min-width:38px;text-align:center;font:700 10.5px ui-monospace,monospace;padding:4px 5px;border-radius:6px;margin:2px 3px 2px 0;background:#1b2740;color:#5a6b87;border:1px solid #263651}
+.sig.on{background:#0f2a1c;color:#7ee2a8;border-color:#1f5c3c}
+.prog{font-size:11.5px;color:#5a7a9a;margin-top:4px}
 
-        /* BUTTONS */
-        .nx-btn { border:none; border-radius:10px; padding:10px 20px; font-weight:700; cursor:pointer; font-size:13px; font-family:inherit; transition:all .3s; display:inline-flex; align-items:center; gap:8px; }
-        .nx-btn-primary { background:linear-gradient(135deg,#00b4d8,#0090b3); color:#03202c; }
-        .nx-btn-primary:hover { box-shadow:0 6px 20px rgba(0,180,216,.35); transform:translateY(-1px); }
-        .nx-btn-success { background:linear-gradient(135deg,#48c78e,#38a06d); color:#fff; }
-        .nx-btn-success:hover { box-shadow:0 6px 20px rgba(72,199,142,.35); transform:translateY(-1px); }
-        .nx-btn-danger { background:transparent; color:#ff3860; border:1px solid #ff3860; padding:8px 14px; }
-        .nx-btn-danger:hover { background:#ff3860; color:#fff; }
-        .nx-btn-sm { padding:6px 12px; font-size:12px; border-radius:8px; }
-        .nx-btn:disabled { opacity:.5; cursor:not-allowed; }
+.selbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#0d2137;border:1px solid #1a3a5c;border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.selbar .state{flex:1 1 220px}
 
-        .doc-card-actions { display:flex; gap:6px; margin-top:10px; }
-        .doc-card-actions .nx-btn { flex:1; justify-content:center; font-size:11px; padding:8px 10px; }
+.nx-select-sm{width:auto;padding:7px 10px;font-size:12.5px;background:#0a1628;border:1px solid #1a3a5c;color:#c8d6e5;border-radius:8px;cursor:pointer}
+.nx-select-sm:focus{border-color:#00b4d8;outline:none}
 
-        /* ACTION BAR */
-        .action-bar { display:flex; gap:12px; margin-top:18px; flex-wrap:wrap; }
+.msg{font-size:13px;color:#5a7a9a;min-height:18px;margin-top:10px}
+.msg.err{color:#ffb4b4}.msg.ok{color:#7ee2a8}
+.hint{font-size:12px;color:#5a7a9a;margin-top:8px}
+.empty{padding:18px;color:#5a7a9a;font-size:13.5px}
+footer{margin-top:24px;text-align:center;color:#5a7a9a;font-size:12px}
+body.noscroll{overflow:hidden}
 
-        /* MODAL */
-        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:3000; justify-content:center; align-items:center; }
-        .modal-overlay.show { display:flex; }
-        .modal-box { background:linear-gradient(135deg,#0d2137,#1a3a5c); border:1px solid #00b4d8; border-radius:20px; padding:30px; max-width:460px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.5); animation:modalIn .3s ease; }
-        @keyframes modalIn { from{transform:scale(.9);opacity:0} to{transform:scale(1);opacity:1} }
-        .modal-title { font-size:18px; font-weight:800; color:#00b4d8; margin-bottom:6px; }
-        .modal-msg { font-size:14px; color:#c8d6e5; line-height:1.6; margin-bottom:18px; }
-        .modal-file-name { font-family:monospace; color:#48c78e; font-weight:700; }
-        .modal-existing-name { font-family:monospace; color:#ff3860; font-weight:700; text-decoration:line-through; opacity:.7; }
-        .modal-actions { display:flex; gap:10px; }
-        .modal-actions .nx-btn { flex:1; justify-content:center; }
+.ov{position:fixed;inset:0;background:rgba(5,9,16,.88);z-index:50;display:flex;align-items:center;justify-content:center;padding:18px}
+.ov[hidden]{display:none}
+.ovbox{background:linear-gradient(135deg,#0d2137,#1a3a5c);border:1px solid #00b4d8;border-radius:16px;width:min(1000px,100%);height:min(88vh,100%);display:flex;flex-direction:column;overflow:hidden}
+.ovtop{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid #1a3a5c}
+.ovtop h3{margin:0;font-size:15px;color:#00b4d8}
+.ovtop .sub{font-size:12px;color:#5a7a9a;word-break:break-all}
+.ovx{background:transparent;border:1px solid #1a3a5c;color:#c8d6e5;border-radius:8px;padding:5px 11px;font-size:15px;line-height:1;cursor:pointer}
+.ovx:hover{border-color:#00b4d8;color:#00b4d8}
+.ovbody{flex:1 1 auto;background:#0a1018;min-height:0}
+.ovbody iframe{width:100%;height:100%;border:0;display:block;background:#0a1018}
+.ovfoot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px;border-top:1px solid #1a3a5c}
+.ovfoot .state{flex:1 1 200px}
 
-        /* LOTE HISTORY */
-        .lote-card { background:linear-gradient(135deg,#0d2137,#122a45); border:1px solid #1a3a5c; border-radius:14px; padding:18px; margin-bottom:12px; transition:all .3s; }
-        .lote-card:hover { border-color:#00b4d8; }
-        .lote-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-        .lote-name { font-size:15px; font-weight:700; color:#c8d6e5; }
-        .lote-date { font-size:11px; color:#5a7a9a; }
-        .lote-docs { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-        .lote-doc-tag { font-size:11px; font-weight:700; padding:3px 10px; border-radius:6px; }
-
-        /* TOAST */
-        .toast-container { position:fixed; top:20px; right:20px; z-index:4000; display:flex; flex-direction:column; gap:8px; }
-        .toast { padding:12px 20px; border-radius:10px; font-size:13px; font-weight:600; box-shadow:0 8px 25px rgba(0,0,0,.4); animation:slideIn .3s ease,fadeOut .3s ease 2.7s; display:flex; align-items:center; gap:8px; }
-        .toast-success { background:linear-gradient(135deg,#48c78e,#38a06d); color:#fff; }
-        .toast-error { background:linear-gradient(135deg,#ff3860,#d63031); color:#fff; }
-        .toast-info { background:linear-gradient(135deg,#00b4d8,#0077b6); color:#fff; }
-        .toast-warn { background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; }
-        @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
-        @keyframes fadeOut { from{opacity:1} to{opacity:0} }
-
-        /* PROGRESS */
-        .progress-wrap { width:100%; background:#1a3a5c; border-radius:10px; height:10px; overflow:hidden; margin-top:12px; }
-        .progress-fill { height:100%; background:linear-gradient(90deg,#00b4d8,#48c78e); border-radius:10px; transition:width .3s; }
-
-        /* SIGLA COLORS */
-        .sig-crc { background:rgba(72,199,142,.12); color:#48c78e; border-color:rgba(72,199,142,.3); }
-        .sig-crc .doc-card-icon { background:rgba(72,199,142,.15); color:#48c78e; }
-        .sig-crc .doc-card-code { color:#48c78e; }
-        .sig-aut { background:rgba(139,92,246,.12); color:#8b5cf6; border-color:rgba(139,92,246,.3); }
-        .sig-aut .doc-card-icon { background:rgba(139,92,246,.15); color:#8b5cf6; }
-        .sig-aut .doc-card-code { color:#8b5cf6; }
-        .sig-hev { background:rgba(0,180,216,.12); color:#00b4d8; border-color:rgba(0,180,216,.3); }
-        .sig-hev .doc-card-icon { background:rgba(0,180,216,.15); color:#00b4d8; }
-        .sig-hev .doc-card-code { color:#00b4d8; }
-        .sig-fev { background:rgba(245,158,11,.12); color:#f59e0b; border-color:rgba(245,158,11,.3); }
-        .sig-fev .doc-card-icon { background:rgba(245,158,11,.15); color:#f59e0b; }
-        .sig-fev .doc-card-code { color:#f59e0b; }
-        .sig-opf { background:rgba(236,72,153,.12); color:#ec4899; border-color:rgba(236,72,153,.3); }
-        .sig-opf .doc-card-icon { background:rgba(236,72,153,.15); color:#ec4899; }
-        .sig-opf .doc-card-code { color:#ec4899; }
-        .sig-epi { background:rgba(16,185,129,.12); color:#10b981; border-color:rgba(16,185,129,.3); }
-        .sig-epi .doc-card-icon { background:rgba(16,185,129,.15); color:#10b981; }
-        .sig-epi .doc-card-code { color:#10b981; }
-
-        .lote-tag-crc { background:rgba(72,199,142,.12); color:#48c78e; }
-        .lote-tag-aut { background:rgba(139,92,246,.12); color:#8b5cf6; }
-        .lote-tag-hev { background:rgba(0,180,216,.12); color:#00b4d8; }
-        .lote-tag-fev { background:rgba(245,158,11,.12); color:#f59e0b; }
-        .lote-tag-opf { background:rgba(236,72,153,.12); color:#ec4899; }
-        .lote-tag-epi { background:rgba(16,185,129,.12); color:#10b981; }
-
-        @media(max-width:768px) { .header{flex-direction:column;gap:10px} .nav-bar{justify-content:center} .doc-grid{grid-template-columns:1fr} .config-grid{grid-template-columns:1fr} }
-    </style>
+@media(max-width:768px){.header{flex-direction:column;gap:10px}.nav-bar{justify-content:center}.boxes{grid-template-columns:1fr}.fields{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-    <script src="nexus_db.js"></script>
-    <script src="permisos.js"></script>
+<script src="nexus_db.js"></script>
+<script src="permisos.js"></script>
 
-    <!-- HEADER -->
-    <div class="header">
-        <div style="display:flex;align-items:center;gap:12px">
-            <div class="brand-name">NEXUS<span>MED</span></div>
+<div class="header">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="brand-name">NEXUS<span>MED</span></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:20px">
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <div><div class="user-name" id="userName">Admin</div><div class="user-role" id="userRole">ADMIN</div></div>
+    </div>
+    <button class="btn-cerrar" onclick="cerrarSesion()">🔒 Cerrar Sesión</button>
+  </div>
+</div>
+
+<nav class="nav-bar">
+  <a class="nav-item" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
+  <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+  <a class="nav-item" href="pacientes.html"><i class="fas fa-users"></i> Pacientes</a>
+  <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias</a>
+  <a class="nav-item" href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
+  <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enf.</a>
+  <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
+  <a class="nav-item" href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+  <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresados</a>
+  <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+  <a class="nav-item" href="conciliacion.html"><i class="fas fa-balance-scale"></i> Conciliación</a>
+  <a class="nav-item active" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Doc.</a>
+  <a class="nav-item" href="renombrar.html"><i class="fas fa-i-cursor"></i> Renombrar</a>
+</nav>
+
+<div class="main">
+  <div class="top-bar">
+    <div>
+      <h1>Gestión Documental y Nomenclatura Automatizada</h1>
+      <p class="sub">Auditoría médica y facturación en salud · renombrado automático, carga masiva y consulta histórica.</p>
+    </div>
+    <div class="mode"><span class="dot" id="dot"></span><span id="modeTxt">Detectando almacenamiento…</span></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab sel" id="tabA" type="button">Pantalla A · Carga y creación</button>
+    <button class="tab" id="tabB" type="button">Pantalla B · Consulta histórica</button>
+  </div>
+
+  <section class="screen sel" id="scrA">
+    <div class="card">
+      <h2>Sección 1 · Configuración de destino y datos</h2>
+      <div class="fields">
+        <div class="wide">
+          <label for="ruta">Carpeta de destino</label>
+          <input id="ruta" class="nx-input" type="text" value="" placeholder="Escribe la ruta: C:\Users\JORGE\Documents\PROYECT" autocomplete="off">
         </div>
-        <div style="display:flex;align-items:center;gap:20px">
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar">A</div>
-                <div><div class="user-name" id="userName">Admin</div><div class="user-role" id="userRole">ADMIN</div></div>
-            </div>
-            <button class="btn-cerrar" onclick="cerrarSesion()">🔒 Cerrar Sesión</button>
+        <div>
+          <label for="carpeta" class="req">Nombre de la carpeta (lote)</label>
+          <input id="carpeta" class="nx-input" type="text" placeholder="FE12410" autocomplete="off">
         </div>
+        <div>
+          <label for="nit" class="req">NIT de la IPS</label>
+          <input id="nit" class="nx-input" type="text" inputmode="numeric" placeholder="900217463" autocomplete="off">
+        </div>
+        <div>
+          <label for="sep">Bloque de separación</label>
+          <select id="sep" class="nx-select">
+            <option value="_">Guión bajo _</option>
+            <option value="-">Guión medio -</option>
+            <option value=" ">Espacio</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="nx-btn" id="btnCrear" type="button">Crear carpeta</button>
+        <button class="nx-btn ghost" id="btnNuevo" type="button">Nuevo lote</button>
+        <span class="mono" id="vista" style="color:#9fd0ff;font-size:12.5px"></span>
+      </div>
+      <div class="msg" id="msgA"></div>
     </div>
 
-    <!-- NAV -->
-    <nav class="nav-bar">
-        <a class="nav-item" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
-        <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
-        <a class="nav-item" href="pacientes.html"><i class="fas fa-users"></i> Pacientes</a>
-        <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias</a>
-        <a class="nav-item" href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
-        <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enf.</a>
-        <a class="nav-item" href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
-        <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
-        <a class="nav-item" href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
-        <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresados</a>
-        <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
-        <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
-        <a class="nav-item" href="conciliacion.html"><i class="fas fa-balance-scale"></i> Conciliación</a>
-        <a class="nav-item active" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Doc.</a>
-        <a class="nav-item" href="generador_evoluciones.html"><i class="fas fa-file-medical-alt"></i> Generador Evol.</a>
-        <a class="nav-item" href="renombrar.html"><i class="fas fa-i-cursor"></i> Renombrar</a>
-    </nav>
+    <div class="active-lote" id="activo"></div>
 
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- MODAL: Anexar o Reemplazar -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-box">
-            <div class="modal-title"><i class="fas fa-exclamation-triangle" style="margin-right:8px;color:#f59e0b"></i>Documento existente</div>
-            <div class="modal-msg">
-                Ya existe un documento guardado para <strong id="modal-sigla-label">CRC</strong>:<br>
-                <span class="modal-existing-name" id="modal-existing-name">archivo_anterior.pdf</span><br><br>
-                Has subido un nuevo archivo:<br>
-                <span class="modal-file-name" id="modal-new-name">nuevo_archivo.pdf</span><br><br>
-                ¿Qué deseas hacer?
-            </div>
-            <div class="modal-actions">
-                <button class="nx-btn nx-btn-success" onclick="modalAction('replace')">
-                    <i class="fas fa-sync-alt"></i> Reemplazar
-                </button>
-                <button class="nx-btn nx-btn-primary" onclick="modalAction('annex')">
-                    <i class="fas fa-plus-circle"></i> Anexar
-                </button>
-                <button class="nx-btn nx-btn-danger" onclick="modalAction('cancel')">
-                    <i class="fas fa-times"></i> Cancelar
-                </button>
-            </div>
-        </div>
+    <div class="card">
+      <h2>Sección 2 · Zona de carga (6 documentos)</h2>
+      <div class="boxes" id="boxes"></div>
+      <div class="hint">Puedes soltar varios PDF en una misma casilla: se unirán en un único archivo, en el orden que indiques, y se guardarán con la nomenclatura estricta. El nombre original de cada PDF se ignora por completo.</div>
     </div>
 
-    <div class="main">
-        <h1 class="page-title"><i class="fas fa-folder-open" style="margin-right:8px"></i>Gestión Documental</h1>
-        <p class="page-sub">Carga, nombra y organiza documentos por lote con nomenclatura oficial</p>
-
-        <!-- STATUS BAR -->
-        <div class="status-bar empty" id="statusBar">
-            <i class="fas fa-info-circle"></i>
-            <span id="statusText">No hay lote activo. Configura los datos y sube documentos.</span>
-        </div>
-
-        <!-- TABS -->
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('cargar')"><i class="fas fa-upload" style="margin-right:6px"></i>Pantalla A - Carga y creación</div>
-            <div class="tab" onclick="switchTab('historial')"><i class="fas fa-history" style="margin-right:6px"></i>Pantalla B - Consulta histórica</div>
-        </div>
-
-        <!-- TAB A: CARGA -->
-        <div id="tab-cargar" class="tab-content active">
-            <!-- CONFIG -->
-            <div class="card">
-                <div class="card-title">
-                    <div class="icon" style="background:rgba(139,92,246,.15);color:#8b5cf6"><i class="fas fa-cogs"></i></div>
-                    <h3>Configuración de destino y datos</h3>
-                </div>
-                <div class="formula-box">
-                    <h4><i class="fas fa-calculator" style="margin-right:6px"></i>Fórmula de nomenclatura oficial</h4>
-                    <div class="formula">
-                        <span class="v" id="formula-sigla">CRC</span><span class="s"> _ </span><span class="v">NIT</span><span class="s"> _ </span><span class="v">NOMBRE_CARPETA</span><span class="s"> _ </span><span class="v">NUM</span><span style="color:#5a7a9a">.pdf</span>
-                    </div>
-                </div>
-                <div class="config-grid">
-                    <div><label class="nx-label">Nombre de la carpeta (lote)</label><input type="text" id="lote-nombre" class="nx-input" placeholder="FE12410" oninput="updateLote()"></div>
-                    <div><label class="nx-label">NIT de la IPS</label><input type="text" id="lote-nit" class="nx-input" placeholder="900217463" oninput="updateLote()"></div>
-                    <div><label class="nx-label">Bloque de separación</label>
-                        <select id="lote-separador" class="nx-select" onchange="updateLote()">
-                            <option value="_">_ (guion bajo)</option>
-                            <option value="-">- (guion medio)</option>
-                            <option value=".">. (punto)</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 6 DOC CARDS -->
-            <div class="card">
-                <div class="card-title">
-                    <div class="icon" style="background:rgba(0,180,216,.15);color:#00b4d8"><i class="fas fa-file-pdf"></i></div>
-                    <h3>Documentos del lote</h3>
-                </div>
-                <div class="doc-grid" id="doc-grid">
-                    <!-- CRC -->
-                    <div class="doc-card sig-crc" id="card-crc" data-sigla="CRC">
-                        <div class="doc-card-header">
-                            <div class="doc-card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-                            <div class="doc-card-code">CRC</div>
-                            <div class="doc-card-name">Cuenta de Cobro</div>
-                        </div>
-                        <div class="doc-upload-zone" id="upload-crc" onclick="triggerUpload('CRC')">
-                            <input type="file" id="file-crc" accept=".pdf" onchange="handleFileSelect('CRC',event)">
-                            <i class="fas fa-cloud-upload-alt" style="font-size:20px;color:#5a7a9a;margin-bottom:6px"></i>
-                            <div style="font-size:12px;color:#5a7a9a">Arrastra PDF aquí</div>
-                        </div>
-                        <div id="fileinfo-crc" style="display:none;margin-top:8px">
-                            <div style="font-size:12px;color:#48c78e;font-weight:600" id="filename-crc"></div>
-                            <div class="saved-badge" id="badge-crc" style="display:none"><i class="fas fa-check-circle"></i> Guardado</div>
-                            <div class="replace-hint" id="hint-crc" style="display:none">Añade PDF para reemplazarlo</div>
-                        </div>
-                        <div class="doc-card-actions">
-                            <button class="nx-btn nx-btn-primary nx-btn-sm" onclick="verDocumento('CRC')" id="btn-ver-crc" disabled><i class="fas fa-eye"></i> Ver</button>
-                            <button class="nx-btn nx-btn-success nx-btn-sm" onclick="procesarDocumento('CRC')" id="btn-proc-crc" disabled><i class="fas fa-cog"></i> Procesar</button>
-                        </div>
-                    </div>
-
-                    <!-- AUT -->
-                    <div class="doc-card sig-aut" id="card-aut" data-sigla="AUT">
-                        <div class="doc-card-header">
-                            <div class="doc-card-icon"><i class="fas fa-shield-alt"></i></div>
-                            <div class="doc-card-code">AUT</div>
-                            <div class="doc-card-name">Autorizaciones</div>
-                        </div>
-                        <div class="doc-upload-zone" id="upload-aut" onclick="triggerUpload('AUT')">
-                            <input type="file" id="file-aut" accept=".pdf" onchange="handleFileSelect('AUT',event)">
-                            <i class="fas fa-cloud-upload-alt" style="font-size:20px;color:#5a7a9a;margin-bottom:6px"></i>
-                            <div style="font-size:12px;color:#5a7a9a">Arrastra PDF aquí</div>
-                        </div>
-                        <div id="fileinfo-aut" style="display:none;margin-top:8px">
-                            <div style="font-size:12px;color:#8b5cf6;font-weight:600" id="filename-aut"></div>
-                            <div class="saved-badge" id="badge-aut" style="display:none"><i class="fas fa-check-circle"></i> Guardado</div>
-                            <div class="replace-hint" id="hint-aut" style="display:none">Añade PDF para reemplazarlo</div>
-                        </div>
-                        <div class="doc-card-actions">
-                            <button class="nx-btn nx-btn-primary nx-btn-sm" onclick="verDocumento('AUT')" id="btn-ver-aut" disabled><i class="fas fa-eye"></i> Ver</button>
-                            <button class="nx-btn nx-btn-success nx-btn-sm" onclick="procesarDocumento('AUT')" id="btn-proc-aut" disabled><i class="fas fa-cog"></i> Procesar</button>
-                        </div>
-                    </div>
-
-                    <!-- HEV -->
-                    <div class="doc-card sig-hev" id="card-hev" data-sigla="HEV">
-                        <div class="doc-card-header">
-                            <div class="doc-card-icon"><i class="fas fa-notes-medical"></i></div>
-                            <div class="doc-card-code">HEV</div>
-                            <div class="doc-card-name">Historia / Evolución</div>
-                        </div>
-                        <div class="doc-upload-zone" id="upload-hev" onclick="triggerUpload('HEV')">
-                            <input type="file" id="file-hev" accept=".pdf" onchange="handleFileSelect('HEV',event)">
-                            <i class="fas fa-cloud-upload-alt" style="font-size:20px;color:#5a7a9a;margin-bottom:6px"></i>
-                            <div style="font-size:12px;color:#5a7a9a">Arrastra PDF aquí</div>
-                        </div>
-                        <div id="fileinfo-hev" style="display:none;margin-top:8px">
-                            <div style="font-size:12px;color:#00b4d8;font-weight:600" id="filename-hev"></div>
-                            <div class="saved-badge" id="badge-hev" style="display:none"><i class="fas fa-check-circle"></i> Guardado</div>
-                            <div class="replace-hint" id="hint-hev" style="display:none">Añade PDF para reemplazarlo</div>
-                        </div>
-                        <div class="doc-card-actions">
-                            <button class="nx-btn nx-btn-primary nx-btn-sm" onclick="verDocumento('HEV')" id="btn-ver-hev" disabled><i class="fas fa-eye"></i> Ver</button>
-                            <button class="nx-btn nx-btn-success nx-btn-sm" onclick="procesarDocumento('HEV')" id="btn-proc-hev" disabled><i class="fas fa-cog"></i> Procesar</button>
-                        </div>
-                    </div>
-
-                    <!-- FEV -->
-                    <div class="doc-card sig-fev" id="card-fev" data-sigla="FEV">
-                        <div class="doc-card-header">
-                            <div class="doc-card-icon"><i class="fas fa-file-invoice"></i></div>
-                            <div class="doc-card-code">FEV</div>
-                            <div class="doc-card-name">Factura Electrónica</div>
-                        </div>
-                        <div class="doc-upload-zone" id="upload-fev" onclick="triggerUpload('FEV')">
-                            <input type="file" id="file-fev" accept=".pdf" onchange="handleFileSelect('FEV',event)">
-                            <i class="fas fa-cloud-upload-alt" style="font-size:20px;color:#5a7a9a;margin-bottom:6px"></i>
-                            <div style="font-size:12px;color:#5a7a9a">Arrastra PDF aquí</div>
-                        </div>
-                        <div id="fileinfo-fev" style="display:none;margin-top:8px">
-                            <div style="font-size:12px;color:#f59e0b;font-weight:600" id="filename-fev"></div>
-                            <div class="saved-badge" id="badge-fev" style="display:none"><i class="fas fa-check-circle"></i> Guardado</div>
-                            <div class="replace-hint" id="hint-fev" style="display:none">Añade PDF para reemplazarlo</div>
-                        </div>
-                        <div class="doc-card-actions">
-                            <button class="nx-btn nx-btn-primary nx-btn-sm" onclick="verDocumento('FEV')" id="btn-ver-fev" disabled><i class="fas fa-eye"></i> Ver</button>
-                            <button class="nx-btn nx-btn-success nx-btn-sm" onclick="procesarDocumento('FEV')" id="btn-proc-fev" disabled><i class="fas fa-cog"></i> Procesar</button>
-                        </div>
-                    </div>
-
-                    <!-- OPF -->
-                    <div class="doc-card sig-opf" id="card-opf" data-sigla="OPF">
-                        <div class="doc-card-header">
-                            <div class="doc-card-icon"><i class="fas fa-prescription"></i></div>
-                            <div class="doc-card-code">OPF</div>
-                            <div class="doc-card-name">Orden / Fórmula</div>
-                        </div>
-                        <div class="doc-upload-zone" id="upload-opf" onclick="triggerUpload('OPF')">
-                            <input type="file" id="file-opf" accept=".pdf" onchange="handleFileSelect('OPF',event)">
-                            <i class="fas fa-cloud-upload-alt" style="font-size:20px;color:#5a7a9a;margin-bottom:6px"></i>
-                            <div style="font-size:12px;color:#5a7a9a">Arrastra PDF aquí</div>
-                        </div>
-                        <div id="fileinfo-opf" style="display:none;margin-top:8px">
-                            <div style="font-size:12px;color:#ec4899;font-weight:600" id="filename-opf"></div>
-                            <div class="saved-badge" id="badge-opf" style="display:none"><i class="fas fa-check-circle"></i> Guardado</div>
-                            <div class="replace-hint" id="hint-opf" style="display:none">Añade PDF para reemplazarlo</div>
-                        </div>
-                        <div class="doc-card-actions">
-                            <button class="nx-btn nx-btn-primary nx-btn-sm" onclick="verDocumento('OPF')" id="btn-ver-opf" disabled><i class="fas fa-eye"></i> Ver</button>
-                            <button class="nx-btn nx-btn-success nx-btn-sm" onclick="procesarDocumento('OPF')" id="btn-proc-opf" disabled><i class="fas fa-cog"></i> Procesar</button>
-                        </div>
-                    </div>
-
-                    <!-- EPI -->
-                    <div class="doc-card sig-epi" id="card-epi" data-sigla="EPI">
-                        <div class="doc-card-header">
-                            <div class="doc-card-icon"><i class="fas fa-file-medical-alt"></i></div>
-                            <div class="doc-card-code">EPI</div>
-                            <div class="doc-card-name">Epicrisis</div>
-                        </div>
-                        <div class="doc-upload-zone" id="upload-epi" onclick="triggerUpload('EPI')">
-                            <input type="file" id="file-epi" accept=".pdf" onchange="handleFileSelect('EPI',event)">
-                            <i class="fas fa-cloud-upload-alt" style="font-size:20px;color:#5a7a9a;margin-bottom:6px"></i>
-                            <div style="font-size:12px;color:#5a7a9a">Arrastra PDF aquí</div>
-                        </div>
-                        <div id="fileinfo-epi" style="display:none;margin-top:8px">
-                            <div style="font-size:12px;color:#10b981;font-weight:600" id="filename-epi"></div>
-                            <div class="saved-badge" id="badge-epi" style="display:none"><i class="fas fa-check-circle"></i> Guardado</div>
-                            <div class="replace-hint" id="hint-epi" style="display:none">Añade PDF para reemplazarlo</div>
-                        </div>
-                        <div class="doc-card-actions">
-                            <button class="nx-btn nx-btn-primary nx-btn-sm" onclick="verDocumento('EPI')" id="btn-ver-epi" disabled><i class="fas fa-eye"></i> Ver</button>
-                            <button class="nx-btn nx-btn-success nx-btn-sm" onclick="procesarDocumento('EPI')" id="btn-proc-epi" disabled><i class="fas fa-cog"></i> Procesar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ACTION BAR -->
-                <div class="action-bar">
-                    <button class="nx-btn nx-btn-success" onclick="procesarTodo()" id="btn-todo" disabled>
-                        <i class="fas fa-save"></i> Procesar y guardar todo
-                    </button>
-                    <button class="nx-btn nx-btn-primary" onclick="descargarZIP()" id="btn-zip" disabled>
-                        <i class="fas fa-file-archive"></i> Descargar ZIP de este lote
-                    </button>
-                    <button class="nx-btn nx-btn-danger nx-btn-sm" onclick="limpiarLote()" id="btn-limpiar" style="display:none">
-                        <i class="fas fa-trash"></i> Limpiar lote
-                    </button>
-                </div>
-                <div id="progress-section" style="display:none;margin-top:14px">
-                    <div class="progress-wrap"><div id="progress-fill" class="progress-fill" style="width:0%"></div></div>
-                    <p id="progress-text" style="font-size:12px;color:#5a7a9a;margin-top:6px">Procesando...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB B: HISTORIAL -->
-        <div id="tab-historial" class="tab-content">
-            <div class="card">
-                <div class="card-title">
-                    <div class="icon" style="background:rgba(139,92,246,.15);color:#8b5cf6"><i class="fas fa-history"></i></div>
-                    <h3>Lotes procesados</h3>
-                </div>
-                <div id="lotes-list">
-                    <p style="font-size:13px;color:#5a7a9a;font-style:italic">No hay lotes procesados aún. Crea uno en la Pantalla A.</p>
-                </div>
-            </div>
-        </div>
+    <div class="card">
+      <h2>Sección 3 · Procesamiento y guardado</h2>
+      <div class="actions">
+        <button class="nx-btn go" id="btnTodo" type="button" disabled>Procesar y guardar todo</button>
+        <button class="nx-btn ghost" id="btnZipA" type="button" disabled>Descargar ZIP de este lote</button>
+      </div>
+      <div class="msg" id="msgP"></div>
     </div>
+  </section>
 
-    <!-- JSZip -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <section class="screen" id="scrB">
+    <div class="card">
+      <h2>Buscador inteligente</h2>
+      <div class="search">
+        <input id="q" class="nx-input" type="text" placeholder="Filtrar por nombre de carpeta o NIT de la IPS…" autocomplete="off">
+        <select id="filtro" class="nx-select" style="width:auto">
+          <option value="todos">Todos los lotes</option>
+          <option value="completos">Solo completos (6/6)</option>
+          <option value="incompletos">Solo incompletos</option>
+        </select>
+        <button class="nx-btn ghost mini" id="btnRef" type="button"><i class="fas fa-sync-alt"></i> Actualizar</button>
+        <span class="state" id="resumen"></span>
+      </div>
+      <div class="selbar">
+        <span class="state" id="selTxt">Marca varios lotes para descargarlos juntos en un solo ZIP.</span>
+        <button class="nx-btn mini" id="btnZipSel" type="button" disabled><i class="fas fa-file-archive"></i> Descargar seleccionados en ZIP</button>
+        <button class="nx-btn ghost mini" id="btnLimpiaSel" type="button" disabled><i class="fas fa-times"></i> Quitar selección</button>
+        <button class="nx-btn mini danger" id="btnElimSel" type="button" disabled><i class="fas fa-trash"></i> Eliminar seleccionados</button>
+      </div>
+      <div class="tablebox">
+        <table>
+          <thead><tr>
+            <th class="cchk"><input type="checkbox" class="chk" id="chAll" title="Seleccionar todos"></th>
+            <th>Fecha y hora</th><th>Nombre carpeta</th><th>NIT</th>
+            <th>Documentos</th><th>Acciones</th>
+          </tr></thead>
+          <tbody id="tb"></tbody>
+        </table>
+      </div>
+      <div class="msg" id="msgB"></div>
+    </div>
+  </section>
 
-    <script>
-    /* ===== SESSION CHECK ===== */
-    const sesion = JSON.parse(localStorage.getItem('nexus_sesion'));
-    if (!sesion || !sesion.logueado) window.location.href = 'index.html';
-    else {
-        document.getElementById('userName').textContent = sesion.nombre;
-        document.getElementById('userRole').textContent = sesion.rol.toUpperCase();
-        document.getElementById('userAvatar').textContent = sesion.nombre.charAt(0).toUpperCase();
+  <footer>Nomenclatura estricta: SIGLA + separador + NIT + separador + carpeta + .pdf</footer>
+</div>
+
+<div class="ov" id="ov" hidden>
+  <div class="ovbox">
+    <div class="ovtop">
+      <div style="flex:1 1 auto">
+        <h3 id="ovTitle">Vista previa</h3>
+        <p class="sub" id="ovSub"></p>
+      </div>
+      <button class="ovx" id="ovClose" type="button" title="Cerrar">&times;</button>
+    </div>
+    <div class="ovbody"><iframe id="ovFrame" title="Vista previa del documento"></iframe></div>
+    <div class="ovfoot">
+      <span class="state" id="ovMsg"></span>
+      <button class="nx-btn" id="ovPrint" type="button" disabled><i class="fas fa-print"></i> Imprimir</button>
+      <button class="nx-btn ghost" id="ovDown" type="button" disabled><i class="fas fa-download"></i> Descargar</button>
+      <button class="nx-btn ghost" id="ovBack" type="button"><i class="fas fa-arrow-left"></i> Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Unión de varios PDF en uno solo, 100 % dentro del navegador.
+   No usa librerías externas ni internet: lee cada PDF, toma sus páginas
+   y escribe un PDF nuevo con todas ellas en el orden indicado.
+   Los archivos originales del usuario nunca se modifican. */
+(function(root){
+"use strict";
+
+/* ================================================================
+ *  1) Descompresión Flate (zlib / deflate) en JavaScript puro
+ * ================================================================ */
+function inflateRaw(src){
+  var pos = 0, bb = 0, bc = 0;
+  var out = new Uint8Array(1 << 16), on = 0;
+
+  function ensure(extra){
+    if(on + extra <= out.length) return;
+    var l = out.length;
+    while(l < on + extra) l *= 2;
+    var nb = new Uint8Array(l);
+    nb.set(out.subarray(0, on));
+    out = nb;
+  }
+  function bits(n){
+    if(n === 0) return 0;
+    while(bc < n){
+      if(pos >= src.length) throw new Error("flujo comprimido incompleto");
+      bb = (bb | (src[pos++] << bc)) >>> 0;
+      bc += 8;
     }
-    function cerrarSesion() { localStorage.removeItem('nexus_sesion'); window.location.href = 'index.html'; }
-
-    /* ===== PERMISOS CHECK ===== */
-    if (window.NX) NX.iniciar('gestion_documental', {});
-
-    /* ===== STATE ===== */
-    const SIGLAS = ['CRC','AUT','HEV','FEV','OPF','EPI'];
-    const SIGLA_NAMES = {CRC:'Cuenta de Cobro',AUT:'Autorizaciones',HEV:'Historia/Evolución',FEV:'Factura Electrónica',OPF:'Orden/Fórmula',EPI:'Epicrisis'};
-    const SIGLA_COLORS = {CRC:'#48c78e',AUT:'#8b5cf6',HEV:'#00b4d8',FEV:'#f59e0b',OPF:'#ec4899',EPI:'#10b981'};
-    const SIGLA_TAG = {CRC:'lote-tag-crc',AUT:'lote-tag-aut',HEV:'lote-tag-hev',FEV:'lote-tag-fev',OPF:'lote-tag-opf',EPI:'lote-tag-epi'};
-
-    // docStore: { CRC: [{name, data(ArrayBuffer), renamed}], AUT: [...], ... }
-    let docStore = {};
-    SIGLAS.forEach(s => docStore[s] = []);
-
-    let lotes = JSON.parse(localStorage.getItem('nexus_gestion_documental_lotes') || '[]');
-    let savedCount = 0;
-
-    // Pending modal decision
-    let pendingModal = { sigla: null, file: null, index: null };
-
-    /* ===== TABS ===== */
-    function switchTab(tab) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        event.target.closest('.tab').classList.add('active');
-        document.getElementById('tab-' + tab).classList.add('active');
-        if (tab === 'historial') renderLotes();
+    var v = bb & ((1 << n) - 1);
+    bb = bb >>> n; bc -= n;
+    return v;
+  }
+  function tabla(lens, n){
+    var counts = new Int32Array(16), i;
+    for(i = 0; i < n; i++) counts[lens[i]]++;
+    counts[0] = 0;
+    var offs = new Int32Array(16), sum = 0;
+    for(i = 1; i < 16; i++){ offs[i] = sum; sum += counts[i]; }
+    var symbols = new Int32Array(sum);
+    for(i = 0; i < n; i++) if(lens[i]) symbols[offs[lens[i]]++] = i;
+    return { c:counts, s:symbols };
+  }
+  function decodeSym(h){
+    var code = 0, first = 0, index = 0, len;
+    for(len = 1; len < 16; len++){
+      code |= bits(1);
+      var count = h.c[len];
+      if(code - first < count) return h.s[index + (code - first)];
+      index += count;
+      first = (first + count) << 1;
+      code <<= 1;
     }
+    throw new Error("código comprimido inválido");
+  }
 
-    /* ===== LOTE UPDATE ===== */
-    function updateLote() {
-        const nombre = document.getElementById('lote-nombre').value.trim();
-        const nit = document.getElementById('lote-nit').value.trim();
-        const sep = document.getElementById('lote-separador').value;
-        const sepDisplay = sep === '' ? '(sin separador)' : sep;
-        document.getElementById('formula-sigla').textContent = nombre ? 'SIGLA' : 'SIGLA';
+  var LB = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
+  var LE = [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0];
+  var DB = [1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577];
+  var DE = [0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13];
 
-        savedCount = SIGLAS.filter(s => docStore[s].length > 0).length;
+  var fijoLit = null, fijoDist = null;
+  function fijas(){
+    if(fijoLit) return;
+    var l = new Uint8Array(288), i;
+    for(i = 0;   i < 144; i++) l[i] = 8;
+    for(i = 144; i < 256; i++) l[i] = 9;
+    for(i = 256; i < 280; i++) l[i] = 7;
+    for(i = 280; i < 288; i++) l[i] = 8;
+    fijoLit = tabla(l, 288);
+    var d = new Uint8Array(30);
+    for(i = 0; i < 30; i++) d[i] = 5;
+    fijoDist = tabla(d, 30);
+  }
 
-        const statusBar = document.getElementById('statusBar');
-        const statusText = document.getElementById('statusText');
-        if (nombre && nit) {
-            statusBar.classList.remove('empty');
-            statusText.innerHTML = `<i class="fas fa-folder-open" style="margin-right:4px"></i> Lote activo: <strong>${nombre}</strong> - NIT ${nit} - <strong>${savedCount}</strong> de 6 documentos guardados`;
-        } else {
-            statusBar.classList.add('empty');
-            statusText.innerHTML = '<i class="fas fa-info-circle" style="margin-right:4px"></i> No hay lote activo. Configura los datos y sube documentos.';
+  var ORDEN = [16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
+  var fin = false;
+
+  while(!fin){
+    fin = bits(1) === 1;
+    var tipo = bits(2);
+    if(tipo === 0){
+      bb = 0; bc = 0;
+      if(pos + 4 > src.length) throw new Error("bloque sin comprimir incompleto");
+      var len = src[pos] | (src[pos+1] << 8);
+      pos += 4;
+      if(pos + len > src.length) throw new Error("bloque sin comprimir incompleto");
+      ensure(len);
+      out.set(src.subarray(pos, pos + len), on);
+      on += len; pos += len;
+      continue;
+    }
+    var lit, dist;
+    if(tipo === 1){
+      fijas(); lit = fijoLit; dist = fijoDist;
+    } else if(tipo === 2){
+      var nlen = bits(5) + 257, ndist = bits(5) + 1, ncode = bits(4) + 4;
+      var lens = new Uint8Array(320), i2;
+      for(i2 = 0; i2 < ncode; i2++) lens[ORDEN[i2]] = bits(3);
+      var hcl = tabla(lens, 19);
+      var todos = new Uint8Array(nlen + ndist), k = 0;
+      while(k < nlen + ndist){
+        var sym = decodeSym(hcl), rep, val = 0;
+        if(sym < 16){ todos[k++] = sym; continue; }
+        if(sym === 16){
+          if(k === 0) throw new Error("tabla comprimida inválida");
+          val = todos[k-1]; rep = 3 + bits(2);
+        } else if(sym === 17){ rep = 3 + bits(3); }
+        else { rep = 11 + bits(7); }
+        while(rep-- > 0 && k < nlen + ndist) todos[k++] = val;
+      }
+      lit  = tabla(todos.subarray(0, nlen), nlen);
+      dist = tabla(todos.subarray(nlen, nlen + ndist), ndist);
+    } else {
+      throw new Error("bloque comprimido no válido");
+    }
+    for(;;){
+      var s = decodeSym(lit);
+      if(s === 256) break;
+      if(s < 256){ ensure(1); out[on++] = s; continue; }
+      s -= 257;
+      if(s >= LB.length) throw new Error("longitud comprimida inválida");
+      var largo = LB[s] + bits(LE[s]);
+      var ds = decodeSym(dist);
+      if(ds >= DB.length) throw new Error("distancia comprimida inválida");
+      var d2 = DB[ds] + bits(DE[ds]);
+      if(d2 > on) throw new Error("distancia comprimida fuera de rango");
+      ensure(largo);
+      var from = on - d2;
+      for(var j = 0; j < largo; j++) out[on + j] = out[from + j];
+      on += largo;
+    }
+  }
+  return out.subarray(0, on);
+}
+
+function inflate(data){
+  if(data.length > 1){
+    var cmf = data[0], flg = data[1];
+    if((cmf & 0x0f) === 8 && ((cmf << 8) + flg) % 31 === 0){
+      try { return inflateRaw(data.subarray(2)); } catch(e){ /* probar en crudo */ }
+    }
+  }
+  return inflateRaw(data);
+}
+
+/* ================================================================
+ *  2) Utilidades de bytes
+ * ================================================================ */
+function u8(x){
+  if(x instanceof Uint8Array) return x;
+  if(x && x.buffer) return new Uint8Array(x.buffer, x.byteOffset, x.byteLength);
+  return new Uint8Array(x);
+}
+function txt(bytes, from, to){
+  var s = "", b = bytes.subarray(from, to), paso = 8192;
+  for(var i = 0; i < b.length; i += paso){
+    s += String.fromCharCode.apply(null, b.subarray(i, Math.min(i + paso, b.length)));
+  }
+  return s;
+}
+function bytesDe(str){
+  var b = new Uint8Array(str.length);
+  for(var i = 0; i < str.length; i++) b[i] = str.charCodeAt(i) & 0xFF;
+  return b;
+}
+function buscar(buf, pat, desde){
+  var p = bytesDe(pat), n = buf.length - p.length;
+  for(var i = Math.max(0, desde); i <= n; i++){
+    var ok = true;
+    for(var j = 0; j < p.length; j++){ if(buf[i+j] !== p[j]){ ok = false; break; } }
+    if(ok) return i;
+  }
+  return -1;
+}
+function buscarAtras(buf, pat, desde){
+  var p = bytesDe(pat);
+  for(var i = Math.min(desde, buf.length - p.length); i >= 0; i--){
+    var ok = true;
+    for(var j = 0; j < p.length; j++){ if(buf[i+j] !== p[j]){ ok = false; break; } }
+    if(ok) return i;
+  }
+  return -1;
+}
+function esBlanco(c){ return c===0x20||c===0x0a||c===0x0d||c===0x09||c===0x0c||c===0x00; }
+function esDelim(c){ return c===0x28||c===0x29||c===0x3c||c===0x3e||c===0x5b||c===0x5d||c===0x7b||c===0x7d||c===0x2f||c===0x25; }
+function esReg(c){ return !esBlanco(c) && !esDelim(c); }
+
+function esNombre(v, n){ return v && v.n !== undefined && (n === undefined || v.n === n); }
+function esRef(v){ return v && v.r !== undefined && v.n === undefined; }
+function esStream(v){ return !!(v && v.isStream); }
+function dicDe(v){ return esStream(v) ? v.sd : (v instanceof Map ? v : null); }
+
+/* ================================================================
+ *  3) Lectura de un documento PDF
+ * ================================================================ */
+function PdfDoc(buf){
+  this.buf = u8(buf);
+  this.pos = 0;
+  this.xref = new Map();      // nº objeto -> {off} | {stm, idx}
+  this.cache = new Map();
+  this.trailer = new Map();
+  this.escaneado = false;
+  this.objstm = {};           // nº de object stream ya cargados
+}
+
+/* ---- lectura de tokens ---- */
+PdfDoc.prototype.saltar = function(){
+  var b = this.buf;
+  for(;;){
+    while(this.pos < b.length && esBlanco(b[this.pos])) this.pos++;
+    if(this.pos < b.length && b[this.pos] === 0x25){          // comentario %
+      while(this.pos < b.length && b[this.pos] !== 0x0a && b[this.pos] !== 0x0d) this.pos++;
+      continue;
+    }
+    return;
+  }
+};
+PdfDoc.prototype.palabra = function(){
+  this.saltar();
+  var b = this.buf, ini = this.pos;
+  while(this.pos < b.length && esReg(b[this.pos])) this.pos++;
+  if(this.pos === ini && this.pos < b.length) this.pos++;
+  return txt(b, ini, this.pos);
+};
+PdfDoc.prototype.entero = function(){
+  var t = this.palabra(), n = parseInt(t, 10);
+  if(isNaN(n)) throw new Error("se esperaba un número y se encontró \"" + t.slice(0,12) + "\"");
+  return n;
+};
+
+PdfDoc.prototype.valor = function(){
+  this.saltar();
+  var b = this.buf;
+  if(this.pos >= b.length) throw new Error("fin de archivo inesperado");
+  var c = b[this.pos];
+
+  if(c === 0x2f){                                   // nombre /Algo
+    this.pos++;
+    var s = "";
+    while(this.pos < b.length && esReg(b[this.pos])){
+      var ch = b[this.pos++];
+      if(ch === 0x23 && this.pos + 1 < b.length){
+        var h = parseInt(txt(b, this.pos, this.pos + 2), 16);
+        if(!isNaN(h)){ s += String.fromCharCode(h); this.pos += 2; continue; }
+      }
+      s += String.fromCharCode(ch);
+    }
+    return { n:s };
+  }
+  if(c === 0x28) return this.cadena();
+  if(c === 0x3c){
+    if(b[this.pos+1] === 0x3c) return this.diccionario();
+    return this.hex();
+  }
+  if(c === 0x5b){                                   // array
+    this.pos++;
+    var arr = [];
+    for(;;){
+      this.saltar();
+      if(this.pos >= b.length) throw new Error("array sin cerrar");
+      if(b[this.pos] === 0x5d){ this.pos++; return arr; }
+      arr.push(this.valor());
+    }
+  }
+  if(c === 0x5d || c === 0x3e || c === 0x29){ this.pos++; return null; }
+
+  var ini = this.pos, t = this.palabra();
+  if(t === "true")  return true;
+  if(t === "false") return false;
+  if(t === "null")  return null;
+  if(/^[+-]?[\d.]+$/.test(t)){
+    var num = parseFloat(t);
+    if(isNaN(num)) num = 0;
+    if(/^\d+$/.test(t)){                             // ¿referencia "12 0 R"?
+      var g = this.pos;
+      try{
+        this.saltar();
+        var t2ini = this.pos, t2 = this.palabra();
+        if(/^\d+$/.test(t2)){
+          this.saltar();
+          var t3 = this.palabra();
+          if(t3 === "R") return { r:num, g:parseInt(t2,10) };
         }
-
-        document.getElementById('btn-todo').disabled = savedCount === 0;
-        document.getElementById('btn-zip').disabled = savedCount === 0;
-        document.getElementById('btn-limpiar').style.display = savedCount > 0 ? 'inline-flex' : 'none';
+        this.pos = g;
+        void t2ini;
+      }catch(e){ this.pos = g; }
     }
+    return num;
+  }
+  if(t === ""){ this.pos = ini + 1; return null; }
+  return { n:t, raro:true };                         // palabra suelta: se ignora
+};
 
-    /* ===== DRAG & DROP SETUP ===== */
-    SIGLAS.forEach(sigla => {
-        const zone = document.getElementById('upload-' + sigla.toLowerCase());
-        zone.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); zone.classList.add('dragover'); });
-        zone.addEventListener('dragleave', e => { e.preventDefault(); zone.classList.remove('dragover'); });
-        zone.addEventListener('drop', e => {
-            e.preventDefault(); e.stopPropagation();
-            zone.classList.remove('dragover');
-            const f = e.dataTransfer.files[0];
-            if (f && f.name.toLowerCase().endsWith('.pdf')) {
-                processNewFile(sigla, f);
-            }
-        });
+PdfDoc.prototype.cadena = function(){
+  var b = this.buf, out = [], nivel = 0;
+  this.pos++;
+  for(;;){
+    if(this.pos >= b.length) break;
+    var c = b[this.pos++];
+    if(c === 0x5c){                                   // \
+      if(this.pos >= b.length) break;
+      var e = b[this.pos++];
+      if(e === 0x6e) out.push(10);
+      else if(e === 0x72) out.push(13);
+      else if(e === 0x74) out.push(9);
+      else if(e === 0x62) out.push(8);
+      else if(e === 0x66) out.push(12);
+      else if(e >= 0x30 && e <= 0x37){
+        var o = e - 0x30, k = 0;
+        while(k < 2 && this.pos < b.length && b[this.pos] >= 0x30 && b[this.pos] <= 0x37){
+          o = o * 8 + (b[this.pos++] - 0x30); k++;
+        }
+        out.push(o & 0xFF);
+      }
+      else if(e === 0x0a){ /* continuación de línea */ }
+      else if(e === 0x0d){ if(b[this.pos] === 0x0a) this.pos++; }
+      else out.push(e);
+      continue;
+    }
+    if(c === 0x28){ nivel++; out.push(c); continue; }
+    if(c === 0x29){
+      if(nivel === 0) break;
+      nivel--; out.push(c); continue;
+    }
+    out.push(c);
+  }
+  return { s:new Uint8Array(out) };
+};
+PdfDoc.prototype.hex = function(){
+  var b = this.buf, h = "";
+  this.pos++;
+  while(this.pos < b.length && b[this.pos] !== 0x3e){
+    var c = b[this.pos++];
+    if(/[0-9a-fA-F]/.test(String.fromCharCode(c))) h += String.fromCharCode(c);
+  }
+  if(this.pos < b.length) this.pos++;
+  if(h.length % 2) h += "0";
+  var out = new Uint8Array(h.length / 2);
+  for(var i = 0; i < out.length; i++) out[i] = parseInt(h.substr(i*2, 2), 16);
+  return { s:out };
+};
+PdfDoc.prototype.diccionario = function(){
+  var b = this.buf;
+  this.pos += 2;
+  var d = new Map();
+  for(;;){
+    this.saltar();
+    if(this.pos >= b.length) throw new Error("diccionario sin cerrar");
+    if(b[this.pos] === 0x3e && b[this.pos+1] === 0x3e){ this.pos += 2; break; }
+    if(b[this.pos] !== 0x2f){                        // clave inesperada: se descarta
+      var basura = this.valor();
+      if(basura === null && this.pos >= b.length) throw new Error("diccionario sin cerrar");
+      continue;
+    }
+    var clave = this.valor();
+    var val = this.valor();
+    if(clave && clave.n !== undefined) d.set(clave.n, val);
+  }
+  // ¿viene un stream?
+  var guarda = this.pos;
+  this.saltar();
+  if(txt(b, this.pos, this.pos + 6) === "stream"){
+    this.pos += 6;
+    if(b[this.pos] === 0x0d) this.pos++;
+    if(b[this.pos] === 0x0a) this.pos++;
+    var ini = this.pos, largo = -1;
+    try{
+      var L = this.resolver(d.get("Length"));
+      if(typeof L === "number" && L >= 0 && ini + L <= b.length) largo = L;
+    }catch(e){ largo = -1; }
+    var fin;
+    if(largo >= 0){
+      fin = ini + largo;
+      var cola = txt(b, fin, fin + 20);
+      if(!/^[\s]*endstream/.test(cola)) largo = -1;
+    }
+    if(largo < 0){
+      var e2 = buscar(b, "endstream", ini);
+      if(e2 < 0) throw new Error("stream sin cerrar");
+      fin = e2;
+      while(fin > ini && (b[fin-1] === 0x0a || b[fin-1] === 0x0d)) fin--;
+    }
+    var raw = b.subarray(ini, fin);
+    var e3 = buscar(b, "endstream", fin);
+    this.pos = e3 < 0 ? fin : e3 + 9;
+    return { isStream:true, sd:d, raw:raw };
+  }
+  this.pos = guarda;
+  return d;
+};
+
+/* ---- resolución de referencias ---- */
+PdfDoc.prototype.resolver = function(v){
+  var vueltas = 0;
+  while(esRef(v)){
+    if(++vueltas > 32) return null;
+    v = this.obj(v.r);
+  }
+  return v;
+};
+PdfDoc.prototype.obj = function(num){
+  var guarda = this.pos;
+  try { return this._obj(num); }
+  finally { this.pos = guarda; }
+};
+PdfDoc.prototype._obj = function(num){
+  if(this.cache.has(num)) return this.cache.get(num);
+  var ent = this.xref.get(num);
+  if(!ent){
+    this.escanear();
+    ent = this.xref.get(num);
+    if(!ent){ this.cache.set(num, null); return null; }
+  }
+  var val = null;
+  try{
+    if(ent.off !== undefined) val = this.enOffset(ent.off, num);
+    else { this.cargarObjStm(ent.stm); val = this.cache.has(num) ? this.cache.get(num) : null; }
+  }catch(e){
+    val = null;
+  }
+  if(val === null && !this.escaneado){
+    this.escanear();
+    var e2 = this.xref.get(num);
+    if(e2 && e2.off !== undefined){
+      try { val = this.enOffset(e2.off, num); } catch(e3){ val = null; }
+    }
+  }
+  this.cache.set(num, val);
+  return val;
+};
+PdfDoc.prototype.enOffset = function(off, num){
+  if(off < 0 || off >= this.buf.length) return null;
+  this.pos = off;
+  var n = this.entero();
+  this.entero();
+  var kw = this.palabra();
+  if(kw !== "obj") return null;
+  if(num !== undefined && n !== num) return null;
+  return this.valor();
+};
+
+/* ---- object streams ---- */
+PdfDoc.prototype.cargarObjStm = function(stmNum){
+  if(this.objstm[stmNum]) return;
+  this.objstm[stmNum] = true;
+  var st = this.obj(stmNum);
+  if(!esStream(st)) return;
+  var data = this.datos(st);
+  var N = this.resolver(st.sd.get("N")) || 0;
+  var First = this.resolver(st.sd.get("First")) || 0;
+  var head = new PdfDoc(data.subarray(0, First));
+  var pares = [];
+  for(var i = 0; i < N; i++){
+    try { pares.push([head.entero(), head.entero()]); } catch(e){ break; }
+  }
+  var cuerpo = new PdfDoc(data);
+  for(var k = 0; k < pares.length; k++){
+    var num = pares[k][0];
+    if(this.cache.has(num) && this.cache.get(num) !== null) continue;
+    try{
+      cuerpo.pos = First + pares[k][1];
+      this.cache.set(num, cuerpo.valor());
+    }catch(e){ /* objeto ilegible: se ignora */ }
+  }
+};
+
+/* ---- filtros de stream (solo para xref y object streams) ---- */
+PdfDoc.prototype.datos = function(st){
+  var data = st.raw;
+  var f = this.resolver(st.sd.get("Filter"));
+  var parms = this.resolver(st.sd.get("DecodeParms")) || this.resolver(st.sd.get("DP"));
+  var filtros = f ? (Array.isArray(f) ? f : [f]) : [];
+  var lista = Array.isArray(parms) ? parms : [parms];
+  for(var i = 0; i < filtros.length; i++){
+    var nom = esNombre(filtros[i]) ? filtros[i].n : "";
+    if(nom === "FlateDecode" || nom === "Fl"){
+      data = inflate(data);
+    } else if(nom === "ASCIIHexDecode" || nom === "AHx"){
+      var s = txt(data, 0, data.length).replace(/[^0-9a-fA-F>]/g, "");
+      s = s.split(">")[0];
+      if(s.length % 2) s += "0";
+      var o = new Uint8Array(s.length/2);
+      for(var j = 0; j < o.length; j++) o[j] = parseInt(s.substr(j*2,2),16);
+      data = o;
+    } else if(nom){
+      throw new Error("filtro " + nom + " no soportado");
+    }
+    var pd = this.resolver(lista[i]);
+    if(pd instanceof Map) data = this.prediccion(data, pd);
+  }
+  return data;
+};
+PdfDoc.prototype.prediccion = function(data, pd){
+  var pred = this.resolver(pd.get("Predictor")) || 1;
+  if(pred < 2) return data;
+  var colors = this.resolver(pd.get("Colors")) || 1;
+  var bpc    = this.resolver(pd.get("BitsPerComponent")) || 8;
+  var cols   = this.resolver(pd.get("Columns")) || 1;
+  var bpp    = Math.ceil(colors * bpc / 8);
+  var fila   = Math.ceil(colors * bpc * cols / 8);
+  if(pred === 2){
+    if(bpc !== 8) return data;
+    for(var r = 0; r + fila <= data.length; r += fila){
+      for(var i = bpp; i < fila; i++) data[r+i] = (data[r+i] + data[r+i-bpp]) & 0xFF;
+    }
+    return data;
+  }
+  var filas = Math.floor(data.length / (fila + 1));
+  var out = new Uint8Array(filas * fila);
+  var prev = new Uint8Array(fila);
+  for(var f = 0; f < filas; f++){
+    var tipo = data[f * (fila + 1)];
+    var src = data.subarray(f * (fila + 1) + 1, f * (fila + 1) + 1 + fila);
+    var cur = out.subarray(f * fila, (f + 1) * fila);
+    cur.set(src);
+    for(var x = 0; x < fila; x++){
+      var a = x >= bpp ? cur[x - bpp] : 0, b = prev[x], c = x >= bpp ? prev[x - bpp] : 0;
+      if(tipo === 1) cur[x] = (cur[x] + a) & 0xFF;
+      else if(tipo === 2) cur[x] = (cur[x] + b) & 0xFF;
+      else if(tipo === 3) cur[x] = (cur[x] + ((a + b) >> 1)) & 0xFF;
+      else if(tipo === 4){
+        var p = a + b - c, pa = Math.abs(p-a), pb = Math.abs(p-b), pc = Math.abs(p-c);
+        cur[x] = (cur[x] + (pa <= pb && pa <= pc ? a : (pb <= pc ? b : c))) & 0xFF;
+      }
+    }
+    prev = cur;
+  }
+  return out;
+};
+
+/* ---- tabla de referencias cruzadas ---- */
+PdfDoc.prototype.init = function(){
+  var b = this.buf;
+  if(txt(b, 0, 5) !== "%PDF-"){
+    var d = buscar(b, "%PDF-", 0);
+    if(d > 0) this.buf = b = b.subarray(d);
+  }
+  var ok = false;
+  try { ok = this.leerXref(); } catch(e){ ok = false; }
+  if(!ok || !this.trailer.get("Root")) this.escanear();
+  if(this.trailer.get("Encrypt")) throw new Error("está cifrado o protegido con contraseña");
+  return this;
+};
+PdfDoc.prototype.leerXref = function(){
+  var b = this.buf;
+  var sx = buscarAtras(b, "startxref", b.length - 9);
+  if(sx < 0) return false;
+  this.pos = sx + 9;
+  var off = this.entero();
+  var vistos = {}, vueltas = 0, algo = false;
+  while(off >= 0 && off < b.length && !vistos[off] && ++vueltas < 64){
+    vistos[off] = true;
+    this.pos = off;
+    this.saltar();
+    var siguiente = -1, hibrido = -1;
+    if(txt(b, this.pos, this.pos + 4) === "xref"){
+      this.pos += 4;
+      for(;;){
+        this.saltar();
+        if(txt(b, this.pos, this.pos + 7) === "trailer"){
+          this.pos += 7;
+          var tr = this.valor();
+          if(tr instanceof Map){
+            tr.forEach(function(v,k){ if(!this.trailer.has(k)) this.trailer.set(k,v); }, this);
+            if(typeof tr.get("Prev") === "number") siguiente = tr.get("Prev");
+            if(typeof tr.get("XRefStm") === "number") hibrido = tr.get("XRefStm");
+          }
+          break;
+        }
+        var ini, cnt;
+        try { ini = this.entero(); cnt = this.entero(); }
+        catch(e){ break; }
+        for(var i = 0; i < cnt; i++){
+          this.saltar();
+          var o1 = this.palabra(), g1 = this.palabra(), t1 = this.palabra();
+          void g1;
+          var num = ini + i;
+          if(t1 === "n" && !this.xref.has(num)) this.xref.set(num, { off: parseInt(o1, 10) });
+        }
+        algo = true;
+      }
+      if(hibrido >= 0){
+        try { this.xrefStream(hibrido); } catch(e){}
+      }
+    } else {
+      var r = this.xrefStream(off);
+      if(r === false) return algo;
+      algo = true;
+      siguiente = r;
+    }
+    off = siguiente;
+  }
+  return algo;
+};
+PdfDoc.prototype.xrefStream = function(off){
+  this.pos = off;
+  var n = this.entero();
+  void n;
+  this.entero();
+  if(this.palabra() !== "obj") return false;
+  var st = this.valor();
+  if(!esStream(st)) return false;
+  var d = st.sd, self = this;
+  d.forEach(function(v,k){ if(!self.trailer.has(k)) self.trailer.set(k,v); });
+  var data = this.datos(st);
+  var W = (this.resolver(d.get("W")) || []).map(function(x){ return self.resolver(x) || 0; });
+  if(W.length < 3) return false;
+  var size = this.resolver(d.get("Size")) || 0;
+  var idx = this.resolver(d.get("Index"));
+  var secciones = [];
+  if(Array.isArray(idx)){
+    for(var i = 0; i + 1 < idx.length; i += 2) secciones.push([this.resolver(idx[i]) || 0, this.resolver(idx[i+1]) || 0]);
+  } else secciones.push([0, size]);
+  var ancho = W[0] + W[1] + W[2], p = 0;
+  for(var s = 0; s < secciones.length; s++){
+    var ini = secciones[s][0], cnt = secciones[s][1];
+    for(var k = 0; k < cnt; k++){
+      if(p + ancho > data.length) break;
+      var f = [0,0,0];
+      for(var c = 0; c < 3; c++){
+        var v = 0;
+        for(var j = 0; j < W[c]; j++) v = v * 256 + data[p++];
+        f[c] = v;
+      }
+      var tipo = W[0] === 0 ? 1 : f[0];
+      var num2 = ini + k;
+      if(!this.xref.has(num2)){
+        if(tipo === 1) this.xref.set(num2, { off:f[1] });
+        else if(tipo === 2) this.xref.set(num2, { stm:f[1], idx:f[2] });
+      }
+    }
+  }
+  var prev = this.resolver(d.get("Prev"));
+  return typeof prev === "number" ? prev : -1;
+};
+
+/* ---- rescate: recorrer el archivo buscando "N G obj" ---- */
+PdfDoc.prototype.escanear = function(){
+  if(this.escaneado) return;
+  this.escaneado = true;
+  var s = txt(this.buf, 0, this.buf.length);
+  var re = /(\d+)[\s]+(\d+)[\s]+obj\b/g, m;
+  var encontrados = [];
+  while((m = re.exec(s)) !== null){
+    var num = parseInt(m[1], 10);
+    this.xref.set(num, { off:m.index });        // el último gana (actualizaciones)
+    this.cache.delete(num);
+    encontrados.push(num);
+  }
+  // trailer
+  var t = s.lastIndexOf("trailer");
+  while(t >= 0){
+    try{
+      this.pos = t + 7;
+      var tr = this.valor();
+      if(tr instanceof Map){
+        var self = this;
+        tr.forEach(function(v,k){ if(!self.trailer.has(k)) self.trailer.set(k,v); });
+      }
+    }catch(e){}
+    if(this.trailer.get("Root")) break;
+    t = s.lastIndexOf("trailer", t - 1);
+  }
+  // object streams y catálogo
+  for(var i = 0; i < encontrados.length; i++){
+    var o = null;
+    try { o = this.obj(encontrados[i]); } catch(e){ o = null; }
+    var d = dicDe(o);
+    if(!d) continue;
+    var tp = d.get("Type");
+    if(esStream(o) && esNombre(tp, "ObjStm")){
+      try { this.cargarObjStm(encontrados[i]); } catch(e){}
+    } else if(esNombre(tp, "Catalog") && !this.trailer.get("Root")){
+      this.trailer.set("Root", { r:encontrados[i], g:0 });
+    } else if(esStream(o) && esNombre(tp, "XRef") && !this.trailer.get("Root")){
+      if(d.get("Root")) this.trailer.set("Root", d.get("Root"));
+    }
+  }
+};
+
+/* ---- páginas ---- */
+var HEREDA = ["Resources","MediaBox","CropBox","Rotate"];
+PdfDoc.prototype.paginas = function(){
+  var out = [], self = this;
+  var root = this.resolver(this.trailer.get("Root"));
+  var rd = dicDe(root);
+  var raizPaginas = rd ? rd.get("Pages") : null;
+  var vistos = {};
+
+  function anda(ref, inh, prof){
+    if(prof > 64 || out.length > 20000) return;
+    var num = esRef(ref) ? ref.r : 0;
+    if(num){
+      if(vistos[num]) return;
+      vistos[num] = true;
+    }
+    var nodo = self.resolver(ref);
+    var d = dicDe(nodo);
+    if(!d) return;
+    var her = {};
+    HEREDA.forEach(function(k){ her[k] = d.has(k) ? d.get(k) : inh[k]; });
+    var kids = self.resolver(d.get("Kids"));
+    var tipo = d.get("Type");
+    if(Array.isArray(kids) && !esNombre(tipo, "Page")){
+      for(var i = 0; i < kids.length; i++) anda(kids[i], her, prof + 1);
+      return;
+    }
+    if(esNombre(tipo, "Page") || d.has("Contents") || d.has("MediaBox")){
+      out.push({ num:num, dict:d, inh:inh });
+    }
+  }
+
+  if(raizPaginas) anda(raizPaginas, {}, 0);
+
+  if(!out.length){                                  // rescate: buscar objetos /Type /Page
+    this.escanear();
+    var nums = Array.from(this.xref.keys()).concat(Array.from(this.cache.keys()));
+    nums.sort(function(a,b){ return a - b; });
+    var hechos = {};
+    for(var i = 0; i < nums.length; i++){
+      var n = nums[i];
+      if(hechos[n]) continue;
+      hechos[n] = true;
+      var o = null;
+      try { o = this.obj(n); } catch(e){ o = null; }
+      var d2 = dicDe(o);
+      if(d2 && !esStream(o) && esNombre(d2.get("Type"), "Page")) out.push({ num:n, dict:d2, inh:{} });
+    }
+  }
+  return out;
+};
+
+/* ================================================================
+ *  4) Escritura del PDF resultante
+ * ================================================================ */
+function Writer(){
+  this.objs = [];        // posición 0 -> objeto 1
+  this.mapa = new Map(); // "doc:num" -> nuevo número
+  this.cola = [];
+  this.docId = 0;
+}
+Writer.prototype.reservar = function(){ this.objs.push(null); return this.objs.length; };
+Writer.prototype.poner = function(num, val){ this.objs[num-1] = val; };
+Writer.prototype.idDoc = function(doc){
+  if(doc.__wid === undefined) doc.__wid = ++this.docId;
+  return doc.__wid;
+};
+Writer.prototype.fijarPagina = function(doc, viejo, nuevo){
+  if(viejo) this.mapa.set(this.idDoc(doc) + ":" + viejo, nuevo);
+};
+Writer.prototype.refNueva = function(doc, num){
+  var k = this.idDoc(doc) + ":" + num;
+  if(this.mapa.has(k)) return this.mapa.get(k);
+  var n = this.reservar();
+  this.mapa.set(k, n);
+  this.cola.push({ doc:doc, viejo:num, nuevo:n });
+  return n;
+};
+Writer.prototype.copiar = function(doc, v, prof){
+  prof = prof || 0;
+  if(prof > 200) return null;
+  if(v === null || v === undefined) return null;
+  if(typeof v === "number" || typeof v === "boolean") return v;
+  if(Array.isArray(v)){
+    var a = [];
+    for(var i = 0; i < v.length; i++) a.push(this.copiar(doc, v[i], prof+1));
+    return a;
+  }
+  if(esRef(v)) return { r:this.refNueva(doc, v.r) };
+  if(esStream(v)){
+    var sd = new Map(), self = this;
+    v.sd.forEach(function(x,k){ if(k !== "Length") sd.set(k, self.copiar(doc, x, prof+1)); });
+    sd.set("Length", v.raw.length);
+    return { isStream:true, sd:sd, raw:v.raw };
+  }
+  if(v instanceof Map){
+    var d = new Map(), me = this;
+    v.forEach(function(x,k){ d.set(k, me.copiar(doc, x, prof+1)); });
+    return d;
+  }
+  if(v.n !== undefined) return { n:v.n };
+  if(v.s !== undefined) return { s:v.s };
+  return null;
+};
+Writer.prototype.vaciar = function(){
+  var tope = 0;
+  while(this.cola.length){
+    if(++tope > 400000) throw new Error("el documento tiene demasiados objetos");
+    var it = this.cola.shift();
+    var val = null;
+    try { val = it.doc.obj(it.viejo); } catch(e){ val = null; }
+    this.poner(it.nuevo, this.copiar(it.doc, val, 0));
+  }
+};
+
+/* ---- serialización ---- */
+function numTxt(v){
+  if(!isFinite(v)) return "0";
+  if(Math.floor(v) === v && Math.abs(v) < 1e15) return String(v);
+  return v.toFixed(6).replace(/0+$/,"").replace(/\.$/,"");
+}
+function hex2(c){ return (c < 16 ? "0" : "") + c.toString(16); }
+function nomTxt(n){
+  var o = "/";
+  for(var i = 0; i < n.length; i++){
+    var c = n.charCodeAt(i) & 0xFF;
+    if(c < 0x21 || c > 0x7e || esDelim(c) || c === 0x23) o += "#" + hex2(c);
+    else o += String.fromCharCode(c);
+  }
+  return o;
+}
+function serie(v, chunks){
+  function put(s){ chunks.push(bytesDe(s)); }
+  if(v === null || v === undefined){ put("null"); return; }
+  if(typeof v === "number"){ put(numTxt(v)); return; }
+  if(typeof v === "boolean"){ put(v ? "true" : "false"); return; }
+  if(Array.isArray(v)){
+    put("[");
+    for(var i = 0; i < v.length; i++){ put(" "); serie(v[i], chunks); }
+    put(" ]");
+    return;
+  }
+  if(esRef(v)){ put(v.r + " 0 R"); return; }
+  if(esStream(v)){
+    serie(v.sd, chunks);
+    put("\nstream\n");
+    chunks.push(v.raw);
+    put("\nendstream");
+    return;
+  }
+  if(v instanceof Map){
+    put("<<");
+    v.forEach(function(x,k){ put(" " + nomTxt(k) + " "); serie(x, chunks); });
+    put(" >>");
+    return;
+  }
+  if(v.n !== undefined){ put(nomTxt(v.n)); return; }
+  if(v.s !== undefined){
+    var h = "<";
+    for(var j = 0; j < v.s.length; j++) h += hex2(v.s[j]);
+    put(h + ">");
+    return;
+  }
+  put("null");
+}
+Writer.prototype.construir = function(){
+  var chunks = [], largo = 0, offs = [];
+  function add(list){
+    for(var i = 0; i < list.length; i++){ chunks.push(list[i]); largo += list[i].length; }
+  }
+  add([bytesDe("%PDF-1.7\n"), new Uint8Array([0x25,0xE2,0xE3,0xCF,0xD3,0x0A])]);
+  for(var i = 0; i < this.objs.length; i++){
+    offs.push(largo);
+    var c = [bytesDe((i+1) + " 0 obj\n")];
+    serie(this.objs[i], c);
+    c.push(bytesDe("\nendobj\n"));
+    add(c);
+  }
+  var xrefOff = largo;
+  var t = "xref\n0 " + (this.objs.length + 1) + "\n0000000000 65535 f \n";
+  for(var k = 0; k < offs.length; k++){
+    var s = String(offs[k]);
+    while(s.length < 10) s = "0" + s;
+    t += s + " 00000 n \n";
+  }
+  var id = "";
+  for(var z = 0; z < 16; z++) id += hex2(Math.floor(Math.random() * 256));
+  t += "trailer\n<< /Size " + (this.objs.length + 1) +
+       " /Root 1 0 R /ID [<" + id + "><" + id + ">] >>\nstartxref\n" + xrefOff + "\n%%EOF\n";
+  add([bytesDe(t)]);
+  var out = new Uint8Array(largo), p = 0;
+  for(var q = 0; q < chunks.length; q++){ out.set(chunks[q], p); p += chunks[q].length; }
+  return out;
+};
+
+/* ================================================================
+ *  5) Función pública
+ * ================================================================ */
+function merge(lista, nombres){
+  if(!lista || !lista.length) throw new Error("no hay archivos para unir");
+  var w = new Writer();
+  var CAT = w.reservar(), PAGES = w.reservar();
+  var docs = [], i;
+
+  for(i = 0; i < lista.length; i++){
+    var etiqueta = (nombres && nombres[i]) ? "“" + nombres[i] + "”" : "archivo " + (i+1);
+    var doc, pgs;
+    try{
+      doc = new PdfDoc(lista[i]).init();
+      pgs = doc.paginas();
+    }catch(e){
+      throw new Error("El " + etiqueta + " no se pudo leer: " + (e.message || e) + ".");
+    }
+    if(!pgs.length) throw new Error("El " + etiqueta + " no contiene páginas legibles.");
+    var refs = [];
+    for(var p = 0; p < pgs.length; p++) refs.push(w.reservar());
+    for(p = 0; p < pgs.length; p++) w.fijarPagina(doc, pgs[p].num, refs[p]);
+    docs.push({ doc:doc, pgs:pgs, refs:refs, etiqueta:etiqueta });
+  }
+
+  var kids = [], total = 0;
+  for(i = 0; i < docs.length; i++){
+    var D = docs[i];
+    for(var j = 0; j < D.pgs.length; j++){
+      var pg = D.pgs[j], d = new Map();
+      pg.dict.forEach(function(v,k){
+        if(k === "Parent") return;
+        d.set(k, w.copiar(D.doc, v, 0));
+      });
+      HEREDA.forEach(function(k){
+        if(!d.has(k) && pg.inh[k] !== undefined && pg.inh[k] !== null){
+          d.set(k, w.copiar(D.doc, pg.inh[k], 0));
+        }
+      });
+      d.set("Type", { n:"Page" });
+      d.set("Parent", { r:PAGES });
+      if(!d.has("MediaBox")) d.set("MediaBox", [0,0,612,792]);
+      w.poner(D.refs[j], d);
+      kids.push({ r:D.refs[j] });
+      total++;
+    }
+  }
+  w.vaciar();
+
+  var pagesDict = new Map();
+  pagesDict.set("Type", { n:"Pages" });
+  pagesDict.set("Kids", kids);
+  pagesDict.set("Count", total);
+  w.poner(PAGES, pagesDict);
+
+  var cat = new Map();
+  cat.set("Type", { n:"Catalog" });
+  cat.set("Pages", { r:PAGES });
+  w.poner(CAT, cat);
+
+  return { bytes:w.construir(), paginas:total };
+}
+
+function contarPaginas(bytes){
+  try { return new PdfDoc(bytes).init().paginas().length; }
+  catch(e){ return 0; }
+}
+
+root.PDFMerge = { merge:merge, contarPaginas:contarPaginas };
+
+})(typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : this));
+
+
+/* ===== SESSION ===== */
+var sesion = JSON.parse(localStorage.getItem('nexus_sesion'));
+if (!sesion || !sesion.logueado) window.location.href = 'index.html';
+else {
+  document.getElementById('userName').textContent = sesion.nombre;
+  document.getElementById('userRole').textContent = sesion.rol.toUpperCase();
+  document.getElementById('userAvatar').textContent = sesion.nombre.charAt(0).toUpperCase();
+}
+function cerrarSesion(){ localStorage.removeItem('nexus_sesion'); window.location.href='index.html'; }
+if(window.NX) NX.iniciar('gestion_documental',{});
+
+/* ===== APP: Cat\u00e1logo de documentos ===== */
+var DOCS = [
+  {s:'CRC', d:'Firma del paciente documento ADRES',   n:1},
+  {s:'AUT', d:'Autorizaciones',                        n:2},
+  {s:'HEV', d:'Historia Cl\u00ednica / Evoluci\u00f3n',          n:3},
+  {s:'FEV', d:'Factura Electr\u00f3nica de Venta',          n:4},
+  {s:'OPF', d:'Orden del Profesional / Soporte',       n:5},
+  {s:'EPI', d:'Historia Cl\u00ednica Externa',              n:6}
+];
+var SIGLAS = DOCS.map(function(d){return d.s;});
+
+/* ===== Estado global ===== */
+var sep='_', ruta='', carpeta='', nit='', cola={}, activoId=null;
+var idLote=Date.now(), lotesGuardados=[];
+var URL=window.URL||window.webkitURL;
+
+/* ===== IndexedDB ===== */
+var IDB={
+  db:null,
+  abrir:function(){
+    return new Promise(function(ok,fail){
+      var req=indexedDB.open('gestion_documental',2);
+      req.onupgradeneeded=function(e){
+        var db=e.target.result;
+        if(!db.objectStoreNames.contains('lotes'))db.createObjectStore('lotes',{keyPath:'id'});
+        if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'lid_sigla'});
+      };
+      req.onsuccess=function(e){IDB.db=e.target.result;ok();};
+      req.onerror=function(){fail('IndexedDB no disponible');};
     });
+  },
+  tx:function(st,modo){return IDB.db.transaction(st,modo).objectStore(st);},
+  put:function(st,d){return new Promise(function(ok,fail){var r=IDB.tx(st,'readwrite').put(d);r.onsuccess=function(){ok();};r.onerror=function(){fail();};});},
+  get:function(st,k){return new Promise(function(ok,fail){var r=IDB.tx(st).get(k);r.onsuccess=function(){ok(r.result);};r.onerror=function(){fail();};});},
+  getAll:function(st){return new Promise(function(ok,fail){var r=IDB.tx(st).getAll();r.onsuccess=function(){ok(r.result);};r.onerror=function(){fail();};});},
+  del:function(st,k){return new Promise(function(ok,fail){var r=IDB.tx(st,'readwrite').delete(k);r.onsuccess=function(){ok();};r.onerror=function(){fail();};});}
+};
 
-    /* ===== TRIGGER FILE INPUT ===== */
-    function triggerUpload(sigla) {
-        document.getElementById('file-' + sigla.toLowerCase()).click();
+/* ===== Inicializaci\u00f3n ===== */
+async function init(){
+  try{await IDB.abrir();}catch(e){}
+  document.getElementById('dot').classList.add('on');
+  document.getElementById('modeTxt').textContent='Almacenamiento local (IndexedDB)';
+  try{await cargarTabla();}catch(e){}
+  pintarCajas();
+}
+
+/* ===== Tabs ===== */
+var tabA=document.getElementById('tabA'),
+    tabB=document.getElementById('tabB'),
+    scrA=document.getElementById('scrA'),
+    scrB=document.getElementById('scrB');
+tabA.onclick=function(){tabA.classList.add('sel');tabB.classList.remove('sel');scrA.classList.add('sel');scrB.classList.remove('sel');};
+tabB.onclick=function(){tabB.classList.add('sel');tabA.classList.remove('sel');scrB.classList.add('sel');scrA.classList.remove('sel');cargarTabla();};
+
+/* ===== Config ===== */
+document.getElementById('sep').onchange=actualizarVista;
+document.getElementById('ruta').oninput=actualizarVista;
+document.getElementById('carpeta').oninput=actualizarVista;
+document.getElementById('nit').oninput=actualizarVista;
+document.getElementById('nit').onblur=function(){this.value=this.value.replace(/\D/g,'');actualizarVista();};
+
+document.getElementById('btnCrear').onclick=function(){
+  carpeta=document.getElementById('carpeta').value.trim();
+  nit=document.getElementById('nit').value.trim();
+  if(!carpeta||!nit){msg('msgA','Complete carpeta y NIT','err');return;}
+  actualizarVista();
+  activoId=idLote;
+  var el=document.getElementById('activo');
+  el.classList.add('on');
+  el.innerHTML='<b>Lote activo:</b> '+nombreOficial('CRC')+' \u2026 ('+SIGLAS.length+' documentos)';
+  msg('msgA','Carpeta y NIT configurados correctamente','ok');
+};
+
+document.getElementById('btnNuevo').onclick=function(){
+  if(!confirm('\u00bfDeseas iniciar un lote nuevo? Los datos actuales se perder\u00e1n si no han sido procesados.'))return;
+  cola={};activoId=null;idLote=Date.now();
+  document.getElementById('carpeta').value='';
+  document.getElementById('nit').value='';
+  document.getElementById('activo').classList.remove('on');
+  document.getElementById('activo').innerHTML='';
+  actualizarVista();pintarCajas();
+  document.getElementById('btnTodo').disabled=true;
+  document.getElementById('btnZipA').disabled=true;
+  msg('msgA','Lote reiniciado','');
+};
+
+function actualizarVista(){
+  sep=document.getElementById('sep').value;
+  ruta=document.getElementById('ruta').value.trim();
+  carpeta=document.getElementById('carpeta').value.trim();
+  nit=document.getElementById('nit').value.trim();
+  var v=document.getElementById('vista');
+  v.textContent=carpeta&&nit?nombreOficial('CRC')+' \u2026 .pdf':'\u2014';
+}
+
+function nombreOficial(sigla){return sigla+sep+nit+sep+carpeta+'.pdf';}
+
+/* ===== Pintar cajas ===== */
+function pintarCajas(){
+  var box=document.getElementById('boxes');
+  box.innerHTML='';
+  DOCS.forEach(function(doc){
+    var files=cola[doc.s]||[];
+    var total=files.length;
+    var div=document.createElement('div');
+    div.className='box'+(total?' hot':'');
+
+    var head=document.createElement('div');
+    head.className='bhead';
+    head.innerHTML='<div class="ico">PDF</div>'+
+      '<div><div class="sigla">'+doc.s+'</div><div class="desc">'+doc.d+'</div></div>';
+    div.appendChild(head);
+
+    var zone=document.createElement('div');
+    zone.className='zone'+(total?' has':'');
+    zone.innerHTML='<i class="fas fa-cloud-upload-alt" style="font-size:18px;margin-bottom:4px"></i><br>'+
+      'Arrastra PDF aqu\u00ed<br>o haz clic para seleccionar';
+    zone.dataset.sigla=doc.s;
+    zone.onclick=function(){tomar(doc.s);};
+    zone.ondragover=function(e){e.preventDefault();zone.classList.add('dragover');};
+    zone.ondragleave=function(){zone.classList.remove('dragover');};
+    zone.ondrop=function(e){e.preventDefault();zone.classList.remove('dragover');tomarDrop(doc.s,e);};
+    div.appendChild(zone);
+
+    if(carpeta&&nit){
+      var tgt=document.createElement('div');
+      tgt.className='target';
+      tgt.textContent='\u2192 '+nombreOficial(doc.s);
+      div.appendChild(tgt);
     }
 
-    function handleFileSelect(sigla, event) {
-        const f = event.target.files[0];
-        if (f) processNewFile(sigla, f);
+    if(total){
+      var flist=document.createElement('div');
+      flist.className='flist';
+      for(var i=0;i<files.length;i++){
+        var f=files[i];
+        var item=document.createElement('div');
+        item.className='fitem';
+        item.innerHTML='<span class="fnum">'+(i+1)+'</span>'+
+          '<span class="fname">'+f.name+'</span>'+
+          '<span class="fsize">'+fmtSize(f.size)+'</span>'+
+          (i>0?'<button class="fbtn" data-dir="-1" data-sigla="'+doc.s+'" data-i="'+i+'" title="Subir">\u2191</button>':'')+
+          (i<total-1?'<button class="fbtn" data-dir="1" data-sigla="'+doc.s+'" data-i="'+i+'" title="Bajar">\u2193</button>':'')+
+          '<button class="fbtn del" data-sigla="'+doc.s+'" data-i="'+i+'" title="Eliminar">\u2715</button>';
+        flist.appendChild(item);
+      }
+      div.appendChild(flist);
+      var count=document.createElement('div');
+      count.className='fcount';
+      count.textContent=total+' archivo'+(total>1?'s':'')+', '+fmtSize(files.reduce(function(s,f){return s+f.size;},0));
+      div.appendChild(count);
     }
 
-    /* ===== PROCESS NEW FILE (with modal if exists) ===== */
-    function processNewFile(sigla, file) {
-        const existing = docStore[sigla];
-        if (existing.length > 0) {
-            // SHOW MODAL: Anexar o Reemplazar
-            pendingModal = { sigla, file };
-            document.getElementById('modal-sigla-label').textContent = sigla + ' - ' + SIGLA_NAMES[sigla];
-            document.getElementById('modal-existing-name').textContent = existing.map(d => d.renamed || d.name).join(', ');
-            document.getElementById('modal-new-name').textContent = file.name;
-            document.getElementById('modalOverlay').classList.add('show');
-        } else {
-            // No existing file, just add
-            addFileToStore(sigla, file);
+    var row=document.createElement('div');
+    row.className='brow';
+    if(total){
+      row.innerHTML='<span class="state ok"><i class="fas fa-check-circle"></i> Listo para procesar</span>'+
+        '<div class="rowacts"><button class="nx-btn mini" data-accion="ver" data-sigla="'+doc.s+'" title="Vista previa"><i class="fas fa-eye"></i> Ver</button>'+
+        '<button class="nx-btn mini ghost" data-accion="procesar" data-sigla="'+doc.s+'" title="Procesar"><i class="fas fa-cog"></i> Procesar</button></div>';
+    }else{
+      row.innerHTML='<span class="state">Sin archivos</span>';
+    }
+    div.appendChild(row);
+    box.appendChild(div);
+  });
+
+  box.querySelectorAll('.fbtn').forEach(function(btn){
+    btn.onclick=function(){
+      var s=btn.dataset.sigla, idx=parseInt(btn.dataset.i);
+      if(btn.classList.contains('del')){quitar(s,idx);}
+      else{var dir=parseInt(btn.dataset.dir);mover(s,idx,dir);}
+    };
+  });
+  box.querySelectorAll('[data-accion="ver"]').forEach(function(b){
+    b.onclick=function(){verCasilla(b.dataset.sigla);};
+  });
+  box.querySelectorAll('[data-accion="procesar"]').forEach(function(b){
+    b.onclick=function(){procesar(b.dataset.sigla);};
+  });
+
+  var hay=SIGLAS.some(function(s){return cola[s]&&cola[s].length;});
+  document.getElementById('btnTodo').disabled=!hay;
+  document.getElementById('btnZipA').disabled=!hay;
+}
+
+/* ===== Tomar archivos ===== */
+function tomar(sigla){
+  var inp=document.createElement('input');
+  inp.type='file';
+  inp.multiple=true;
+  inp.accept='.pdf,application/pdf';
+  inp.onchange=function(){
+    if(!inp.files.length)return;
+    agregarArchivos(sigla,Array.from(inp.files));
+  };
+  inp.click();
+}
+
+function tomarDrop(sigla,ev){
+  var files=Array.from(ev.dataTransfer.files).filter(function(f){return f.type==='application/pdf'||f.name.toLowerCase().endsWith('.pdf');});
+  if(!files.length){msg('msgA','Solo se aceptan archivos PDF','err');return;}
+  agregarArchivos(sigla,files);
+}
+
+function agregarArchivos(sigla,arr){
+  if(!cola[sigla])cola[sigla]=[];
+  cola[sigla]=cola[sigla].concat(arr);
+  pintarCajas();
+}
+
+/* ===== Quitar archivo ===== */
+function quitar(sigla,idx){
+  if(!cola[sigla])return;
+  cola[sigla].splice(idx,1);
+  if(!cola[sigla].length)delete cola[sigla];
+  pintarCajas();
+}
+
+/* ===== Mover archivo ===== */
+function mover(sigla,idx,dir){
+  if(!cola[sigla])return;
+  var nuevo=idx+dir;
+  if(nuevo<0||nuevo>=cola[sigla].length)return;
+  var tmp=cola[sigla][idx];
+  cola[sigla][idx]=cola[sigla][nuevo];
+  cola[sigla][nuevo]=tmp;
+  pintarCajas();
+}
+
+/* ===== Procesar un documento ===== */
+async function procesar(sigla){
+  var files=cola[sigla];
+  if(!files||!files.length){msg('msgP','No hay archivos en '+sigla,'err');return;}
+  if(!carpeta||!nit){msg('msgP','Configure carpeta y NIT primero','err');return;}
+  var btns=document.querySelectorAll('[data-accion="procesar"][data-sigla="'+sigla+'"]');
+  btns.forEach(function(b){b.disabled=true;b.innerHTML='<i class="fas fa-spinner fa-spin"></i> Procesando\u2026';});
+  try{
+    var buffers=[];
+    for(var i=0;i<files.length;i++){buffers.push(await files[i].arrayBuffer());}
+    var merged;
+    if(buffers.length===1){merged=new Uint8Array(buffers[0]);}
+    else{var res=PDFMerge.merge(buffers,files.map(function(f){return f.name;}));merged=res.bytes;}
+    var blob=new Blob([merged],{type:'application/pdf'});
+    var nombre=nombreOficial(sigla);
+    var loteData={id:idLote,nombre:carpeta,nit:nit,fecha:new Date().toISOString(),total:1,siglas:[sigla],separador:sep};
+    await IDB.put('lotes',loteData);
+    await IDB.put('files',{lid_sigla:idLote+'_'+sigla,blob:blob,nombre:nombre,sigla:sigla,lid:idLote});
+    lotesGuardados=await IDB.getAll('lotes');
+    msg('msgP','\u2705 '+sigla+': '+nombre+' procesado ('+PDFMerge.contarPaginas(merged)+' p\u00e1g.)','ok');
+    delete cola[sigla];
+    pintarCajas();
+  }catch(e){
+    msg('msgP','Error en '+sigla+': '+e.message,'err');
+  }finally{
+    btns.forEach(function(b){b.disabled=false;b.innerHTML='<i class="fas fa-cog"></i> Procesar';});
+  }
+}
+
+/* ===== Procesar todo ===== */
+async function procesarTodo(){
+  if(!carpeta||!nit){msg('msgP','Configure carpeta y NIT primero','err');return;}
+  var btn=document.getElementById('btnTodo');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Procesando todo\u2026';
+  var total=0,ok=0,err=0,errores=[];
+  for(var k=0;k<SIGLAS.length;k++){
+    var s=SIGLAS[k];
+    var files=cola[s];
+    if(!files||!files.length)continue;
+    total++;
+    try{
+      var buffers=[];
+      for(var i=0;i<files.length;i++){buffers.push(await files[i].arrayBuffer());}
+      var merged;
+      if(buffers.length===1){merged=new Uint8Array(buffers[0]);}
+      else{var res=PDFMerge.merge(buffers,files.map(function(f){return f.name;}));merged=res.bytes;}
+      var blob=new Blob([merged],{type:'application/pdf'});
+      var nombre=nombreOficial(s);
+      await IDB.put('files',{lid_sigla:idLote+'_'+s,blob:blob,nombre:nombre,sigla:s,lid:idLote});
+      ok++;
+      delete cola[s];
+    }catch(e){err++;errores.push(s+': '+e.message);}
+  }
+  if(ok){
+    var procesadas=SIGLAS.filter(function(s){var f=cola[s];return !f||!f.length;});
+    var loteData={id:idLote,nombre:carpeta,nit:nit,fecha:new Date().toISOString(),total:ok,siglas:procesadas,separador:sep};
+    await IDB.put('lotes',loteData);
+    lotesGuardados=await IDB.getAll('lotes');
+    pintarCajas();
+  }
+  btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Procesar y guardar todo';
+  if(err)msg('msgP','\u26a0 '+ok+'/'+total+' procesados. Errores: '+errores.join('; '),'err');
+  else if(ok)msg('msgP','\u2705 '+ok+' documentos procesados y guardados','ok');
+  else msg('msgP','No hab\u00eda documentos para procesar','');
+}
+document.getElementById('btnTodo').onclick=procesarTodo;
+
+/* ===== Ver casilla ===== */
+async function verCasilla(sigla){
+  var files=cola[sigla];
+  if(!files||!files.length)return;
+  try{
+    var buffers=[];
+    for(var i=0;i<files.length;i++){buffers.push(await files[i].arrayBuffer());}
+    var merged;
+    if(buffers.length===1){merged=new Uint8Array(buffers[0]);}
+    else{var res=PDFMerge.merge(buffers,files.map(function(f){return f.name;}));merged=res.bytes;}
+    abrirVista(sigla,new Blob([merged],{type:'application/pdf'}),nombreOficial(sigla));
+  }catch(e){msg('msgP','Error al generar vista: '+e.message,'err');}
+}
+
+/* ===== Vista previa ===== */
+function abrirVista(sigla,blob,nombre){
+  var url=URL.createObjectURL(blob);
+  var ov=document.getElementById('ov');
+  ov.hidden=false;
+  document.body.classList.add('noscroll');
+  document.getElementById('ovTitle').textContent=sigla+' \u2014 Vista previa';
+  document.getElementById('ovSub').textContent=nombre;
+  document.getElementById('ovFrame').src=url;
+  var ovMsg=document.getElementById('ovMsg');
+  ovMsg.textContent='Cargando\u2026';ovMsg.className='state';
+  document.getElementById('ovFrame').onload=function(){ovMsg.textContent='Documento cargado';ovMsg.className='state ok';};
+  document.getElementById('ovPrint').disabled=false;
+  document.getElementById('ovPrint').onclick=function(){document.getElementById('ovFrame').contentWindow.print();};
+  document.getElementById('ovDown').disabled=false;
+  document.getElementById('ovDown').onclick=function(){bajarBlob(blob,nombre);};
+  ov._blobUrl=url;ov._blob=blob;
+}
+
+function cerrarVista(){
+  var ov=document.getElementById('ov');
+  if(ov._blobUrl)URL.revokeObjectURL(ov._blobUrl);
+  ov.hidden=true;
+  document.body.classList.remove('noscroll');
+  document.getElementById('ovFrame').src='about:blank';
+}
+document.getElementById('ovClose').onclick=cerrarVista;
+document.getElementById('ovBack').onclick=cerrarVista;
+document.getElementById('ov').onclick=function(e){if(e.target===this)cerrarVista();};
+
+/* ===== Ver documento guardado ===== */
+async function verDoc(lid,sigla){
+  try{
+    var rec=await IDB.get('files',lid+'_'+sigla);
+    if(!rec||!rec.blob){toast('Documento no encontrado','error');return;}
+    abrirVista(sigla,rec.blob,rec.nombre);
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+/* ===== Descargar documento ===== */
+async function bajarDoc(lid,sigla){
+  try{
+    var rec=await IDB.get('files',lid+'_'+sigla);
+    if(!rec||!rec.blob){toast('Documento no encontrado','error');return;}
+    bajarBlob(rec.blob,rec.nombre);
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+function bajarBlob(blob,nombre){
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=nombre;a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},5000);
+}
+
+/* ===== ZIP nativo ===== */
+function crc32(buf){
+  var c=0xFFFFFFFF,t=new Int32Array(256);
+  for(var n=0;n<256;n++){var cc=n;for(var k=0;k<8;k++)cc=cc&1?0xEDB88320^(cc>>>1):cc>>>1;t[n]=cc;}
+  for(var i=0;i<buf.length;i++)c=t[(c^buf[i])&0xFF]^(c>>>8);
+  return(c^0xFFFFFFFF)>>>0;
+}
+
+function zipBlobs(entradas){
+  var local=[],central=[],off=0;
+  var enc=new TextEncoder();
+  entradas.forEach(function(ent){
+    var nm=enc.encode(ent.name),d=ent.data;
+    var crc=crc32(d),sz=d.length;
+    var lh=new Uint8Array(30+nm.length+d.length);
+    var v=new DataView(lh.buffer);
+    v.setUint32(0,0x04034b50,true);
+    v.setUint16(4,20,true);v.setUint16(6,0,true);
+    v.setUint16(8,0,true);v.setUint16(10,0,true);
+    v.setUint16(12,0,true);
+    v.setUint32(14,crc,true);
+    v.setUint32(18,sz,true);v.setUint32(22,sz,true);
+    v.setUint16(26,nm.length,true);
+    v.setUint16(28,0,true);
+    lh.set(nm,30);
+    lh.set(d,30+nm.length);
+    local.push(lh);
+    var cd=new Uint8Array(46+nm.length);
+    var cv=new DataView(cd.buffer);
+    cv.setUint32(0,0x02014b50,true);
+    cv.setUint16(4,20,true);cv.setUint16(6,20,true);
+    cv.setUint16(8,0,true);cv.setUint16(10,0,true);
+    cv.setUint16(12,0,true);cv.setUint16(14,0,true);
+    cv.setUint32(16,crc,true);
+    cv.setUint32(20,sz,true);cv.setUint32(24,sz,true);
+    cv.setUint16(28,nm.length,true);
+    cv.setUint16(30,0,true);cv.setUint16(32,0,true);
+    cv.setUint16(34,0,true);cv.setUint16(36,0,true);
+    cv.setUint32(38,0,true);
+    cv.setUint32(42,off,true);
+    cd.set(nm,46);
+    central.push(cd);
+    off+=lh.length;
+  });
+  var cdOff=off;
+  var cdLen=central.reduce(function(s,c){return s+c.length;},0);
+  var eocd=new Uint8Array(22);
+  var ev=new DataView(eocd.buffer);
+  ev.setUint32(0,0x06054b50,true);
+  ev.setUint16(4,0,true);ev.setUint16(6,0,true);
+  ev.setUint16(8,entradas.length,true);
+  ev.setUint16(10,entradas.length,true);
+  ev.setUint32(12,cdLen,true);
+  ev.setUint32(16,cdOff,true);
+  ev.setUint16(20,0,true);
+  var total=off+cdLen+22;
+  var out=new Uint8Array(total),p=0;
+  local.forEach(function(l){out.set(l,p);p+=l.length;});
+  central.forEach(function(c){out.set(c,p);p+=c.length;});
+  out.set(eocd,p);
+  return new Blob([out],{type:'application/zip'});
+}
+
+/* ===== ZIP del lote actual ===== */
+async function zipLote(){
+  var entradas=[];
+  for(var k=0;k<SIGLAS.length;k++){
+    var s=SIGLAS[k],files=cola[s];
+    if(!files||!files.length)continue;
+    var buffers=[];
+    for(var i=0;i<files.length;i++){buffers.push(await files[i].arrayBuffer());}
+    var merged;
+    if(buffers.length===1){merged=new Uint8Array(buffers[0]);}
+    else{var res=PDFMerge.merge(buffers,files.map(function(f){return f.name;}));merged=res.bytes;}
+    entradas.push({name:nombreOficial(s),data:merged});
+  }
+  if(!entradas.length){msg('msgP','No hay documentos en la cola','err');return;}
+  var zip=zipBlobs(entradas);
+  bajarBlob(zip,carpeta+'_documentos.zip');
+  msg('msgP','\u2705 ZIP descargado con '+entradas.length+' documentos','ok');
+}
+document.getElementById('btnZipA').onclick=zipLote;
+
+/* ===== ZIP selecci\u00f3n ===== */
+async function zipVarios(ids){
+  var entradas=[];
+  for(var k=0;k<ids.length;k++){
+    var lid=ids[k];
+    for(var j=0;j<SIGLAS.length;j++){
+      try{
+        var rec=await IDB.get('files',lid+'_'+SIGLAS[j]);
+        if(rec&&rec.blob){
+          var buf=await rec.blob.arrayBuffer();
+          var lote=lotesGuardados.find(function(l){return l.id===lid;});
+          var prefix=lote?lote.nombre+'/':'';
+          entradas.push({name:prefix+rec.nombre,data:new Uint8Array(buf)});
         }
+      }catch(e){}
+    }
+  }
+  if(!entradas.length){toast('No se encontraron documentos','error');return;}
+  var zip=zipBlobs(entradas);
+  bajarBlob(zip,'documentos_seleccionados.zip');
+  toast('ZIP descargado con '+entradas.length+' documentos','success');
+}
+
+/* ===== Pantalla B: tabla ===== */
+async function cargarTabla(){
+  try{lotesGuardados=await IDB.getAll('lotes');}catch(e){lotesGuardados=[];}
+  pintarTabla();
+}
+
+function pintarTabla(){
+  var q=document.getElementById('q').value.toLowerCase().trim();
+  var filtro=document.getElementById('filtro').value;
+  var tb=document.getElementById('tb');
+  var resumen=document.getElementById('resumen');
+
+  var lista=lotesGuardados.filter(function(l){
+    if(q&&l.nombre.toLowerCase().indexOf(q)<0&&l.nit.toLowerCase().indexOf(q)<0)return false;
+    var completos=l.siglas&&l.siglas.length===6;
+    if(filtro==='completos'&&!completos)return false;
+    if(filtro==='incompletos'&&completos)return false;
+    return true;
+  });
+  lista.sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha);});
+
+  resumen.textContent=lista.length+' lote'+(lista.length!==1?'s':'')+' encontrado'+(lista.length!==1?'s':'');
+
+  if(!lista.length){
+    tb.innerHTML='<tr><td colspan="6" class="empty">No hay lotes guardados. Crea uno en la Pantalla A.</td></tr>';
+    refrescarBarraSel();return;
+  }
+
+  tb.innerHTML='';
+  lista.forEach(function(l){
+    var d=new Date(l.fecha);
+    var fStr=d.toLocaleDateString('es-CO')+' '+d.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+    var completos=l.siglas&&l.siglas.length===6;
+
+    var tr=document.createElement('tr');
+    tr.dataset.lid=l.id;
+
+    var cchk=document.createElement('td');
+    cchk.className='cchk';
+    var chk=document.createElement('input');
+    chk.type='checkbox';
+    chk.className='chk';
+    chk.dataset.lid=l.id;
+    chk.onchange=refrescarBarraSel;
+    cchk.appendChild(chk);
+    tr.appendChild(cchk);
+
+    var tdF=document.createElement('td');
+    tdF.textContent=fStr;
+    tr.appendChild(tdF);
+
+    var tdN=document.createElement('td');
+    tdN.style.fontWeight='600';
+    tdN.textContent=l.nombre;
+    tr.appendChild(tdN);
+
+    var tdNit=document.createElement('td');
+    tdNit.className='mono';
+    tdNit.textContent=l.nit;
+    tr.appendChild(tdNit);
+
+    var tdS=document.createElement('td');
+    var div=document.createElement('div');
+    div.style.lineHeight='2';
+    SIGLAS.forEach(function(s){
+      var on=l.siglas&&l.siglas.indexOf(s)>=0;
+      var sp=document.createElement('span');
+      sp.className='sig'+(on?' on':'');
+      sp.textContent=s;
+      sp.title=DOCS.find(function(d){return d.s===s;}).d+(on?' \u2713':' \u2014 Ausente');
+      div.appendChild(sp);
+    });
+    if(!completos){
+      var pg=document.createElement('div');
+      pg.className='prog';
+      pg.textContent=(l.siglas?l.siglas.length:0)+'/6 documentos';
+      div.appendChild(pg);
+    }
+    tdS.appendChild(div);
+    tr.appendChild(tdS);
+
+    var tdA=document.createElement('td');
+    var rowActs=document.createElement('div');
+    rowActs.className='rowacts';
+
+    var selV=document.createElement('select');
+    selV.className='nx-select-sm';
+    selV.innerHTML='<option value="">Ver documento\u2026</option>';
+    SIGLAS.forEach(function(s){
+      var on=l.siglas&&l.siglas.indexOf(s)>=0;
+      if(on){
+        var opt=document.createElement('option');
+        opt.value='v_'+l.id+'_'+s;
+        opt.textContent=s+' \u2014 '+DOCS.find(function(d){return d.s===s;}).d;
+        selV.appendChild(opt);
+      }
+    });
+    selV.onchange=function(){
+      if(!selV.value)return;
+      var parts=selV.value.split('_');
+      verDoc(parseInt(parts[1]),parts[2]);
+      selV.value='';
+    };
+    rowActs.appendChild(selV);
+
+    var selD=document.createElement('select');
+    selD.className='nx-select-sm';
+    selD.innerHTML='<option value="">Descargar\u2026</option>'+
+      '<option value="z_'+l.id+'">ZIP de este lote</option>';
+    SIGLAS.forEach(function(s){
+      var on=l.siglas&&l.siglas.indexOf(s)>=0;
+      if(on){
+        var opt2=document.createElement('option');
+        opt2.value='d_'+l.id+'_'+s;
+        opt2.textContent=s+' \u2014 '+nombreOficialLote(l,s);
+        selD.appendChild(opt2);
+      }
+    });
+    selD.onchange=function(){
+      if(!selD.value)return;
+      var parts=selD.value.split('_');
+      if(parts[0]==='z')zipUnLote(parseInt(parts[1]));
+      else bajarDoc(parseInt(parts[1]),parts[2]);
+      selD.value='';
+    };
+    rowActs.appendChild(selD);
+
+    if(!completos){
+      var btnC=document.createElement('button');
+      btnC.className='nx-btn mini ghost';
+      btnC.innerHTML='<i class="fas fa-upload"></i> Continuar';
+      btnC.title='Continuar carga';
+      btnC.onclick=function(){continuarCarga(l);};
+      rowActs.appendChild(btnC);
     }
 
-    function modalAction(action) {
-        document.getElementById('modalOverlay').classList.remove('show');
-        const { sigla, file } = pendingModal;
+    var btnDel=document.createElement('button');
+    btnDel.className='nx-btn mini danger';
+    btnDel.innerHTML='<i class="fas fa-trash"></i>';
+    btnDel.title='Eliminar lote';
+    btnDel.onclick=function(){eliminarLote(l.id);};
+    rowActs.appendChild(btnDel);
 
-        if (action === 'replace') {
-            // Remove all existing, add new
-            docStore[sigla] = [];
-            addFileToStore(sigla, file);
-            showToast(`${sigla}: Documento reemplazado correctamente`, 'info');
-        } else if (action === 'annex') {
-            // Keep existing + add new
-            addFileToStore(sigla, file);
-            showToast(`${sigla}: Documento anexado correctamente`, 'success');
-        } else {
-            // Cancel - reset file input
-            document.getElementById('file-' + sigla.toLowerCase()).value = '';
-            showToast('Operación cancelada', 'warn');
-        }
-        pendingModal = { sigla: null, file: null };
-    }
+    tdA.appendChild(rowActs);
+    tr.appendChild(tdA);
+    tb.appendChild(tr);
+  });
+  refrescarBarraSel();
+}
 
-    async function addFileToStore(sigla, file) {
-        const data = await file.arrayBuffer();
-        const nombre = document.getElementById('lote-nombre').value.trim() || 'LOTE';
-        const nit = document.getElementById('lote-nit').value.trim() || 'NIT';
-        const sep = document.getElementById('lote-separador').value;
-        const num = docStore[sigla].length + 1;
-        const renamed = `${sigla}${sep}${nit}${sep}${nombre}${sep}${String(num).padStart(3,'0')}.pdf`;
+function nombreOficialLote(l,sigla){return sigla+(l.separador||'_')+l.nit+(l.separador||'_')+l.nombre+'.pdf';}
 
-        docStore[sigla].push({ name: file.name, data, renamed });
+/* ===== Continuar carga ===== */
+function continuarCarga(l){
+  document.getElementById('carpeta').value=l.nombre;
+  document.getElementById('nit').value=l.nit;
+  document.getElementById('sep').value=l.separador||'_';
+  idLote=l.id;
+  actualizarVista();
+  tabA.click();
+  var el=document.getElementById('activo');
+  el.classList.add('on');
+  el.innerHTML='<b>Continuando lote:</b> '+l.nombre+' (faltan documentos)';
+  toast('Continuando carga del lote '+l.nombre,'info');
+}
 
-        // Update UI
-        updateCardUI(sigla);
-        updateLote();
+/* ===== ZIP un lote ===== */
+async function zipUnLote(lid){
+  var entradas=[];
+  for(var j=0;j<SIGLAS.length;j++){
+    try{
+      var rec=await IDB.get('files',lid+'_'+SIGLAS[j]);
+      if(rec&&rec.blob){
+        var buf=await rec.blob.arrayBuffer();
+        entradas.push({name:rec.nombre,data:new Uint8Array(buf)});
+      }
+    }catch(e){}
+  }
+  if(!entradas.length){toast('No se encontraron documentos','error');return;}
+  var lote=lotesGuardados.find(function(l){return l.id===lid;});
+  var nombre=(lote?lote.nombre:'lote')+'_documentos.zip';
+  var zip=zipBlobs(entradas);
+  bajarBlob(zip,nombre);
+  toast('ZIP descargado con '+entradas.length+' documentos','success');
+}
 
-        // Reset file input
-        document.getElementById('file-' + sigla.toLowerCase()).value = '';
-    }
+/* ===== Eliminar lote ===== */
+async function eliminarLote(lid){
+  if(!confirm('\u00bfEliminar este lote y todos sus documentos?'))return;
+  await IDB.del('lotes',lid);
+  for(var j=0;j<SIGLAS.length;j++){try{await IDB.del('files',lid+'_'+SIGLAS[j]);}catch(e){}}
+  lotesGuardados=await IDB.getAll('lotes');
+  pintarTabla();
+  toast('Lote eliminado','success');
+}
 
-    function updateCardUI(sigla) {
-        const files = docStore[sigla];
-        const zone = document.getElementById('upload-' + sigla.toLowerCase());
-        const card = document.getElementById('card-' + sigla.toLowerCase());
-        const info = document.getElementById('fileinfo-' + sigla.toLowerCase());
-        const nameEl = document.getElementById('filename-' + sigla.toLowerCase());
-        const badge = document.getElementById('badge-' + sigla.toLowerCase());
-        const hint = document.getElementById('hint-' + sigla.toLowerCase());
-        const btnVer = document.getElementById('btn-ver-' + sigla.toLowerCase());
-        const btnProc = document.getElementById('btn-proc-' + sigla.toLowerCase());
+/* ===== Eliminar selecci\u00f3n ===== */
+async function eliminarLoteSel(){
+  var ids=marcados();
+  if(!ids.length){toast('Selecciona lotes primero','warn');return;}
+  if(!confirm('\u00bfEliminar '+ids.length+' lote'+(ids.length>1?'s':'')+' y todos sus documentos?'))return;
+  for(var k=0;k<ids.length;k++){
+    await IDB.del('lotes',ids[k]);
+    for(var j=0;j<SIGLAS.length;j++){try{await IDB.del('files',ids[k]+'_'+SIGLAS[j]);}catch(e){}}
+  }
+  lotesGuardados=await IDB.getAll('lotes');
+  pintarTabla();
+  toast(ids.length+' lote'+(ids.length>1?'s':'')+' eliminado'+(ids.length>1?'s':''),'success');
+}
 
-        if (files.length > 0) {
-            zone.classList.add('has-file');
-            card.classList.add('saved');
-            info.style.display = 'block';
+/* ===== Marcados ===== */
+function marcados(){
+  var ids=[];
+  document.querySelectorAll('#tb .chk:checked').forEach(function(c){ids.push(parseInt(c.dataset.lid));});
+  return ids;
+}
 
-            // Show all file names
-            if (files.length === 1) {
-                nameEl.textContent = files[0].renamed;
-                nameEl.style.color = SIGLA_COLORS[sigla];
-            } else {
-                nameEl.innerHTML = files.map(f => `<div style="margin:2px 0">${f.renamed}</div>`).join('');
-                nameEl.style.color = SIGLA_COLORS[sigla];
-            }
+function refrescarBarraSel(){
+  var ids=marcados();
+  var n=ids.length;
+  document.getElementById('selTxt').textContent=n?n+' lote'+(n>1?'s':'')+' seleccionado'+(n>1?'s':''):'Marca varios lotes para descargarlos juntos en un solo ZIP.';
+  document.getElementById('btnZipSel').disabled=!n;
+  document.getElementById('btnLimpiaSel').disabled=!n;
+  document.getElementById('btnElimSel').disabled=!n;
+  document.getElementById('chAll').checked=n>0&&n===document.querySelectorAll('#tb .chk').length;
+}
 
-            badge.style.display = 'inline-flex';
-            hint.style.display = 'block';
-            hint.textContent = files.length === 1 ? 'Documento guardado - añade PDF para reemplazarlo' : `${files.length} documentos guardados - añade más o reemplaza`;
-            btnVer.disabled = false;
-            btnProc.disabled = false;
-        } else {
-            zone.classList.remove('has-file');
-            card.classList.remove('saved');
-            info.style.display = 'none';
-            badge.style.display = 'none';
-            hint.style.display = 'none';
-            btnVer.disabled = true;
-            btnProc.disabled = true;
-        }
-    }
+document.getElementById('chAll').onchange=function(){
+  var v=this.checked;
+  document.querySelectorAll('#tb .chk').forEach(function(c){c.checked=v;});
+  refrescarBarraSel();
+};
 
-    /* ===== VER DOCUMENTO ===== */
-    function verDocumento(sigla) {
-        const files = docStore[sigla];
-        if (files.length === 0) return;
-        // Show last file
-        const last = files[files.length - 1];
-        const blob = new Blob([last.data], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-    }
+document.getElementById('q').oninput=pintarTabla;
+document.getElementById('filtro').onchange=pintarTabla;
+document.getElementById('btnRef').onclick=cargarTabla;
+document.getElementById('btnZipSel').onclick=function(){var ids=marcados();if(ids.length)zipVarios(ids);};
+document.getElementById('btnLimpiaSel').onclick=function(){document.querySelectorAll('#tb .chk:checked').forEach(function(c){c.checked=false;});refrescarBarraSel();};
+document.getElementById('btnElimSel').onclick=eliminarLoteSel;
 
-    /* ===== PROCESAR DOCUMENTO INDIVIDUAL ===== */
-    function procesarDocumento(sigla) {
-        const files = docStore[sigla];
-        if (files.length === 0) return;
-        showToast(`${sigla}: ${files.length} documento(s) procesado(s)`, 'success');
-    }
+/* ===== Utilidades ===== */
+function fmtSize(b){
+  if(b<1024)return b+' B';
+  if(b<1048576)return(b/1024).toFixed(1)+' KB';
+  return(b/1048576).toFixed(1)+' MB';
+}
 
-    /* ===== PROCESAR TODO ===== */
-    async function procesarTodo() {
-        const nombre = document.getElementById('lote-nombre').value.trim();
-        const nit = document.getElementById('lote-nit').value.trim();
-        if (!nombre || !nit) { showToast('Completa el nombre del lote y el NIT', 'error'); return; }
+function msg(id,txt,cls){
+  var el=document.getElementById(id);
+  el.textContent=txt;
+  el.className='msg'+(cls?' '+cls:'');
+}
 
-        const btn = document.getElementById('btn-todo');
-        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-        document.getElementById('progress-section').style.display = 'block';
+function toast(msg,type){
+  var c=document.getElementById('toastBox');
+  if(!c){c=document.createElement('div');c.id='toastBox';c.style.cssText='position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px';document.body.appendChild(c);}
+  var d=document.createElement('div');
+  var bg=type==='success'?'#1f5c3c':type==='error'?'#6b2530':type==='warn'?'#5c4a1f':'#1a3a5c';
+  var fg=type==='success'?'#7ee2a8':type==='error'?'#ffb4b4':type==='warn'?'#fbbf24':'#c8d6e5';
+  var ic=type==='success'?'check-circle':type==='error'?'exclamation-triangle':type==='warn'?'exclamation-circle':'info-circle';
+  d.style.cssText='background:'+bg+';color:'+fg+';border:1px solid '+fg+';border-radius:10px;padding:11px 16px;font-size:13px;display:flex;align-items:center;gap:8px;animation:fadein .3s;max-width:380px';
+  d.innerHTML='<i class="fas fa-'+ic+'"></i> '+msg;
+  c.appendChild(d);setTimeout(function(){d.style.animation='fadeout .3s';setTimeout(function(){d.remove();},300);},3000);
+}
 
-        const totalDocs = SIGLAS.reduce((c,s) => c + docStore[s].length, 0);
-        let processed = 0;
+var sty=document.createElement('style');
+sty.textContent='@keyframes fadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes fadeout{from{opacity:1}to{opacity:0}}';
+document.head.appendChild(sty);
 
-        const loteFiles = [];
-        SIGLAS.forEach(sigla => {
-            docStore[sigla].forEach(f => {
-                loteFiles.push({ sigla, renamed: f.renamed, name: f.name, size: f.data.byteLength });
-                processed++;
-                const pct = Math.round((processed / totalDocs) * 90);
-                document.getElementById('progress-fill').style.width = pct + '%';
-                document.getElementById('progress-text').textContent = `Procesando ${sigla}: ${f.renamed}`;
-            });
-        });
+/* ===== Iniciar ===== */
+init();
 
-        // Save to lotes
-        const lote = {
-            id: Date.now(),
-            nombre: nombre,
-            nit: nit,
-            fecha: new Date().toISOString(),
-            documentos: loteFiles,
-            total: loteFiles.length
-        };
-        lotes.push(lote);
-        localStorage.setItem('nexus_gestion_documental_lotes', JSON.stringify(lotes));
-
-        document.getElementById('progress-fill').style.width = '100%';
-        document.getElementById('progress-text').textContent = '✅ Todos los documentos guardados correctamente';
-        showToast(`${totalDocs} documentos procesados y guardados`, 'success');
-
-        btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Procesar y guardar todo';
-    }
-
-    /* ===== DESCARGAR ZIP ===== */
-    async function descargarZIP() {
-        const nombre = document.getElementById('lote-nombre').value.trim() || 'lote';
-        const totalDocs = SIGLAS.reduce((c,s) => c + docStore[s].length, 0);
-        if (totalDocs === 0) { showToast('No hay documentos para descargar', 'error'); return; }
-
-        const btn = document.getElementById('btn-zip');
-        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando ZIP...';
-        document.getElementById('progress-section').style.display = 'block';
-
-        try {
-            const zip = new JSZip();
-            let count = 0;
-
-            SIGLAS.forEach(sigla => {
-                docStore[sigla].forEach(f => {
-                    zip.file(f.renamed, f.data);
-                    count++;
-                    const pct = Math.round((count / totalDocs) * 80);
-                    document.getElementById('progress-fill').style.width = pct + '%';
-                    document.getElementById('progress-text').textContent = `Agregando: ${f.renamed}`;
-                });
-            });
-
-            document.getElementById('progress-text').textContent = 'Comprimiendo ZIP...';
-            const blob = await zip.generateAsync({ type: 'blob' }, meta => {
-                document.getElementById('progress-fill').style.width = (80 + meta.percent * 0.2) + '%';
-            });
-
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `${nombre}_documentos.zip`; a.click();
-            URL.revokeObjectURL(url);
-
-            document.getElementById('progress-fill').style.width = '100%';
-            document.getElementById('progress-text').textContent = '✅ ZIP descargado';
-            showToast('ZIP descargado correctamente', 'success');
-        } catch(err) {
-            showToast('Error al generar ZIP: ' + err.message, 'error');
-        } finally {
-            btn.disabled = false; btn.innerHTML = '<i class="fas fa-file-archive"></i> Descargar ZIP de este lote';
-        }
-    }
-
-    /* ===== LIMPIAR LOTE ===== */
-    function limpiarLote() {
-        if (!confirm('¿Seguro que deseas limpiar todos los documentos del lote actual?')) return;
-        SIGLAS.forEach(s => {
-            docStore[s] = [];
-            updateCardUI(s);
-        });
-        updateLote();
-        document.getElementById('progress-section').style.display = 'none';
-        showToast('Lote limpiado', 'info');
-    }
-
-    /* ===== RENDER LOTES ===== */
-    function renderLotes() {
-        const list = document.getElementById('lotes-list');
-        if (lotes.length === 0) {
-            list.innerHTML = '<p style="font-size:13px;color:#5a7a9a;font-style:italic">No hay lotes procesados aún. Crea uno en la Pantalla A.</p>';
-            return;
-        }
-        list.innerHTML = '';
-        lotes.forEach(l => {
-            const d = new Date(l.fecha);
-            const dateStr = d.toLocaleDateString('es-CO') + ' ' + d.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
-            const siglasInLote = [...new Set(l.documentos.map(d => d.sigla))];
-            const div = document.createElement('div');
-            div.className = 'lote-card';
-            div.innerHTML = `
-                <div class="lote-header">
-                    <div>
-                        <span class="lote-name">${l.nombre}</span>
-                        <span class="lote-date" style="margin-left:10px">${dateStr}</span>
-                    </div>
-                    <button class="nx-btn nx-btn-danger nx-btn-sm" onclick="eliminarLote(${l.id})"><i class="fas fa-trash"></i></button>
-                </div>
-                <div style="font-size:12px;color:#5a7a9a">NIT: ${l.nit} — ${l.total} documento${l.total!==1?'s':''}</div>
-                <div class="lote-docs">
-                    ${siglasInLote.map(s => `<span class="lote-doc-tag ${SIGLA_TAG[s]}">${s}</span>`).join('')}
-                </div>
-            `;
-            list.appendChild(div);
-        });
-    }
-
-    function eliminarLote(id) {
-        lotes = lotes.filter(l => l.id !== id);
-        localStorage.setItem('nexus_gestion_documental_lotes', JSON.stringify(lotes));
-        renderLotes();
-        showToast('Lote eliminado', 'success');
-    }
-
-    /* ===== TOAST ===== */
-    function showToast(msg, type='info') {
-        const c = document.getElementById('toastContainer');
-        const d = document.createElement('div');
-        const cls = type==='success'?'toast-success':type==='error'?'toast-error':type==='warn'?'toast-warn':'toast-info';
-        d.className = `toast ${cls}`;
-        const icon = type==='success'?'check-circle':type==='error'?'exclamation-triangle':type==='warn'?'exclamation-circle':'info-circle';
-        d.innerHTML = `<i class="fas fa-${icon}"></i> ${msg}`;
-        c.appendChild(d); setTimeout(()=>d.remove(), 3000);
-    }
-
-    // Init
-    updateLote();
-    </script>
+</script>
 </body>
 </html>
