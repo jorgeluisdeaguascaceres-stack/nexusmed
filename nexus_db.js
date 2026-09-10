@@ -19,7 +19,8 @@
         'nexus_evoluciones', 'nexus_notas_enfermeria', 'nexus_terapias',
         'nexus_epicrisis',
         'nexus_contador_hc', 'nexus_contador_admision', 'nexus_contador_evo',
-        'nexus_contador_ne', 'nexus_contador_te', 'nexus_contador_epi'
+        'nexus_contador_ne', 'nexus_contador_te', 'nexus_contador_epi',
+        'nexus_conciliacion_jobs', 'nexus_gestion_documental_lotes', 'nexus_evoluciones_generadas'
     ];
 
     /* Claves que NUNCA se comparten (son de cada navegador) */

@@ -401,6 +401,11 @@
     <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresados</a>
     <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
     <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+    <!-- MÓDULOS NUEVOS DE INTEGRACIÓN -->
+    <a class="nav-item" href="conciliacion.html"><i class="fas fa-balance-scale"></i> Conciliación</a>
+    <a class="nav-item" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Documental</a>
+    <a class="nav-item" href="generador_evoluciones.html"><i class="fas fa-file-medical-alt"></i> Generador Evol.</a>
+    <a class="nav-item" href="renombrar.html"><i class="fas fa-i-cursor"></i> Renombrar</a>
 </nav>
 
     <!-- TOAST -->
@@ -535,6 +540,32 @@
                 <span class="module-icon">📄</span>
                 <div class="module-name">Epicrisis</div>
                 <div class="module-desc">Resumen de egreso para hospitalización en casa</div>
+            </div>
+
+            <!-- ═══ MÓDULOS NUEVOS DE INTEGRACIÓN ═══ -->
+            <div class="module-card" onclick="window.location.href='conciliacion.html'" style="border-color:#1a3a5c;">
+                <span class="module-badge" style="background:rgba(255,183,3,.2);color:#ffb703;">Nuevo</span>
+                <span class="module-icon">⚖️</span>
+                <div class="module-name">Conciliación</div>
+                <div class="module-desc">Cruza agendamiento del Health System con evoluciones SOAP para verificar asistencias</div>
+            </div>
+            <div class="module-card" onclick="window.location.href='gestion_documental.html'" style="border-color:#1a3a5c;">
+                <span class="module-badge" style="background:rgba(255,183,3,.2);color:#ffb703;">Nuevo</span>
+                <span class="module-icon">📁</span>
+                <div class="module-name">Gestión Documental</div>
+                <div class="module-desc">Crea lotes, nombra PDFs con fórmula SIGLA_NIT_NOMBRE, une y descarga por lote</div>
+            </div>
+            <div class="module-card" onclick="window.location.href='generador_evoluciones.html'" style="border-color:#1a3a5c;">
+                <span class="module-badge" style="background:rgba(255,183,3,.2);color:#ffb703;">Nuevo</span>
+                <span class="module-icon">📝</span>
+                <div class="module-name">Generador Evoluciones</div>
+                <div class="module-desc">Genera copias de PDFs de evolución con fechas y numeración cambiadas automáticamente</div>
+            </div>
+            <div class="module-card" onclick="window.location.href='renombrar.html'" style="border-color:#1a3a5c;">
+                <span class="module-badge" style="background:rgba(255,183,3,.2);color:#ffb703;">Nuevo</span>
+                <span class="module-icon">✏️</span>
+                <div class="module-name">Renombrar Archivos</div>
+                <div class="module-desc">Renombra archivos masivamente con patrones personalizados y descarga en ZIP</div>
             </div>
         </div>
     </div>
