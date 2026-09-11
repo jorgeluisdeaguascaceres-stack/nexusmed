@@ -140,6 +140,20 @@ body.noscroll{overflow:hidden}
 .ovfoot .state{flex:1 1 200px}
 
 @media(max-width:768px){.header{flex-direction:column;gap:10px}.nav-bar{justify-content:center}.boxes{grid-template-columns:1fr}.fields{grid-template-columns:1fr}}
+/* Modal Reemplazar/Añadir */
+.modal-overlay{position:fixed;inset:0;background:rgba(5,9,16,.92);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-overlay[hidden]{display:none}
+.modal-box{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:18px;padding:28px 32px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-title{font-size:18px;font-weight:700;color:#c8d6e5;margin-bottom:8px}
+.modal-text{font-size:13.5px;color:#5a7a9a;margin-bottom:18px;line-height:1.6}
+.modal-text strong{color:#90e0ef}
+.modal-actions{display:flex;gap:12px;flex-wrap:wrap}
+.modal-actions .nx-btn{flex:1;min-width:140px;justify-content:center}
+.modal-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:6px;background:#0f2a1c;color:#7ee2a8;border:1px solid #1f5c3c;margin-left:6px}
+.fitem.saved{border-color:#1f5c3c;background:#0c1f15}
+.fitem.saved .fname{color:#7ee2a8}
+.zone.has-saved{border-style:solid;border-color:#1f5c3c;color:#7ee2a8;background:#0c1f15}
+
 </style>
 </head>
 <body>
@@ -274,6 +288,19 @@ body.noscroll{overflow:hidden}
   </section>
 
   <footer>Nomenclatura estricta: SIGLA + separador + NIT + separador + carpeta + .pdf</footer>
+</div>
+
+<!-- Modal Reemplazar/Añadir -->
+<div id="modalRA" class="modal-overlay" hidden>
+  <div class="modal-box">
+    <div class="modal-title"><i class="fas fa-exclamation-triangle" style="color:#fbbf24;margin-right:8px"></i>Esta casilla ya tiene archivos</div>
+    <div class="modal-text" id="modalRA-text"></div>
+    <div class="modal-actions">
+      <button class="nx-btn go" id="modalRA-add"><i class="fas fa-plus-circle"></i> Añadir / Juntar</button>
+      <button class="nx-btn" id="modalRA-rep" style="background:linear-gradient(135deg,#c0392b,#8e2f3c)"><i class="fas fa-exchange-alt"></i> Reemplazar todo</button>
+      <button class="nx-btn ghost" id="modalRA-cancel"><i class="fas fa-times"></i> Cancelar</button>
+    </div>
+  </div>
 </div>
 
 <div class="ov" id="ov" hidden>
@@ -1362,7 +1389,8 @@ function pintarCajas(){
     var files=cola[doc.s]||[];
     var total=files.length;
     var div=document.createElement('div');
-    div.className='box'+(total?' hot':'');
+    var hasSaved=files.some(function(f){return f.saved;});
+    div.className='box'+(total?' hot':'')+(hasSaved?' done':'');
 
     var head=document.createElement('div');
     head.className='bhead';
@@ -1371,9 +1399,22 @@ function pintarCajas(){
     div.appendChild(head);
 
     var zone=document.createElement('div');
-    zone.className='zone'+(total?' has':'');
-    zone.innerHTML='<i class="fas fa-cloud-upload-alt" style="font-size:18px;margin-bottom:4px"></i><br>'+
-      'Arrastra PDF aqu\u00ed<br>o haz clic para seleccionar';
+    var hasSaved=files.some(function(f){return f.saved;});
+    zone.className='zone'+(total?' has':'')+(hasSaved?' has-saved':'');
+    var savedCount=files.filter(function(f){return f.saved;}).length;
+    var newCount=total-savedCount;
+    if(savedCount&&!newCount){
+      zone.innerHTML='<i class="fas fa-check-circle" style="font-size:22px;margin-bottom:4px;color:#7ee2a8"></i><br>'+
+        savedCount+' archivo'+(savedCount>1?'s':'')+' guardado'+(savedCount>1?'s':'')+'<br>'+
+        '<span style="font-size:11px">Arrastra PDF para añadir o reemplazar</span>';
+    }else if(savedCount&&newCount){
+      zone.innerHTML='<i class="fas fa-layer-group" style="font-size:22px;margin-bottom:4px;color:#7ee2a8"></i><br>'+
+        savedCount+' guardado'+(savedCount>1?'s':'')+' + '+newCount+' nuevo'+(newCount>1?'s':'')+'<br>'+
+        '<span style="font-size:11px">Arrastra más PDF o procesa</span>';
+    }else{
+      zone.innerHTML='<i class="fas fa-cloud-upload-alt" style="font-size:18px;margin-bottom:4px"></i><br>'+
+        'Arrastra PDF aquí<br>o haz clic para seleccionar';
+    }
     zone.dataset.sigla=doc.s;
     zone.onclick=function(){tomar(doc.s);};
     zone.ondragover=function(e){e.preventDefault();zone.classList.add('dragover');};
@@ -1394,9 +1435,10 @@ function pintarCajas(){
       for(var i=0;i<files.length;i++){
         var f=files[i];
         var item=document.createElement('div');
-        item.className='fitem';
+        item.className='fitem'+(f.saved?' saved':'');
         item.innerHTML='<span class="fnum">'+(i+1)+'</span>'+
           '<span class="fname">'+f.name+'</span>'+
+          (f.saved?'<span class="modal-badge">💾 Guardado</span>':'')+
           '<span class="fsize">'+fmtSize(f.size)+'</span>'+
           (i>0?'<button class="fbtn" data-dir="-1" data-sigla="'+doc.s+'" data-i="'+i+'" title="Subir">\u2191</button>':'')+
           (i<total-1?'<button class="fbtn" data-dir="1" data-sigla="'+doc.s+'" data-i="'+i+'" title="Bajar">\u2193</button>':'')+
@@ -1413,7 +1455,20 @@ function pintarCajas(){
     var row=document.createElement('div');
     row.className='brow';
     if(total){
-      row.innerHTML='<span class="state ok"><i class="fas fa-check-circle"></i> Listo para procesar</span>'+
+      var savedCount=files.filter(function(f){return f.saved;}).length;
+      var newCount=total-savedCount;
+      var statusTxt,statusCls;
+      if(savedCount&&!newCount){
+        statusTxt='<i class="fas fa-check-circle"></i> 💾 Documento guardado';
+        statusCls='state ok';
+      }else if(savedCount&&newCount){
+        statusTxt='<i class="fas fa-layer-group"></i> '+savedCount+' guardado + '+newCount+' nuevo'+(newCount>1?'s':'')+' — listo para procesar';
+        statusCls='state ok';
+      }else{
+        statusTxt='<i class="fas fa-check-circle"></i> Listo para procesar';
+        statusCls='state ok';
+      }
+      row.innerHTML='<span class="'+statusCls+'">'+statusTxt+'</span>'+
         '<div class="rowacts"><button class="nx-btn mini" data-accion="ver" data-sigla="'+doc.s+'" title="Vista previa"><i class="fas fa-eye"></i> Ver</button>'+
         '<button class="nx-btn mini ghost" data-accion="procesar" data-sigla="'+doc.s+'" title="Procesar"><i class="fas fa-cog"></i> Procesar</button></div>';
     }else{
@@ -1462,10 +1517,59 @@ function tomarDrop(sigla,ev){
 }
 
 function agregarArchivos(sigla,arr){
-  if(!cola[sigla])cola[sigla]=[];
-  cola[sigla]=cola[sigla].concat(arr);
+  var existing=cola[sigla]||[];
+  if(existing.length){
+    // Show Reemplazar/Añadir modal
+    var savedCount=existing.filter(function(f){return f.saved;}).length;
+    var newCount=existing.length-savedCount;
+    var parts=[];
+    if(savedCount)parts.push('<strong>'+savedCount+' archivo'+(savedCount>1?'s':'')+' ya guardado'+(savedCount>1?'s':'')+'</strong>');
+    if(newCount)parts.push('<strong>'+newCount+' archivo'+(newCount>1?'s':'')+' nuevo'+(newCount>1?'s':'')+'</strong>');
+    var existTxt=parts.join(' y ');
+    var incomingTxt=arr.length+' archivo'+(arr.length>1?'s':'')+' nuevo'+(arr.length>1?'s':'');
+    document.getElementById('modalRA-text').innerHTML=
+      'La casilla <strong>'+sigla+'</strong> ya contiene '+existTxt+'.<br>'+
+      'Estás intentando agregar '+incomingTxt+'.<br><br>'+
+      '<strong>Añadir / Juntar</strong>: los nuevos archivos se agregan al final.<br>'+
+      '<strong>Reemplazar todo</strong>: se borran los actuales y se quedan solo los nuevos.';
+    var modal=document.getElementById('modalRA');
+    modal.hidden=false;
+    document.body.classList.add('noscroll');
+    // Store pending resolution
+    modal._pending={sigla:sigla,arr:arr};
+    return;
+  }
+  cola[sigla]=arr.slice();
   pintarCajas();
 }
+
+// Modal button handlers (set up once)
+(function(){
+  var modal=document.getElementById('modalRA');
+  if(!modal)return;
+  document.getElementById('modalRA-add').onclick=function(){
+    modal.hidden=true;document.body.classList.remove('noscroll');
+    var p=modal._pending;if(!p)return;
+    if(!cola[p.sigla])cola[p.sigla]=[];
+    cola[p.sigla]=cola[p.sigla].concat(p.arr);
+    modal._pending=null;
+    pintarCajas();
+  };
+  document.getElementById('modalRA-rep').onclick=function(){
+    modal.hidden=true;document.body.classList.remove('noscroll');
+    var p=modal._pending;if(!p)return;
+    cola[p.sigla]=p.arr.slice();
+    modal._pending=null;
+    pintarCajas();
+  };
+  document.getElementById('modalRA-cancel').onclick=function(){
+    modal.hidden=true;document.body.classList.remove('noscroll');
+    modal._pending=null;
+  };
+  modal.onclick=function(e){
+    if(e.target===modal){modal.hidden=true;document.body.classList.remove('noscroll');modal._pending=null;}
+  };
+})();
 
 /* ===== Quitar archivo ===== */
 function quitar(sigla,idx){
@@ -1490,6 +1594,11 @@ function mover(sigla,idx,dir){
 async function procesar(sigla){
   var files=cola[sigla];
   if(!files||!files.length){msg('msgP','No hay archivos en '+sigla,'err');return;}
+  var allSaved=files.every(function(f){return f.saved;});
+  if(allSaved){
+    msg('msgP','\u26a0 '+sigla+': Este documento ya está guardado. Agrega PDFs nuevos para reemplazarlo o añadirlo, o elimínalo primero.','err');
+    return;
+  }
   if(!carpeta||!nit){msg('msgP','Configure carpeta y NIT primero','err');return;}
   var btns=document.querySelectorAll('[data-accion="procesar"][data-sigla="'+sigla+'"]');
   btns.forEach(function(b){b.disabled=true;b.innerHTML='<i class="fas fa-spinner fa-spin"></i> Procesando\u2026';});
@@ -1525,6 +1634,8 @@ async function procesarTodo(){
     var s=SIGLAS[k];
     var files=cola[s];
     if(!files||!files.length)continue;
+    var allSaved=files.every(function(f){return f.saved;});
+    if(allSaved)continue; // skip already-saved-only docs
     total++;
     try{
       var buffers=[];
@@ -1558,6 +1669,12 @@ async function verCasilla(sigla){
   var files=cola[sigla];
   if(!files||!files.length)return;
   try{
+    // If all files are saved, just open the saved blob directly
+    var allSaved=files.every(function(f){return f.saved;});
+    if(allSaved&&files.length===1){
+      abrirVista(sigla,files[0].blob,nombreOficial(sigla));
+      return;
+    }
     var buffers=[];
     for(var i=0;i<files.length;i++){buffers.push(await files[i].arrayBuffer());}
     var merged;
@@ -1691,6 +1808,12 @@ async function zipLote(){
   for(var k=0;k<SIGLAS.length;k++){
     var s=SIGLAS[k],files=cola[s];
     if(!files||!files.length)continue;
+    var allSaved=files.every(function(f){return f.saved;});
+    if(allSaved&&files.length===1){
+      var buf=await files[0].blob.arrayBuffer();
+      entradas.push({name:nombreOficial(s),data:new Uint8Array(buf)});
+      continue;
+    }
     var buffers=[];
     for(var i=0;i<files.length;i++){buffers.push(await files[i].arrayBuffer());}
     var merged;
@@ -1881,17 +2004,38 @@ function pintarTabla(){
 function nombreOficialLote(l,sigla){return sigla+(l.separador||'_')+l.nit+(l.separador||'_')+l.nombre+'.pdf';}
 
 /* ===== Continuar carga ===== */
-function continuarCarga(l){
+async function continuarCarga(l){
   document.getElementById('carpeta').value=l.nombre;
   document.getElementById('nit').value=l.nit;
   document.getElementById('sep').value=l.separador||'_';
   idLote=l.id;
+  cola={};
+  // Load saved blobs from IndexedDB into cola as wrapper objects
+  for(var k=0;k<SIGLAS.length;k++){
+    var s=SIGLAS[k];
+    try{
+      var rec=await IDB.get('files',l.id+'_'+s);
+      if(rec&&rec.blob){
+        var wrap={
+          name:rec.nombre,
+          size:rec.blob.size,
+          saved:true,
+          blob:rec.blob,
+          arrayBuffer:function(){return this.blob.arrayBuffer();}
+        };
+        if(!cola[s])cola[s]=[];
+        cola[s].push(wrap);
+      }
+    }catch(e){}
+  }
   actualizarVista();
   tabA.click();
   var el=document.getElementById('activo');
   el.classList.add('on');
-  el.innerHTML='<b>Continuando lote:</b> '+l.nombre+' (faltan documentos)';
-  toast('Continuando carga del lote '+l.nombre,'info');
+  var guardados=SIGLAS.filter(function(s){return cola[s]&&cola[s].length;}).length;
+  el.innerHTML='<b>Continuando lote:</b> '+l.nombre+' ('+guardados+' de '+SIGLAS.length+' documentos ya guardados)';
+  toast('Se recargaron '+guardados+' documentos guardados del lote '+l.nombre,'info');
+  pintarCajas();
 }
 
 /* ===== ZIP un lote ===== */
