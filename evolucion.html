@@ -10,21 +10,29 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:#0a1628;color:#c8d6e5;min-height:100vh}
 
-/* Header */
-.header{background:linear-gradient(135deg,#0d2137,#122a45);padding:12px 30px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1a3a5c;position:sticky;top:0;z-index:100}
-.header .logo{display:flex;align-items:center;gap:10px}
-.header .logo h1{font-size:1.3rem;font-weight:700;color:#00b4d8;letter-spacing:1px}
-.header .logo span{font-size:.7rem;color:#5a7a9a;font-weight:300}
-.header .user-info{display:flex;align-items:center;gap:12px;color:#90e0ef;font-size:.85rem}
-.header .user-info i{color:#00b4d8}
-.header .btn-logout{background:transparent;border:1px solid #ff3860;color:#ff3860;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.75rem;transition:.3s}
-.header .btn-logout:hover{background:#ff3860;color:#fff}
 
-/* Nav */
-.nav{background:#0d2137;padding:8px 20px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #1a3a5c}
-.nav a{text-decoration:none;color:#5a7a9a;font-size:.75rem;padding:6px 12px;border-radius:6px;transition:.3s;border:1px solid transparent}
-.nav a:hover{color:#00b4d8;border-color:#1a3a5c;background:rgba(0,180,216,.05)}
-.nav a.active{color:#00b4d8;background:rgba(0,180,216,.1);border-color:#00b4d8}
+/* ===== HEADER ===== */
+.header{background:linear-gradient(135deg,#0d2137,#1a3a5c);padding:15px 30px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #00b4d8;box-shadow:0 2px 15px rgba(0,180,216,.2)}
+.header-left{display:flex;align-items:center;gap:12px}
+.brand-icon{width:32px;height:32px}
+.brand-icon svg{width:100%;height:100%}
+.brand-name{font-size:24px;font-weight:800;color:#00b4d8;letter-spacing:3px}
+.brand-name span{color:#90e0ef;font-weight:300}
+.header-right{display:flex;align-items:center;gap:20px}
+.user-info{display:flex;align-items:center;gap:10px}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#00b4d8,#0077b6);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
+.user-details{display:flex;flex-direction:column}
+.user-name{font-size:13px;font-weight:600;color:#e0e0e0}
+.user-role{font-size:11px;color:#5a7a9a;text-transform:uppercase;letter-spacing:1px}
+.btn-cerrar-sesion{background:transparent;color:#ff3860;border:1px solid #ff3860;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:all .3s}
+.btn-cerrar-sesion:hover{background:#ff3860;color:#fff}
+/* ===== BARRA DE NAVEGACIÓN ===== */
+.nav-bar{background:#0d2137;padding:8px 30px;display:flex;gap:5px;border-bottom:1px solid #1a3a5c;flex-wrap:wrap}
+.nav-item{padding:8px 16px;border-radius:6px;font-size:13px;color:#5a7a9a;cursor:pointer;transition:all .3s;text-decoration:none;display:flex;align-items:center;gap:6px;font-family:'Inter',sans-serif}
+.nav-item:hover{color:#00b4d8;background-color:rgba(0,180,216,.1)}
+.nav-item.active{color:#00b4d8;background-color:rgba(0,180,216,.15);border:1px solid rgba(0,180,216,.3)}
+@media(max-width:768px){.header{flex-direction:column;gap:10px}.header-right{flex-wrap:wrap;justify-content:center}.nav-bar{padding:8px 10px;justify-content:center}.nav-item{padding:6px 10px;font-size:11px}}
+
 
 /* Main */
 .main{padding:25px 30px;max-width:1400px;margin:0 auto}
@@ -225,8 +233,7 @@ tr:hover td{background:rgba(0,180,216,.03)}
 @media(max-width:768px){
 .form-grid{grid-template-columns:1fr}
 .stats-row{grid-template-columns:1fr 1fr}
-.nav{gap:4px}.nav a{font-size:.68rem;padding:4px 8px}
-}
+.nav{gap:4px}}
 </style>
     <script src="nexus_db.js"></script>
     <script src="permisos.js"></script>
@@ -235,36 +242,48 @@ tr:hover td{background:rgba(0,180,216,.03)}
 
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- Header -->
-<header class="header">
-  <div class="logo">
-    <h1><i class="fas fa-heartbeat"></i> NEXUSMED</h1>
-    <span>plataforma que conecta todo</span>
-  </div>
-  <div class="user-info">
-    <i class="fas fa-user-circle"></i>
-    <span id="userName">Admin</span>
-    <span style="color:#5a7a9a">|</span>
-    <span id="userRole" style="color:#5a7a9a">Administrador</span>
-  </div>
-  <button class="btn-logout" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Salir</button>
-</header>
+<!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="brand-icon">
+                <svg viewBox="0 0 40 40" fill="none">
+                    <path d="M20 4 L20 36" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M20 10 L10 4" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M20 10 L30 4" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="20" cy="36" r="3" fill="#00b4d8"/>
+                </svg>
+            </div>
+            <div class="brand-name">NEXUS<span>MED</span></div>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <div class="user-details">
+                    <span class="user-name" id="userName">Administrador</span>
+                    <span class="user-role" id="userRole">ADMIN</span>
+                </div>
+            </div>
+            <button class="btn-cerrar-sesion" onclick="cerrarSesion()">🔒 Cerrar Sesión</button>
+        </div>
+    </div>
 
-<!-- Nav -->
-<nav class="nav">
-  <a href="menu.html"><i class="fas fa-home"></i> Inicio</a>
-  <a href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
-  <a href="pacientes.html"><i class="fas fa-users"></i> Pacientes</a>
-  <a href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
-  <a href="evolucion.html" class="active"><i class="fas fa-notes-medical"></i> Evolución</a>
-  <a href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enfermería</a>
-  <a href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
-  <a href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
-  <a href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
-  <a href="egresados.html"><i class="fas fa-door-closed"></i> Egresados</a>
-  <a href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
-  <a href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
-</nav>
+    <!-- BARRA DE NAVEGACIÓN -->
+    <nav class="nav-bar">
+        <a class="nav-item" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
+        <a class="nav-item" href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+        <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+        <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresos</a>
+        <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
+        <a class="nav-item active" href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
+        <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enf.</a>
+        <a class="nav-item" href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
+        <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
+        <a class="nav-item" href="conciliacion.html"><i class="fas fa-balance-scale"></i> Conciliación</a>
+        <a class="nav-item" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Doc.</a>
+        <a class="nav-item" href="generador_evoluciones.html"><i class="fas fa-file-medical-alt"></i> Generador Evol.</a>
+        <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
+        <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+    </nav>
 
 <!-- Main -->
 <main class="main">
