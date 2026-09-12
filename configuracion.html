@@ -207,7 +207,7 @@
         <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enf.</a>
         <a class="nav-item" href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
         <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
-        <a class="nav-item" href="conciliacion.html"><i class="fas fa-balance-scale"></i> Conciliación</a>
+        <a class="nav-item" href="facturacion.html"><i class="fas fa-file-invoice-dollar"></i> Facturación</a>
         <a class="nav-item" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Doc.</a>
         <a class="nav-item" href="generador_evoluciones.html"><i class="fas fa-file-medical-alt"></i> Generador Evol.</a>
         <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
@@ -301,7 +301,62 @@
                 </div>
             </div>
 
-            <!-- Matriz Global de Permisos -->
+            
+            <!-- ═══════ CATÁLOGO DE SERVICIOS CUPS ═══════ -->
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-clipboard-list"></i> Catálogo de Servicios (CUPS) <span class="hint">Código · Nombre · Tipo · Ámbito · Valor por EPS</span></div>
+                <div class="form-grid">
+                    <div class="form-group"><label><i class="fas fa-barcode"></i> Código CUPS</label><input type="text" id="cupCodigo" placeholder="Ej: 931001" maxlength="10"></div>
+                    <div class="form-group full"><label><i class="fas fa-stethoscope"></i> Nombre del Servicio</label><input type="text" id="cupNombre" placeholder="Ej: Fisioterapia Domiciliaria"></div>
+                    <div class="form-group"><label>Tipo RIPS</label><select id="cupTipo"><option value="consulta">Consulta</option><option value="procedimiento">Procedimiento</option><option value="otroServicio">Otro Servicio</option></select></div>
+                    <div class="form-group"><label>Ambito</label><select id="cupAmbito"><option value="domiciliario">Domiciliario</option><option value="intramural">Intramural</option><option value="hospitalario">Hospitalario</option></select></div>
+                    <div class="form-group"><label><i class="fas fa-coins"></i> Valor Unitario (todos)</label><input type="number" id="cupValorGeneral" placeholder="Ej: 42769" min="0"></div>
+                    <div class="form-group"><label>Finalidad Tecnología</label><select id="cupFinalidad"><option value="01">01 - Diagnóstico</option><option value="02">02 - Terapéutico</option><option value="03">03 - Protección</option><option value="04" selected>04 - Rehabilitación</option><option value="05">05 - Prevención</option></select></div>
+                    <div class="form-group"><label>Grupo Servicios</label><select id="cupGrupo"><option value="01">01 - Promoción</option><option value="02">02 - Prevención</option><option value="03" selected>03 - Atención enfermedad</option></select></div>
+                    <div class="form-group"><label>Causa/Motivo Atención</label><select id="cupCausa"><option value="01">01 - Enfermedad general</option><option value="02" selected>02 - Otra</option><option value="03">03 - Accidente</option><option value="04">04 - Secuela</option><option value="13">13 - Enfermedad laboral</option></select></div>
+                </div>
+                <div id="cupValoresEps" style="margin-top:12px">
+                    <div class="section-title" style="border:none;padding:0;margin-bottom:8px;font-size:13px"><i class="fas fa-building"></i> Valores específicos por EPS (opcional)</div>
+                    <div class="form-grid" id="cupEpsGrid"></div>
+                    <p style="font-size:11px;color:#5a7a9a;margin-top:6px">Si un EPS no aparece en la lista, agréguelo en la sección <b>Gestión de EPS</b> debajo.</p>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-registrar" onclick="guardarServicioCups()"><i class="fas fa-save"></i> Guardar Servicio</button>
+                    <button class="btn-limpiar" onclick="limpiarFormCups()"><i class="fas fa-eraser"></i> Limpiar</button>
+                </div>
+                <div class="table-wrap" style="margin-top:16px">
+                    <table class="user-table" style="width:100%">
+                        <thead><tr><th>CUPS</th><th>Nombre</th><th>Tipo</th><th>Ambito</th><th>Valor General</th><th>Activo</th><th>Acciones</th></tr></thead>
+                        <tbody id="tablaCups"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ═══════ GESTIÓN DE EPS ═══════ -->
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-hospital-alt"></i> Gestión de EPS / Entidades Pagadoras <span class="hint">Código · Nombre · Régimen · Contacto</span></div>
+                <div class="form-grid">
+                    <div class="form-group"><label><i class="fas fa-hashtag"></i> Código EPS</label><input type="text" id="epsCodigo" placeholder="Ej: EPS017" maxlength="10"></div>
+                    <div class="form-group full"><label><i class="fas fa-building"></i> Nombre de la EPS</label><input type="text" id="epsNombre" placeholder="Ej: FOMAG EPS"></div>
+                    <div class="form-group"><label>Régimen</label><select id="epsRegimen"><option value="subsidiado">Subsidiado</option><option value="contributivo">Contributivo</option><option value="mixto">Mixto</option></select></div>
+                    <div class="form-group"><label><i class="fas fa-id-card"></i> NIT</label><input type="text" id="epsNit" placeholder="Ej: 900.123.456-7"></div>
+                    <div class="form-group"><label><i class="fas fa-phone"></i> Teléfono</label><input type="text" id="epsTelefono" placeholder="+57 300 000 0000"></div>
+                    <div class="form-group"><label><i class="fas fa-envelope"></i> Email</label><input type="email" id="epsEmail" placeholder="radicacion@eps.com"></div>
+                    <div class="form-group full"><label>Observaciones</label><input type="text" id="epsNotas" placeholder="Convenio, condiciones especiales..."></div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-registrar" onclick="guardarEps()"><i class="fas fa-save"></i> Guardar EPS</button>
+                    <button class="btn-limpiar" onclick="limpiarFormEps()"><i class="fas fa-eraser"></i> Limpiar</button>
+                </div>
+                <div class="table-wrap" style="margin-top:16px">
+                    <table class="user-table" style="width:100%">
+                        <thead><tr><th>Código</th><th>Nombre EPS</th><th>Régimen</th><th>NIT</th><th>Teléfono</th><th>Email</th><th>Activo</th><th>Acciones</th></tr></thead>
+                        <tbody id="tablaEps"></tbody>
+                    </table>
+                </div>
+            </div>
+
+<!-- Matriz Global de Permisos -->
             <div class="section-card wide">
                 <div class="section-title"><i class="fas fa-table-cells-large"></i> Matriz Global Definitiva de Permisos <span class="hint">Haga clic en cada letra para activar o desactivar el permiso</span></div>
 
@@ -533,6 +588,8 @@
             cargarUsuarios();
             cargarHospital();
             actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups();
             mostrarResumenRol();
             configurarSubidaFirmas();
             configurarSubidaLogo();
@@ -664,7 +721,9 @@
             usuarios.push({ usuario, documento, nombre, clave, rol, especialidad, registro, firma: firmaNueva, fechaRegistro: new Date().toISOString() });
             try { guardarUsuarios(usuarios); }
             catch (e) { mostrarToast('Almacenamiento lleno: use una firma más liviana', 'error'); return; }
-            cargarUsuarios(); actualizarInfoSistema(); limpiarFormUsuario();
+            cargarUsuarios(); actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups(); limpiarFormUsuario();
             mostrarToast(`Usuario ${usuario} creado como ${ROL_MAP[rol].nombre}`, 'success');
         }
 
@@ -714,6 +773,8 @@
             try { guardarUsuarios(usuarios); }
             catch (e) { mostrarToast('Almacenamiento lleno: use una firma más liviana', 'error'); return; }
             cerrarModal(); cargarUsuarios(); actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups();
             mostrarToast('Usuario actualizado', 'success');
         }
 
@@ -723,6 +784,8 @@
             if (!confirm(`¿Eliminar al usuario ${usuario}? Se borrará también su firma digital.`)) return;
             guardarUsuarios(obtenerUsuarios().filter(u => u.usuario !== usuario));
             cargarUsuarios(); actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups();
             mostrarToast('Usuario eliminado', 'info');
         }
 
@@ -783,6 +846,307 @@
                 <p style="font-size:11px;color:#5a7a9a;margin-bottom:8px">${r.desc}</p>
                 <div class="lista">${items}</div>`;
         }
+
+        
+        /* ═══════════════════════════════════════════════════════════
+           CATÁLOGO DE SERVICIOS CUPS
+           Clave: nexus_servicios_facturacion (compartida via nexus_db)
+           ═══════════════════════════════════════════════════════════ */
+        const K_CUPS = 'nexus_servicios_facturacion';
+
+        const CUPS_DEFAULT = [
+            { id:'sf_01', codigoCUPS:'',       nombre:'CAMA DOMICILIARIA',           tipoServicio:'otroServicio', ambito:'domiciliario',
+              valorGeneral:250000, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_02', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA DOMICILIARIA',   tipoServicio:'consulta', ambito:'domiciliario',
+              valorGeneral:42769, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_03', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA INTRAMURAL',    tipoServicio:'consulta', ambito:'intramural',
+              valorGeneral:23345, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_04', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL DOMICILIARIA', tipoServicio:'consulta', ambito:'domiciliario',
+              valorGeneral:42769, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_05', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL INTRAMURAL',  tipoServicio:'consulta', ambito:'intramural',
+              valorGeneral:23345, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_06', codigoCUPS:'931001', nombre:'FISIOTERAPIA DOMICILIARIA',      tipoServicio:'consulta', ambito:'domiciliario',
+              valorGeneral:42769, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_07', codigoCUPS:'931001', nombre:'FISIOTERAPIA INTRAMURAL',       tipoServicio:'consulta', ambito:'intramural',
+              valorGeneral:23345, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_08', codigoCUPS:'943102', nombre:'PSICOLOGÍA DOMICILIARIA',       tipoServicio:'consulta', ambito:'domiciliario',
+              valorGeneral:42769, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_09', codigoCUPS:'943102', nombre:'PSICOLOGÍA INTRAMURAL',         tipoServicio:'consulta', ambito:'intramural',
+              valorGeneral:23345, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_10', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA DOMICILIARIA', tipoServicio:'procedimiento', ambito:'domiciliario',
+              valorGeneral:42769, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_11', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA INTRAMURAL',  tipoServicio:'procedimiento', ambito:'intramural',
+              valorGeneral:23345, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_12', codigoCUPS:'',       nombre:'ENFERMERÍA 24H DOMICILIARIA',  tipoServicio:'otroServicio', ambito:'domiciliario',
+              valorGeneral:200000, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_13', codigoCUPS:'',       nombre:'ENFERMERÍA 12H DOMICILIARIA',  tipoServicio:'otroServicio', ambito:'domiciliario',
+              valorGeneral:100000, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_14', codigoCUPS:'',       nombre:'ENFERMERÍA 8H DOMICILIARIA',   tipoServicio:'otroServicio', ambito:'domiciliario',
+              valorGeneral:95000, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_15', codigoCUPS:'',       nombre:'LIMPIEZA TRAQUEOSTOMÍA DOM.',  tipoServicio:'otroServicio', ambito:'domiciliario',
+              valorGeneral:42769, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true }
+        ];
+
+        function leerCups() { try { return JSON.parse(localStorage.getItem(K_CUPS)||'null'); } catch(e){ return null; } }
+        function guardarCups(arr) { localStorage.setItem(K_CUPS, JSON.stringify(arr)); }
+
+        function initCups() {
+            let cat = leerCups();
+            if (!cat || !Array.isArray(cat) || !cat.length) guardarCups(CUPS_DEFAULT);
+        }
+
+        function cargarTablaCups() {
+            const arr = leerCups() || [];
+            const tbody = document.getElementById('tablaCups');
+            if (!arr.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#5a7a9a;padding:16px">Sin servicios configurados. Agregue el primero arriba.</td></tr>'; return; }
+            tbody.innerHTML = arr.map(s => {
+                const tipo = {consulta:'Consulta',procedimiento:'Procedimiento',otroServicio:'Otro Servicio'}[s.tipoServicio]||s.tipoServicio;
+                const ambito = {domiciliario:'🏠 Domiciliario',intramural:'🏥 Intramural',hospitalario:'🏨 Hospitalario'}[s.ambito]||s.ambito;
+                const valor = s.valores && typeof s.valores === 'object'
+                    ? Object.keys(s.valores).map(k => `<span style="color:#90e0ef;font-size:11px">${k}: ${fmtCups$(s.valores[k].valorUnitario)}</span>`).join(' · ')
+                    : `<span style="color:#90e0ef">${fmtCups$(s.valorGeneral)}</span>`;
+                return `<tr>
+                    <td style="color:#00b4d8;font-family:monospace">${escapar(s.codigoCUPS||'—')}</td>
+                    <td>${escapar(s.nombre)}</td>
+                    <td>${tipo}</td>
+                    <td>${ambito}</td>
+                    <td>${valor}</td>
+                    <td><span class="badge badge-${s.activo?'admin':'enfermeria'}" style="cursor:pointer" onclick="toggleCupsActivo('${s.id}')">${s.activo?'✅ Activo':'⛔ Inactivo'}</span></td>
+                    <td style="white-space:nowrap">
+                        <button class="btn-action btn-editar" title="Editar" onclick="editarCups('${s.id}')"><i class="fas fa-pen"></i></button>
+                        <button class="btn-action btn-eliminar" title="Eliminar" onclick="eliminarCups('${s.id}')"><i class="fas fa-trash"></i></button>
+                    </td></tr>`;
+            }).join('');
+        }
+
+        function fmtCups$(n) { return '$' + Number(n||0).toLocaleString('es-CO'); }
+
+        let cupsEditando = null;
+
+        function guardarServicioCups() {
+            const codigo = document.getElementById('cupCodigo').value.trim();
+            const nombre = document.getElementById('cupNombre').value.trim();
+            const tipo = document.getElementById('cupTipo').value;
+            const ambito = document.getElementById('cupAmbito').value;
+            const valorGeneral = parseInt(document.getElementById('cupValorGeneral').value) || 0;
+            const finalidad = document.getElementById('cupFinalidad').value;
+            const grupo = document.getElementById('cupGrupo').value;
+            const causa = document.getElementById('cupCausa').value;
+
+            if (!nombre) { mostrarToast('Ingrese el nombre del servicio', 'error'); return; }
+
+            // Collect per-EPS overrides
+            const epsArr = leerEps() || [];
+            const valores = {};
+            epsArr.forEach(e => {
+                const input = document.getElementById('cupEpsVal_' + e.codigo);
+                if (input && input.value) {
+                    valores[e.codigo] = { valorUnitario: parseInt(input.value)||0, conceptoRecaudo:'04', vrCopago:0, vrDescuento:0 };
+                }
+            });
+
+            let arr = leerCups() || [];
+
+            if (cupsEditando) {
+                const idx = arr.findIndex(s => s.id === cupsEditando);
+                if (idx !== -1) {
+                    arr[idx] = { ...arr[idx], codigoCUPS:codigo, nombre, tipoServicio:tipo, ambito, valorGeneral, valores, finalidadTecnologiaSalud:finalidad, grupoServicios:grupo, causaMotivoAtencion:causa };
+                }
+                cupsEditando = null;
+            } else {
+                const id = 'sf_' + Date.now();
+                arr.push({ id, codigoCUPS:codigo, nombre, tipoServicio:tipo, ambito, valorGeneral, valores, finalidadTecnologiaSalud:finalidad, grupoServicios:grupo, causaMotivoAtencion:causa, activo:true });
+            }
+
+            guardarCups(arr);
+            cargarTablaCups();
+            generarCamposEpsCups();
+            limpiarFormCups();
+            mostrarToast('Servicio guardado', 'success');
+        }
+
+        function editarCups(id) {
+            const s = (leerCups()||[]).find(x => x.id === id);
+            if (!s) return;
+            cupsEditando = id;
+            document.getElementById('cupCodigo').value = s.codigoCUPS || '';
+            document.getElementById('cupNombre').value = s.nombre || '';
+            document.getElementById('cupTipo').value = s.tipoServicio || 'consulta';
+            document.getElementById('cupAmbito').value = s.ambito || 'domiciliario';
+            document.getElementById('cupValorGeneral').value = s.valorGeneral || '';
+            document.getElementById('cupFinalidad').value = s.finalidadTecnologiaSalud || '04';
+            document.getElementById('cupGrupo').value = s.grupoServicios || '03';
+            document.getElementById('cupCausa').value = s.causaMotivoAtencion || '02';
+            // Fill per-EPS values
+            setTimeout(() => {
+                if (s.valores && typeof s.valores === 'object') {
+                    Object.keys(s.valores).forEach(k => {
+                        const inp = document.getElementById('cupEpsVal_' + k);
+                        if (inp) inp.value = s.valores[k].valorUnitario || '';
+                    });
+                }
+            }, 200);
+            mostrarToast('Editando servicio: ' + s.nombre, 'info');
+        }
+
+        function eliminarCups(id) {
+            const s = (leerCups()||[]).find(x => x.id === id);
+            if (!s) return;
+            if (!confirm('¿Eliminar el servicio "' + s.nombre + '"?')) return;
+            guardarCups((leerCups()||[]).filter(x => x.id !== id));
+            cargarTablaCups();
+            generarCamposEpsCups();
+            mostrarToast('Servicio eliminado', 'info');
+        }
+
+        function toggleCupsActivo(id) {
+            let arr = leerCups() || [];
+            const idx = arr.findIndex(x => x.id === id);
+            if (idx !== -1) { arr[idx].activo = !arr[idx].activo; guardarCups(arr); cargarTablaCups(); }
+        }
+
+        function limpiarFormCups() {
+            ['cupCodigo','cupNombre','cupValorGeneral'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('cupTipo').value = 'consulta';
+            document.getElementById('cupAmbito').value = 'domiciliario';
+            cupsEditando = null;
+        }
+
+        function generarCamposEpsCups() {
+            const epsArr = (leerEps() || []).filter(e => e.activo);
+            const grid = document.getElementById('cupEpsGrid');
+            if (!grid) return;
+            grid.innerHTML = epsArr.map(e =>
+                `<div class="form-group"><label>${escapar(e.nombre)}</label><input type="number" id="cupEpsVal_${e.codigo}" placeholder="${fmtCups$(0)}" min="0"></div>`
+            ).join('');
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           GESTIÓN DE EPS / ENTIDADES PAGADORAS
+           Clave: nexus_entidades_pagadoras (compartida via nexus_db)
+           ═══════════════════════════════════════════════════════════ */
+        const K_EPS = 'nexus_entidades_pagadoras';
+
+        const EPS_DEFAULT = [
+            { id:'eps_01', codigo:'FOMAG',    nombre:'FOMAG EPS',       regimen:'subsidiado',  nit:'', telefono:'', email:'', notas:'', activo:true },
+            { id:'eps_02', codigo:'COOSALUD', nombre:'COOSALUD EPS',   regimen:'subsidiado',  nit:'', telefono:'', email:'', notas:'', activo:true }
+        ];
+
+        function leerEps() { try { return JSON.parse(localStorage.getItem(K_EPS)||'null'); } catch(e){ return null; } }
+        function guardarEpsArr(arr) { localStorage.setItem(K_EPS, JSON.stringify(arr)); }
+
+        function initEps() {
+            let arr = leerEps();
+            if (!arr || !Array.isArray(arr) || !arr.length) guardarEpsArr(EPS_DEFAULT);
+        }
+
+        function cargarTablaEps() {
+            const arr = leerEps() || [];
+            const tbody = document.getElementById('tablaEps');
+            if (!arr.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#5a7a9a;padding:16px">Sin EPS registradas. Agregue la primera arriba.</td></tr>'; return; }
+            tbody.innerHTML = arr.map(e => {
+                const reg = {subsidiado:'Subsidiado',contributivo:'Contributivo',mixto:'Mixto'}[e.regimen]||e.regimen;
+                return `<tr>
+                    <td style="color:#00b4d8;font-family:monospace">${escapar(e.codigo)}</td>
+                    <td>${escapar(e.nombre)}</td>
+                    <td>${reg}</td>
+                    <td>${escapar(e.nit||'—')}</td>
+                    <td>${escapar(e.telefono||'—')}</td>
+                    <td>${escapar(e.email||'—')}</td>
+                    <td><span class="badge badge-${e.activo?'admin':'enfermeria'}" style="cursor:pointer" onclick="toggleEpsActivo('${e.id}')">${e.activo?'✅ Activo':'⛔ Inactivo'}</span></td>
+                    <td style="white-space:nowrap">
+                        <button class="btn-action btn-editar" title="Editar" onclick="editarEps('${e.id}')"><i class="fas fa-pen"></i></button>
+                        <button class="btn-action btn-eliminar" title="Eliminar" onclick="eliminarEps('${e.id}')"><i class="fas fa-trash"></i></button>
+                    </td></tr>`;
+            }).join('');
+        }
+
+        let epsEditando = null;
+
+        function guardarEps() {
+            const codigo = document.getElementById('epsCodigo').value.trim().toUpperCase();
+            const nombre = document.getElementById('epsNombre').value.trim();
+            const regimen = document.getElementById('epsRegimen').value;
+            const nit = document.getElementById('epsNit').value.trim();
+            const telefono = document.getElementById('epsTelefono').value.trim();
+            const email = document.getElementById('epsEmail').value.trim();
+            const notas = document.getElementById('epsNotas').value.trim();
+
+            if (!codigo) { mostrarToast('Ingrese el código de la EPS', 'error'); return; }
+            if (!nombre) { mostrarToast('Ingrese el nombre de la EPS', 'error'); return; }
+
+            let arr = leerEps() || [];
+
+            if (epsEditando) {
+                const idx = arr.findIndex(e => e.id === epsEditando);
+                if (idx !== -1) {
+                    const oldCodigo = arr[idx].codigo;
+                    arr[idx] = { ...arr[idx], codigo, nombre, regimen, nit, telefono, email, notas };
+                    // If code changed, update references in CUPS
+                    if (oldCodigo !== codigo) {
+                        let cups = leerCups() || [];
+                        cups = cups.map(s => {
+                            if (s.valores && s.valores[oldCodigo]) {
+                                s.valores[codigo] = s.valores[oldCodigo];
+                                delete s.valores[oldCodigo];
+                            }
+                            return s;
+                        });
+                        guardarCups(cups);
+                    }
+                }
+                epsEditando = null;
+            } else {
+                if (arr.some(e => e.codigo === codigo)) { mostrarToast('Ya existe una EPS con ese código', 'error'); return; }
+                const id = 'eps_' + Date.now();
+                arr.push({ id, codigo, nombre, regimen, nit, telefono, email, notas, activo:true });
+            }
+
+            guardarEpsArr(arr);
+            cargarTablaEps();
+            generarCamposEpsCups();
+            limpiarFormEps();
+            mostrarToast('EPS guardada', 'success');
+        }
+
+        function editarEps(id) {
+            const e = (leerEps()||[]).find(x => x.id === id);
+            if (!e) return;
+            epsEditando = id;
+            document.getElementById('epsCodigo').value = e.codigo || '';
+            document.getElementById('epsNombre').value = e.nombre || '';
+            document.getElementById('epsRegimen').value = e.regimen || 'subsidiado';
+            document.getElementById('epsNit').value = e.nit || '';
+            document.getElementById('epsTelefono').value = e.telefono || '';
+            document.getElementById('epsEmail').value = e.email || '';
+            document.getElementById('epsNotas').value = e.notas || '';
+            mostrarToast('Editando EPS: ' + e.nombre, 'info');
+        }
+
+        function eliminarEps(id) {
+            const e = (leerEps()||[]).find(x => x.id === id);
+            if (!e) return;
+            if (!confirm('¿Eliminar la EPS "' + e.nombre + '"?')) return;
+            let arr = leerEps() || [];
+            arr = arr.filter(x => x.id !== id);
+            guardarEpsArr(arr);
+            cargarTablaEps();
+            generarCamposEpsCups();
+            mostrarToast('EPS eliminada', 'info');
+        }
+
+        function toggleEpsActivo(id) {
+            let arr = leerEps() || [];
+            const idx = arr.findIndex(x => x.id === id);
+            if (idx !== -1) { arr[idx].activo = !arr[idx].activo; guardarEpsArr(arr); cargarTablaEps(); generarCamposEpsCups(); }
+        }
+
+        function limpiarFormEps() {
+            ['epsCodigo','epsNombre','epsNit','epsTelefono','epsEmail','epsNotas'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('epsRegimen').value = 'subsidiado';
+            epsEditando = null;
+        }
+
 
         /* ================== MATRIZ VISUAL ================== */
         function construirMatriz() {
@@ -862,6 +1226,8 @@
             localStorage.setItem(PERMISOS_KEY, JSON.stringify(MATRIZ));
             mostrarToast('Matriz de permisos guardada y aplicada al sistema', 'success');
             actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups();
         }
 
         function restaurarMatriz() {
@@ -1055,17 +1421,21 @@
             localStorage.setItem(CITAS_KEY, JSON.stringify(citas));
 
             actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups();
             mostrarToast('Datos de prueba cargados', 'success');
         }
 
         function limpiarTodoDatos() {
             if (!confirm('⚠️ ¿Eliminar TODOS los datos clínicos? Esta acción es irreversible.')) return;
             if (!confirm('¿Está completamente seguro? Se perderán pacientes, citas, historias, evoluciones y notas.')) return;
-            const conservar = [USERS_KEY, PERMISOS_KEY, HOSPITAL_KEY, 'nexus_sesion'];
+            const conservar = [USERS_KEY, PERMISOS_KEY, HOSPITAL_KEY, K_CUPS, K_EPS, 'nexus_sesion'];
             const keysToRemove = [];
             for (let key in localStorage) { if (key.indexOf('nexus_') === 0 && conservar.indexOf(key) === -1) keysToRemove.push(key); }
             keysToRemove.forEach(k => localStorage.removeItem(k));
-            actualizarInfoSistema(); cargarUsuarios(); cargarHospital();
+            actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups(); cargarUsuarios(); cargarHospital();
             mostrarToast('Datos clínicos eliminados (usuarios, permisos y datos de la IPS conservados)', 'info');
         }
 

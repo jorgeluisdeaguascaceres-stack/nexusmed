@@ -257,7 +257,7 @@
                 <div class="form-title"><i class="fas fa-plus-circle"></i> Generar Nueva Factura desde Conciliación</div>
                 <div class="form-subtitle"><i class="fas fa-calendar-alt"></i> Período de Facturación</div>
                 <div class="form-grid">
-                    <div class="form-group"><label>EPS</label><select id="nuevaEps" onchange="alCambiarEps()"><option value="">Seleccione EPS...</option><option value="FOMAG">FOMAG EPS</option><option value="COOSALUD">COOSALUD EPS</option></select></div>
+                    <div class="form-group"><label>EPS</label><select id="nuevaEps" onchange="alCambiarEps()"><option value="">Seleccione EPS...</option></select></div>
                     <div class="form-group"><label>Mes</label><select id="nuevaMes"><option value="">Mes...</option><option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option><option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option><option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></div>
                     <div class="form-group"><label>Año</label><select id="nuevaAnio"><option value="2026">2026</option><option value="2025">2025</option></select></div>
                     <div class="form-group" id="grpQuincena"><label>Quincena</label><select id="nuevaQuincena"><option value="completa">Mes completo</option><option value="01">01 (día 1 al 15)</option><option value="20">20 (día 16 al final)</option></select></div>
@@ -478,6 +478,34 @@
             var c = leer(K_CONTADOR);
             if (c === null || c === undefined) guardar(K_CONTADOR, 0);
         }
+        /* ═══════ CARGA DINÁMICA DE EPS DESDE CONFIGURACIÓN ═══════ */
+        var K_EPS = 'nexus_entidades_pagadoras';
+        function leerEps() { try { return JSON.parse(localStorage.getItem(K_EPS)||'null'); } catch(e){ return null; } }
+
+        function poblarSelectEps() {
+            var sel = document.getElementById('nuevaEps');
+            if (!sel) return;
+            var arr = (leerEps() || []).filter(function(e){ return e.activo; });
+            sel.innerHTML = '<option value="">Seleccione EPS...</option>' + arr.map(function(e){
+                return '<option value="' + e.codigo + '">' + e.nombre + '</option>';
+            }).join('');
+        }
+
+        // Also fix the EPS default to FOMAG (was FOMAG in reference data)
+        var EPS_DEFAULT = [
+            { id:'eps_01', codigo:'FOMAG',    nombre:'FOMAG EPS',       regimen:'subsidiado',  nit:'', telefono:'', email:'', notas:'', activo:true },
+            { id:'eps_02', codigo:'COOSALUD', nombre:'COOSALUD EPS',   regimen:'subsidiado',  nit:'', telefono:'', email:'', notas:'', activo:true }
+        ];
+
+        function initEpsFact() {
+            var arr = leerEps();
+            if (!arr || !Array.isArray(arr) || !arr.length) {
+                localStorage.setItem(K_EPS, JSON.stringify(EPS_DEFAULT));
+            }
+            poblarSelectEps();
+        }
+
+
         function siguienteNum() {
             var c = (leer(K_CONTADOR) || 0) + 1;
             guardar(K_CONTADOR, c);
@@ -782,7 +810,7 @@
                     tipoDocumento: p.tipoDocumento || 'CC',
                     numeroDocumento: p.documento || '',
                     nombrePaciente: p.nombre || p.nombres || '',
-                    tipoUsuario: eps==='FOMAG'?'01':eps==='COOSALUD'?'04':'01',
+                    tipoUsuario: (function(){ var eArr = leerEps()||[]; var e = eArr.find(function(x){return x.codigo===eps;}); return e && e.regimen==='subsidiado'?'01':'04'; })(),
                     fechaNacimiento: p.fechaNacimiento || p.fecha_nacimiento || '',
                     codSexo: (p.genero||p.sexo||'')==='Masculino'?'M':(p.genero||p.sexo||'')==='Femenino'?'F':'M',
                     codPaisResidencia: '170',
@@ -809,7 +837,7 @@
                 fechaEmision: hoy(),
                 estado: 'borrador',
                 eps: eps,
-                entidadPagadora: { codigoEPS: eps==='FOMAG'?'EPS017':'EPS019', nombre: eps==='FOMAG'?'FOMAG EPS':'COOSALUD EPS' },
+                entidadPagadora: (function(){ var eArr = leerEps()||[]; var e = eArr.find(function(x){return x.codigo===eps;}); return e ? {codigoEPS:e.codigo, nombre:e.nombre} : {codigoEPS:eps, nombre:eps}; })(),
                 periodo: { mes: mes, anio: anio, fechaInicio: fechaInicio, fechaFin: fechaFin, quincena: quincena },
                 valores: { subtotal: subtotal, copago: 0, descuento: 0, iva: 0, totalFactura: subtotal },
                 items: items,
@@ -1236,6 +1264,7 @@
         cargarSesion();
         initCatalogo();
         initContador();
+        initEpsFact();
         renderFacturas();
         renderCatalogo();
         cargarPrestador();
