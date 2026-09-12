@@ -20,7 +20,8 @@
         'nexus_epicrisis',
         'nexus_contador_hc', 'nexus_contador_admision', 'nexus_contador_evo',
         'nexus_contador_ne', 'nexus_contador_te', 'nexus_contador_epi',
-        'nexus_conciliacion_jobs', 'nexus_gestion_documental_lotes', 'nexus_evoluciones_generadas'
+        'nexus_servicios_facturacion', 'nexus_entidades_pagadoras',
+        'nexus_facturas', 'nexus_rips_json', 'nexus_contador_facturas'
     ];
 
     /* Claves que NUNCA se comparten (son de cada navegador) */
@@ -366,7 +367,10 @@
             nexus_usuarios: 'Usuarios', nexus_permisos: 'Permisos', nexus_hospital: 'Datos del hospital',
             nexus_pacientes: 'Pacientes', nexus_citas: 'Citas', nexus_historias_clinicas: 'Historias clinicas',
             nexus_evoluciones: 'Evoluciones', nexus_notas_enfermeria: 'Notas de enfermeria',
-            nexus_terapias: 'Terapias', nexus_epicrisis: 'Epicrisis'
+            nexus_terapias: 'Terapias', nexus_epicrisis: 'Epicrisis',
+            nexus_servicios_facturacion: 'Cat\u00e1logo servicios', nexus_entidades_pagadoras: 'Entidades pagadoras',
+            nexus_facturas: 'Facturas', nexus_rips_json: 'RIPS JSON',
+            nexus_contador_facturas: 'Contador facturas'
         };
         return n[clave] || clave;
     }
@@ -449,10 +453,8 @@
         usuarios: usuarios,
         guardarUsuarios: guardarUsuarios,
 
-        /* Todavia no hay ningun usuario creado en la nube */
         sinUsuarios: function () { return usuarios().length === 0; },
 
-        /* Comprueba credenciales contra la base compartida */
         verificar: function (usuario, clave) {
             var lista = usuarios();
             var u = lista.filter(function (x) {
@@ -461,7 +463,6 @@
             if (!u) return null;
             var esperado = u.clave || u.hash || '';
             if (esperado && esperado === resumen(u.usuario, clave)) return u;
-            /* Compatibilidad con datos antiguos guardados en texto plano */
             if (!esperado && (u.password === clave || u.contrasena === clave)) {
                 u.clave = resumen(u.usuario, clave);
                 delete u.password; delete u.contrasena;
@@ -504,7 +505,6 @@
             return true;
         },
 
-        /* Espera a que termine el envio de datos a la nube */
         guardado: function () { return enviarPendientes(); }
     };
 
@@ -519,7 +519,6 @@
         especialista: 'Especialista'
     };
 
-    /* Convierte cualquier forma de escribir el rol al identificador oficial */
     function normalizarRol(rol) {
         var r = String(rol === undefined || rol === null ? '' : rol)
             .toLowerCase().trim().replace(/\s+/g, '_');
@@ -528,12 +527,12 @@
         if (r.indexOf('admin') !== -1 || r.indexOf('gerente') !== -1) return 'admin';
         if (r.indexOf('recep') !== -1 || r.indexOf('secretar') !== -1 || r.indexOf('facturac') !== -1) return 'recepcion';
         if (r.indexOf('especialista') !== -1 || r.indexOf('especialidad') !== -1) return 'especialista';
-        if (r.indexOf('medic') !== -1 || r.indexOf('m\u00e9dic') !== -1 || r.indexOf('doctor') !== -1 ||
-            r.indexOf('cirujan') !== -1 || r.indexOf('odontolog') !== -1 || r.indexOf('odont\u00f3log') !== -1) return 'medico_general';
+        if (r.indexOf('medic') !== -1 || r.indexOf('doctor') !== -1 ||
+            r.indexOf('cirujan') !== -1 || r.indexOf('odontolog') !== -1) return 'medico_general';
         if (r.indexOf('enferm') !== -1 || r.indexOf('auxiliar') !== -1 || r.indexOf('jefe') !== -1) return 'enfermeria';
         if (r.indexOf('terap') !== -1 || r.indexOf('fisio') !== -1 || r.indexOf('kinesiolog') !== -1 ||
-            r.indexOf('fonoaudiolog') !== -1 || r.indexOf('ocupacional') !== -1 || r.indexOf('lenguaje') !== -1 ||
-            r.indexOf('psicolog') !== -1 || r.indexOf('psic\u00f3log') !== -1 || r.indexOf('nutricion') !== -1) return 'terapia';
+            r.indexOf('fonoaudiolog') !== -1 || r.indexOf('ocupacional') !== -1 ||
+            r.indexOf('psicolog') !== -1 || r.indexOf('nutricion') !== -1) return 'terapia';
         return '';
     }
 
@@ -542,8 +541,6 @@
         return NOMBRE_ROL[r] || String(rol === undefined || rol === null ? '' : rol);
     }
 
-    /* Un administrador aparece en las listas clinicas solo si tiene
-       registro profesional o una especialidad medica declarada */
     function adminEsProfesional(u) {
         var reg = String(u.registro || '').trim();
         var esp = String(u.especialidad || '').trim().toLowerCase();
@@ -558,7 +555,6 @@
         });
     }
 
-    /* Devuelve los usuarios cuyos roles estan en la lista pedida */
     function profesionales(roles) {
         return ordenarPorNombre(usuarios().filter(function (u) {
             var r = normalizarRol(u.rol);
@@ -578,7 +574,6 @@
         clinicos: function () {
             return profesionales(['medico_general', 'especialista', 'enfermeria', 'terapia', 'admin_clinico']);
         },
-        /* Texto visible del profesional: nombre + especialidad */
         etiquetaPersona: function (u) {
             var n = String(u.nombre || u.usuario || '').trim();
             var e = String(u.especialidad || '').trim();

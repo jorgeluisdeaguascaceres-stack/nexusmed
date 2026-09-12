@@ -32,10 +32,7 @@
         epicrisis: 'Epicrisis',
         citas: 'Citas',
         egresados: 'Egresados',
-        conciliacion: 'Conciliación',
-        gestion_documental: 'Gestión Documental',
-        generador_evoluciones: 'Generador de Evoluciones',
-        renombrar: 'Renombrar Archivos'
+        facturacion: 'Facturación'
     };
 
     var T = ['C', 'V', 'E', 'B'];
@@ -55,10 +52,7 @@
             epicrisis:        { admin: T, recepcion: SV,  medico_general: CVE, enfermeria: SV,  terapia: SV,  especialista: CVE },
             citas:            { admin: T, recepcion: CVE, medico_general: CVE, enfermeria: CVE, terapia: CVE, especialista: CVE },
             egresados:        { admin: T, recepcion: CVE, medico_general: CVE, enfermeria: CVE, terapia: CVE, especialista: CVE },
-            conciliacion:          { admin: T, recepcion: SV,  medico_general: CVE, enfermeria: NO,  terapia: NO,  especialista: CVE },
-            gestion_documental:    { admin: T, recepcion: CVE, medico_general: NO,  enfermeria: NO,  terapia: NO,  especialista: NO },
-            generador_evoluciones: { admin: T, recepcion: NO,  medico_general: CVE, enfermeria: NO,  terapia: CVE, especialista: CVE },
-            renombrar:              { admin: T, recepcion: CVE, medico_general: CVE, enfermeria: CVE, terapia: CVE, especialista: CVE }
+            facturacion:      { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: NO,  terapia: SV,  especialista: SV }
         };
     }
 
@@ -278,10 +272,7 @@
         'epicrisis.html': 'epicrisis',
         'citas.html': 'citas',
         'egresados.html': 'egresados',
-        'conciliacion.html': 'conciliacion',
-        'gestion_documental.html': 'gestion_documental',
-        'generador_evoluciones.html': 'generador_evoluciones',
-        'renombrar.html': 'renombrar'
+        'facturacion.html': 'facturacion'
     };
 
     NX.filtrarMenu = function () {
