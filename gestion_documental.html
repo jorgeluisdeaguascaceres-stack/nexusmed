@@ -1542,6 +1542,13 @@ function pintarCajas(){
     btnTodo.innerHTML='<i class="fas fa-save"></i> Procesar y guardar todo';
     btnTodo.className='nx-btn go';
   }
+
+  // Actualizar banner del lote activo
+  var el=document.getElementById('activo');
+  if(idLote&&el.classList.contains('on')){
+    var guardados=SIGLAS.filter(function(s){return cola[s]&&cola[s].length&&cola[s].every(function(x){return x.saved;});}).length;
+    el.innerHTML='<b>Continuando lote:</b> '+carpeta+' ('+guardados+' de '+SIGLAS.length+' documentos ya guardados)';
+  }
 }
 
 /* ===== Tomar archivos ===== */
@@ -1662,13 +1669,17 @@ async function procesar(sigla){
     await IDB.put('files',{lid_sigla:idLote+'_'+sigla,blob:blob,nombre:nombre,sigla:sigla,lid:idLote});
     lotesGuardados=await IDB.getAll('lotes');
     msg('msgP','\u2705 '+sigla+': '+nombre+' procesado ('+PDFMerge.contarPaginas(merged)+' p\u00e1g.)','ok');
-    delete cola[sigla];
+    // Reemplazar la cola con el wrapper saved (no borrar, para que se vea "Guardado")
+    cola[sigla]=[{
+      name:nombre,
+      size:blob.size,
+      saved:true,
+      blob:blob,
+      arrayBuffer:function(){return this.blob.arrayBuffer();}
+    }];
     pintarCajas();
   }catch(e){
     msg('msgP','Error en '+sigla+': '+e.message,'err');
-  }finally{
-    btns.forEach(function(b){b.disabled=false;b.innerHTML='<i class="fas fa-cog"></i> Procesar';});
-    pintarCajas();
   }
 }
 
@@ -1695,12 +1706,19 @@ async function procesarTodo(){
       var nombre=nombreOficial(s);
       await IDB.put('files',{lid_sigla:idLote+'_'+s,blob:blob,nombre:nombre,sigla:s,lid:idLote});
       ok++;
-      delete cola[s];
+      // Reemplazar la cola con el wrapper saved (no borrar)
+      cola[s]=[{
+        name:nombre,
+        size:blob.size,
+        saved:true,
+        blob:blob,
+        arrayBuffer:function(){return this.blob.arrayBuffer();}
+      }];
     }catch(e){err++;errores.push(s+': '+e.message);}
   }
   if(ok){
-    var procesadas=SIGLAS.filter(function(s){var f=cola[s];return !f||!f.length;});
-    var loteData={id:idLote,nombre:carpeta,nit:nit,fecha:new Date().toISOString(),total:ok,siglas:procesadas,separador:sep};
+    var procesadas=SIGLAS.filter(function(s){var f=cola[s];return f&&f.length&&f.every(function(x){return x.saved;});});
+    var loteData={id:idLote,nombre:carpeta,nit:nit,fecha:new Date().toISOString(),total:procesadas.length,siglas:procesadas,separador:sep};
     await IDB.put('lotes',loteData);
     lotesGuardados=await IDB.getAll('lotes');
     pintarCajas();
