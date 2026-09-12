@@ -153,6 +153,9 @@ body.noscroll{overflow:hidden}
 .fitem.saved{border-color:#1f5c3c;background:#0c1f15}
 .fitem.saved .fname{color:#7ee2a8}
 .zone.has-saved{border-style:solid;border-color:#1f5c3c;color:#7ee2a8;background:#0c1f15}
+.saved-tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;padding:2px 7px;border-radius:5px;background:#0f2a1c;color:#7ee2a8;border:1px solid #1f5c3c;font-weight:600;white-space:nowrap}
+.saved-tag .fa-check-circle{font-size:9px}
+.box.done{border-color:#1f5c3c;background:linear-gradient(135deg,#0c1f15,#0f2a1c)}
 
 </style>
 </head>
@@ -1388,26 +1391,29 @@ function pintarCajas(){
   DOCS.forEach(function(doc){
     var files=cola[doc.s]||[];
     var total=files.length;
+    var savedCount=files.filter(function(f){return f.saved;}).length;
+    var newCount=total-savedCount;
+    var hasSaved=savedCount>0;
+    var allSaved=total>0&&savedCount===total;
+
     var div=document.createElement('div');
-    var hasSaved=files.some(function(f){return f.saved;});
     div.className='box'+(total?' hot':'')+(hasSaved?' done':'');
 
+    /* --- Cabecera: ícono PDF + sigla + descripción --- */
     var head=document.createElement('div');
     head.className='bhead';
     head.innerHTML='<div class="ico">PDF</div>'+
       '<div><div class="sigla">'+doc.s+'</div><div class="desc">'+doc.d+'</div></div>';
     div.appendChild(head);
 
+    /* --- Zona de arrastre --- */
     var zone=document.createElement('div');
-    var hasSaved=files.some(function(f){return f.saved;});
     zone.className='zone'+(total?' has':'')+(hasSaved?' has-saved':'');
-    var savedCount=files.filter(function(f){return f.saved;}).length;
-    var newCount=total-savedCount;
-    if(savedCount&&!newCount){
+    if(allSaved){
       zone.innerHTML='<i class="fas fa-check-circle" style="font-size:22px;margin-bottom:4px;color:#7ee2a8"></i><br>'+
         savedCount+' archivo'+(savedCount>1?'s':'')+' guardado'+(savedCount>1?'s':'')+'<br>'+
         '<span style="font-size:11px">Arrastra PDF para añadir o reemplazar</span>';
-    }else if(savedCount&&newCount){
+    }else if(hasSaved&&newCount){
       zone.innerHTML='<i class="fas fa-layer-group" style="font-size:22px;margin-bottom:4px;color:#7ee2a8"></i><br>'+
         savedCount+' guardado'+(savedCount>1?'s':'')+' + '+newCount+' nuevo'+(newCount>1?'s':'')+'<br>'+
         '<span style="font-size:11px">Arrastra más PDF o procesa</span>';
@@ -1422,6 +1428,7 @@ function pintarCajas(){
     zone.ondrop=function(e){e.preventDefault();zone.classList.remove('dragover');tomarDrop(doc.s,e);};
     div.appendChild(zone);
 
+    /* --- Nombre del archivo destino --- */
     if(carpeta&&nit){
       var tgt=document.createElement('div');
       tgt.className='target';
@@ -1429,6 +1436,7 @@ function pintarCajas(){
       div.appendChild(tgt);
     }
 
+    /* --- Lista de archivos con badges --- */
     if(total){
       var flist=document.createElement('div');
       flist.className='flist';
@@ -1438,7 +1446,7 @@ function pintarCajas(){
         item.className='fitem'+(f.saved?' saved':'');
         item.innerHTML='<span class="fnum">'+(i+1)+'</span>'+
           '<span class="fname">'+f.name+'</span>'+
-          (f.saved?'<span class="modal-badge">💾 Guardado</span>':'')+
+          (f.saved?'<span class="saved-tag"><i class="fas fa-check-circle"></i> Guardado</span>':'')+
           '<span class="fsize">'+fmtSize(f.size)+'</span>'+
           (i>0?'<button class="fbtn" data-dir="-1" data-sigla="'+doc.s+'" data-i="'+i+'" title="Subir">\u2191</button>':'')+
           (i<total-1?'<button class="fbtn" data-dir="1" data-sigla="'+doc.s+'" data-i="'+i+'" title="Bajar">\u2193</button>':'')+
@@ -1452,25 +1460,46 @@ function pintarCajas(){
       div.appendChild(count);
     }
 
+    /* --- Fila de estado + botones --- */
     var row=document.createElement('div');
     row.className='brow';
     if(total){
-      var savedCount=files.filter(function(f){return f.saved;}).length;
-      var newCount=total-savedCount;
       var statusTxt,statusCls;
-      if(savedCount&&!newCount){
-        statusTxt='<i class="fas fa-check-circle"></i> 💾 Documento guardado';
+      if(allSaved){
+        statusTxt='<i class="fas fa-check-circle"></i> Documento guardado';
         statusCls='state ok';
-      }else if(savedCount&&newCount){
+      }else if(hasSaved&&newCount){
         statusTxt='<i class="fas fa-layer-group"></i> '+savedCount+' guardado + '+newCount+' nuevo'+(newCount>1?'s':'')+' — listo para procesar';
         statusCls='state ok';
       }else{
-        statusTxt='<i class="fas fa-check-circle"></i> Listo para procesar';
-        statusCls='state ok';
+        statusTxt='<i class="fas fa-file-alt"></i> Listo para procesar';
+        statusCls='state';
       }
-      row.innerHTML='<span class="'+statusCls+'">'+statusTxt+'</span>'+
-        '<div class="rowacts"><button class="nx-btn mini" data-accion="ver" data-sigla="'+doc.s+'" title="Vista previa"><i class="fas fa-eye"></i> Ver</button>'+
-        '<button class="nx-btn mini ghost" data-accion="procesar" data-sigla="'+doc.s+'" title="Procesar"><i class="fas fa-cog"></i> Procesar</button></div>';
+      var btnVer=document.createElement('button');
+      btnVer.className='nx-btn mini';
+      btnVer.dataset.accion='ver';
+      btnVer.dataset.sigla=doc.s;
+      btnVer.title='Ver / Imprimir documento';
+      btnVer.innerHTML='<i class="fas fa-eye"></i> Ver / Imprimir';
+
+      var btnPro=document.createElement('button');
+      btnPro.className='nx-btn mini ghost';
+      btnPro.dataset.accion='procesar';
+      btnPro.dataset.sigla=doc.s;
+      btnPro.title='Procesar';
+      if(allSaved){
+        btnPro.disabled=true;
+        btnPro.innerHTML='<i class="fas fa-check"></i> Guardado';
+      }else{
+        btnPro.innerHTML='<i class="fas fa-cog"></i> Procesar';
+      }
+
+      row.innerHTML='<span class="'+statusCls+'">'+statusTxt+'</span>';
+      var acts=document.createElement('div');
+      acts.className='rowacts';
+      acts.appendChild(btnVer);
+      acts.appendChild(btnPro);
+      row.appendChild(acts);
     }else{
       row.innerHTML='<span class="state">Sin archivos</span>';
     }
@@ -1478,6 +1507,7 @@ function pintarCajas(){
     box.appendChild(div);
   });
 
+  /* --- Eventos de botones dentro de las tarjetas --- */
   box.querySelectorAll('.fbtn').forEach(function(btn){
     btn.onclick=function(){
       var s=btn.dataset.sigla, idx=parseInt(btn.dataset.i);
@@ -1492,9 +1522,26 @@ function pintarCajas(){
     b.onclick=function(){procesar(b.dataset.sigla);};
   });
 
-  var hay=SIGLAS.some(function(s){return cola[s]&&cola[s].length;});
-  document.getElementById('btnTodo').disabled=!hay;
-  document.getElementById('btnZipA').disabled=!hay;
+  /* --- Estado de Sección 3: desactivar si no hay nada nuevo que procesar --- */
+  var hayNuevos=SIGLAS.some(function(s){
+    var f=cola[s];
+    return f&&f.length&&f.some(function(x){return !x.saved;});
+  });
+  var hayAlgo=SIGLAS.some(function(s){return cola[s]&&cola[s].length;});
+  var btnTodo=document.getElementById('btnTodo');
+  var btnZipA=document.getElementById('btnZipA');
+  btnTodo.disabled=!hayNuevos;
+  btnZipA.disabled=!hayAlgo;
+  if(!hayNuevos&&hayAlgo){
+    btnTodo.innerHTML='<i class="fas fa-check-circle"></i> Todo guardado';
+    btnTodo.className='nx-btn go';
+  }else if(hayNuevos){
+    btnTodo.innerHTML='<i class="fas fa-save"></i> Procesar y guardar todo';
+    btnTodo.className='nx-btn go';
+  }else{
+    btnTodo.innerHTML='<i class="fas fa-save"></i> Procesar y guardar todo';
+    btnTodo.className='nx-btn go';
+  }
 }
 
 /* ===== Tomar archivos ===== */
@@ -1621,6 +1668,7 @@ async function procesar(sigla){
     msg('msgP','Error en '+sigla+': '+e.message,'err');
   }finally{
     btns.forEach(function(b){b.disabled=false;b.innerHTML='<i class="fas fa-cog"></i> Procesar';});
+    pintarCajas();
   }
 }
 
@@ -1657,7 +1705,8 @@ async function procesarTodo(){
     lotesGuardados=await IDB.getAll('lotes');
     pintarCajas();
   }
-  btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Procesar y guardar todo';
+  // pintarCajas already handles btnTodo text/state; only fix if no ok
+  if(!ok) btn.disabled=false;
   if(err)msg('msgP','\u26a0 '+ok+'/'+total+' procesados. Errores: '+errores.join('; '),'err');
   else if(ok)msg('msgP','\u2705 '+ok+' documentos procesados y guardados','ok');
   else msg('msgP','No hab\u00eda documentos para procesar','');
