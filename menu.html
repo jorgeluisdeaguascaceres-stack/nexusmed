@@ -7,356 +7,213 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a1628;
-            color: #e0e0e0;
-            min-height: 100vh;
+            font-family:'Inter',sans-serif;
+            background:#0a1628;
+            color:#e0e0e0;
+            min-height:100vh;
         }
 
         /* ===== HEADER ===== */
         .header {
-            background: linear-gradient(135deg, #0d2137, #1a3a5c);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #00b4d8;
-            box-shadow: 0 2px 15px rgba(0, 180, 216, 0.2);
+            background:linear-gradient(135deg,#0d2137,#1a3a5c);
+            padding:15px 30px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            border-bottom:2px solid #00b4d8;
+            box-shadow:0 2px 15px rgba(0,180,216,.2);
         }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .brand-icon {
-            width: 32px;
-            height: 32px;
-        }
-
-        .brand-icon svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        .brand-name {
-            font-size: 24px;
-            font-weight: 800;
-            color: #00b4d8;
-            letter-spacing: 3px;
-        }
-
-        .brand-name span {
-            color: #90e0ef;
-            font-weight: 300;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
+        .header-left { display:flex; align-items:center; gap:12px; }
+        .brand-icon { width:32px; height:32px; }
+        .brand-icon svg { width:100%; height:100%; }
+        .brand-name { font-size:24px; font-weight:800; color:#00b4d8; letter-spacing:3px; }
+        .brand-name span { color:#90e0ef; font-weight:300; }
+        .header-right { display:flex; align-items:center; gap:20px; }
+        .user-info { display:flex; align-items:center; gap:10px; }
         .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #00b4d8, #0077b6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
-            color: #fff;
+            width:36px; height:36px; border-radius:50%;
+            background:linear-gradient(135deg,#00b4d8,#0077b6);
+            display:flex; align-items:center; justify-content:center;
+            font-size:14px; font-weight:700; color:#fff;
         }
-
-        .user-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .user-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #e0e0e0;
-        }
-
-        .user-role {
-            font-size: 11px;
-            color: #5a7a9a;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
+        .user-details { display:flex; flex-direction:column; }
+        .user-name { font-size:13px; font-weight:600; color:#e0e0e0; }
+        .user-role { font-size:11px; color:#5a7a9a; text-transform:uppercase; letter-spacing:1px; }
         .btn-cerrar-sesion {
-            background-color: transparent;
-            color: #ff3860;
-            border: 1px solid #ff3860;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: all 0.3s;
+            background:transparent; color:#ff3860; border:1px solid #ff3860;
+            padding:8px 16px; border-radius:8px; cursor:pointer;
+            font-size:12px; font-weight:600; transition:all .3s;
         }
-
-        .btn-cerrar-sesion:hover {
-            background-color: #ff3860;
-            color: #fff;
-        }
+        .btn-cerrar-sesion:hover { background:#ff3860; color:#fff; }
 
         /* ===== BARRA DE NAVEGACIÓN ===== */
         .nav-bar {
-            background: #0d2137;
-            padding: 8px 30px;
-            display: flex;
-            gap: 5px;
-            border-bottom: 1px solid #1a3a5c;
-            flex-wrap: wrap;
+            background:#0d2137; padding:8px 30px;
+            display:flex; gap:5px;
+            border-bottom:1px solid #1a3a5c; flex-wrap:wrap;
         }
-
         .nav-item {
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            color: #5a7a9a;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            padding:8px 16px; border-radius:6px; font-size:13px;
+            color:#5a7a9a; cursor:pointer; transition:all .3s;
+            text-decoration:none; display:flex; align-items:center; gap:6px;
         }
-
-        .nav-item:hover {
-            color: #00b4d8;
-            background-color: rgba(0, 180, 216, 0.1);
-        }
-
-        .nav-item.active {
-            color: #00b4d8;
-            background-color: rgba(0, 180, 216, 0.15);
-            border: 1px solid rgba(0, 180, 216, 0.3);
-        }
+        .nav-item:hover { color:#00b4d8; background:rgba(0,180,216,.1); }
+        .nav-item.active { color:#00b4d8; background:rgba(0,180,216,.15); border:1px solid rgba(0,180,216,.3); }
 
         /* ===== CONTENIDO PRINCIPAL ===== */
-        .main-container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
+        .main-container { max-width:1280px; margin:30px auto; padding:0 24px; }
 
-        .welcome-section {
-            text-align: center;
-            margin-bottom: 35px;
-        }
+        .welcome-section { text-align:center; margin-bottom:32px; }
+        .welcome-title { font-size:28px; font-weight:800; color:#00b4d8; margin-bottom:8px; }
+        .welcome-subtitle { font-size:14px; color:#7b9ab8; }
 
-        .welcome-title {
-            font-size: 28px;
-            font-weight: 800;
-            color: #00b4d8;
-            margin-bottom: 8px;
+        /* ===== RESUMEN RÁPIDO ===== */
+        .summary-section {
+            display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+            gap:14px; margin-bottom:36px;
         }
+        .summary-card {
+            background:linear-gradient(135deg,#0d2137,#122a45);
+            border:1px solid #1a3a5c; border-radius:12px;
+            padding:18px; display:flex; align-items:center; gap:14px;
+        }
+        .summary-icon {
+            width:48px; height:48px; border-radius:12px;
+            display:flex; align-items:center; justify-content:center; font-size:22px;
+        }
+        .summary-icon.cyan  { background:rgba(0,180,216,.15); }
+        .summary-icon.green { background:rgba(72,199,142,.15); }
+        .summary-icon.yellow{ background:rgba(255,183,3,.15); }
+        .summary-icon.red   { background:rgba(255,56,96,.15); }
+        .summary-data .summary-number { font-size:26px; font-weight:800; color:#00b4d8; }
+        .summary-data .summary-label { font-size:11px; color:#7b9ab8; text-transform:uppercase; letter-spacing:1px; }
 
-        .welcome-subtitle {
-            font-size: 14px;
-            color: #5a7a9a;
+        /* ===== BLOQUES DE SECCIÓN ===== */
+        .block-section {
+            margin-bottom:28px;
+        }
+        .block-header {
+            display:flex; align-items:center; gap:12px;
+            margin-bottom:18px; padding-bottom:10px;
+            border-bottom:1px solid #1a3a5c;
+        }
+        .block-label {
+            font-size:11px; font-weight:700; letter-spacing:2px;
+            text-transform:uppercase; padding:4px 14px;
+            border-radius:6px; line-height:1;
+        }
+        .block-label-activo   { background:rgba(0,180,216,.15); color:#00b4d8; border:1px solid rgba(0,180,216,.3); }
+        .block-label-clinico  { background:rgba(114,221,167,.12); color:#72dda7; border:1px solid rgba(114,221,167,.25); }
+        .block-label-nuevo    { background:rgba(255,183,3,.12); color:#ffb703; border:1px solid rgba(255,183,3,.25); }
+        .block-label-admin    { background:rgba(177,147,255,.12); color:#b193ff; border:1px solid rgba(177,147,255,.25); }
+
+        .block-title {
+            font-size:17px; font-weight:700; color:#c8d6e5;
+        }
+        .block-count {
+            font-size:12px; color:#5a7a9a; margin-left:auto;
         }
 
         /* ===== TARJETAS DE MÓDULOS ===== */
         .modules-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+            gap:18px;
         }
+        /* Alinear 3 cols para bloque de 3, forzando simetría */
+        .modules-grid.cols-3 { grid-template-columns:repeat(3,1fr); }
+        .modules-grid.cols-5 { grid-template-columns:repeat(5,1fr); }
+        .modules-grid.cols-3-mid { grid-template-columns:repeat(3,1fr); }
 
         .module-card {
-            background: linear-gradient(135deg, #0d2137, #122a45);
-            border: 1px solid #1a3a5c;
-            border-radius: 16px;
-            padding: 25px;
-            cursor: pointer;
-            transition: all 0.4s;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+            background:linear-gradient(135deg,#0d2137,#122a45);
+            border:1px solid #1a3a5c;
+            border-radius:14px;
+            padding:24px 20px 20px;
+            cursor:pointer; transition:all .4s;
+            text-align:center; position:relative; overflow:hidden;
+            display:flex; flex-direction:column; align-items:center;
+            min-height:180px;
         }
-
         .module-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(0, 180, 216, 0.05), transparent);
-            opacity: 0;
-            transition: opacity 0.4s;
+            content:''; position:absolute; top:0; left:0;
+            width:100%; height:100%;
+            background:linear-gradient(135deg,rgba(0,180,216,.06),transparent);
+            opacity:0; transition:opacity .4s;
         }
-
         .module-card:hover {
-            transform: translateY(-5px);
-            border-color: #00b4d8;
-            box-shadow: 0 8px 30px rgba(0, 180, 216, 0.2);
+            transform:translateY(-4px);
+            border-color:#00b4d8;
+            box-shadow:0 8px 28px rgba(0,180,216,.18);
         }
+        .module-card:hover::before { opacity:1; }
 
-        .module-card:hover::before {
-            opacity: 1;
+        .module-badge {
+            position:absolute; top:10px; right:10px;
+            font-size:9px; font-weight:700;
+            padding:3px 9px; border-radius:8px;
+            text-transform:uppercase; letter-spacing:1.5px;
         }
+        .badge-activo  { background:rgba(0,180,216,.15); color:#00b4d8; border:1px solid rgba(0,180,216,.25); }
+        .badge-clinico { background:rgba(114,221,167,.12); color:#72dda7; border:1px solid rgba(114,221,167,.2); }
+        .badge-nuevo   { background:rgba(255,183,3,.12); color:#ffb703; border:1px solid rgba(255,183,3,.2); }
+        .badge-admin   { background:rgba(177,147,255,.12); color:#b193ff; border:1px solid rgba(177,147,255,.2); }
 
         .module-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-            display: block;
+            font-size:40px; margin-bottom:12px; display:block;
+            filter:drop-shadow(0 2px 6px rgba(0,180,216,.2));
         }
-
         .module-name {
-            font-size: 16px;
-            font-weight: 700;
-            color: #e0e0e0;
-            margin-bottom: 6px;
+            font-size:14px; font-weight:700; color:#e8edf2;
+            margin-bottom:8px; line-height:1.2;
         }
-
         .module-desc {
-            font-size: 12px;
-            color: #5a7a9a;
-            line-height: 1.4;
-        }
-
-        .module-card .module-badge {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: rgba(0, 180, 216, 0.15);
-            color: #00b4d8;
-            font-size: 10px;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* ===== PANEL DE RESUMEN ===== */
-        .summary-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .summary-card {
-            background: linear-gradient(135deg, #0d2137, #122a45);
-            border: 1px solid #1a3a5c;
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .summary-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .summary-icon.cyan { background: rgba(0, 180, 216, 0.15); }
-        .summary-icon.green { background: rgba(72, 199, 142, 0.15); }
-        .summary-icon.yellow { background: rgba(255, 183, 3, 0.15); }
-        .summary-icon.red { background: rgba(255, 56, 96, 0.15); }
-
-        .summary-data .summary-number {
-            font-size: 28px;
-            font-weight: 800;
-            color: #00b4d8;
-        }
-
-        .summary-data .summary-label {
-            font-size: 12px;
-            color: #5a7a9a;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size:11.5px; color:#94b3cc; line-height:1.5;
+            flex-grow:1;
         }
 
         /* ===== TOAST ===== */
         .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            position:fixed; top:20px; right:20px; z-index:2000;
+            display:flex; flex-direction:column; gap:8px;
         }
-
         .toast {
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            padding:12px 20px; border-radius:8px; font-size:14px;
+            animation:slideIn .3s ease,fadeOut .3s ease 2.7s;
+            box-shadow:0 4px 15px rgba(0,0,0,.3);
         }
-
-        .toast-success {
-            background: linear-gradient(135deg, #48c78e, #38a06d);
-            color: #fff;
-        }
-
-        .toast-info {
-            background: linear-gradient(135deg, #00b4d8, #0077b6);
-            color: #fff;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
+        .toast-success { background:linear-gradient(135deg,#48c78e,#38a06d); color:#fff; }
+        .toast-info { background:linear-gradient(135deg,#00b4d8,#0077b6); color:#fff; }
+        @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+        @keyframes fadeOut  { from{opacity:1} to{opacity:0} }
 
         /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .nav-bar {
-                justify-content: center;
-            }
-            .modules-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        @media(max-width:1100px){
+            .modules-grid.cols-5 { grid-template-columns:repeat(3,1fr); }
         }
-
-        @media (max-width: 480px) {
-            .modules-grid {
-                grid-template-columns: 1fr;
-            }
+        @media(max-width:900px){
+            .modules-grid.cols-3,
+            .modules-grid.cols-5,
+            .modules-grid.cols-3-mid { grid-template-columns:repeat(2,1fr); }
+        }
+        @media(max-width:768px){
+            .header { flex-direction:column; gap:10px; }
+            .nav-bar { justify-content:center; }
+            .modules-grid.cols-3,
+            .modules-grid.cols-5,
+            .modules-grid.cols-3-mid { grid-template-columns:repeat(2,1fr); }
+        }
+        @media(max-width:520px){
+            .modules-grid.cols-3,
+            .modules-grid.cols-5,
+            .modules-grid.cols-3-mid,
+            .modules-grid { grid-template-columns:1fr; }
         }
     </style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="nexus_db.js"></script>
     <script src="permisos.js"></script>
 </head>
@@ -389,24 +246,21 @@
 
     <!-- BARRA DE NAVEGACIÓN -->
     <nav class="nav-bar">
-    <a class="nav-item active" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
-    <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
-    <a class="nav-item" href="pacientes.html"><i class="fas fa-users"></i> Pacientes</a>
-    <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
-    <a class="nav-item" href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
-    <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enfermería</a>
-    <a class="nav-item" href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
-    <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
-    <a class="nav-item" href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
-    <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresados</a>
-    <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
-    <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
-    <!-- MÓDULOS NUEVOS DE INTEGRACIÓN -->
-    <a class="nav-item" href="conciliacion.html"><i class="fas fa-balance-scale"></i> Conciliación</a>
-    <a class="nav-item" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Documental</a>
-    <a class="nav-item" href="generador_evoluciones.html"><i class="fas fa-file-medical-alt"></i> Generador Evol.</a>
-    <a class="nav-item" href="renombrar.html"><i class="fas fa-i-cursor"></i> Renombrar</a>
-</nav>
+        <a class="nav-item active" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
+        <a class="nav-item" href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+        <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+        <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresos</a>
+        <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
+        <a class="nav-item" href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
+        <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enf.</a>
+        <a class="nav-item" href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
+        <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
+        <a class="nav-item" href="conciliacion.html"><i class="fas fa-balance-scale"></i> Conciliación</a>
+        <a class="nav-item" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Doc.</a>
+        <a class="nav-item" href="generador_evoluciones.html"><i class="fas fa-file-medical-alt"></i> Generador Evol.</a>
+        <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
+        <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+    </nav>
 
     <!-- TOAST -->
     <div class="toast-container" id="toastContainer"></div>
@@ -451,21 +305,21 @@
                 </div>
             </div>
             <div class="summary-card">
-                <div class="summary-icon" style="background:rgba(0,180,216,.15);">📋</div>
+                <div class="summary-icon cyan">📋</div>
                 <div class="summary-data">
                     <div class="summary-number" id="resHistorias">0</div>
                     <div class="summary-label">Historias Clínicas</div>
                 </div>
             </div>
             <div class="summary-card">
-                <div class="summary-icon" style="background:rgba(0,180,216,.15);">🩺</div>
+                <div class="summary-icon cyan">🩺</div>
                 <div class="summary-data">
                     <div class="summary-number" id="resEvolucion">0</div>
                     <div class="summary-label">Notas Evolución</div>
                 </div>
             </div>
             <div class="summary-card">
-                <div class="summary-icon" style="background:rgba(0,180,216,.15);">🧠</div>
+                <div class="summary-icon cyan">🧠</div>
                 <div class="summary-data">
                     <div class="summary-number" id="resTerapias">0</div>
                     <div class="summary-label">Sesiones Terapias</div>
@@ -473,102 +327,150 @@
             </div>
         </div>
 
-        <!-- MÓDULOS -->
-        <div class="modules-grid">
-            <div class="module-card" onclick="window.location.href='admisiones.html'">
-                <span class="module-badge">Activo</span>
-                <span class="module-icon">📋</span>
-                <div class="module-name">Admisiones</div>
-                <div class="module-desc">Registro y gestión de ingresos de pacientes al hospital</div>
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- BLOQUE 1 · FLUJO DE ENTRADA Y SALIDA       -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="block-section">
+            <div class="block-header">
+                <span class="block-label block-label-activo">ACTIVO</span>
+                <span class="block-title">Flujo de Entrada y Salida</span>
+                <span class="block-count">3 módulos</span>
             </div>
-            <div class="module-card" onclick="window.location.href='egresados.html'">
-                <span class="module-badge">Activo</span>
-                <span class="module-icon">🏥</span>
-                <div class="module-name">Egresados</div>
-                <div class="module-desc">Historial de pacientes dados de alta y su seguimiento</div>
-            </div>
-            <div class="module-card" onclick="window.location.href='pacientes.html'">
-                <span class="module-badge">Activo</span>
-                <span class="module-icon">👥</span>
-                <div class="module-name">Pacientes</div>
-                <div class="module-desc">Base de datos completa de todos los pacientes registrados</div>
-            </div>
-            <div class="module-card" onclick="window.location.href='citas.html'">
-                <span class="module-badge">Activo</span>
-                <span class="module-icon">📅</span>
-                <div class="module-name">Citas Médicas</div>
-                <div class="module-desc">Programación y gestión de citas y consultas</div>
-            </div>
-            <div class="module-card" onclick="window.location.href='reportes.html'">
-                <span class="module-badge">Activo</span>
-                <span class="module-icon">📊</span>
-                <div class="module-name">Reportes</div>
-                <div class="module-desc">Estadísticas, gráficos e informes del sistema</div>
-            </div>
-            <div class="module-card" onclick="window.location.href='configuracion.html'">
-                <span class="module-badge">Admin</span>
-                <span class="module-icon">⚙️</span>
-                <div class="module-name">Configuración</div>
-                <div class="module-desc">Usuarios, roles, parámetros generales del sistema</div>
-            </div>
-            <div class="module-card" onclick="window.location.href='historias_clinicas.html'">
-                <span class="module-badge">Clínico</span>
-                <span class="module-icon">📋</span>
-                <div class="module-name">Historias Clínicas</div>
-                <div class="module-desc">Registros médicos completos con CIE-10 y antecedentes</div>
-            </div>
-            <div class="module-card" onclick="window.location.href='evolucion.html'">
-                <span class="module-badge">Clínico</span>
-                <span class="module-icon">🩺</span>
-                <div class="module-name">Evolución SOAP</div>
-                <div class="module-desc">Notas de evolución clínica formato SOAP</div>
-            </div>
-            <div class="module-card" onclick="window.location.href='notas_enfermeria.html'">
-                <span class="module-badge">Clínico</span>
-                <span class="module-icon">👩‍⚕️</span>
-                <div class="module-name">Notas de Enfermería</div>
-                <div class="module-desc">Signos vitales, procedimientos y estado del paciente</div>
-            </div>
-            <div class="module-card" onclick="window.location.href='terapias.html'">
-                <span class="module-badge">Clínico</span>
-                <span class="module-icon">🧠</span>
-                <div class="module-name">Terapias</div>
-                <div class="module-desc">Física, ocupacional, respiratoria, lenguaje, nutrición y psicología</div>
-            </div>
-            <div class="module-card" onclick="window.location.href='epicrisis.html'">
-                <span class="module-badge">Clínico</span>
-                <span class="module-icon">📄</span>
-                <div class="module-name">Epicrisis</div>
-                <div class="module-desc">Resumen de egreso para hospitalización en casa</div>
-            </div>
-
-            <!-- ═══ MÓDULOS NUEVOS DE INTEGRACIÓN ═══ -->
-            <div class="module-card" onclick="window.location.href='conciliacion.html'" style="border-color:#1a3a5c;">
-                <span class="module-badge" style="background:rgba(255,183,3,.2);color:#ffb703;">Nuevo</span>
-                <span class="module-icon">⚖️</span>
-                <div class="module-name">Conciliación</div>
-                <div class="module-desc">Cruza agendamiento del Health System con evoluciones SOAP para verificar asistencias</div>
-            </div>
-            <div class="module-card" onclick="window.location.href='gestion_documental.html'" style="border-color:#1a3a5c;">
-                <span class="module-badge" style="background:rgba(255,183,3,.2);color:#ffb703;">Nuevo</span>
-                <span class="module-icon">📁</span>
-                <div class="module-name">Gestión Documental</div>
-                <div class="module-desc">Crea lotes, nombra PDFs con fórmula SIGLA_NIT_NOMBRE, une y descarga por lote</div>
-            </div>
-            <div class="module-card" onclick="window.location.href='generador_evoluciones.html'" style="border-color:#1a3a5c;">
-                <span class="module-badge" style="background:rgba(255,183,3,.2);color:#ffb703;">Nuevo</span>
-                <span class="module-icon">📝</span>
-                <div class="module-name">Generador Evoluciones</div>
-                <div class="module-desc">Genera copias de PDFs de evolución con fechas y numeración cambiadas automáticamente</div>
-            </div>
-            <div class="module-card" onclick="window.location.href='renombrar.html'" style="border-color:#1a3a5c;">
-                <span class="module-badge" style="background:rgba(255,183,3,.2);color:#ffb703;">Nuevo</span>
-                <span class="module-icon">✏️</span>
-                <div class="module-name">Renombrar Archivos</div>
-                <div class="module-desc">Renombra archivos masivamente con patrones personalizados y descarga en ZIP</div>
+            <div class="modules-grid cols-3">
+                <!-- 1 · Citas Médicas -->
+                <div class="module-card" onclick="window.location.href='citas.html'">
+                    <span class="module-badge badge-activo">ACTIVO</span>
+                    <span class="module-icon">📅</span>
+                    <div class="module-name">Citas Médicas</div>
+                    <div class="module-desc">Programación y gestión de citas y consultas médicas</div>
+                </div>
+                <!-- 2 · Admisiones -->
+                <div class="module-card" onclick="window.location.href='admisiones.html'">
+                    <span class="module-badge badge-activo">ACTIVO</span>
+                    <span class="module-icon">📋</span>
+                    <div class="module-name">Admisiones</div>
+                    <div class="module-desc">Registro y gestión de ingresos de pacientes al centro</div>
+                </div>
+                <!-- 3 · Egresos -->
+                <div class="module-card" onclick="window.location.href='egresados.html'">
+                    <span class="module-badge badge-activo">ACTIVO</span>
+                    <span class="module-icon">🏥</span>
+                    <div class="module-name">Egresos</div>
+                    <div class="module-desc">Historial de pacientes dados de alta y su seguimiento</div>
+                </div>
             </div>
         </div>
-    </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- BLOQUE 2 · NÚCLEO CLÍNICO                  -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="block-section">
+            <div class="block-header">
+                <span class="block-label block-label-clinico">CLÍNICO</span>
+                <span class="block-title">Núcleo Clínico</span>
+                <span class="block-count">5 módulos</span>
+            </div>
+            <div class="modules-grid cols-5">
+                <!-- 4 · Historias Clínicas -->
+                <div class="module-card" onclick="window.location.href='historias_clinicas.html'">
+                    <span class="module-badge badge-clinico">CLÍNICO</span>
+                    <span class="module-icon">📋</span>
+                    <div class="module-name">Historias Clínicas</div>
+                    <div class="module-desc">Registros médicos completos con CIE-10 y antecedentes</div>
+                </div>
+                <!-- 5 · Evolución SOAP -->
+                <div class="module-card" onclick="window.location.href='evolucion.html'">
+                    <span class="module-badge badge-clinico">CLÍNICO</span>
+                    <span class="module-icon">🩺</span>
+                    <div class="module-name">Evolución SOAP</div>
+                    <div class="module-desc">Notas de evolución clínica en formato SOAP</div>
+                </div>
+                <!-- 6 · Notas de Enfermería -->
+                <div class="module-card" onclick="window.location.href='notas_enfermeria.html'">
+                    <span class="module-badge badge-clinico">CLÍNICO</span>
+                    <span class="module-icon">👩‍⚕️</span>
+                    <div class="module-name">Notas de Enfermería</div>
+                    <div class="module-desc">Signos vitales, procedimientos y estado del paciente</div>
+                </div>
+                <!-- 7 · Terapias -->
+                <div class="module-card" onclick="window.location.href='terapias.html'">
+                    <span class="module-badge badge-clinico">CLÍNICO</span>
+                    <span class="module-icon">🧠</span>
+                    <div class="module-name">Terapias</div>
+                    <div class="module-desc">Física, ocupacional, respiratoria, lenguaje y psicología</div>
+                </div>
+                <!-- 8 · Epicrisis -->
+                <div class="module-card" onclick="window.location.href='epicrisis.html'">
+                    <span class="module-badge badge-clinico">CLÍNICO</span>
+                    <span class="module-icon">📄</span>
+                    <div class="module-name">Epicrisis</div>
+                    <div class="module-desc">Resumen de egreso para hospitalización en casa</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- BLOQUE 3 · AUTOMATIZACIÓN E INTELIGENCIA   -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="block-section">
+            <div class="block-header">
+                <span class="block-label block-label-nuevo">NUEVO</span>
+                <span class="block-title">Automatización e Inteligencia</span>
+                <span class="block-count">3 módulos</span>
+            </div>
+            <div class="modules-grid cols-3">
+                <!-- 9 · Conciliación -->
+                <div class="module-card" onclick="window.location.href='conciliacion.html'">
+                    <span class="module-badge badge-nuevo">NUEVO</span>
+                    <span class="module-icon">⚖️</span>
+                    <div class="module-name">Conciliación</div>
+                    <div class="module-desc">Cruza agendamiento del Health System con evoluciones SOAP para verificar asistencias</div>
+                </div>
+                <!-- 10 · Gestión Documental -->
+                <div class="module-card" onclick="window.location.href='gestion_documental.html'">
+                    <span class="module-badge badge-nuevo">NUEVO</span>
+                    <span class="module-icon">📁</span>
+                    <div class="module-name">Gestión Documental</div>
+                    <div class="module-desc">Crea lotes, renombra PDFs masivamente con fórmula SIGLA·NIT·NOMBRE, une y descarga en ZIP por lote</div>
+                </div>
+                <!-- 11 · Generador de Evoluciones -->
+                <div class="module-card" onclick="window.location.href='generador_evoluciones.html'">
+                    <span class="module-badge badge-nuevo">NUEVO</span>
+                    <span class="module-icon">📝</span>
+                    <div class="module-name">Generador de Evoluciones</div>
+                    <div class="module-desc">Genera copias de PDFs de evolución con fechas y numeración cambiadas automáticamente</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- BLOQUE 4 · CONTROL ADMINISTRATIVO          -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="block-section">
+            <div class="block-header">
+                <span class="block-label block-label-admin">ADMIN</span>
+                <span class="block-title">Control Administrativo</span>
+                <span class="block-count">2 módulos</span>
+            </div>
+            <div class="modules-grid cols-3">
+                <!-- 12 · Reportes -->
+                <div class="module-card" onclick="window.location.href='reportes.html'">
+                    <span class="module-badge badge-admin">ADMIN</span>
+                    <span class="module-icon">📊</span>
+                    <div class="module-name">Reportes</div>
+                    <div class="module-desc">Estadísticas, gráficos e informes del sistema</div>
+                </div>
+                <!-- 13 · Configuración -->
+                <div class="module-card" onclick="window.location.href='configuracion.html'">
+                    <span class="module-badge badge-admin">ADMIN</span>
+                    <span class="module-icon">⚙️</span>
+                    <div class="module-name">Configuración</div>
+                    <div class="module-desc">Usuarios, roles, permisos y parámetros generales del sistema</div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /main-container -->
 
     <script>
         // ===== VERIFICAR SESIÓN =====
@@ -576,7 +478,6 @@
         if (!sesion || !sesion.logueado) {
             window.location.href = 'index.html';
         } else {
-            // Mostrar datos del usuario
             document.getElementById('userName').textContent = sesion.nombre;
             document.getElementById('userRole').textContent = sesion.rol.toUpperCase();
             document.getElementById('userAvatar').textContent = sesion.nombre.charAt(0).toUpperCase();
@@ -605,7 +506,6 @@
             const citasHoy = citas.filter(c => c.fecha && c.fecha.slice(0, 10) === hoy);
             document.getElementById('resCitas').textContent = citasHoy.length;
 
-            // Resumen módulos clínicos
             const historias = JSON.parse(localStorage.getItem('nexus_historias_clinicas') || '[]');
             document.getElementById('resHistorias').textContent = historias.length;
 
@@ -615,7 +515,6 @@
             const terapias = JSON.parse(localStorage.getItem('nexus_terapias') || '[]');
             document.getElementById('resTerapias').textContent = terapias.length;
         }
-
         actualizarResumen();
 
         // ===== TOAST =====
@@ -628,7 +527,6 @@
             setTimeout(() => toast.remove(), 3000);
         }
     </script>
-
 
     <!-- MATRIZ GLOBAL DE PERMISOS -->
     <script>
