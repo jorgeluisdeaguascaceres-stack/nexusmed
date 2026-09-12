@@ -1664,7 +1664,11 @@ async function procesar(sigla){
     else{var res=PDFMerge.merge(buffers,files.map(function(f){return f.name;}));merged=res.bytes;}
     var blob=new Blob([merged],{type:'application/pdf'});
     var nombre=nombreOficial(sigla);
-    var loteData={id:idLote,nombre:carpeta,nit:nit,fecha:new Date().toISOString(),total:1,siglas:[sigla],separador:sep};
+    // Leer lote existente y agregar la sigla (no sobrescribir)
+    var loteExist=await IDB.get('lotes',idLote);
+    var siglasExistentes=loteExist&&loteExist.siglas?loteExist.siglas:[];
+    if(siglasExistentes.indexOf(sigla)<0)siglasExistentes.push(sigla);
+    var loteData={id:idLote,nombre:carpeta,nit:nit,fecha:new Date().toISOString(),total:siglasExistentes.length,siglas:siglasExistentes,separador:sep};
     await IDB.put('lotes',loteData);
     await IDB.put('files',{lid_sigla:idLote+'_'+sigla,blob:blob,nombre:nombre,sigla:sigla,lid:idLote});
     lotesGuardados=await IDB.getAll('lotes');
@@ -1718,7 +1722,11 @@ async function procesarTodo(){
   }
   if(ok){
     var procesadas=SIGLAS.filter(function(s){var f=cola[s];return f&&f.length&&f.every(function(x){return x.saved;});});
-    var loteData={id:idLote,nombre:carpeta,nit:nit,fecha:new Date().toISOString(),total:procesadas.length,siglas:procesadas,separador:sep};
+    // Leer lote existente y fusionar siglas (no sobrescribir)
+    var loteExist=await IDB.get('lotes',idLote);
+    var siglasPrev=loteExist&&loteExist.siglas?loteExist.siglas:[];
+    procesadas.forEach(function(s){if(siglasPrev.indexOf(s)<0)siglasPrev.push(s);});
+    var loteData={id:idLote,nombre:carpeta,nit:nit,fecha:new Date().toISOString(),total:siglasPrev.length,siglas:siglasPrev,separador:sep};
     await IDB.put('lotes',loteData);
     lotesGuardados=await IDB.getAll('lotes');
     pintarCajas();
