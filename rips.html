@@ -635,12 +635,11 @@ function construirServicios(fac, catalogo) {
   const consultas = [];
   const procedimientos = [];
   const otrosServicios = [];
+  let consecutivoGlobal = 0; // Consecutivo global que suma TODOS los bloques
 
   const servicios = fac.servicios || [];
-  const nit = document.getElementById('ripNitPrestador').value.trim().replace(/[^0-9]/g,'');
   const codHab = document.getElementById('ripCodHabilitacion').value.trim();
   const eps = fac.eps || '';
-  const codEps = codigoEpsFromString(eps);
   const dx = fac.diagnostico || '';
   const dxCodigo = fac.diagnosticoCodigo || extraerCIE10(dx);
 
@@ -654,7 +653,7 @@ function construirServicios(fac, catalogo) {
     const nombreServ = svc.nombre || '';
     const codigoCUPS = svc.codigo || (catMatch ? catMatch.codigoCUPS : '') || '';
     const ambito = (svc.tipo || '').toUpperCase(); // DOMICILIARIA, INTRAMURAL, HOSPITARIA
-    const valor = svc.valorUnit || 0;
+    const valorUnit = svc.valorUnit || 0;
     const cantidad = svc.cantidad || 1;
     const autorizacion = svc.autorizacion || '';
 
@@ -676,88 +675,97 @@ function construirServicios(fac, catalogo) {
                       n.includes('FONOAUD') || n.includes('PSICOLOG') || n.includes('PSICOLÓG') ||
                       n.includes('RESPIRATOR');
     const esConsulta = n.includes('CONSULTA') || n.includes('VALORACIÓN') || n.includes('VALORACION');
-    const esOtro = !esTerapia && !esConsulta; // CAMA, ENFERMERÍA, LIMPIEZA, etc.
 
     const fechaAtencion = fac.fecha || hoy();
-    const consecutivo = idx + 1;
 
-    if (esTerapia) {
-      // ─── Procedimientos (AP) ───
-      procedimientos.push({
-        codPrestador: codHab || '',
-        fechaInicioAtencion: fechaAtencion + ' 08:00:00',
-        numAutorizacion: autorizacion || null,
-        codProcedimiento: codigoCUPS || '939800', // Default: terapia física
-        viaIngresoServicioSalud: viaIngresoServicio(),
-        modalidadGrupoServicioTecSal: modalidad,
-        grupoServicios: grupoServ,
-        codServicio: codHab || '',
-        finalidadTecnologiaSalud: finalidad,
-        causaMotivoAtencion: causa,
-        codDiagnosticoPrincipal: dxCodigo || 'Z000',
-        codDiagnosticoPrincipalCIE11: null,
-        nomCodDiagnosticoPrincipalCIE11: null,
-        codDiagnosticoRelacionado: null,
-        codDiagnosticoRelacionadoCIE11: null,
-        nomCodDiagnosticoRelacionadoCIE11: null,
-        complicacion: 'NO',
-        conceptoRecaudo: concepto,
-        coberturaPlanBeneficios: cobertura,
-        valorPagoModerador: 0,
-        numeroSesiones: cantidad,
-        vrServicio: valor * cantidad,
-        valorPagoEfectivo: 0,
-        codigoVIDA: null,
-        consecutivo: consecutivo
-      });
-    } else if (esConsulta) {
-      // ─── Consultas (AC) ───
-      consultas.push({
-        codPrestador: codHab || '',
-        fechaInicioAtencion: fechaAtencion + ' 08:00:00',
-        numAutorizacion: autorizacion || null,
-        codConsulta: codigoCUPS || '090201', // Default: consulta médica general
-        modalidadGrupoServicioTecSal: modalidad,
-        grupoServicios: grupoServ,
-        codServicio: codHab || '',
-        finalidadTecnologiaSalud: finalidad,
-        causaMotivoAtencion: causa,
-        codDiagnosticoPrincipal: dxCodigo || 'Z000',
-        codDiagnosticoPrincipalCIE11: null,
-        nomCodDiagnosticoPrincipalCIE11: null,
-        codDiagnosticoRelacionado1: null,
-        codDiagnosticoRelacionado1CIE11: null,
-        nomCodDiagnosticoRelacionado1CIE11: null,
-        tipoDiagnosticoPrincipal: '1', // Confirmado
-        conceptoRecaudo: concepto,
-        coberturaPlanBeneficios: cobertura,
-        valorPagoModerador: 0,
-        vrServicio: valor * cantidad,
-        valorPagoEfectivo: 0,
-        numeroConsultas: cantidad,
-        codigoVIDA: null,
-        consecutivo: consecutivo
-      });
-    } else {
-      // ─── Otros Servicios (AT) ───
-      // Para CAMA, ENFERMERÍA, LIMPIEZA TRAQUEOSTOMÍA, etc.
-      otrosServicios.push({
-        codPrestador: codHab || '',
-        fechaInicioAtencion: fechaAtencion + ' 08:00:00',
-        numAutorizacion: autorizacion || null,
-        codTecnologiaSalud: codigoCUPS || '01.02.01.01.01', // Default: cama
-        nomTecnologiaSalud: nombreServ || 'Servicio',
-        cantidadOServicio: cantidad,
-        vrUnitOServicio: valor,
-        vrServicio: valor * cantidad,
-        conceptoRecaudo: concepto,
-        coberturaPlanBeneficios: cobertura,
-        valorPagoModerador: 0,
-        valorPagoEfectivo: 0,
-        codigoVIDA: null,
-        consecutivo: consecutivo
-      });
-    }
+    // ═══════════════════════════════════════════════════════════
+    // DESBLOQUEAR CANTIDADES: crear 1 bloque por cada unidad
+    // Si cantidad=10 consultas, genera 10 bloques individuales,
+    // cada uno con consecutivo incremental,
+    // numeroConsultas/numeroSesiones/cantidadOServicio = 1,
+    // vrServicio = valorUnit (valor de UNA sola unidad)
+    // ═══════════════════════════════════════════════════════════
+    for (let i = 0; i < cantidad; i++) {
+      consecutivoGlobal++;
+      const consecutivo = consecutivoGlobal;
+
+      if (esTerapia) {
+        // ─── Procedimientos (AP) — 1 bloque por sesión ───
+        procedimientos.push({
+          codPrestador: codHab || '',
+          fechaInicioAtencion: fechaAtencion + ' 08:00:00',
+          numAutorizacion: autorizacion || null,
+          codProcedimiento: codigoCUPS || '939800',
+          viaIngresoServicioSalud: viaIngresoServicio(),
+          modalidadGrupoServicioTecSal: modalidad,
+          grupoServicios: grupoServ,
+          codServicio: codHab || '',
+          finalidadTecnologiaSalud: finalidad,
+          causaMotivoAtencion: causa,
+          codDiagnosticoPrincipal: dxCodigo || 'Z000',
+          codDiagnosticoPrincipalCIE11: null,
+          nomCodDiagnosticoPrincipalCIE11: null,
+          codDiagnosticoRelacionado: null,
+          codDiagnosticoRelacionadoCIE11: null,
+          nomCodDiagnosticoRelacionadoCIE11: null,
+          complicacion: 'NO',
+          conceptoRecaudo: concepto,
+          coberturaPlanBeneficios: cobertura,
+          valorPagoModerador: 0,
+          numeroSesiones: 1,
+          vrServicio: valorUnit,
+          valorPagoEfectivo: 0,
+          codigoVIDA: null,
+          consecutivo: consecutivo
+        });
+      } else if (esConsulta) {
+        // ─── Consultas (AC) — 1 bloque por consulta ───
+        consultas.push({
+          codPrestador: codHab || '',
+          fechaInicioAtencion: fechaAtencion + ' 08:00:00',
+          numAutorizacion: autorizacion || null,
+          codConsulta: codigoCUPS || '090201',
+          modalidadGrupoServicioTecSal: modalidad,
+          grupoServicios: grupoServ,
+          codServicio: codHab || '',
+          finalidadTecnologiaSalud: finalidad,
+          causaMotivoAtencion: causa,
+          codDiagnosticoPrincipal: dxCodigo || 'Z000',
+          codDiagnosticoPrincipalCIE11: null,
+          nomCodDiagnosticoPrincipalCIE11: null,
+          codDiagnosticoRelacionado1: null,
+          codDiagnosticoRelacionado1CIE11: null,
+          nomCodDiagnosticoRelacionado1CIE11: null,
+          tipoDiagnosticoPrincipal: '1',
+          conceptoRecaudo: concepto,
+          coberturaPlanBeneficios: cobertura,
+          valorPagoModerador: 0,
+          vrServicio: valorUnit,
+          valorPagoEfectivo: 0,
+          numeroConsultas: 1,
+          codigoVIDA: null,
+          consecutivo: consecutivo
+        });
+      } else {
+        // ─── Otros Servicios (AT) — 1 bloque por unidad ───
+        otrosServicios.push({
+          codPrestador: codHab || '',
+          fechaInicioAtencion: fechaAtencion + ' 08:00:00',
+          numAutorizacion: autorizacion || null,
+          codTecnologiaSalud: codigoCUPS || '01.02.01.01.01',
+          nomTecnologiaSalud: nombreServ || 'Servicio',
+          cantidadOServicio: 1,
+          vrUnitOServicio: valorUnit,
+          vrServicio: valorUnit,
+          conceptoRecaudo: concepto,
+          coberturaPlanBeneficios: cobertura,
+          valorPagoModerador: 0,
+          valorPagoEfectivo: 0,
+          codigoVIDA: null,
+          consecutivo: consecutivo
+        });
+      }
+    } // fin for (desbloqueo de cantidades)
   });
 
   return { consultas, procedimientos, otrosServicios };
