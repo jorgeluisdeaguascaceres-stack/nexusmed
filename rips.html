@@ -601,7 +601,7 @@ function generarRIPS() {
 
 function construirUsuarios(fac, pac, catalogo) {
   // Un usuario por cada factura (en este caso, 1 paciente por factura)
-  const tipoDoc = tipoDocRips(pac.tipo || fac.documento ? 'CC' : 'CC');
+  const tipoDoc = tipoDocRips(pac.tipoDoc || pac.tipo || 'CC');
   const numDoc = pac.documento || fac.documento || '';
   const nombrePac = pac.nombre || fac.paciente || '';
   const fechaNac = pac.fechaNacimiento || calcularFechaNacimiento(pac.edad);

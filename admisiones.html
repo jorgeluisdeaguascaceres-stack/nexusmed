@@ -259,6 +259,26 @@
                 <div class="form-subtitle"><i class="fas fa-user"></i> Datos del Paciente</div>
                 <div class="form-grid">
                     <div class="form-group">
+                        <label>Tipo de Documento</label>
+                        <select id="tipoDoc" required>
+                            <option value="">...</option>
+                            <option value="CC">CC - Cédula de Ciudadanía</option>
+                            <option value="CE">CE - Cédula de Extranjería</option>
+                            <option value="TI">TI - Tarjeta de Identidad</option>
+                            <option value="RC">RC - Registro Civil</option>
+                            <option value="PA">PA - Pasaporte</option>
+                            <option value="AS">AS - Adulto Sin Identificación</option>
+                            <option value="MS">MS - Menor Sin Identificación</option>
+                            <option value="NI">NI - NIT</option>
+                            <option value="CD">CD - Carné Diplomático</option>
+                            <option value="CN">CN - Certificado de Nacido Vivo</option>
+                            <option value="SC">SC - Salvoconducto</option>
+                            <option value="PE">PE - Permiso Especial de Permanencia</option>
+                            <option value="PT">PT - Permiso por Protección Temporal</option>
+                            <option value="DE">DE - Documento de Extranjería</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>Documento</label>
                         <input type="text" id="documento" placeholder="Ej: 12345678" required>
                     </div>
@@ -384,7 +404,7 @@
             <div class="table-wrapper">
                 <table>
                     <thead><tr>
-                        <th>Nº Adm.</th><th>Fecha</th><th>Documento</th><th>Nombre</th><th>EPS</th><th>Edad</th><th>Servicio</th><th>Médico</th><th>Diagnóstico</th><th>Hab.</th><th>Estado</th><th>Acciones</th>
+                        <th>Nº Adm.</th><th>Fecha</th><th>Tipo Doc.</th><th>Documento</th><th>Nombre</th><th>EPS</th><th>Edad</th><th>Servicio</th><th>Médico</th><th>Diagnóstico</th><th>Hab.</th><th>Estado</th><th>Acciones</th>
                     </tr></thead>
                     <tbody id="tablaAdmisiones"></tbody>
                 </table>
@@ -398,6 +418,7 @@
         <div class="modal">
             <h3>✏️ Editar Admisión</h3>
             <div class="form-grid">
+                <div class="form-group"><label>Tipo Documento</label><select id="editTipoDoc"><option value="CC">CC</option><option value="CE">CE</option><option value="TI">TI</option><option value="RC">RC</option><option value="PA">PA</option><option value="AS">AS</option><option value="MS">MS</option><option value="NI">NI</option><option value="CD">CD</option><option value="CN">CN</option><option value="SC">SC</option><option value="PE">PE</option><option value="PT">PT</option><option value="DE">DE</option></select></div>
                 <div class="form-group"><label>Documento</label><input type="text" id="editDocumento"></div>
                 <div class="form-group"><label>Nombre</label><input type="text" id="editNombre"></div>
                 <div class="form-group"><label>Fecha Nacimiento</label><input type="date" id="editFechaNacimiento" onchange="calcularEdadEdicion()"></div>
@@ -773,6 +794,7 @@
         function registrarAdmision() {
             const numAdmision = document.getElementById('numAdmision').value.trim();
             const fechaIngreso = document.getElementById('fechaIngreso').value;
+            const tipoDoc = document.getElementById('tipoDoc').value;
             const documento = document.getElementById('documento').value.trim();
             const nombre = document.getElementById('nombre').value.trim();
             const fechaNacimiento = document.getElementById('fechaNacimiento').value;
@@ -799,6 +821,7 @@
 
             // Validaciones
             if (!fechaIngreso) { mostrarToast('Ingrese la fecha de ingreso', 'error'); return; }
+            if (!tipoDoc) { mostrarToast('Seleccione el tipo de documento', 'error'); return; }
             if (!documento) { mostrarToast('Ingrese el documento', 'error'); return; }
             if (!nombre) { mostrarToast('Ingrese el nombre', 'error'); return; }
             if (!fechaNacimiento) { mostrarToast('Ingrese la fecha de nacimiento', 'error'); return; }
@@ -817,7 +840,7 @@
 
             const nuevoPaciente = {
                 id: Date.now(), numAdmision, fechaIngreso, fechaSalida: '',
-                documento, nombre, fechaNacimiento, edad, genero, servicio,
+                tipoDoc, documento, nombre, fechaNacimiento, edad, genero, servicio,
                 medico, diagnostico, diagnosticoCodigo, eps, estado, habitacion, observaciones,
                 direccion, barrio, departamento, municipio, telefono,
                 familiarNombre, familiarTelefono, familiarParentesco,
@@ -858,7 +881,7 @@
                 const epsDisplay = p.eps || '—';
                 // Mostrar código corto si es muy largo
                 const diagCorto = diagDisplay.length > 25 ? diagDisplay.substring(0, 25) + '…' : diagDisplay;
-                tr.innerHTML = `<td><strong>${p.numAdmision}</strong></td><td>${fecha}</td><td>${p.documento}</td><td>${p.nombre}</td><td>${epsDisplay}</td><td>${edadDisplay}</td><td>${p.servicio}</td><td>${medicoDisplay}</td><td title="${diagDisplay}">${diagCorto}</td><td>${p.habitacion || '—'}</td><td><span class="badge ${badgeClass}">${p.estado}</span></td><td><button class="btn-action btn-editar" onclick="editarPaciente(${p.id})"><i class=\"fas fa-pen\"></i></button><button class="btn-action btn-egresar" onclick="egresarPaciente(${p.id})"><i class=\"fas fa-hospital\"></i></button><button class="btn-action btn-eliminar" onclick="eliminarPaciente(${p.id})"><i class=\"fas fa-trash\"></i></button><button class="btn-action btn-certi" onclick="generarCertificadoPDF(${p.id})" title="Certificado PDF"><i class=\"fas fa-file-pdf\"></i></button></td>`;
+                tr.innerHTML = `<td><strong>${p.numAdmision}</strong></td><td>${fecha}</td><td>${p.tipoDoc||'CC'}</td><td>${p.documento}</td><td>${p.nombre}</td><td>${epsDisplay}</td><td>${edadDisplay}</td><td>${p.servicio}</td><td>${medicoDisplay}</td><td title="${diagDisplay}">${diagCorto}</td><td>${p.habitacion || '—'}</td><td><span class="badge ${badgeClass}">${p.estado}</span></td><td><button class="btn-action btn-editar" onclick="editarPaciente(${p.id})"><i class=\"fas fa-pen\"></i></button><button class="btn-action btn-egresar" onclick="egresarPaciente(${p.id})"><i class=\"fas fa-hospital\"></i></button><button class="btn-action btn-eliminar" onclick="eliminarPaciente(${p.id})"><i class=\"fas fa-trash\"></i></button><button class="btn-action btn-certi" onclick="generarCertificadoPDF(${p.id})" title="Certificado PDF"><i class=\"fas fa-file-pdf\"></i></button></td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -895,6 +918,7 @@
             const p = obtenerPacientes().find(p => p.id === id);
             if (!p) return;
             idEditando = id;
+            document.getElementById('editTipoDoc').value = p.tipoDoc || 'CC';
             document.getElementById('editDocumento').value = p.documento || '';
             document.getElementById('editNombre').value = p.nombre || '';
             document.getElementById('editFechaNacimiento').value = p.fechaNacimiento || '';
@@ -929,6 +953,7 @@
             const pacientes = obtenerPacientes();
             const idx = pacientes.findIndex(p => p.id === idEditando);
             if (idx === -1) return;
+            pacientes[idx].tipoDoc = document.getElementById('editTipoDoc').value;
             pacientes[idx].documento = document.getElementById('editDocumento').value.trim();
             pacientes[idx].nombre = document.getElementById('editNombre').value.trim();
             pacientes[idx].fechaNacimiento = document.getElementById('editFechaNacimiento').value;
@@ -990,7 +1015,7 @@
            LIMPIAR FORMULARIO
            ═══════════════════════════════════════════ */
         function limpiarFormulario() {
-            ['documento','nombre','fechaNacimiento','edad','medico','diagnostico','diagnosticoCodigo','habitacion','observaciones','direccion','barrio','telefono','familiarNombre','familiarTelefono'].forEach(id => {
+            ['tipoDoc','documento','nombre','fechaNacimiento','edad','medico','diagnostico','diagnosticoCodigo','habitacion','observaciones','direccion','barrio','telefono','familiarNombre','familiarTelefono'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
@@ -1122,7 +1147,7 @@
 
             doc.setTextColor(40, 40, 40);
             doc.setFontSize(9.5);
-            addRow('Documento:', p.documento);
+            addRow('Documento:', (p.tipoDoc||'CC') + ' ' + p.documento);
             addRow('Nombre:', p.nombre);
             addRow('Fecha Nacimiento:', p.fechaNacimiento ? new Date(p.fechaNacimiento + 'T00:00:00').toLocaleDateString('es-ES') : '—');
             addRow('Edad:', (p.edad ? p.edad + ' años' : '—'));
