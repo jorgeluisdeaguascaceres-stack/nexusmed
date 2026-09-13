@@ -456,12 +456,13 @@ let ripsGenerado = null;
 
 function cargarFacturasDefinitivas() {
   const facturas = leer(K_FACTURAS) || [];
-  const definitivas = facturas.filter(f => f.estado === 'definitiva');
+  // Mostrar facturas definitivas Y anuladas (para ver/regenerar RIPS de facturas anuladas)
+  const visibles = facturas.filter(f => f.estado === 'definitiva' || f.estado === 'anulada');
 
   const filtroEps = document.getElementById('filtroEps').value;
   const filtroPeriodo = document.getElementById('filtroPeriodo').value;
 
-  const filtradas = definitivas.filter(f => {
+  const filtradas = visibles.filter(f => {
     if (filtroEps && (f.eps||'').toUpperCase() !== filtroEps.toUpperCase()) return false;
     if (filtroPeriodo && (f.fecha||'').slice(0,7) !== filtroPeriodo) return false;
     return true;
@@ -491,9 +492,11 @@ function cargarFacturasDefinitivas() {
     const nServ = (f.servicios||[]).length;
     const ripExistente = (leer(K_RIPS) || []).find(r => r.facturaId === f.id);
     const tieneRIPS = !!ripExistente;
-    return '<tr style="'+(sel?'background:rgba(0,180,216,.1)':'')+'">'
-      + '<td style="text-align:center"><input type="radio" name="selFact" value="'+f.id+'" '+(sel?'checked':'')+' onchange="seleccionarFactura(\''+f.id+'\')"></td>'
-      + '<td style="font-weight:600;color:#00b4d8">'+(f.numeroFactura||'—')+'</td>'
+    const esAnulada = f.estado === 'anulada';
+    const rowBg = sel ? 'background:rgba(0,180,216,.1)' : (esAnulada ? 'opacity:0.6' : '');
+    return '<tr style="'+rowBg+'">'
+      + '<td style="text-align:center"><input type="radio" name="selFact" value="'+f.id+'" '+(sel?'checked':'')+' onchange="seleccionarFactura(\''+f.id+'\')" '+(esAnulada?'disabled':'')+'></td>'
+      + '<td style="font-weight:600;color:#00b4d8">'+(f.numeroFactura||'—')+(esAnulada?' <span style="font-size:0.65em;background:rgba(255,56,96,.15);color:#ff3860;padding:2px 6px;border-radius:4px;margin-left:4px">ANULADA</span>':'')+'</td>'
       + '<td>'+(f.eps||'—')+'</td>'
       + '<td>'+(f.paciente||'—')+'</td>'
       + '<td>'+(f.documento||'—')+'</td>'
@@ -515,6 +518,7 @@ function seleccionarFactura(id) {
   const facturas = leer(K_FACTURAS) || [];
   const fac = facturas.find(f => f.id === id);
   if (!fac) { toast('Factura no encontrada','error'); return; }
+  if (fac.estado === 'anulada') { toast('No se puede generar RIPS de una factura anulada','error'); return; }
   facturaSeleccionada = fac;
   cargarFacturasDefinitivas();
   mostrarPaso2();
@@ -960,15 +964,21 @@ function renderHistorialRIPS() {
   }
 
   tbody.innerHTML = sorted.map(h => {
-    return '<tr>'
-      + '<td style="font-weight:600;color:#00b4d8">'+(h.numeroFactura||'—')+'</td>'
+    const anulado = h.facturaAnulada === true;
+    const fila = anulado ? 'style="opacity:0.6"' : '';
+    const badge = anulado ? ' <span class="badge" style="background:#dc3545;color:#fff;font-size:9px;padding:2px 6px;border-radius:4px">ANULADA</span>' : '';
+    const btnRegen = anulado
+      ? '<button class="btn btn-secondary" style="padding:5px 12px;font-size:11px;opacity:0.4;cursor:not-allowed" disabled><i class="fas fa-ban"></i> Anulada</button>'
+      : '<button class="btn btn-secondary" style="padding:5px 12px;font-size:11px" onclick="regenerarRIPS(\''+h.facturaId+'\')"><i class="fas fa-redo"></i> Regenerar</button>';
+    return '<tr '+fila+'>'
+      + '<td style="font-weight:600;color:#00b4d8">'+(h.numeroFactura||'—')+badge+'</td>'
       + '<td>'+(h.eps||'—')+'</td>'
       + '<td>'+(h.paciente||'—')+'</td>'
       + '<td>'+formatPeriodo(h.periodo)+'</td>'
       + '<td>'+(h.fechaGeneracion||'').slice(0,10)+'</td>'
       + '<td style="text-align:center">'+h.numUsuarios+'</td>'
       + '<td style="text-align:center">'+h.numServicios+'</td>'
-      + '<td><button class="btn btn-secondary" style="padding:5px 12px;font-size:11px" onclick="regenerarRIPS(\''+h.facturaId+'\')"><i class="fas fa-redo"></i> Regenerar</button></td>'
+      + '<td>'+btnRegen+'</td>'
       + '</tr>';
   }).join('');
 }
@@ -976,7 +986,8 @@ function renderHistorialRIPS() {
 function regenerarRIPS(facturaId) {
   const facturas = leer(K_FACTURAS) || [];
   const fac = facturas.find(f => f.id === facturaId);
-  if (!fac) { toast('Factura no encontrada','error'); return; }
+  if (!fac) { toast('Factura no encontrada — puede haber sido eliminada. El registro RIPS se conserva como historial.','warning'); return; }
+  if (fac.estado === 'anulada') { toast('Esta factura está anulada. El RIPS previo se mantiene solo como historial.','warning'); return; }
   facturaSeleccionada = fac;
   cambiarTab('tabGenerar');
   mostrarPaso2();

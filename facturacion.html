@@ -1183,6 +1183,10 @@ document.getElementById('btnConfirmarAnular').onclick = function() {
     facturas[idx].estado = 'anulada';
     facturas[idx].anuladaEn = ahora();
     guardar(K_FACTURAS, facturas);
+    /* Marcar RIPS historial como factura anulada */
+    const rips = leer('nexus_rips_generados') || [];
+    const ripsIdx = rips.findIndex(r => r.facturaId === _idAnular);
+    if (ripsIdx >= 0) { rips[ripsIdx].facturaAnulada = true; guardar('nexus_rips_generados', rips); }
     toast('Factura anulada','success');
     actualizarStats();
     renderHistorial();
