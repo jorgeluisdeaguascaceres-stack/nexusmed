@@ -21,8 +21,6 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
 .user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#00b4d8,#0077b6);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
 .user-name{font-size:13px;font-weight:600;color:#e0e0e0}
 .user-role{font-size:11px;color:#5a7a9a;text-transform:uppercase;letter-spacing:1px}
-.btn-header{background:#1a3a5c;color:#00b4d8;border:1px solid #00b4d8;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:14px;transition:all .3s;text-decoration:none;font-family:'Inter',sans-serif}
-.btn-header:hover{background:#00b4d8;color:#0a1628}
 .btn-cerrar{background:transparent;color:#ff3860;border:1px solid #ff3860;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:all .3s;font-family:'Inter',sans-serif}
 .btn-cerrar:hover{background:#ff3860;color:#fff}
 
@@ -94,7 +92,6 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
 .adm-dropdown-item .item-eps{color:#00b4d8;font-size:11px}
 .adm-dropdown-item .item-status{float:right;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:1px}
 .adm-dropdown-item .item-status.egresado{background:rgba(46,204,113,.15);color:#2ecc71}
-.adm-dropdown-item .item-status.otro{background:rgba(90,122,154,.15);color:#5a7a9a}
 .adm-no-results{padding:14px;text-align:center;color:#5a7a9a;font-size:13px}
 
 /* ─── Service table ─── */
@@ -218,11 +215,10 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
     <div class="stat-card"><div class="stat-num" id="statTotal$">$0</div><div class="stat-label">Total Facturado</div></div>
   </div>
 
-  <!-- Tabs -->
+  <!-- Tabs (solo 2: Nueva Factura + Historial) -->
   <div class="tabs-bar">
     <button class="tab-btn active" data-tab="tabNueva" onclick="cambiarTab('tabNueva')"><i class="fas fa-plus-circle"></i> Nueva Factura</button>
     <button class="tab-btn" data-tab="tabHistorial" onclick="cambiarTab('tabHistorial')"><i class="fas fa-list"></i> Historial</button>
-    <button class="tab-btn" data-tab="tabConfig" onclick="cambiarTab('tabConfig')"><i class="fas fa-cogs"></i> Configuración</button>
   </div>
 
   <!-- ═══════ TAB: NUEVA FACTURA ═══════ -->
@@ -256,9 +252,9 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
       <div class="form-title"><i class="fas fa-search"></i> Paso 1 — Buscar Admisión Egresada</div>
       <p style="color:#5a7a9a;font-size:13px;margin-bottom:14px">Solo admisiones con estado <strong style="color:#2ecc71">Egresado</strong> pueden facturarse.</p>
       <div class="form-group" style="margin-bottom:0">
-        <label>Buscar paciente (nombre o documento)</label>
+        <label>Buscar paciente (nombre, documento o N° admisión)</label>
         <div class="adm-dropdown-wrap">
-          <input type="text" class="adm-dropdown-input" id="buscarAdmInput" placeholder="Escriba nombre o documento del paciente egresado…" autocomplete="off">
+          <input type="text" class="adm-dropdown-input" id="buscarAdmInput" placeholder="Escriba nombre, documento o N° admisión…" autocomplete="off">
           <div class="adm-dropdown-list" id="admDropdownList"></div>
         </div>
       </div>
@@ -273,22 +269,32 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
     <!-- PASO 2: Servicios -->
     <div class="form-section" id="paso2Panel" style="display:none">
       <div class="form-title"><i class="fas fa-medkit"></i> Paso 2 — Agregar Servicios (CUPS)</div>
+
+      <!-- Fila: Código CUPS + auto-fill + Cantidad + Autorización + Agregar -->
       <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;align-items:end">
-        <div class="form-group" style="flex:2;min-width:220px">
-          <label>Servicio</label>
-          <select id="selectServicio" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif">
-            <option value="">— Seleccione servicio —</option>
-          </select>
+        <div class="form-group" style="flex:0 0 140px;min-width:120px">
+          <label>Código CUPS</label>
+          <input type="text" id="inputCups" placeholder="Ej: 941006" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;text-transform:uppercase">
+        </div>
+        <div class="form-group" style="flex:2;min-width:180px">
+          <label>Servicio (se auto-completa)</label>
+          <input type="text" id="inputServicioNombre" readonly placeholder="Se llena automáticamente al escribir CUPS" style="background:#0a1628;border:1px solid #1a3a5c;color:#90e0ef;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif">
         </div>
         <div class="form-group" style="flex:0 0 100px">
           <label>Cantidad</label>
           <input type="number" id="inputCantidad" value="1" min="1" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px;border-radius:8px;font-size:14px;text-align:center;font-family:'Inter',sans-serif">
         </div>
+        <div class="form-group" style="flex:0 0 180px;min-width:140px">
+          <label>Autorización</label>
+          <input type="text" id="inputAutorizacion" placeholder="N° autorización" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif">
+        </div>
         <button class="btn btn-success" onclick="agregarServicio()" style="height:42px"><i class="fas fa-plus"></i> Agregar</button>
       </div>
+
+      <!-- Tabla de servicios agregados -->
       <table class="svc-factura-table" id="tablaServicios">
         <thead><tr>
-          <th>Código</th><th>Servicio</th><th>Tipo</th><th>Valor Unit.</th><th style="text-align:center">Cant.</th><th style="text-align:right">Subtotal</th><th style="text-align:center">Quitar</th>
+          <th>CUPS</th><th>Servicio</th><th>Tipo</th><th>Valor Unit.</th><th style="text-align:center">Cant.</th><th>Autorización</th><th style="text-align:right">Subtotal</th><th style="text-align:center">Quitar</th>
         </tr></thead>
         <tbody id="bodyServicios"></tbody>
       </table>
@@ -304,17 +310,18 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
       <div class="liq-grid" id="liqGrid">
         <div class="liq-card">
           <h4><i class="fas fa-info-circle"></i> Datos de Factura</h4>
+          <div class="liq-row"><span class="liq-label">N° Admisión</span><span class="liq-value" id="liqNumAdm">—</span></div>
           <div class="liq-row"><span class="liq-label">EPS / Entidad</span><span class="liq-value" id="liqEps">—</span></div>
           <div class="liq-row"><span class="liq-label">Código EPS</span><span class="liq-value" id="liqCodEps">—</span></div>
           <div class="liq-row"><span class="liq-label">Paciente</span><span class="liq-value" id="liqPaciente">—</span></div>
           <div class="liq-row"><span class="liq-label">Documento</span><span class="liq-value" id="liqDocumento">—</span></div>
+          <div class="liq-row"><span class="liq-label">Diagnóstico</span><span class="liq-value" id="liqDiagnostico">—</span></div>
           <div class="liq-row"><span class="liq-label">Fecha</span><span class="liq-value" id="liqFecha">—</span></div>
-          <div class="liq-row"><span class="liq-label">Vigencia</span><span class="liq-value" id="liqVigencia">—</span></div>
         </div>
         <div class="liq-card">
           <h4><i class="fas fa-dollar-sign"></i> Resumen Financiero</h4>
           <div class="liq-row"><span class="liq-label">Subtotal (servicios)</span><span class="liq-value" id="liqSubtotal">$0</span></div>
-          <div class="liq-row"><span class="liq-label">IVA (0% — exento)</span><span class="liq-value" id="liqIva">$0</span></div>
+          <div class="liq-row"><span class="liq-label">IVA (0% — exento salud)</span><span class="liq-value" id="liqIva">$0</span></div>
           <div class="liq-row"><span class="liq-label">Descuento</span><span class="liq-value" id="liqDescuento">$0</span></div>
           <div class="liq-row total"><span class="liq-label">Total a Facturar</span><span class="liq-value" id="liqTotal">$0</span></div>
         </div>
@@ -329,7 +336,7 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
     <!-- PASO 4: Emitir -->
     <div class="form-section" id="paso4Panel" style="display:none">
       <div class="form-title"><i class="fas fa-paper-plane"></i> Paso 4 — Emitir Factura Definitiva</div>
-      <p style="color:#5a7a9a;font-size:13px;margin-bottom:14px">Revise la información y emita la factura definitiva. Esta acción le asigna un número consecutivo.</p>
+      <p style="color:#5a7a9a;font-size:13px;margin-bottom:14px">Revise la información y emita la factura definitiva. Se asignará un número consecutivo.</p>
       <div id="resumenEmitir" style="background:#0a1628;border-radius:10px;padding:18px;border:1px solid #1a3a5c;margin-bottom:16px"></div>
       <div style="display:flex;justify-content:space-between">
         <button class="btn btn-secondary" onclick="irPaso(3)"><i class="fas fa-arrow-left"></i> Anterior</button>
@@ -362,48 +369,12 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
       </div>
       <table class="data-table" id="tablaHistorial">
         <thead><tr>
-          <th>N° Factura</th><th>EPS</th><th>Paciente</th><th>Documento</th><th>Fecha</th><th>Estado</th><th style="text-align:right">Total</th><th>Acciones</th>
+          <th>N° Factura</th><th>N° Adm</th><th>EPS</th><th>Paciente</th><th>Documento</th><th>Fecha</th><th>Estado</th><th style="text-align:right">Total</th><th>Acciones</th>
         </tr></thead>
         <tbody id="bodyHistorial"></tbody>
       </table>
     </div>
   </div><!-- /tabHistorial -->
-
-  <!-- ═══════ TAB: CONFIGURACIÓN ═══════ -->
-  <div class="tab-panel" id="tabConfig">
-    <div class="form-section">
-      <div class="form-title"><i class="fas fa-cogs"></i> Catálogo de Servicios de Facturación</div>
-      <p style="color:#5a7a9a;font-size:13px;margin-bottom:14px">Administre los servicios CUPS disponibles para facturación con sus valores unitarios por tipo (Domiciliaria / Intramural).</p>
-      <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;align-items:end">
-        <div class="form-group" style="flex:2;min-width:200px">
-          <label>Nombre del Servicio</label>
-          <input type="text" id="cfgSvcNombre" placeholder="Ej: ENFERMERÍA 12H" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
-        </div>
-        <div class="form-group" style="flex:0 0 140px">
-          <label>Código CUPS</label>
-          <input type="text" id="cfgSvcCups" placeholder="Ej: 890001" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
-        </div>
-        <div class="form-group" style="flex:0 0 140px">
-          <label>Tipo</label>
-          <select id="cfgSvcTipo" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
-            <option value="DOMICILIARIA">Domiciliaria</option>
-            <option value="INTRAMURAL">Intramural</option>
-          </select>
-        </div>
-        <div class="form-group" style="flex:0 0 120px">
-          <label>Valor Unit.</label>
-          <input type="number" id="cfgSvcValor" placeholder="0" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
-        </div>
-        <button class="btn btn-success" onclick="agregarServicioCatalogo()"><i class="fas fa-plus"></i> Agregar</button>
-      </div>
-      <table class="data-table" id="tablaCatalogo">
-        <thead><tr>
-          <th>CUPS</th><th>Servicio</th><th>Tipo</th><th style="text-align:right">Valor Unit.</th><th>Acción</th>
-        </tr></thead>
-        <tbody id="bodyCatalogo"></tbody>
-      </table>
-    </div>
-  </div><!-- /tabConfig -->
 
 </div><!-- /container -->
 
@@ -425,17 +396,14 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
 
 <script>
 /* ═══════════════════════════════════════════════
-   NEXUSMED — FACTURACIÓN (Nueva Factura Individual)
+   NEXUSMED — FACTURACIÓN (Flujo Individual)
    ═══════════════════════════════════════════════ */
 
-// ─── textdb.online Motor ───
-const NS = 'nxmed_b7f3a9c2e4d1_';
-const K_PACIENTES  = NS + 'nexus_pacientes';
-const K_SERVICIOS  = NS + 'nexus_servicios_facturacion';
-const K_FACTURAS   = NS + 'nexus_facturas';
-const K_CONTADOR   = NS + 'nexus_contador_facturas';
-const K_HOSPITAL   = NS + 'nexus_hospital';
-const LIMIT = 195000;
+// ─── Claves localStorage (sin prefijo NS, nexus_db.js lo gestiona) ───
+const K_PACIENTES  = 'nexus_pacientes';
+const K_SERVICIOS  = 'nexus_servicios_facturacion';
+const K_FACTURAS   = 'nexus_facturas';
+const K_CONTADOR   = 'nexus_contador_facturas';
 
 function leer(k)   { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch(e) { return null; } }
 function guardar(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
@@ -448,7 +416,9 @@ function uid(pref) { return pref + '_' + Date.now() + '_' + Math.random().toStri
 let facturaActual = {
   admision: null,
   servicios: [],
-  paso: 1
+  paso: 1,
+  numeroFactura: null,
+  _editandoId: null
 };
 
 // ─── EPS code map ───
@@ -457,7 +427,7 @@ function codigoEpsFromString(epsStr) {
   const s = epsStr.toUpperCase().trim();
   if (s.includes('COOSALUD'))  return 'EPS017';
   if (s.includes('FOMAG'))     return 'EPS019';
-  if (s.includes('SALUD'))     return 'EPS017';
+  if (s.includes('SALUD'))    return 'EPS017';
   return 'SDS001';
 }
 
@@ -483,11 +453,9 @@ const CATALOGO_DEFAULT = [
 function initCatalogo() {
   if (!leer(K_SERVICIOS)) guardar(K_SERVICIOS, CATALOGO_DEFAULT);
 }
-
 function initContador() {
   if (!leer(K_CONTADOR)) guardar(K_CONTADOR, {ultimo: 0});
 }
-
 function siguienteNum() {
   const c = leer(K_CONTADOR) || {ultimo:0};
   c.ultimo++;
@@ -497,8 +465,7 @@ function siguienteNum() {
 
 // ─── Sesión ───
 function sesion() {
-  const s = leer(NS + 'nexus_sesion');
-  return s || null;
+  return JSON.parse(localStorage.getItem('nexus_sesion') || 'null');
 }
 function cargarSesion() {
   const s = sesion();
@@ -508,7 +475,7 @@ function cargarSesion() {
   }
 }
 function cerrarSesion() {
-  guardar(NS + 'nexus_sesion', null);
+  localStorage.removeItem('nexus_sesion');
   window.location.href = 'index.html';
 }
 
@@ -535,12 +502,10 @@ function cambiarTab(tabId) {
   document.querySelector('[data-tab="'+tabId+'"]').classList.add('active');
   document.getElementById(tabId).classList.add('active');
   if (tabId === 'tabHistorial') renderHistorial();
-  if (tabId === 'tabConfig') renderCatalogo();
 }
 
 // ─── PASOS ───
 function irPaso(num) {
-  // Validación antes de avanzar
   if (num >= 2 && !facturaActual.admision) {
     toast('Primero seleccione una admisión egresada','warning');
     return;
@@ -554,13 +519,11 @@ function irPaso(num) {
 
   facturaActual.paso = num;
 
-  // Mostrar/ocultar paneles
   for (let i = 1; i <= 4; i++) {
     const panel = document.getElementById('paso'+i+'Panel');
     if (panel) panel.style.display = (i === num) ? 'block' : 'none';
   }
 
-  // Actualizar indicador
   document.querySelectorAll('.paso-step').forEach(step => {
     const p = parseInt(step.dataset.paso);
     step.classList.remove('active','done');
@@ -582,12 +545,14 @@ function buscarAdmisiones(query) {
   if (!q) return [];
 
   return pacientes.filter(p => {
-    const estado = (p.estado || p.status || '').toLowerCase();
-    // Solo egresados
-    if (estado !== 'egresado' && estado !== 'egresada') return false;
-    const nombre = (p.nombre || p.nombres || '').toLowerCase();
-    const doc = (p.documento || p.cedula || p.numeroDocumento || '').toLowerCase();
-    return nombre.includes(q) || doc.includes(q);
+    // Estado 'Egresado' (con mayúscula, como lo guarda admisiones.html)
+    const estado = (p.estado || '').toLowerCase();
+    if (estado !== 'egresado') return false;
+
+    const nombre = (p.nombre || '').toLowerCase();
+    const doc = (p.documento || '').toLowerCase();
+    const numAdm = (p.numAdmision || '').toLowerCase();
+    return nombre.includes(q) || doc.includes(q) || numAdm.includes(q);
   });
 }
 
@@ -599,18 +564,18 @@ function renderDropdownResultados(resultados) {
     return;
   }
   lista.innerHTML = resultados.map((p, idx) => {
-    const nombre = p.nombre || p.nombres || 'Sin nombre';
-    const doc = p.documento || p.cedula || p.numeroDocumento || '—';
-    const eps = p.eps || p.entidad || '—';
+    const nombre = p.nombre || 'Sin nombre';
+    const doc = p.documento || '—';
+    const eps = p.eps || '—';
+    const numAdm = p.numAdmision || '—';
     return '<div class="adm-dropdown-item" onclick="seleccionarAdmision(' + idx + ')">'
       + '<span class="item-status egresado">Egresado</span>'
       + '<div class="item-name">' + nombre + '</div>'
-      + '<div class="item-doc">Doc: ' + doc + '</div>'
+      + '<div class="item-doc">Doc: ' + doc + ' | Adm: ' + numAdm + '</div>'
       + '<div class="item-eps">' + eps + '</div>'
       + '</div>';
   }).join('');
   lista.classList.add('open');
-  // Guardar temporalmente para selección
   window._admResultados = resultados;
 }
 
@@ -619,75 +584,144 @@ function seleccionarAdmision(idx) {
   facturaActual.admision = p;
   facturaActual.servicios = [];
   facturaActual.paso = 1;
+  facturaActual.numeroFactura = null;
+  facturaActual._editandoId = null;
 
   document.getElementById('buscarAdmInput').value = '';
   document.getElementById('admDropdownList').classList.remove('open');
   document.getElementById('admSeleccionada').style.display = 'block';
 
   llenarDatosPaciente(p);
-  llenarSelectServicios();
   renderServiciosTabla();
 }
 
 function llenarDatosPaciente(p) {
-  const nombre = p.nombre || p.nombres || '—';
-  const doc = p.documento || p.cedula || p.numeroDocumento || '—';
-  const eps = p.eps || p.entidad || '—';
+  const nombre = p.nombre || '—';
+  const doc = p.documento || '—';
+  const eps = p.eps || '—';
   const codEps = codigoEpsFromString(eps);
-  const tipoDoc = p.tipoDocumento || p.tipo_documento || 'CC';
-  const municipio = p.municipio || p.ciudad || '—';
-  const dx = p.diagnostico || p.dx || '—';
-  const autorizacion = p.autorizacion || p.autorizacionNumero || '—';
+  const numAdm = p.numAdmision || '—';
+  const municipio = p.municipio || '—';
+  const dx = p.diagnostico || '—';
+  const servicio = p.servicio || '—';
+  const telefono = p.telefono || '—';
 
   const grid = document.getElementById('datosPacienteGrid');
   grid.innerHTML = ''
+    + '<div class="form-group"><label>N° Admisión</label><input readonly value="'+numAdm+'"></div>'
     + '<div class="form-group"><label>Paciente</label><input readonly value="'+nombre+'"></div>'
-    + '<div class="form-group"><label>Tipo Doc.</label><input readonly value="'+tipoDoc+'"></div>'
     + '<div class="form-group"><label>Documento</label><input readonly value="'+doc+'"></div>'
     + '<div class="form-group"><label>EPS</label><input readonly value="'+eps+'"></div>'
     + '<div class="form-group"><label>Código EPS</label><input readonly value="'+codEps+'"></div>'
+    + '<div class="form-group"><label>Servicio</label><input readonly value="'+servicio+'"></div>'
     + '<div class="form-group"><label>Municipio</label><input readonly value="'+municipio+'"></div>'
     + '<div class="form-group"><label>Diagnóstico</label><input readonly value="'+dx+'"></div>'
-    + '<div class="form-group"><label>Autorización</label><input readonly value="'+autorizacion+'"></div>';
+    + '<div class="form-group"><label>Teléfono</label><input readonly value="'+telefono+'"></div>';
 }
 
-// ─── PASO 2: Servicios ───
-function llenarSelectServicios() {
+// ─── PASO 2: CUPS → auto-fill + Servicios ───
+
+// Mapa CUPS → servicios del catálogo (para autocompletar)
+function buscarPorCups(codigo) {
   const catalogo = leer(K_SERVICIOS) || [];
-  const sel = document.getElementById('selectServicio');
-  sel.innerHTML = '<option value="">— Seleccione servicio —</option>';
-  catalogo.forEach((s, i) => {
-    sel.innerHTML += '<option value="'+i+'">' + s.nombre + ' (' + s.tipo + ') — ' + fmt$(s.valor) + '</option>';
-  });
+  const cod = codigo.toUpperCase().trim();
+  return catalogo.filter(s => s.codigo.toUpperCase() === cod);
+}
+
+// Auto-fill al escribir CUPS
+function onCupsInput() {
+  const cups = document.getElementById('inputCups').value.trim();
+  const nombreInput = document.getElementById('inputServicioNombre');
+  if (!cups) {
+    nombreInput.value = '';
+    nombreInput.style.color = '#90e0ef';
+    return;
+  }
+  const matches = buscarPorCups(cups);
+  if (matches.length === 1) {
+    nombreInput.value = matches[0].nombre + ' (' + matches[0].tipo + ') — ' + fmt$(matches[0].valor);
+    nombreInput.style.color = '#2ecc71';
+    window._cupsMatch = matches[0];
+  } else if (matches.length > 1) {
+    nombreInput.value = matches.length + ' servicios encontrados con código ' + cups;
+    nombreInput.style.color = '#f39c12';
+    window._cupsMatch = null;
+    window._cupsMatches = matches;
+  } else {
+    nombreInput.value = 'Código no encontrado en catálogo';
+    nombreInput.style.color = '#ff3860';
+    window._cupsMatch = null;
+    window._cupsMatches = null;
+  }
+}
+
+// Si hay múltiples matches con mismo CUPS, al hacer click en nombre se abre mini-selector
+function seleccionarMatchMultiple() {
+  const matches = window._cupsMatches;
+  if (!matches || !matches.length) return;
+  // Usar el primer match por ahora (se puede mejorar con un mini-dropdown)
+  // Si solo hay 2 (DOMICILIARIA / INTRAMURAL), preguntar tipo según el servicio del paciente
+  const p = facturaActual.admision;
+  const servPac = (p.servicio || '').toLowerCase();
+  // Si el paciente es "Domiciliario", priorizar domiciliaria
+  const idx = servPac.includes('domicil') ? 0 : (matches.length > 1 ? 1 : 0);
+  const elegido = matches[idx] || matches[0];
+  document.getElementById('inputServicioNombre').value = elegido.nombre + ' (' + elegido.tipo + ') — ' + fmt$(elegido.valor);
+  document.getElementById('inputServicioNombre').style.color = '#2ecc71';
+  window._cupsMatch = elegido;
 }
 
 function agregarServicio() {
-  const sel = document.getElementById('selectServicio');
-  const idx = sel.value;
-  if (!idx && idx !== 0) { toast('Seleccione un servicio','warning'); return; }
-  const catalogo = leer(K_SERVICIOS) || [];
-  const svc = catalogo[parseInt(idx)];
-  if (!svc) return;
+  const cups = document.getElementById('inputCups').value.trim().toUpperCase();
   const cant = parseInt(document.getElementById('inputCantidad').value) || 1;
+  const autorizacion = document.getElementById('inputAutorizacion').value.trim();
+
+  if (!cups) { toast('Ingrese un código CUPS','warning'); return; }
   if (cant < 1) { toast('La cantidad debe ser ≥ 1','warning'); return; }
 
+  // Buscar en catálogo
+  let svc = window._cupsMatch;
+  if (!svc) {
+    // Intentar buscar de nuevo
+    const matches = buscarPorCups(cups);
+    if (matches.length === 1) {
+      svc = matches[0];
+    } else if (matches.length > 1) {
+      seleccionarMatchMultiple();
+      svc = window._cupsMatch;
+    }
+  }
+
+  if (!svc) {
+    toast('Código CUPS no encontrado. Verifique el código.','warning');
+    return;
+  }
+
   // Verificar si ya existe el mismo servicio+tipo
-  const existente = facturaActual.servicios.find(s => s.nombre === svc.nombre && s.tipo === svc.tipo);
+  const existente = facturaActual.servicios.find(s => s.codigo === svc.codigo && s.nombre === svc.nombre && s.tipo === svc.tipo);
   if (existente) {
     existente.cantidad += cant;
+    if (autorizacion && !existente.autorizacion) existente.autorizacion = autorizacion;
   } else {
     facturaActual.servicios.push({
       codigo: svc.codigo,
       nombre: svc.nombre,
       tipo: svc.tipo,
       valorUnit: svc.valor,
-      cantidad: cant
+      cantidad: cant,
+      autorizacion: autorizacion || ''
     });
   }
 
   renderServiciosTabla();
-  sel.value = '';
+  // Limpiar inputs
+  document.getElementById('inputCups').value = '';
+  document.getElementById('inputServicioNombre').value = '';
+  document.getElementById('inputServicioNombre').style.color = '#90e0ef';
   document.getElementById('inputCantidad').value = '1';
+  document.getElementById('inputAutorizacion').value = '';
+  window._cupsMatch = null;
+  window._cupsMatches = null;
   toast('Servicio agregado','success');
 }
 
@@ -706,17 +740,18 @@ function cambiarCantidad(idx, nuevaCant) {
 function renderServiciosTabla() {
   const tbody = document.getElementById('bodyServicios');
   if (!facturaActual.servicios.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#5a7a9a;padding:20px"><i class="fas fa-inbox"></i> No hay servicios agregados</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#5a7a9a;padding:20px"><i class="fas fa-inbox"></i> No hay servicios agregados — escriba un código CUPS arriba</td></tr>';
     return;
   }
   tbody.innerHTML = facturaActual.servicios.map((s, i) => {
     const subtotal = s.cantidad * s.valorUnit;
     return '<tr>'
-      + '<td>' + s.codigo + '</td>'
+      + '<td style="font-weight:600;color:#00b4d8">' + s.codigo + '</td>'
       + '<td>' + s.nombre + '</td>'
       + '<td><span class="badge" style="background:rgba(0,180,216,.15);color:#00b4d8">' + s.tipo + '</span></td>'
       + '<td class="td-valor">' + fmt$(s.valorUnit) + '</td>'
       + '<td class="td-cant"><input type="number" class="input-cant" value="'+s.cantidad+'" min="1" onchange="cambiarCantidad('+i+',this.value)"></td>'
+      + '<td style="font-size:12px;color:#90e0ef">' + (s.autorizacion||'—') + '</td>'
       + '<td class="td-subtotal">' + fmt$(subtotal) + '</td>'
       + '<td style="text-align:center"><button class="btn-del" onclick="eliminarServicio('+i+')"><i class="fas fa-trash"></i></button></td>'
       + '</tr>';
@@ -728,21 +763,24 @@ function recalcularLiquidacion() {
   const p = facturaActual.admision;
   if (!p) return;
 
-  const eps = p.eps || p.entidad || '—';
+  const eps = p.eps || '—';
   const codEps = codigoEpsFromString(eps);
-  const nombre = p.nombre || p.nombres || '—';
-  const doc = p.documento || p.cedula || p.numeroDocumento || '—';
+  const nombre = p.nombre || '—';
+  const doc = p.documento || '—';
+  const numAdm = p.numAdmision || '—';
+  const dx = p.diagnostico || '—';
 
+  document.getElementById('liqNumAdm').textContent = numAdm;
   document.getElementById('liqEps').textContent = eps;
   document.getElementById('liqCodEps').textContent = codEps;
   document.getElementById('liqPaciente').textContent = nombre;
   document.getElementById('liqDocumento').textContent = doc;
+  document.getElementById('liqDiagnostico').textContent = dx;
   document.getElementById('liqFecha').textContent = hoy();
-  document.getElementById('liqVigencia').textContent = hoy().substring(0,7); // mes vigencia
 
   let subtotal = 0;
   facturaActual.servicios.forEach(s => subtotal += s.cantidad * s.valorUnit);
-  const iva = 0; // servicios de salud exentos
+  const iva = 0;
   const descuento = 0;
   const total = subtotal - descuento;
 
@@ -757,53 +795,55 @@ function guardarPreFactura() {
   if (!facturaActual.admision) { toast('Seleccione una admisión','error'); return; }
   if (!facturaActual.servicios.length) { toast('Agregue servicios','error'); return; }
 
-  const p = facturaActual.admision;
   const facturas = leer(K_FACTURAS) || [];
-
   const fac = construirFactura();
   fac.estado = 'pre-factura';
-  fac.numeroFactura = fac.numeroFactura || uid('PF');
 
-  facturas.push(fac);
+  // Si estamos editando una pre-factura existente
+  if (facturaActual._editandoId) {
+    const idx = facturas.findIndex(f => f.id === facturaActual._editandoId);
+    if (idx >= 0) {
+      fac.numeroFactura = facturas[idx].numeroFactura;
+      fac.id = facturas[idx].id;
+      facturas[idx] = fac;
+    }
+  } else {
+    fac.numeroFactura = uid('PF');
+    facturas.push(fac);
+  }
+
   guardar(K_FACTURAS, facturas);
-
-  toast('Pre-Factura guardada correctamente','success');
+  toast('Pre-Factura guardada: ' + fac.numeroFactura, 'success');
   actualizarStats();
 }
 
 function construirFactura() {
   const p = facturaActual.admision;
-  const eps = p.eps || p.entidad || '—';
+  const eps = p.eps || '—';
   const codEps = codigoEpsFromString(eps);
-  const nombre = p.nombre || p.nombres || '—';
-  const doc = p.documento || p.cedula || p.numeroDocumento || '—';
-  const tipoDoc = p.tipoDocumento || p.tipo_documento || 'CC';
-  const municipio = p.municipio || p.ciudad || '—';
-  const dx = p.diagnostico || p.dx || '—';
-  const autorizacion = p.autorizacion || p.autorizacionNumero || '—';
 
   let subtotal = 0;
   facturaActual.servicios.forEach(s => subtotal += s.cantidad * s.valorUnit);
 
   return {
-    id: uid('FAC'),
+    id: facturaActual._editandoId || uid('FAC'),
     numeroFactura: facturaActual.numeroFactura || null,
-    admisionId: p.id || p._id || null,
-    paciente: nombre,
-    tipoDocumento: tipoDoc,
-    documento: doc,
+    admisionId: p.id || null,
+    numAdmision: p.numAdmision || '—',
+    paciente: p.nombre || '—',
+    documento: p.documento || '—',
     eps: eps,
     codigoEps: codEps,
-    municipio: municipio,
-    diagnostico: dx,
-    autorizacion: autorizacion,
+    municipio: p.municipio || '—',
+    diagnostico: p.diagnostico || '—',
+    servicio: p.servicio || '—',
+    telefono: p.telefono || '—',
     servicios: JSON.parse(JSON.stringify(facturaActual.servicios)),
     subtotal: subtotal,
     iva: 0,
     descuento: 0,
     total: subtotal,
     fecha: hoy(),
-    vigencia: hoy().substring(0,7),
     creadoEn: ahora()
   };
 }
@@ -811,14 +851,16 @@ function construirFactura() {
 // ─── PASO 4: Emitir Factura Definitiva ───
 function llenarResumenEmitir() {
   const p = facturaActual.admision;
-  const eps = p ? (p.eps || p.entidad || '—') : '—';
-  const nombre = p ? (p.nombre || p.nombres || '—') : '—';
+  const eps = p ? (p.eps || '—') : '—';
+  const nombre = p ? (p.nombre || '—') : '—';
+  const numAdm = p ? (p.numAdmision || '—') : '—';
 
   let subtotal = 0;
   facturaActual.servicios.forEach(s => subtotal += s.cantidad * s.valorUnit);
 
   const resumen = document.getElementById('resumenEmitir');
   resumen.innerHTML = ''
+    + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">N° Admisión:</strong> <span style="color:#c8d6e5">'+numAdm+'</span></div>'
     + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">Paciente:</strong> <span style="color:#c8d6e5">'+nombre+'</span></div>'
     + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">EPS:</strong> <span style="color:#c8d6e5">'+eps+'</span></div>'
     + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">Servicios:</strong> <span style="color:#c8d6e5">'+facturaActual.servicios.length+' ítem(s)</span></div>'
@@ -832,29 +874,26 @@ function emitirFacturaDefinitiva() {
   if (!facturaActual.servicios.length) { toast('Agregue servicios','error'); return; }
 
   const facturas = leer(K_FACTURAS) || [];
-
-  // Si ya existe como pre-factura, actualizarla; si no, crear nueva
   const fac = construirFactura();
-  fac.numeroFactura = siguienteNum();
   fac.estado = 'definitiva';
   fac.emitidaEn = ahora();
 
-  // Si teníamos una pre-factura con el mismo id, reemplazar
-  const existenteIdx = facturaActual.numeroFactura
-    ? facturas.findIndex(f => f.numeroFactura === facturaActual.numeroFactura)
-    : -1;
-
-  if (existenteIdx >= 0) {
-    // Preservar el número si era pre-factura
-    fac.numeroFactura = facturas[existenteIdx].numeroFactura;
-    facturas[existenteIdx] = fac;
+  // Si estábamos editando una pre-factura, reemplazarla
+  if (facturaActual._editandoId) {
+    const idx = facturas.findIndex(f => f.id === facturaActual._editandoId);
+    if (idx >= 0) {
+      // Mantener el número de pre-factura o asignar nuevo definitivo
+      fac.numeroFactura = siguienteNum();
+      fac.id = facturas[idx].id;
+      facturas[idx] = fac;
+    }
   } else {
+    fac.numeroFactura = siguienteNum();
     facturas.push(fac);
   }
 
   guardar(K_FACTURAS, facturas);
-
-  toast('Factura definitiva emitida: ' + fac.numeroFactura, 'success');
+  toast('✅ Factura definitiva emitida: ' + fac.numeroFactura, 'success');
   actualizarStats();
   resetFacturaActual();
   irPaso(1);
@@ -862,174 +901,114 @@ function emitirFacturaDefinitiva() {
 
 // ─── Reset ───
 function resetFacturaActual() {
-  facturaActual = { admision: null, servicios: [], paso: 1 };
+  facturaActual = { admision: null, servicios: [], paso: 1, numeroFactura: null, _editandoId: null };
   document.getElementById('admSeleccionada').style.display = 'none';
   document.getElementById('buscarAdmInput').value = '';
   renderServiciosTabla();
 }
 
-// ─── Historial ───
+// ─── HISTORIAL ───
 function renderHistorial() {
   const facturas = leer(K_FACTURAS) || [];
   const filtroEps = document.getElementById('filtroEps').value;
   const filtroEstado = document.getElementById('filtroEstado').value;
 
-  let filtradas = facturas;
-  if (filtroEps) filtradas = filtradas.filter(f => (f.eps||'').includes(filtroEps));
-  if (filtroEstado) filtradas = filtradas.filter(f => f.estado === filtroEstado);
-
   // Ordenar por fecha descendente
-  filtradas.sort((a,b) => (b.creadoEn||'').localeCompare(a.creadoEn||''));
+  const sorted = facturas.slice().sort((a,b) => (b.creadoEn||'').localeCompare(a.creadoEn||''));
+
+  const filtradas = sorted.filter(f => {
+    if (filtroEps && (f.eps||'').toUpperCase() !== filtroEps.toUpperCase()) return false;
+    if (filtroEstado && f.estado !== filtroEstado) return false;
+    return true;
+  });
 
   const tbody = document.getElementById('bodyHistorial');
   if (!filtradas.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#5a7a9a;padding:20px"><i class="fas fa-inbox"></i> No hay facturas</td></tr>';
-    return;
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#5a7a9a;padding:20px"><i class="fas fa-folder-open"></i> No hay facturas</td></tr>';
+  } else {
+    tbody.innerHTML = filtradas.map(f => {
+      const estadoBadge = f.estado === 'definitiva'
+        ? '<span class="badge" style="background:rgba(46,204,113,.15);color:#2ecc71">Definitiva</span>'
+        : f.estado === 'pre-factura'
+        ? '<span class="badge" style="background:rgba(255,193,7,.15);color:#ffc107">Pre-Factura</span>'
+        : '<span class="badge" style="background:rgba(255,56,96,.15);color:#ff3860">Anulada</span>';
+
+      const acciones = f.estado === 'definitiva'
+        ? '<button class="btn-sm btn-danger-sm" onclick="anularFactura(\''+f.id+'\')"><i class="fas fa-ban"></i> Anular</button>'
+        : f.estado === 'pre-factura'
+        ? '<button class="btn-sm btn-primary-sm" onclick="cargarPreFactura(\''+f.id+'\')"><i class="fas fa-edit"></i> Editar</button> '
+          + '<button class="btn-sm btn-danger-sm" onclick="anularFactura(\''+f.id+'\')"><i class="fas fa-ban"></i> Anular</button>'
+        : '';
+
+      return '<tr>'
+        + '<td style="font-weight:600;color:#00b4d8">' + (f.numeroFactura||'—') + '</td>'
+        + '<td>' + (f.numAdmision||'—') + '</td>'
+        + '<td>' + (f.eps||'—') + '</td>'
+        + '<td>' + (f.paciente||'—') + '</td>'
+        + '<td>' + (f.documento||'—') + '</td>'
+        + '<td>' + (f.fecha||'—') + '</td>'
+        + '<td>' + estadoBadge + '</td>'
+        + '<td class="td-valor">' + fmt$(f.total) + '</td>'
+        + '<td>' + acciones + '</td>'
+        + '</tr>';
+    }).join('');
   }
 
-  tbody.innerHTML = filtradas.map(f => {
-    const badge = f.estado === 'pre-factura' ? '<span class="badge badge-prefactura">Pre-Factura</span>'
-      : f.estado === 'definitiva' ? '<span class="badge badge-definitiva">Definitiva</span>'
-      : '<span class="badge badge-anulada">Anulada</span>';
-
-    const acciones = [];
-    if (f.estado === 'pre-factura') {
-      acciones.push('<button class="btn btn-sm btn-primary" onclick="editarPreFactura(\''+f.id+'\')"><i class="fas fa-edit"></i></button>');
-      acciones.push('<button class="btn btn-sm btn-danger" onclick="anularPreFactura(\''+f.id+'\')"><i class="fas fa-ban"></i></button>');
-    }
-    if (f.estado === 'definitiva') {
-      acciones.push('<button class="btn btn-sm btn-danger" onclick="anularPreFactura(\''+f.id+'\')"><i class="fas fa-ban"></i></button>');
-    }
-
-    return '<tr>'
-      + '<td style="font-weight:700;color:#00b4d8">' + (f.numeroFactura||'—') + '</td>'
-      + '<td>' + (f.eps||'—') + '</td>'
-      + '<td>' + (f.paciente||'—') + '</td>'
-      + '<td>' + (f.documento||'—') + '</td>'
-      + '<td>' + (f.fecha||'—') + '</td>'
-      + '<td>' + badge + '</td>'
-      + '<td style="text-align:right;font-weight:700;color:#90e0ef">' + fmt$(f.total) + '</td>'
-      + '<td><div class="acciones">' + acciones.join('') + '</div></td>'
-      + '</tr>';
-  }).join('');
-
-  // Llenar filtro EPS
-  const epsSet = new Set(facturas.map(f => f.eps).filter(Boolean));
-  const selEps = document.getElementById('filtroEps');
-  const currentVal = selEps.value;
-  selEps.innerHTML = '<option value="">Todas</option>';
-  epsSet.forEach(e => {
-    selEps.innerHTML += '<option value="'+e+'"'+(currentVal===e?' selected':'')+'>'+e+'</option>';
-  });
+  // Actualizar opciones EPS en filtro
+  const epsSet = new Set(facturas.map(f => (f.eps||'').toUpperCase()));
+  const selectEps = document.getElementById('filtroEps');
+  const current = selectEps.value;
+  selectEps.innerHTML = '<option value="">Todas</option>'
+    + [...epsSet].filter(Boolean).sort().map(e => '<option value="'+e+'"'+(e===current?' selected':'')+'>'+e+'</option>').join('');
 }
 
-// ─── Editar Pre-Factura ───
-function editarPreFactura(id) {
-  const facturas = leer(K_FACTURAS) || [];
-  const fac = facturas.find(f => f.id === id);
-  if (!fac) return;
-  if (fac.estado !== 'pre-factura') { toast('Solo se pueden editar pre-facturas','warning'); return; }
-
-  // Cargar en facturaActual
-  facturaActual.admision = {
-    nombre: fac.paciente,
-    tipoDocumento: fac.tipoDocumento,
-    documento: fac.documento,
-    eps: fac.eps,
-    municipio: fac.municipio,
-    diagnostico: fac.diagnostico,
-    autorizacion: fac.autorizacion,
-    estado: 'egresado'
-  };
-  facturaActual.servicios = JSON.parse(JSON.stringify(fac.servicios || []));
-  facturaActual.numeroFactura = fac.numeroFactura;
-  facturaActual._editandoId = id;
-
-  // Mostrar datos paciente
-  document.getElementById('admSeleccionada').style.display = 'block';
-  llenarDatosPaciente(facturaActual.admision);
-  llenarSelectServicios();
-  renderServiciosTabla();
-
-  cambiarTab('tabNueva');
-  irPaso(2);
-  toast('Editando pre-factura ' + fac.numeroFactura, 'info');
-}
-
-// ─── Anular ───
-let _anularId = null;
-function anularPreFactura(id) {
-  _anularId = id;
+// ─── Anular factura ───
+let _idAnular = null;
+function anularFactura(id) {
+  _idAnular = id;
   abrirModal('modalAnular');
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('btnConfirmarAnular').addEventListener('click', function() {
-    if (!_anularId) return;
-    const facturas = leer(K_FACTURAS) || [];
-    const fac = facturas.find(f => f.id === _anularId);
-    if (fac) {
-      fac.estado = 'anulada';
-      fac.anuladaEn = ahora();
-      guardar(K_FACTURAS, facturas);
-      toast('Factura anulada','error');
-      actualizarStats();
-      renderHistorial();
-    }
-    cerrarModal('modalAnular');
-    _anularId = null;
-  });
-});
-
-// ─── Catálogo Config ───
-function renderCatalogo() {
-  const catalogo = leer(K_SERVICIOS) || [];
-  const tbody = document.getElementById('bodyCatalogo');
-  if (!catalogo.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#5a7a9a;padding:20px"><i class="fas fa-inbox"></i> No hay servicios configurados</td></tr>';
-    return;
+document.getElementById('btnConfirmarAnular').onclick = function() {
+  if (!_idAnular) return;
+  const facturas = leer(K_FACTURAS) || [];
+  const idx = facturas.findIndex(f => f.id === _idAnular);
+  if (idx >= 0) {
+    facturas[idx].estado = 'anulada';
+    facturas[idx].anuladaEn = ahora();
+    guardar(K_FACTURAS, facturas);
+    toast('Factura anulada','success');
+    actualizarStats();
+    renderHistorial();
   }
-  tbody.innerHTML = catalogo.map((s, i) => {
-    return '<tr>'
-      + '<td>' + (s.codigo||'—') + '</td>'
-      + '<td>' + s.nombre + '</td>'
-      + '<td><span class="badge" style="background:rgba(0,180,216,.15);color:#00b4d8">' + s.tipo + '</span></td>'
-      + '<td style="text-align:right;font-weight:700;color:#90e0ef">' + fmt$(s.valor) + '</td>'
-      + '<td><button class="btn btn-sm btn-danger" onclick="eliminarServicioCatalogo('+i+')"><i class="fas fa-trash"></i></button></td>'
-      + '</tr>';
-  }).join('');
-}
+  cerrarModal('modalAnular');
+  _idAnular = null;
+};
 
-function agregarServicioCatalogo() {
-  const nombre = document.getElementById('cfgSvcNombre').value.trim();
-  const codigo = document.getElementById('cfgSvcCups').value.trim();
-  const tipo = document.getElementById('cfgSvcTipo').value;
-  const valor = parseInt(document.getElementById('cfgSvcValor').value) || 0;
+// ─── Cargar pre-factura para editar ───
+function cargarPreFactura(id) {
+  const facturas = leer(K_FACTURAS) || [];
+  const fac = facturas.find(f => f.id === id);
+  if (!fac) { toast('Factura no encontrada','error'); return; }
 
-  if (!nombre) { toast('Ingrese nombre del servicio','warning'); return; }
-  if (!codigo) { toast('Ingrese código CUPS','warning'); return; }
-  if (valor <= 0) { toast('El valor debe ser mayor a 0','warning'); return; }
+  // Buscar el paciente en nexus_pacientes para obtener datos completos
+  const pacientes = leer(K_PACIENTES) || [];
+  const pac = pacientes.find(p => p.numAdmision === fac.numAdmision);
+  if (!pac) { toast('Paciente de la admisión no encontrado en base de datos','error'); return; }
 
-  const catalogo = leer(K_SERVICIOS) || [];
-  catalogo.push({codigo, nombre, tipo, valor});
-  guardar(K_SERVICIOS, catalogo);
+  facturaActual = {
+    admision: pac,
+    servicios: fac.servicios || [],
+    paso: 1,
+    numeroFactura: fac.numeroFactura,
+    _editandoId: fac.id
+  };
 
-  document.getElementById('cfgSvcNombre').value = '';
-  document.getElementById('cfgSvcCups').value = '';
-  document.getElementById('cfgSvcValor').value = '';
-
-  renderCatalogo();
-  llenarSelectServicios();
-  toast('Servicio agregado al catálogo','success');
-}
-
-function eliminarServicioCatalogo(idx) {
-  const catalogo = leer(K_SERVICIOS) || [];
-  catalogo.splice(idx, 1);
-  guardar(K_SERVICIOS, catalogo);
-  renderCatalogo();
-  llenarSelectServicios();
-  toast('Servicio eliminado del catálogo','info');
+  // Ir a tab Nueva Factura
+  cambiarTab('tabNueva');
+  llenarDatosPaciente(pac);
+  renderServiciosTabla();
+  irPaso(2);
+  toast('Pre-Factura cargada para edición','info');
 }
 
 // ─── Stats ───
@@ -1038,7 +1017,7 @@ function actualizarStats() {
   const pre = facturas.filter(f => f.estado === 'pre-factura').length;
   const def = facturas.filter(f => f.estado === 'definitiva').length;
   const anul = facturas.filter(f => f.estado === 'anulada').length;
-  const total$ = facturas.filter(f => f.estado === 'definitiva').reduce((sum, f) => sum + (f.total||0), 0);
+  const total$ = facturas.filter(f => f.estado === 'definitiva').reduce((s,f) => s + (f.total||0), 0);
 
   document.getElementById('statPre').textContent = pre;
   document.getElementById('statDef').textContent = def;
@@ -1046,24 +1025,35 @@ function actualizarStats() {
   document.getElementById('statTotal$').textContent = fmt$(total$);
 }
 
-// ─── Event Listeners ───
+// ─── Eventos ───
 document.addEventListener('DOMContentLoaded', function() {
   initCatalogo();
   initContador();
   cargarSesion();
   actualizarStats();
-  renderHistorial();
+  renderServiciosTabla();
 
-  // Buscar admisiones
-  const input = document.getElementById('buscarAdmInput');
-  input.addEventListener('input', function() {
-    const q = this.value.trim();
-    if (q.length < 2) {
-      document.getElementById('admDropdownList').classList.remove('open');
-      return;
+  // Búsqueda de admisiones egresadas
+  const inputBuscar = document.getElementById('buscarAdmInput');
+  let debounceTimer;
+  inputBuscar.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      const q = inputBuscar.value.trim();
+      if (q.length < 2) {
+        document.getElementById('admDropdownList').classList.remove('open');
+        return;
+      }
+      const resultados = buscarAdmisiones(q);
+      renderDropdownResultados(resultados);
+    }, 250);
+  });
+
+  inputBuscar.addEventListener('focus', function() {
+    if (inputBuscar.value.trim().length >= 2) {
+      const resultados = buscarAdmisiones(inputBuscar.value.trim());
+      renderDropdownResultados(resultados);
     }
-    const resultados = buscarAdmisiones(q);
-    renderDropdownResultados(resultados);
   });
 
   // Cerrar dropdown al hacer click fuera
@@ -1073,13 +1063,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Click fuera del modal
-  document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', function(e) {
-      if (e.target === this) this.classList.remove('active');
-    });
+  // Auto-fill CUPS
+  document.getElementById('inputCups').addEventListener('input', function() {
+    onCupsInput();
+  });
+
+  // Enter en CUPS agrega automáticamente
+  document.getElementById('inputCups').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); agregarServicio(); }
+  });
+
+  // Enter en cantidad
+  document.getElementById('inputCantidad').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); agregarServicio(); }
+  });
+
+  // Enter en autorización
+  document.getElementById('inputAutorizacion').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); agregarServicio(); }
   });
 });
+
 </script>
 </body>
 </html>
