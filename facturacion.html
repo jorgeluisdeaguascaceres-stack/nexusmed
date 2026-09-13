@@ -365,8 +365,15 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
     <!-- PASO 4: Emitir -->
     <div class="form-section" id="paso4Panel" style="display:none">
       <div class="form-title"><i class="fas fa-paper-plane"></i> Paso 4 — Emitir Factura Definitiva</div>
-      <p style="color:#5a7a9a;font-size:13px;margin-bottom:14px">Revise la información y emita la factura definitiva. Se asignará un número consecutivo.</p>
+      <p style="color:#5a7a9a;font-size:13px;margin-bottom:14px">Revise la información y emita la factura definitiva. Se asignará un número consecutivo automático, <strong style="color:#90e0ef">o ingrese manualmente el número si ya emitió la factura en otro aplicativo</strong>.</p>
       <div id="resumenEmitir" style="background:#0a1628;border-radius:10px;padding:18px;border:1px solid #1a3a5c;margin-bottom:16px"></div>
+      <div style="background:#0a1628;border-radius:10px;padding:16px;border:1px dashed #1a3a5c;margin-bottom:16px">
+        <div class="form-group" style="margin-bottom:0">
+          <label style="color:#90e0ef"><i class="fas fa-external-link-alt"></i> N° Factura Externo (Opcional)</label>
+          <input type="text" id="facturaExterna" placeholder="Ej: FE12865 — Dejar vacío para consecutivo automático" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;width:100%;transition:border-color .3s" onfocus="this.style.borderColor='#00b4d8';this.style.boxShadow='0 0 0 3px rgba(0,180,216,.15)'" onblur="this.style.borderColor='#1a3a5c';this.style.boxShadow='none'">
+          <small style="color:#5a7a9a;font-size:11px;margin-top:6px;display:block">Si ya emitió esta factura en otro aplicativo (ej: facturador electrónico), ingrese aquí el número real. Si lo deja vacío, se asignará el consecutivo automático del sistema (FC-XXXXXX).</small>
+        </div>
+      </div>
       <div style="display:flex;justify-content:space-between">
         <button class="btn btn-secondary" onclick="irPaso(3)"><i class="fas fa-arrow-left"></i> Anterior</button>
         <button class="btn btn-success" onclick="emitirFacturaDefinitiva()" id="btnEmitir"><i class="fas fa-check-circle"></i> Emitir Factura Definitiva</button>
@@ -1041,7 +1048,12 @@ function llenarResumenEmitir() {
     + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">Servicios:</strong> <span style="color:#c8d6e5">'+facturaActual.servicios.length+' ítem(s)</span></div>'
     + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">Subtotal:</strong> <span style="color:#00b4d8;font-weight:700">'+fmt$(subtotal)+'</span></div>'
     + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">IVA:</strong> <span style="color:#2ecc71">$0 (exento)</span></div>'
-    + '<div style="border-top:2px solid #00b4d8;padding-top:10px;margin-top:4px"><strong style="color:#00b4d8;font-size:18px">TOTAL:</strong> <span style="color:#00b4d8;font-size:20px;font-weight:800">'+fmt$(subtotal)+'</span></div>';
+    + '<div style="border-top:2px solid #00b4d8;padding-top:10px;margin-top:4px"><strong style="color:#00b4d8;font-size:18px">TOTAL:</strong> <span style="color:#00b4d8;font-size:20px;font-weight:800">'+fmt$(subtotal)+'</span></div>'
+    + '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed #1a3a5c"><small style="color:#5a7a9a"><i class="fas fa-info-circle"></i> Si esta factura ya fue emitida en otro aplicativo, ingrese el número real en el campo <strong style="color:#90e0ef">"N° Factura Externo"</strong> que aparece abajo. Si lo deja vacío, se asignará un consecutivo automático (FC-XXXXXX).</small></div>';
+
+  // Limpiar campo externo al entrar al paso 4
+  var fe = document.getElementById('facturaExterna');
+  if (fe && facturaActual.numeroFacturaExterno) fe.value = facturaActual.numeroFacturaExterno;
 }
 
 function emitirFacturaDefinitiva() {
@@ -1055,22 +1067,33 @@ function emitirFacturaDefinitiva() {
     return;
   }
 
+  // Número externo opcional (si el usuario ya emitió la factura en otro aplicativo)
+  var numExterno = (document.getElementById('facturaExterna').value || '').trim();
+
   const facturas = leer(K_FACTURAS) || [];
   const fac = construirFactura();
   fac.estado = 'definitiva';
   fac.emitidaEn = ahora();
 
+  // Asignar número: externo si se proporcionó, si no consecutivo automático
+  if (numExterno) {
+    fac.numeroFactura = numExterno;
+    fac.numeroFacturaExterno = numExterno;
+    fac.numeroFacturaInterno = siguienteNum(); // guardar interno como referencia
+  } else {
+    fac.numeroFactura = siguienteNum();
+    fac.numeroFacturaExterno = null;
+    fac.numeroFacturaInterno = null;
+  }
+
   // Si estábamos editando una pre-factura, reemplazarla
   if (facturaActual._editandoId) {
     const idx = facturas.findIndex(f => f.id === facturaActual._editandoId);
     if (idx >= 0) {
-      // Mantener el número de pre-factura o asignar nuevo definitivo
-      fac.numeroFactura = siguienteNum();
       fac.id = facturas[idx].id;
       facturas[idx] = fac;
     }
   } else {
-    fac.numeroFactura = siguienteNum();
     facturas.push(fac);
   }
 
@@ -1086,6 +1109,8 @@ function resetFacturaActual() {
   facturaActual = { admision: null, servicios: [], paso: 1, numeroFactura: null, _editandoId: null };
   document.getElementById('admSeleccionada').style.display = 'none';
   document.getElementById('buscarAdmInput').value = '';
+  var fe = document.getElementById('facturaExterna');
+  if (fe) fe.value = '';
   renderServiciosTabla();
 }
 
@@ -1123,7 +1148,7 @@ function renderHistorial() {
         : '';
 
       return '<tr>'
-        + '<td style="font-weight:600;color:#00b4d8">' + (f.numeroFactura||'—') + '</td>'
+        + '<td style="font-weight:600;color:#00b4d8">' + (f.numeroFactura||'—') + (f.numeroFacturaExterno ? ' <span style="font-size:0.65em;background:rgba(0,180,216,.15);color:#90e0ef;padding:2px 6px;border-radius:4px;margin-left:4px"><i class="fas fa-external-link-alt"></i> Ext</span>' : '') + '</td>'
         + '<td>' + (f.numAdmision||'—') + '</td>'
         + '<td>' + (f.eps||'—') + '</td>'
         + '<td>' + (f.paciente||'—') + '</td>'
@@ -1182,6 +1207,7 @@ function cargarPreFactura(id) {
     servicios: fac.servicios || [],
     paso: 1,
     numeroFactura: fac.numeroFactura,
+    numeroFacturaExterno: fac.numeroFacturaExterno || null,
     _editandoId: fac.id
   };
 

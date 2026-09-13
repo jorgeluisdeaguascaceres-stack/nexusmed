@@ -1023,10 +1023,13 @@ function renderTabla() {
   if (filtered.length === 0) {
     tbody.innerHTML = '<tr class="empty-row"><td colspan="8"><i class="fas fa-folder-open"></i> No se encontraron historias clínicas</td></tr>';
   } else {
-    tbody.innerHTML = filtered.map(h => `
-      <tr>
+    tbody.innerHTML = filtered.map(h => {
+      const _pac = getPacientes().find(p => String(p.id) === String(h.pacienteId));
+      const _isEgresado = _pac && _pac.estado === 'Egresado';
+      return `
+      <tr${_isEgresado?' style="opacity:0.65"':''}>
         <td><strong style="color:#00b4d8">${h.numeroHistoria}</strong></td>
-        <td>${h.nombrePaciente}</td>
+        <td>${h.nombrePaciente}${_isEgresado?' <span class="badge" style="background:#d63031;color:#fff;font-size:0.65em">Egresado</span>':''}</td>
         <td>${h.documentoPaciente||'—'}</td>
         <td>${h.diagnosticoPrincipal||'—'}</td>
         <td>${h.medicoTratante||'—'}</td>
@@ -1035,14 +1038,14 @@ function renderTabla() {
         <td>
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
             <button class="btn-action btn-pdf" onclick="generarPDFHistoria('${h.id}')" title="Descargar PDF"><i class="fas fa-file-pdf"></i> PDF</button>
-            <button class="btn-action btn-edit" onclick="editarHistoria('${h.id}')" title="Editar historia"><i class="fas fa-edit"></i> Editar</button>
+            ${_isEgresado?'<span style="color:#d63031;font-size:0.75em;white-space:nowrap"><i class="fas fa-lock"></i> Solo lectura</span>':`<button class="btn-action btn-edit" onclick="editarHistoria('${h.id}')" title="Editar historia"><i class="fas fa-edit"></i> Editar</button>`}
             <button class="btn-action btn-view" onclick="verDetalle('${h.id}')" title="Ver detalle"><i class="fas fa-eye"></i></button>
-            ${h.estado==='Abierta'?`<button class="btn-action btn-close-hc" onclick="cambiarEstado('${h.id}','Cerrada')" title="Cerrar historia"><i class="fas fa-lock"></i></button>`:`<button class="btn-action btn-open-hc" onclick="cambiarEstado('${h.id}','Abierta')" title="Reabrir historia"><i class="fas fa-unlock"></i></button>`}
-            <button class="btn-action btn-delete" onclick="eliminarHistoria('${h.id}')" title="Eliminar historia"><i class="fas fa-trash"></i> Eliminar</button>
+            ${_isEgresado?'':(h.estado==='Abierta'?`<button class="btn-action btn-close-hc" onclick="cambiarEstado('${h.id}','Cerrada')" title="Cerrar historia"><i class="fas fa-lock"></i></button>`:`<button class="btn-action btn-open-hc" onclick="cambiarEstado('${h.id}','Abierta')" title="Reabrir historia"><i class="fas fa-unlock"></i></button>`)}
+            ${_isEgresado?'':`<button class="btn-action btn-delete" onclick="eliminarHistoria('${h.id}')" title="Eliminar historia"><i class="fas fa-trash"></i> Eliminar</button>`}
           </div>
         </td>
-      </tr>
-    `).join('');
+      </tr>`;
+    }).join('');
   }
   
   // Stats
@@ -1087,6 +1090,8 @@ function abrirModalCrear() {
 function editarHistoria(id) {
   const h = getHistorias().find(x => x.id === id);
   if (!h) return;
+  const _pac = getPacientes().find(p => String(p.id) === String(h.pacienteId));
+  if (_pac && _pac.estado === 'Egresado') { showToast('Paciente egresado — historia de solo lectura', 'error'); return; }
   document.getElementById('modalTitulo').textContent = 'Editar Historia Clínica';
   
   // Populate patient search from existing data
@@ -1223,7 +1228,7 @@ function guardarHistoria() {
     historias.push({
       id: 'hc_' + Date.now(),
       numeroHistoria: 'HC-' + year + '-' + String(num).padStart(4, '0'),
-      fechaApertura: today,
+      fechaApertura: fecha,
       estado: 'Abierta',
       ...data
     });
@@ -1422,6 +1427,8 @@ function cambiarEstado(id, nuevoEstado) {
   const historias = getHistorias();
   const idx = historias.findIndex(h => h.id === id);
   if (idx > -1) {
+    const _pac = getPacientes().find(p => String(p.id) === String(historias[idx].pacienteId));
+    if (_pac && _pac.estado === 'Egresado') { showToast('Paciente egresado — no se puede modificar', 'error'); return; }
     historias[idx].estado = nuevoEstado;
     if (nuevoEstado === 'Cerrada') historias[idx].fechaCierre = today;
     else delete historias[idx].fechaCierre;
@@ -1433,6 +1440,11 @@ function cambiarEstado(id, nuevoEstado) {
 
 // Delete
 function eliminarHistoria(id) {
+  const h = getHistorias().find(x => x.id === id);
+  if (h) {
+    const _pac = getPacientes().find(p => String(p.id) === String(h.pacienteId));
+    if (_pac && _pac.estado === 'Egresado') { showToast('Paciente egresado — no se puede eliminar', 'error'); return; }
+  }
   if (!confirm('¿Eliminar esta historia clínica? Esta acción no se puede deshacer.')) return;
   const historias = getHistorias().filter(h => h.id !== id);
   saveHistorias(historias);
