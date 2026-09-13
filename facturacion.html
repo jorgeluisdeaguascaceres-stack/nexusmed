@@ -1,1276 +1,1085 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUSMED - Facturación y RIPS</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: #0a1628; color: #e0e0e0; min-height: 100vh; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUSMED - Facturación</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:100vh}
 
-        .header { background: linear-gradient(135deg, #0d2137, #1a3a5c); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00b4d8; box-shadow: 0 2px 15px rgba(0,180,216,.2); }
-        .header-left { display: flex; align-items: center; gap: 12px; }
-        .brand-icon { width: 32px; height: 32px; }
-        .brand-icon svg { width: 100%; height: 100%; }
-        .brand-name { font-size: 24px; font-weight: 800; color: #00b4d8; letter-spacing: 3px; }
-        .brand-name span { color: #90e0ef; font-weight: 300; }
-        .header-right { display: flex; align-items: center; gap: 20px; }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00b4d8, #0077b6); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; }
-        .user-name { font-size: 13px; font-weight: 600; color: #e0e0e0; }
-        .user-role { font-size: 11px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-header { background-color: #1a3a5c; color: #00b4d8; border: 1px solid #00b4d8; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all .3s; text-decoration: none; font-family: 'Inter', sans-serif; }
-        .btn-header:hover { background-color: #00b4d8; color: #0a1628; }
-        .btn-cerrar { background-color: transparent; color: #ff3860; border: 1px solid #ff3860; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all .3s; font-family: 'Inter', sans-serif; }
-        .btn-cerrar:hover { background-color: #ff3860; color: #fff; }
+/* ─── Header ─── */
+.header{background:linear-gradient(135deg,#0d2137,#1a3a5c);padding:15px 30px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #00b4d8;box-shadow:0 2px 15px rgba(0,180,216,.2)}
+.header-left{display:flex;align-items:center;gap:12px}
+.brand-icon{width:32px;height:32px}
+.brand-icon svg{width:100%;height:100%}
+.brand-name{font-size:24px;font-weight:800;color:#00b4d8;letter-spacing:3px}
+.brand-name span{color:#90e0ef;font-weight:300}
+.header-right{display:flex;align-items:center;gap:20px}
+.user-info{display:flex;align-items:center;gap:10px}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#00b4d8,#0077b6);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
+.user-name{font-size:13px;font-weight:600;color:#e0e0e0}
+.user-role{font-size:11px;color:#5a7a9a;text-transform:uppercase;letter-spacing:1px}
+.btn-header{background:#1a3a5c;color:#00b4d8;border:1px solid #00b4d8;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:14px;transition:all .3s;text-decoration:none;font-family:'Inter',sans-serif}
+.btn-header:hover{background:#00b4d8;color:#0a1628}
+.btn-cerrar{background:transparent;color:#ff3860;border:1px solid #ff3860;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:all .3s;font-family:'Inter',sans-serif}
+.btn-cerrar:hover{background:#ff3860;color:#fff}
 
-        .nav-bar { background: #0d2137; padding: 8px 30px; display: flex; gap: 5px; border-bottom: 1px solid #1a3a5c; flex-wrap: wrap; }
-        .nav-item { padding: 8px 16px; border-radius: 6px; font-size: 13px; color: #5a7a9a; cursor: pointer; transition: all .3s; text-decoration: none; display: flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; }
-        .nav-item:hover { color: #00b4d8; background-color: rgba(0,180,216,.1); }
-        .nav-item.active { color: #00b4d8; background-color: rgba(0,180,216,.15); border: 1px solid rgba(0,180,216,.3); }
+/* ─── Nav ─── */
+.nav-bar{background:#0d2137;padding:8px 30px;display:flex;gap:5px;border-bottom:1px solid #1a3a5c;flex-wrap:wrap}
+.nav-item{padding:8px 16px;border-radius:6px;font-size:13px;color:#5a7a9a;cursor:pointer;transition:all .3s;text-decoration:none;display:flex;align-items:center;gap:6px;font-family:'Inter',sans-serif}
+.nav-item:hover{color:#00b4d8;background:rgba(0,180,216,.1)}
+.nav-item.active{color:#00b4d8;background:rgba(0,180,216,.15);border:1px solid rgba(0,180,216,.3)}
 
-        .container { max-width: 1400px; margin: 25px auto; padding: 0 20px; }
-        .titulo { font-size: 24px; font-weight: 700; color: #00b4d8; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.container{max-width:1400px;margin:25px auto;padding:0 20px}
+.titulo{font-size:24px;font-weight:700;color:#00b4d8;margin-bottom:20px;display:flex;align-items:center;gap:10px}
 
-        .tabs-bar { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid #1a3a5c; padding-bottom: 0; }
-        .tab-btn { padding: 10px 22px; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; background: transparent; color: #5a7a9a; font-size: 13px; font-weight: 700; cursor: pointer; transition: all .25s; font-family: 'Inter', sans-serif; letter-spacing: .5px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
-        .tab-btn:hover { color: #90e0ef; background: rgba(0,180,216,.05); }
-        .tab-btn.active { color: #00b4d8; background: linear-gradient(135deg, #0d2137, #122a45); border-color: #1a3a5c; border-bottom: 2px solid #0a1628; margin-bottom: -2px; }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
+/* ─── Tabs ─── */
+.tabs-bar{display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid #1a3a5c;padding-bottom:0}
+.tab-btn{padding:10px 22px;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:transparent;color:#5a7a9a;font-size:13px;font-weight:700;cursor:pointer;transition:all .25s;font-family:'Inter',sans-serif;letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.tab-btn:hover{color:#90e0ef;background:rgba(0,180,216,.05)}
+.tab-btn.active{color:#00b4d8;background:linear-gradient(135deg,#0d2137,#122a45);border-color:#1a3a5c;border-bottom:2px solid #0a1628;margin-bottom:-2px}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
 
-        .form-section { background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 14px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,.3); }
-        .form-title { font-size: 16px; color: #90e0ef; margin-bottom: 15px; border-bottom: 1px solid #1a3a5c; padding-bottom: 8px; font-weight: 600; }
-        .form-subtitle { font-size: 13px; color: #5a7a9a; margin: 18px 0 10px; padding-top: 12px; border-top: 1px dashed #1a3a5c; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 8px; }
-        .form-subtitle i { color: #00b4d8; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-        .form-group { display: flex; flex-direction: column; }
-        .form-group label { font-size: 11px; color: #5a7a9a; margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
-        .form-group input, .form-group select, .form-group textarea { background-color: #0a1628; border: 1px solid #1a3a5c; color: #e0e0e0; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; transition: border-color .3s; }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #00b4d8; box-shadow: 0 0 8px rgba(0,180,216,.3); }
-        .form-group textarea { resize: vertical; min-height: 50px; }
-        .form-group input::placeholder { color: #3a5a7a; }
-        .form-group input[readonly] { opacity: .8; cursor: default; }
-        .form-group input.calc { background-color: #0e1e35; border-color: #0d3a5c; font-weight: 700; color: #90e0ef; }
-        .form-actions { display: flex; gap: 10px; margin-top: 18px; justify-content: center; flex-wrap: wrap; }
-        .btn-registrar { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; border: none; padding: 12px 35px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; transition: all .3s; letter-spacing: 1px; font-family: 'Inter', sans-serif; }
-        .btn-registrar:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,180,216,.4); }
-        .btn-limpiar { background-color: transparent; color: #90e0ef; border: 1px solid #1a3a5c; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all .3s; font-family: 'Inter', sans-serif; }
-        .btn-limpiar:hover { border-color: #90e0ef; }
-        .btn-danger { background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; border: none; padding: 10px 22px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700; transition: all .3s; font-family: 'Inter', sans-serif; }
-        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(231,76,60,.4); }
-        .btn-success { background: linear-gradient(135deg, #48c78e, #38a06d); color: #fff; border: none; padding: 10px 22px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700; transition: all .3s; font-family: 'Inter', sans-serif; }
-        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(72,199,142,.4); }
-        .btn-warning { background: linear-gradient(135deg, #ffb700, #cc9200); color: #03202c; border: none; padding: 10px 22px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700; transition: all .3s; font-family: 'Inter', sans-serif; }
-        .btn-warning:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255,183,0,.4); }
+/* ─── Form sections ─── */
+.form-section{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:14px;padding:25px;margin-bottom:25px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.form-title{font-size:16px;color:#90e0ef;margin-bottom:15px;border-bottom:1px solid #1a3a5c;padding-bottom:8px;font-weight:600}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.form-group{display:flex;flex-direction:column}
+.form-group label{font-size:11px;color:#5a7a9a;margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px}
+.form-group input,.form-group select,.form-group textarea{background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;transition:border-color .3s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#00b4d8;outline:none;box-shadow:0 0 0 3px rgba(0,180,216,.15)}
+.form-group input:read-only{color:#5a7a9a;cursor:default}
 
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
-        .search-box { position: relative; flex: 1; max-width: 350px; }
-        .search-box input { width: 100%; background-color: #0a1628; border: 1px solid #1a3a5c; color: #e0e0e0; padding: 10px 12px 10px 36px; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; }
-        .search-box input:focus { outline: none; border-color: #00b4d8; }
-        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #5a7a9a; font-size: 14px; }
-        .stats { display: flex; gap: 12px; flex-wrap: wrap; }
-        .stat-card { background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 10px; padding: 10px 16px; text-align: center; min-width: 90px; }
-        .stat-number { font-size: 22px; font-weight: 800; color: #00b4d8; }
-        .stat-label { font-size: 10px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; }
+/* ─── Buttons ─── */
+.btn{padding:10px 22px;border-radius:8px;border:1px solid;cursor:pointer;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;transition:all .3s;display:inline-flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.5px}
+.btn-primary{background:#00b4d8;color:#0a1628;border-color:#00b4d8}
+.btn-primary:hover{background:#0096c7;box-shadow:0 4px 15px rgba(0,180,216,.3)}
+.btn-secondary{background:transparent;color:#00b4d8;border-color:#1a3a5c}
+.btn-secondary:hover{background:#1a3a5c;color:#90e0ef}
+.btn-danger{background:transparent;color:#ff3860;border-color:#ff3860}
+.btn-danger:hover{background:#ff3860;color:#fff}
+.btn-success{background:#2ecc71;color:#fff;border-color:#2ecc71}
+.btn-success:hover{background:#27ae60}
+.btn-warning{background:#f39c12;color:#fff;border-color:#f39c12}
+.btn-warning:hover{background:#d68910}
+.btn-sm{padding:6px 14px;font-size:11px}
+.btn:disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
 
-        .table-section { background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.3); margin-bottom: 25px; }
-        .table-header { padding: 12px 18px; border-bottom: 1px solid #1a3a5c; display: flex; justify-content: space-between; align-items: center; }
-        .table-header h3 { color: #90e0ef; font-size: 15px; font-weight: 600; }
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        thead { background-color: #0a1628; }
-        thead th { padding: 10px 12px; text-align: left; font-size: 11px; color: #00b4d8; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #1a3a5c; font-weight: 700; white-space: nowrap; }
-        tbody tr { border-bottom: 1px solid #0d2137; transition: background-color .2s; cursor: pointer; }
-        tbody tr:hover { background-color: #122a45; }
-        tbody tr.selected { background-color: rgba(0,180,216,.08); border-left: 3px solid #00b4d8; }
-        tbody td { padding: 10px 12px; font-size: 12px; color: #c0c0c0; white-space: nowrap; }
-        td.money { text-align: right; font-weight: 700; color: #90e0ef; font-family: 'Inter', monospace; }
+/* ─── Step indicator ─── */
+.paso-indicator{display:flex;align-items:center;gap:0;margin-bottom:30px;background:#0d2137;border-radius:12px;padding:15px 20px;border:1px solid #1a3a5c}
+.paso-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;padding:8px 4px}
+.paso-step .paso-num{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;border:2px solid #1a3a5c;color:#5a7a9a;background:#0a1628;transition:all .3s;z-index:2}
+.paso-step .paso-label{font-size:11px;color:#5a7a9a;margin-top:6px;font-weight:600;text-transform:uppercase;letter-spacing:1px;text-align:center}
+.paso-step.active .paso-num{background:#00b4d8;color:#0a1628;border-color:#00b4d8;box-shadow:0 0 15px rgba(0,180,216,.4)}
+.paso-step.active .paso-label{color:#00b4d8}
+.paso-step.done .paso-num{background:#2ecc71;color:#fff;border-color:#2ecc71}
+.paso-step.done .paso-label{color:#2ecc71}
+.paso-line{flex:.5;height:2px;background:#1a3a5c;margin:0 -10px;position:relative;top:-10px}
+.paso-line.done{background:#2ecc71}
+.paso-line.active{background:linear-gradient(90deg,#2ecc71,#00b4d8)}
 
-        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
-        .badge-emitida { background-color: rgba(0,180,216,.15); color: #00b4d8; border: 1px solid rgba(0,180,216,.4); }
-        .badge-validada { background-color: rgba(72,199,142,.15); color: #48c78e; border: 1px solid rgba(72,199,142,.4); }
-        .badge-radicada { background-color: rgba(255,183,0,.15); color: #ffb700; border: 1px solid rgba(255,183,0,.4); }
-        .badge-pagada { background-color: rgba(46,213,115,.15); color: #2ed573; border: 1px solid rgba(46,213,115,.4); }
-        .badge-glosada { background-color: rgba(255,56,96,.15); color: #ff3860; border: 1px solid rgba(255,56,96,.4); }
-        .badge-anulada { background-color: rgba(90,90,90,.15); color: #999; border: 1px solid rgba(90,90,90,.4); }
+/* ─── Admision dropdown ─── */
+.adm-dropdown-wrap{position:relative}
+.adm-dropdown-input{width:100%;background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif}
+.adm-dropdown-input:focus{border-color:#00b4d8;outline:none;box-shadow:0 0 0 3px rgba(0,180,216,.15)}
+.adm-dropdown-list{position:absolute;top:100%;left:0;right:0;max-height:250px;overflow-y:auto;background:#0d2137;border:1px solid #1a3a5c;border-top:none;border-radius:0 0 8px 8px;z-index:100;display:none;box-shadow:0 8px 25px rgba(0,0,0,.5)}
+.adm-dropdown-list.open{display:block}
+.adm-dropdown-item{padding:10px 14px;cursor:pointer;transition:all .15s;border-bottom:1px solid #0a1628;font-size:13px}
+.adm-dropdown-item:hover{background:rgba(0,180,216,.1);color:#90e0ef}
+.adm-dropdown-item .item-name{font-weight:600;color:#c8d6e5}
+.adm-dropdown-item .item-doc{color:#5a7a9a;font-size:11px;margin-top:2px}
+.adm-dropdown-item .item-eps{color:#00b4d8;font-size:11px}
+.adm-dropdown-item .item-status{float:right;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:1px}
+.adm-dropdown-item .item-status.egresado{background:rgba(46,204,113,.15);color:#2ecc71}
+.adm-dropdown-item .item-status.otro{background:rgba(90,122,154,.15);color:#5a7a9a}
+.adm-no-results{padding:14px;text-align:center;color:#5a7a9a;font-size:13px}
 
-        .btn-action { padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; transition: all .2s; margin: 0 2px; font-family: 'Inter', sans-serif; }
-        .btn-editar { background-color: rgba(0,180,216,.2); color: #00b4d8; border: 1px solid rgba(0,180,216,.4); }
-        .btn-editar:hover { background-color: #00b4d8; color: #0a1628; }
-        .btn-eliminar { background-color: rgba(255,56,96,.2); color: #ff3860; border: 1px solid rgba(255,56,96,.4); }
-        .btn-eliminar:hover { background-color: #ff3860; color: #fff; }
-        .btn-ver { background-color: rgba(72,199,142,.2); color: #48c78e; border: 1px solid rgba(72,199,142,.4); }
-        .btn-ver:hover { background-color: #48c78e; color: #0a1628; }
-        .btn-rips { background-color: rgba(144,224,239,.15); color: #90e0ef; border: 1px solid rgba(144,224,239,.3); }
-        .btn-rips:hover { background-color: #90e0ef; color: #0a1628; }
+/* ─── Service table ─── */
+.svc-factura-table{width:100%;border-collapse:separate;border-spacing:0;margin-top:12px}
+.svc-factura-table thead th{background:#0d2137;color:#90e0ef;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;padding:12px 10px;border-bottom:2px solid #1a3a5c;font-weight:700;text-align:left}
+.svc-factura-table thead th:last-child{text-align:center}
+.svc-factura-table tbody td{padding:10px;border-bottom:1px solid #0a1628;font-size:13px;vertical-align:middle}
+.svc-factura-table tbody tr:hover{background:rgba(0,180,216,.05)}
+.svc-factura-table .td-cant{text-align:center}
+.svc-factura-table .td-valor{text-align:right;font-weight:600;color:#90e0ef;white-space:nowrap}
+.svc-factura-table .td-subtotal{text-align:right;font-weight:700;color:#00b4d8;white-space:nowrap}
+.svc-factura-table .input-cant{width:60px;text-align:center;background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:5px;border-radius:6px;font-size:13px;font-family:'Inter',sans-serif}
+.svc-factura-table .input-cant:focus{border-color:#00b4d8;outline:none}
+.svc-factura-table .btn-del{background:transparent;border:1px solid #ff3860;color:#ff3860;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;transition:all .3s}
+.svc-factura-table .btn-del:hover{background:#ff3860;color:#fff}
 
-        .empty-state { text-align: center; padding: 35px; color: #5a7a9a; }
-        .empty-state .icon { font-size: 45px; margin-bottom: 10px; }
-        .empty-state p { font-size: 14px; }
+/* ─── Liquidation grid ─── */
+.liq-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:15px}
+.liq-card{background:#0d2137;border:1px solid #1a3a5c;border-radius:12px;padding:20px}
+.liq-card h4{font-size:13px;color:#5a7a9a;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:700}
+.liq-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,58,92,.5);font-size:13px}
+.liq-row:last-child{border-bottom:none}
+.liq-row .liq-label{color:#c8d6e5}
+.liq-row .liq-value{font-weight:700;color:#90e0ef}
+.liq-row.total{border-top:2px solid #00b4d8;border-bottom:none;padding-top:14px;margin-top:6px}
+.liq-row.total .liq-label{font-size:15px;font-weight:700;color:#00b4d8;text-transform:uppercase}
+.liq-row.total .liq-value{font-size:20px;color:#00b4d8}
 
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,.7); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-overlay.active { display: flex; }
-        .modal { background: linear-gradient(135deg, #0d2137, #1a3a5c); border: 1px solid #00b4d8; border-radius: 14px; padding: 25px; width: 90%; max-width: 900px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,180,216,.3); }
-        .modal h3 { color: #00b4d8; margin-bottom: 15px; font-size: 18px; }
-        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+/* ─── Badges ─── */
+.badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.badge-prefactura{background:rgba(243,156,18,.15);color:#f39c12}
+.badge-definitiva{background:rgba(46,204,113,.15);color:#2ecc71}
+.badge-anulada{background:rgba(255,56,96,.15);color:#ff3860}
 
-        .rips-preview { background: #060d18; border: 1px solid #1a3a5c; border-radius: 10px; padding: 18px; max-height: 400px; overflow: auto; font-family: 'Courier New', monospace; font-size: 11px; color: #90e0ef; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
-        .rips-preview .key { color: #00b4d8; }
-        .rips-preview .str { color: #48c78e; }
-        .rips-preview .num { color: #ffb700; }
-        .rips-preview .null { color: #ff3860; }
+/* ─── Stats cards ─── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;margin-bottom:25px}
+.stat-card{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:12px;padding:18px;text-align:center}
+.stat-card .stat-num{font-size:28px;font-weight:800;color:#00b4d8}
+.stat-card .stat-label{font-size:11px;color:#5a7a9a;text-transform:uppercase;letter-spacing:1.5px;margin-top:4px;font-weight:600}
 
-        .inv-card { background: linear-gradient(160deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 12px; padding: 16px; margin-bottom: 12px; transition: all .2s; }
-        .inv-card:hover { border-color: #00b4d8; box-shadow: 0 0 12px rgba(0,180,216,.15); }
-        .inv-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .inv-card-header h4 { color: #90e0ef; font-size: 14px; margin: 0; }
-        .inv-pat-header { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; gap: 6px; padding: 8px 0; border-bottom: 1px solid #1a3a5c; }
-        .inv-pat-header span { font-size: 10px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-        .inv-svc-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 6px; padding: 6px 0; border-bottom: 1px dashed #0d2137; font-size: 12px; }
-        .inv-svc-row span { color: #c0c0c0; }
-        .inv-svc-row span.val { color: #90e0ef; font-weight: 700; text-align: right; }
-        .inv-subtotal { text-align: right; color: #00b4d8; font-weight: 800; font-size: 14px; padding-top: 6px; }
+/* ─── Table ─── */
+.data-table{width:100%;border-collapse:separate;border-spacing:0}
+.data-table thead th{background:#0d2137;color:#90e0ef;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;padding:12px 10px;border-bottom:2px solid #1a3a5c;font-weight:700;text-align:left}
+.data-table tbody td{padding:10px 10px;border-bottom:1px solid #0a1628;font-size:13px}
+.data-table tbody tr:hover{background:rgba(0,180,216,.05)}
+.data-table .acciones{display:flex;gap:6px}
 
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
-        .toast { padding: 12px 20px; border-radius: 8px; font-size: 14px; animation: slideIn .3s ease, fadeOut .3s ease 2.7s; box-shadow: 0 4px 15px rgba(0,0,0,.3); display: flex; align-items: center; gap: 8px; }
-        .toast-success { background: linear-gradient(135deg, #48c78e, #38a06d); color: #fff; }
-        .toast-error { background: linear-gradient(135deg, #ff3860, #d4234a); color: #fff; }
-        .toast-info { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; }
-        .toast-warning { background: linear-gradient(135deg, #ffb700, #cc9200); color: #03202c; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+/* ─── Modal ─── */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal-box{background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #1a3a5c;border-radius:16px;padding:30px;max-width:500px;width:90%;animation:modalIn .3s ease}
+@keyframes modalIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-box h3{color:#00b4d8;margin-bottom:15px;font-size:18px}
 
-        .resumen-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 18px; }
-        .resumen-card { background: linear-gradient(160deg, #0a1628, #122a45); border: 1px solid #1a3a5c; border-radius: 12px; padding: 18px; text-align: center; }
-        .resumen-card .rc-icon { font-size: 28px; margin-bottom: 6px; }
-        .resumen-card .rc-value { font-size: 24px; font-weight: 800; color: #00b4d8; }
-        .resumen-card .rc-label { font-size: 10px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+/* ─── Toast ─── */
+.toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:14px 22px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 8px 25px rgba(0,0,0,.4);animation:toastIn .3s ease,toastOut .3s ease 3.7s forwards;max-width:400px;display:flex;align-items:center;gap:10px}
+.toast.success{background:linear-gradient(135deg,#1a3a2a,#122a1a);border:1px solid #2ecc71;color:#2ecc71}
+.toast.error{background:linear-gradient(135deg,#3a1a1a,#2a1212);border:1px solid #ff3860;color:#ff3860}
+.toast.info{background:linear-gradient(135deg,#1a2a3a,#12202a);border:1px solid #00b4d8;color:#00b4d8}
+.toast.warning{background:linear-gradient(135deg,#3a2a1a,#2a2012);border:1px solid #f39c12;color:#f39c12}
+@keyframes toastIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes toastOut{from{opacity:1}to{opacity:0}}
 
-        .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-        .cat-card { background: linear-gradient(160deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 10px; padding: 14px; position: relative; }
-        .cat-card h5 { color: #90e0ef; font-size: 13px; margin-bottom: 6px; }
-        .cat-card .cat-cups { color: #00b4d8; font-weight: 800; font-size: 15px; }
-        .cat-card .cat-ambito { font-size: 11px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; }
-        .cat-card .cat-valores { display: flex; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #1a3a5c; }
-        .cat-card .cat-eps { font-size: 12px; }
-        .cat-card .cat-eps .eps-name { color: #5a7a9a; font-size: 10px; }
-        .cat-card .cat-eps .eps-valor { color: #90e0ef; font-weight: 700; }
-        .cat-card .cat-rips-type { font-size: 11px; color: #48c78e; font-weight: 700; margin-top: 4px; }
-        .cat-card .cat-edit { position: absolute; top: 8px; right: 8px; background: none; border: none; color: #5a7a9a; cursor: pointer; font-size: 14px; }
-        .cat-card .cat-edit:hover { color: #00b4d8; }
-
-        @media (max-width: 768px) {
-            .header { flex-direction: column; gap: 10px; }
-            .nav-bar { justify-content: center; }
-            .toolbar { flex-direction: column; }
-            .search-box { max-width: 100%; }
-            .form-grid { grid-template-columns: 1fr; }
-            .modal { max-width: 98%; padding: 16px; }
-            .inv-svc-row { grid-template-columns: 1fr 1fr; }
-            .inv-pat-header { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 480px) {
-            .tabs-bar { flex-direction: column; }
-            .cat-grid { grid-template-columns: 1fr; }
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="nexus_db.js"></script>
-    <script src="permisos.js"></script>
+/* ─── Responsive ─── */
+@media(max-width:768px){
+.paso-indicator{flex-wrap:wrap}
+.paso-line{display:none}
+.liq-grid{grid-template-columns:1fr}
+.form-grid{grid-template-columns:1fr}
+.stats-row{grid-template-columns:1fr 1fr}
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
-    <div class="header">
-        <div class="header-left">
-            <div class="brand-icon"><svg viewBox="0 0 40 40" fill="none"><path d="M20 4 L20 36" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/><path d="M20 10 L10 4" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/><path d="M20 10 L30 4" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/><circle cx="20" cy="36" r="3" fill="#00b4d8"/></svg></div>
-            <div class="brand-name">NEXUS<span>MED</span></div>
-        </div>
-        <div class="header-right">
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar">A</div>
-                <div><span class="user-name" id="userName">Admin</span><br><span class="user-role" id="userRole">ADMIN</span></div>
-            </div>
-            <a href="menu.html" class="btn-header"><i class="fas fa-arrow-left"></i> Menú</a>
-            <button class="btn-cerrar" onclick="cerrarSesion()"><i class="fas fa-right-from-bracket"></i> Salir</button>
-        </div>
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <div class="header-left">
+    <div class="brand-icon"><svg viewBox="0 0 40 40" fill="none">
+      <path d="M20 4 L10 4 L10 36 L20 36 L20 24 L14 24 L14 16 L20 16 Z" fill="#00b4d8"/>
+      <path d="M20 10 L10 4" stroke="#90e0ef" stroke-width="2"/>
+      <path d="M20 10 L30 4 L30 36 L20 36 L20 24 L26 24 L26 16 L20 16 Z" fill="#0077b6"/>
+      <circle cx="20" cy="36" r="3" fill="#00b4d8"/>
+    </svg></div>
+    <div class="brand-name">NEXUS<span>MED</span></div>
+  </div>
+  <div class="header-right">
+    <div class="user-info">
+      <div class="user-avatar" id="avatarInicial">A</div>
+      <div><div class="user-name" id="nombreUsuario">Administrador</div><div class="user-role">Facturación</div></div>
+    </div>
+    <button class="btn-cerrar" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+  </div>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<div class="nav-bar">
+  <a class="nav-item" href="index.html"><i class="fas fa-home"></i> Inicio</a>
+  <a class="nav-item" href="citas.html"><i class="fas fa-calendar-alt"></i> Citas</a>
+  <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+  <a class="nav-item" href="egresados.html"><i class="fas fa-walking"></i> Egresados</a>
+  <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
+  <a class="nav-item" href="evolucion.html"><i class="fas fa-chart-line"></i> Evolución</a>
+  <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-notes-medical"></i> Notas Enf.</a>
+  <a class="nav-item" href="conciliacion.html"><i class="fas fa-handshake"></i> Terapias</a>
+  <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-medical-alt"></i> Epicrisis</a>
+  <a class="nav-item active" href="facturacion.html"><i class="fas fa-file-invoice-dollar"></i> Facturación</a>
+  <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+</div>
+
+<div class="container">
+  <div class="titulo"><i class="fas fa-file-invoice-dollar"></i> Facturación</div>
+
+  <!-- Stats -->
+  <div class="stats-row" id="statsFacturacion">
+    <div class="stat-card"><div class="stat-num" id="statPre">0</div><div class="stat-label">Pre-Facturas</div></div>
+    <div class="stat-card"><div class="stat-num" id="statDef">0</div><div class="stat-label">Definitivas</div></div>
+    <div class="stat-card"><div class="stat-num" id="statAnul">0</div><div class="stat-label">Anuladas</div></div>
+    <div class="stat-card"><div class="stat-num" id="statTotal$">$0</div><div class="stat-label">Total Facturado</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" data-tab="tabNueva" onclick="cambiarTab('tabNueva')"><i class="fas fa-plus-circle"></i> Nueva Factura</button>
+    <button class="tab-btn" data-tab="tabHistorial" onclick="cambiarTab('tabHistorial')"><i class="fas fa-list"></i> Historial</button>
+    <button class="tab-btn" data-tab="tabConfig" onclick="cambiarTab('tabConfig')"><i class="fas fa-cogs"></i> Configuración</button>
+  </div>
+
+  <!-- ═══════ TAB: NUEVA FACTURA ═══════ -->
+  <div class="tab-panel active" id="tabNueva">
+
+    <!-- Paso Indicator -->
+    <div class="paso-indicator" id="pasoIndicator">
+      <div class="paso-step active" data-paso="1">
+        <div class="paso-num">1</div>
+        <div class="paso-label">Admisión</div>
+      </div>
+      <div class="paso-line" data-line="1"></div>
+      <div class="paso-step" data-paso="2">
+        <div class="paso-num">2</div>
+        <div class="paso-label">Servicios</div>
+      </div>
+      <div class="paso-line" data-line="2"></div>
+      <div class="paso-step" data-paso="3">
+        <div class="paso-num">3</div>
+        <div class="paso-label">Liquidación</div>
+      </div>
+      <div class="paso-line" data-line="3"></div>
+      <div class="paso-step" data-paso="4">
+        <div class="paso-num">4</div>
+        <div class="paso-label">Emitir</div>
+      </div>
     </div>
 
-    <nav class="nav-bar">
-        <a class="nav-item" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
-        <a class="nav-item" href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
-        <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
-        <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresados</a>
-        <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
-        <a class="nav-item" href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
-        <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enf.</a>
-        <a class="nav-item" href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
-        <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-lines"></i> Epicrisis</a>
-        <a class="nav-item active" href="facturacion.html"><i class="fas fa-file-invoice-dollar"></i> Facturación</a>
-        <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
-        <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
-    </nav>
-
-    <div class="toast-container" id="toastContainer"></div>
-
-    <div class="container">
-        <h2 class="titulo"><i class="fas fa-file-invoice-dollar"></i> Facturación y RIPS</h2>
-
-        <div class="tabs-bar">
-            <button class="tab-btn active" data-tab="tabFacturas" onclick="cambiarTab(this)"><i class="fas fa-file-invoice"></i> Facturas</button>
-            <button class="tab-btn" data-tab="tabNueva" onclick="cambiarTab(this)"><i class="fas fa-plus-circle"></i> Nueva Factura</button>
-            <button class="tab-btn" data-tab="tabRips" onclick="cambiarTab(this)"><i class="fas fa-code"></i> RIPS JSON</button>
-            <button class="tab-btn" data-tab="tabCatalogo" onclick="cambiarTab(this)"><i class="fas fa-list-alt"></i> Catálogo</button>
-            <button class="tab-btn" data-tab="tabPrestador" onclick="cambiarTab(this)"><i class="fas fa-hospital"></i> Prestador</button>
+    <!-- PASO 1: Buscar Admisión -->
+    <div class="form-section" id="paso1Panel">
+      <div class="form-title"><i class="fas fa-search"></i> Paso 1 — Buscar Admisión Egresada</div>
+      <p style="color:#5a7a9a;font-size:13px;margin-bottom:14px">Solo admisiones con estado <strong style="color:#2ecc71">Egresado</strong> pueden facturarse.</p>
+      <div class="form-group" style="margin-bottom:0">
+        <label>Buscar paciente (nombre o documento)</label>
+        <div class="adm-dropdown-wrap">
+          <input type="text" class="adm-dropdown-input" id="buscarAdmInput" placeholder="Escriba nombre o documento del paciente egresado…" autocomplete="off">
+          <div class="adm-dropdown-list" id="admDropdownList"></div>
         </div>
-
-        <!-- TAB 1: FACTURAS -->
-        <div class="tab-panel active" id="tabFacturas">
-            <div class="toolbar">
-                <div class="search-box">
-                    <span class="search-icon"><i class="fas fa-search"></i></span>
-                    <input type="text" id="busquedaFactura" placeholder="Buscar por número, EPS, período..." onkeyup="filtrarFacturas()">
-                </div>
-                <div class="stats">
-                    <div class="stat-card"><div class="stat-number" id="stTotal">0</div><div class="stat-label">Total</div></div>
-                    <div class="stat-card"><div class="stat-number" id="stEmitidas">0</div><div class="stat-label">Emitidas</div></div>
-                    <div class="stat-card"><div class="stat-number" id="stValidadas">0</div><div class="stat-label">Validadas</div></div>
-                    <div class="stat-card"><div class="stat-number" id="stRadicadas">0</div><div class="stat-label">Radicadas</div></div>
-                </div>
-            </div>
-            <div class="table-section">
-                <div class="table-header"><h3><i class="fas fa-file-invoice-dollar"></i> Facturas Emitidas</h3></div>
-                <div class="table-wrapper">
-                    <table>
-                        <thead><tr><th>Nº Factura</th><th>EPS</th><th>Período</th><th>Fecha</th><th>Pacientes</th><th>Subtotal</th><th>Estado</th><th>CUV</th><th>Acciones</th></tr></thead>
-                        <tbody id="tablaFacturas"></tbody>
-                    </table>
-                </div>
-                <div class="empty-state" id="emptyFacturas"><div class="icon">📄</div><p>No hay facturas registradas. Genere una nueva factura desde la pestaña correspondiente.</p></div>
-            </div>
+      </div>
+      <div id="admSeleccionada" style="display:none;margin-top:18px">
+        <div class="form-grid" id="datosPacienteGrid" style="background:#0a1628;border-radius:10px;padding:16px;border:1px solid #1a3a5c"></div>
+        <div style="margin-top:14px;text-align:right">
+          <button class="btn btn-primary" onclick="irPaso(2)"><i class="fas fa-arrow-right"></i> Siguiente — Agregar Servicios</button>
         </div>
-
-        <!-- TAB 2: NUEVA FACTURA -->
-        <div class="tab-panel" id="tabNueva">
-            <div class="form-section">
-                <div class="form-title"><i class="fas fa-plus-circle"></i> Generar Nueva Factura desde Conciliación</div>
-                <div class="form-subtitle"><i class="fas fa-calendar-alt"></i> Período de Facturación</div>
-                <div class="form-grid">
-                    <div class="form-group"><label>EPS</label><select id="nuevaEps" onchange="alCambiarEps()"><option value="">Seleccione EPS...</option></select></div>
-                    <div class="form-group"><label>Mes</label><select id="nuevaMes"><option value="">Mes...</option><option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option><option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option><option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></div>
-                    <div class="form-group"><label>Año</label><select id="nuevaAnio"><option value="2026">2026</option><option value="2025">2025</option></select></div>
-                    <div class="form-group" id="grpQuincena"><label>Quincena</label><select id="nuevaQuincena"><option value="completa">Mes completo</option><option value="01">01 (día 1 al 15)</option><option value="20">20 (día 16 al final)</option></select></div>
-                </div>
-                <div class="form-actions">
-                    <button class="btn-registrar" onclick="generarFactura()"><i class="fas fa-magic"></i> Generar Factura</button>
-                    <button class="btn-limpiar" onclick="limpiarNueva()"><i class="fas fa-eraser"></i> Limpiar</button>
-                </div>
-            </div>
-            <div id="previewFactura" style="display:none">
-                <div class="resumen-grid" id="resumenFactura"></div>
-                <div class="table-section">
-                    <div class="table-header">
-                        <h3><i class="fas fa-users"></i> Detalle de Servicios por Paciente</h3>
-                        <div style="display:flex;gap:8px">
-                            <button class="btn-success" onclick="confirmarFactura()"><i class="fas fa-check"></i> Confirmar y Guardar</button>
-                            <button class="btn-danger" onclick="descartarFactura()"><i class="fas fa-times"></i> Descartar</button>
-                        </div>
-                    </div>
-                    <div id="detallePacientes" style="padding:14px"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 3: RIPS JSON -->
-        <div class="tab-panel" id="tabRips">
-            <div class="form-section">
-                <div class="form-title"><i class="fas fa-code"></i> Generar RIPS JSON — Resolución 948 de 2026</div>
-                <div class="form-grid">
-                    <div class="form-group"><label>Factura</label><select id="ripsFactura" onchange="alSeleccionarRips()"><option value="">Seleccione una factura...</option></select></div>
-                </div>
-                <div class="form-actions">
-                    <button class="btn-registrar" onclick="generarRIPS()"><i class="fas fa-code"></i> Generar RIPS JSON</button>
-                    <button class="btn-warning" onclick="validarRIPS()"><i class="fas fa-check-double"></i> Validar</button>
-                    <button class="btn-success" onclick="descargarRIPS()" id="btnDescargarRips" disabled><i class="fas fa-download"></i> Descargar JSON</button>
-                </div>
-            </div>
-            <div id="ripsValidacion" style="display:none">
-                <div class="table-section" style="margin-bottom:18px">
-                    <div class="table-header"><h3><i class="fas fa-clipboard-check"></i> Resultado de Validación</h3></div>
-                    <div id="ripsValResultados" style="padding:14px"></div>
-                </div>
-            </div>
-            <div id="ripsPreview" style="display:none">
-                <div class="table-section">
-                    <div class="table-header"><h3><i class="fas fa-code"></i> RIPS JSON — Vista Previa</h3><span style="font-size:11px;color:#5a7a9a">Resolución 948 de 2026</span></div>
-                    <div class="rips-preview" id="ripsCodigo"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 4: CATALOGO -->
-        <div class="tab-panel" id="tabCatalogo">
-            <div class="form-section" style="margin-bottom:18px">
-                <div class="form-title"><i class="fas fa-plus-circle"></i> Agregar / Editar Servicio</div>
-                <div class="form-grid">
-                    <div class="form-group"><label>Código CUPS</label><input type="text" id="catCups" placeholder="Ej: 931001"></div>
-                    <div class="form-group"><label>Nombre del Servicio</label><input type="text" id="catNombre" placeholder="Ej: Fisioterapia Domiciliaria"></div>
-                    <div class="form-group"><label>Tipo RIPS</label><select id="catTipo"><option value="consulta">Consulta</option><option value="procedimiento">Procedimiento</option><option value="otroServicio">Otro Servicio</option></select></div>
-                    <div class="form-group"><label>Ambito</label><select id="catAmbito"><option value="domiciliario">Domiciliario</option><option value="intramural">Intramural</option><option value="hospitalario">Hospitalario</option></select></div>
-                    <div class="form-group"><label>Valor COOSALUD</label><input type="number" id="catValCoosalud" placeholder="0"></div>
-                    <div class="form-group"><label>Valor FOMAG</label><input type="number" id="catValFomag" placeholder="0"></div>
-                    <div class="form-group"><label>Finalidad Tecnología</label><select id="catFinalidad"><option value="01">01 - Diagnóstico</option><option value="02">02 - Terapéutico</option><option value="03">03 - Protección</option><option value="04" selected>04 - Rehabilitación</option><option value="05">05 - Prevención</option></select></div>
-                    <div class="form-group"><label>Grupo Servicios</label><select id="catGrupo"><option value="01">01 - Promoción</option><option value="02">02 - Prevención</option><option value="03" selected>03 - Atención enfermedad</option></select></div>
-                </div>
-                <div class="form-actions">
-                    <button class="btn-registrar" onclick="guardarServicio()"><i class="fas fa-save"></i> Guardar Servicio</button>
-                    <button class="btn-limpiar" onclick="limpiarCatalogo()"><i class="fas fa-eraser"></i> Limpiar</button>
-                </div>
-            </div>
-            <div class="table-section">
-                <div class="table-header"><h3><i class="fas fa-list-alt"></i> Catálogo de Servicios (<span id="catCount">0</span>)</h3></div>
-                <div id="catGrid" class="cat-grid" style="padding:14px"></div>
-                <div class="empty-state" id="emptyCat"><div class="icon">📋</div><p>No hay servicios configurados</p></div>
-            </div>
-        </div>
-
-        <!-- TAB 5: PRESTADOR -->
-        <div class="tab-panel" id="tabPrestador">
-            <div class="form-section">
-                <div class="form-title"><i class="fas fa-hospital"></i> Datos del Prestador — Requeridos para FEV y RIPS</div>
-                <div class="form-subtitle"><i class="fas fa-building"></i> Identificación</div>
-                <div class="form-grid">
-                    <div class="form-group"><label>Tipo Identificación</label><select id="prTipoId"><option value="NI">NI - NIT</option><option value="CC">CC - Cédula</option><option value="CE">CE - Cédula Extranjería</option></select></div>
-                    <div class="form-group"><label>Número Identificación (sin DV)</label><input type="text" id="prNumId" placeholder="Ej: 900987654"></div>
-                    <div class="form-group"><label>Dígito Verificación</label><input type="text" id="prDV" placeholder="Ej: 3" maxlength="1"></div>
-                    <div class="form-group"><label>Razón Social</label><input type="text" id="prRazon" placeholder="NEXUSMED IPS S.A.S."></div>
-                    <div class="form-group"><label>Representante Legal</label><input type="text" id="prRepresentante" placeholder="Nombre completo"></div>
-                </div>
-                <div class="form-subtitle"><i class="fas fa-stethoscope"></i> Datos REPS / RIPS</div>
-                <div class="form-grid">
-                    <div class="form-group"><label>Código Prestador (REPS)</label><input type="text" id="prCodigo" placeholder="HPT001234567" maxlength="12"></div>
-                    <div class="form-group"><label>Código Habilitación Sede</label><input type="text" id="prCodHabilitacion" placeholder="Código habilitación sede principal"></div>
-                    <div class="form-group"><label>Régimen</label><select id="prRegimen"><option value="1">1 - Contributivo</option><option value="2">2 - Subsidiado</option><option value="3">3 - Ambos</option></select></div>
-                </div>
-                <div class="form-subtitle"><i class="fas fa-map-marker-alt"></i> Ubicación</div>
-                <div class="form-grid">
-                    <div class="form-group"><label>Departamento (DIVIPOLA)</label><input type="text" id="prDepto" placeholder="Ej: 05" maxlength="2"></div>
-                    <div class="form-group"><label>Municipio (DIVIPOLA)</label><input type="text" id="prMunicipio" placeholder="Ej: 05001" maxlength="5"></div>
-                    <div class="form-group"><label>Dirección</label><input type="text" id="prDireccion" placeholder="Calle / Cra ..."></div>
-                    <div class="form-group"><label>Teléfono</label><input type="tel" id="prTelefono" placeholder="6041234567"></div>
-                    <div class="form-group"><label>Email Facturación</label><input type="email" id="prEmail" placeholder="facturacion@nexusmed.com.co"></div>
-                </div>
-                <div class="form-subtitle"><i class="fas fa-file-invoice"></i> Facturación Electrónica DIAN</div>
-                <div class="form-grid">
-                    <div class="form-group"><label>Prefijo Numeración</label><input type="text" id="prPrefijo" placeholder="FEV" maxlength="4"></div>
-                    <div class="form-group"><label>Rango Inicio</label><input type="number" id="prRangoInicio" placeholder="1"></div>
-                    <div class="form-group"><label>Rango Fin</label><input type="number" id="prRangoFin" placeholder="9999"></div>
-                    <div class="form-group"><label>Resolución DIAN</label><input type="text" id="prResolucion" placeholder="18742 de 2023"></div>
-                    <div class="form-group"><label>Ambiente DIAN</label><select id="prAmbiente"><option value="2">2 - Pruebas</option><option value="1">1 - Producción</option></select></div>
-                </div>
-                <div class="form-actions">
-                    <button class="btn-registrar" onclick="guardarPrestador()"><i class="fas fa-save"></i> Guardar Datos del Prestador</button>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <!-- MODAL DETALLE -->
-    <div class="modal-overlay" id="modalDetalle">
-        <div class="modal" style="max-width:1000px">
-            <h3><i class="fas fa-file-invoice-dollar"></i> Detalle de Factura</h3>
-            <div id="modalDetalleContenido"></div>
-            <div class="modal-actions"><button class="btn-limpiar" onclick="cerrarModal('modalDetalle')"><i class="fas fa-times"></i> Cerrar</button></div>
+    <!-- PASO 2: Servicios -->
+    <div class="form-section" id="paso2Panel" style="display:none">
+      <div class="form-title"><i class="fas fa-medkit"></i> Paso 2 — Agregar Servicios (CUPS)</div>
+      <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;align-items:end">
+        <div class="form-group" style="flex:2;min-width:220px">
+          <label>Servicio</label>
+          <select id="selectServicio" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif">
+            <option value="">— Seleccione servicio —</option>
+          </select>
         </div>
+        <div class="form-group" style="flex:0 0 100px">
+          <label>Cantidad</label>
+          <input type="number" id="inputCantidad" value="1" min="1" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px;border-radius:8px;font-size:14px;text-align:center;font-family:'Inter',sans-serif">
+        </div>
+        <button class="btn btn-success" onclick="agregarServicio()" style="height:42px"><i class="fas fa-plus"></i> Agregar</button>
+      </div>
+      <table class="svc-factura-table" id="tablaServicios">
+        <thead><tr>
+          <th>Código</th><th>Servicio</th><th>Tipo</th><th>Valor Unit.</th><th style="text-align:center">Cant.</th><th style="text-align:right">Subtotal</th><th style="text-align:center">Quitar</th>
+        </tr></thead>
+        <tbody id="bodyServicios"></tbody>
+      </table>
+      <div style="margin-top:16px;display:flex;justify-content:space-between">
+        <button class="btn btn-secondary" onclick="irPaso(1)"><i class="fas fa-arrow-left"></i> Anterior</button>
+        <button class="btn btn-primary" onclick="irPaso(3)"><i class="fas fa-arrow-right"></i> Siguiente — Liquidación</button>
+      </div>
     </div>
 
-    <!-- MODAL ESTADO -->
-    <div class="modal-overlay" id="modalEstado">
-        <div class="modal" style="max-width:450px">
-            <h3 id="modalEstadoTitulo">Cambiar Estado</h3>
-            <p id="modalEstadoMsg" style="color:#c0c0c0;font-size:14px;margin:12px 0"></p>
-            <div class="form-group" style="margin:14px 0" id="grpCuv">
-                <label>CUV (Código Único de Validación MUV)</label>
-                <input type="text" id="modalEstadoCuv" placeholder="Ingrese CUV otorgado por el MUV">
-            </div>
-            <div class="modal-actions">
-                <button class="btn-limpiar" onclick="cerrarModal('modalEstado')"><i class="fas fa-times"></i> Cancelar</button>
-                <button class="btn-registrar" onclick="confirmarCambioEstado()"><i class="fas fa-check"></i> Confirmar</button>
-            </div>
+    <!-- PASO 3: Liquidación -->
+    <div class="form-section" id="paso3Panel" style="display:none">
+      <div class="form-title"><i class="fas fa-calculator"></i> Paso 3 — Liquidación</div>
+      <div class="liq-grid" id="liqGrid">
+        <div class="liq-card">
+          <h4><i class="fas fa-info-circle"></i> Datos de Factura</h4>
+          <div class="liq-row"><span class="liq-label">EPS / Entidad</span><span class="liq-value" id="liqEps">—</span></div>
+          <div class="liq-row"><span class="liq-label">Código EPS</span><span class="liq-value" id="liqCodEps">—</span></div>
+          <div class="liq-row"><span class="liq-label">Paciente</span><span class="liq-value" id="liqPaciente">—</span></div>
+          <div class="liq-row"><span class="liq-label">Documento</span><span class="liq-value" id="liqDocumento">—</span></div>
+          <div class="liq-row"><span class="liq-label">Fecha</span><span class="liq-value" id="liqFecha">—</span></div>
+          <div class="liq-row"><span class="liq-label">Vigencia</span><span class="liq-value" id="liqVigencia">—</span></div>
         </div>
+        <div class="liq-card">
+          <h4><i class="fas fa-dollar-sign"></i> Resumen Financiero</h4>
+          <div class="liq-row"><span class="liq-label">Subtotal (servicios)</span><span class="liq-value" id="liqSubtotal">$0</span></div>
+          <div class="liq-row"><span class="liq-label">IVA (0% — exento)</span><span class="liq-value" id="liqIva">$0</span></div>
+          <div class="liq-row"><span class="liq-label">Descuento</span><span class="liq-value" id="liqDescuento">$0</span></div>
+          <div class="liq-row total"><span class="liq-label">Total a Facturar</span><span class="liq-value" id="liqTotal">$0</span></div>
+        </div>
+      </div>
+      <div style="margin-top:16px;display:flex;justify-content:space-between">
+        <button class="btn btn-secondary" onclick="irPaso(2)"><i class="fas fa-arrow-left"></i> Anterior</button>
+        <button class="btn btn-warning" onclick="guardarPreFactura()"><i class="fas fa-save"></i> Guardar Pre-Factura</button>
+        <button class="btn btn-primary" onclick="irPaso(4)"><i class="fas fa-arrow-right"></i> Siguiente — Emitir</button>
+      </div>
     </div>
 
-    <script>
-    (function () {
-        'use strict';
-
-        /* ═══════ CATÁLOGO DE SERVICIOS POR DEFECTO ═══════ */
-        var SERVICIOS_DEFAULT = [
-            { id:'sf_01', codigoCUPS:'',       nombre:'CAMA DOMICILIARIA',           tipoServicio:'otroServicio', ambito:'domiciliario',
-              valores:{ COOSALUD:{valorUnitario:250000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:250000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_02', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA DOMICILIARIA',   tipoServicio:'consulta', ambito:'domiciliario',
-              valores:{ COOSALUD:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_03', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA INTRAMURAL',    tipoServicio:'consulta', ambito:'intramural',
-              valores:{ COOSALUD:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_04', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL DOMICILIARIA', tipoServicio:'consulta', ambito:'domiciliario',
-              valores:{ COOSALUD:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_05', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL INTRAMURAL',  tipoServicio:'consulta', ambito:'intramural',
-              valores:{ COOSALUD:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_06', codigoCUPS:'931001', nombre:'FISIOTERAPIA DOMICILIARIA',      tipoServicio:'consulta', ambito:'domiciliario',
-              valores:{ COOSALUD:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_07', codigoCUPS:'931001', nombre:'FISIOTERAPIA INTRAMURAL',       tipoServicio:'consulta', ambito:'intramural',
-              valores:{ COOSALUD:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_08', codigoCUPS:'943102', nombre:'PSICOLOGÍA DOMICILIARIA',       tipoServicio:'consulta', ambito:'domiciliario',
-              valores:{ COOSALUD:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_09', codigoCUPS:'943102', nombre:'PSICOLOGÍA INTRAMURAL',         tipoServicio:'consulta', ambito:'intramural',
-              valores:{ COOSALUD:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_10', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA DOMICILIARIA', tipoServicio:'procedimiento', ambito:'domiciliario',
-              valores:{ COOSALUD:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_11', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA INTRAMURAL',  tipoServicio:'procedimiento', ambito:'intramural',
-              valores:{ COOSALUD:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_12', codigoCUPS:'',       nombre:'ENFERMERÍA 24H DOMICILIARIA',  tipoServicio:'otroServicio', ambito:'domiciliario',
-              valores:{ COOSALUD:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_13', codigoCUPS:'',       nombre:'ENFERMERÍA 12H DOMICILIARIA',  tipoServicio:'otroServicio', ambito:'domiciliario',
-              valores:{ COOSALUD:{valorUnitario:100000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:100000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_14', codigoCUPS:'',       nombre:'ENFERMERÍA 8H DOMICILIARIA',   tipoServicio:'otroServicio', ambito:'domiciliario',
-              valores:{ COOSALUD:{valorUnitario:95000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:95000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-            { id:'sf_15', codigoCUPS:'',       nombre:'LIMPIEZA TRAQUEOSTOMÍA DOM.',  tipoServicio:'otroServicio', ambito:'domiciliario',
-              valores:{ COOSALUD:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} },
-              finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true }
-        ];
-
-        /* ═══════ CLAVES DE ALMACENAMIENTO ═══════ */
-        var K_SERVICIOS    = 'nexus_servicios_facturacion';
-        var K_FACTURAS     = 'nexus_facturas';
-        var K_RIPS        = 'nexus_rips_json';
-        var K_CONTADOR    = 'nexus_contador_facturas';
-        var K_PACIENTES   = 'nexus_pacientes';
-        var K_HOSPITAL    = 'nexus_hospital';
-
-        /* ═══════ UTILIDADES ═══════ */
-        function leer(k)   { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch(e) { return null; } }
-        function guardar(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
-        function hoy()     { return new Date().toISOString().split('T')[0]; }
-        function ahora()   { return new Date().toISOString().replace('Z',''); }
-        function fmt$(n)   { return '$' + Number(n||0).toLocaleString('es-CO'); }
-        function uid(pref) { return pref + '_' + Date.now() + '_' + Math.random().toString(36).substring(2,7); }
-
-        function initCatalogo() {
-            var cat = leer(K_SERVICIOS);
-            if (!cat || !Array.isArray(cat) || !cat.length) guardar(K_SERVICIOS, SERVICIOS_DEFAULT);
-        }
-        function initContador() {
-            var c = leer(K_CONTADOR);
-            if (c === null || c === undefined) guardar(K_CONTADOR, 0);
-        }
-        /* ═══════ CARGA DINÁMICA DE EPS DESDE CONFIGURACIÓN ═══════ */
-        var K_EPS = 'nexus_entidades_pagadoras';
-        function leerEps() { try { return JSON.parse(localStorage.getItem(K_EPS)||'null'); } catch(e){ return null; } }
-
-        function poblarSelectEps() {
-            var sel = document.getElementById('nuevaEps');
-            if (!sel) return;
-            var arr = (leerEps() || []).filter(function(e){ return e.activo; });
-            sel.innerHTML = '<option value="">Seleccione EPS...</option>' + arr.map(function(e){
-                return '<option value="' + e.codigo + '">' + e.nombre + '</option>';
-            }).join('');
-        }
-
-        // Also fix the EPS default to FOMAG (was FOMAG in reference data)
-        var EPS_DEFAULT = [
-            { id:'eps_01', codigo:'FOMAG',    nombre:'FOMAG EPS',       regimen:'subsidiado',  nit:'', telefono:'', email:'', notas:'', activo:true },
-            { id:'eps_02', codigo:'COOSALUD', nombre:'COOSALUD EPS',   regimen:'subsidiado',  nit:'', telefono:'', email:'', notas:'', activo:true }
-        ];
-
-        function initEpsFact() {
-            var arr = leerEps();
-            if (!arr || !Array.isArray(arr) || !arr.length) {
-                localStorage.setItem(K_EPS, JSON.stringify(EPS_DEFAULT));
-            }
-            poblarSelectEps();
-        }
-
-
-        function siguienteNum() {
-            var c = (leer(K_CONTADOR) || 0) + 1;
-            guardar(K_CONTADOR, c);
-            var pr = leer(K_HOSPITAL);
-            var prefijo = (pr && pr.prefijoFactura) || 'FEV';
-            return prefijo + '-' + String(c).padStart(4,'0');
-        }
-
-        /* ═══════ SESIÓN ═══════ */
-        function sesion() {
-            try { return JSON.parse(localStorage.getItem('nexus_sesion') || 'null'); } catch(e) { return null; }
-        }
-        function cargarSesion() {
-            var s = sesion();
-            if (s) {
-                document.getElementById('userName').textContent = s.nombre || 'Usuario';
-                document.getElementById('userRole').textContent = NX.nombreRol(s.rol);
-                document.getElementById('userAvatar').textContent = (s.nombre || 'U').charAt(0).toUpperCase();
-            }
-        }
-
-        /* ═══════ TOAST ═══════ */
-        function toast(msg, tipo) {
-            tipo = tipo || 'info';
-            var c = document.getElementById('toastContainer');
-            var t = document.createElement('div');
-            t.className = 'toast toast-' + tipo;
-            var icons = { success:'fa-check-circle', error:'fa-exclamation-circle', info:'fa-info-circle', warning:'fa-exclamation-triangle' };
-            t.innerHTML = '<i class="fas ' + (icons[tipo]||icons.info) + '"></i> ' + msg;
-            c.appendChild(t);
-            setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 3200);
-        }
-
-        /* ═══════ TABS ═══════ */
-        window.cambiarTab = function(btn) {
-            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-            document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-            btn.classList.add('active');
-            document.getElementById(btn.dataset.tab).classList.add('active');
-        };
-
-        /* ═══════ MODALES ═══════ */
-        function abrirModal(id) { document.getElementById(id).classList.add('active'); }
-        function cerrarModal(id) { document.getElementById(id).classList.remove('active'); }
-        window.cerrarModal = cerrarModal;
-
-        /* ═══════ TAB 1: LISTA DE FACTURAS ═══════ */
-        var facturaPendiente = null;
-
-        function renderFacturas() {
-            var facturas = leer(K_FACTURAS) || [];
-            var filtro = (document.getElementById('busquedaFactura').value || '').toLowerCase();
-            var datos = facturas.filter(function(f) {
-                if (!filtro) return true;
-                return ((f.numeroFactura||'') + ' ' + (f.entidadPagadora&&f.entidadPagadora.nombre||f.eps||'') + ' ' + (f.periodo&&(f.periodo.mes+'/'+f.periodo.anio)||'')).toLowerCase().indexOf(filtro) >= 0;
-            });
-            datos.sort(function(a,b) { return (b.creadoEn||'').localeCompare(a.creadoEn||''); });
-
-            var tbody = document.getElementById('tablaFacturas');
-            var empty = document.getElementById('emptyFacturas');
-            tbody.innerHTML = '';
-
-            var total=0, emitidas=0, validadas=0, radicadas=0;
-            facturas.forEach(function(f) {
-                total++;
-                if (f.estado==='emitida') emitidas++;
-                else if (f.estado==='validada') validadas++;
-                else if (f.estado==='radicada') radicadas++;
-            });
-            document.getElementById('stTotal').textContent = total;
-            document.getElementById('stEmitidas').textContent = emitidas;
-            document.getElementById('stValidadas').textContent = validadas;
-            document.getElementById('stRadicadas').textContent = radicadas;
-
-            if (!datos.length) { empty.style.display='block'; return; }
-            empty.style.display = 'none';
-
-            datos.forEach(function(f) {
-                var tr = document.createElement('tr');
-                var perTxt = f.periodo ? f.periodo.mes+'/'+f.periodo.anio + (f.periodo.quincena && f.periodo.quincena!=='completa' ? ' Q'+f.periodo.quincena : '') : '';
-                tr.innerHTML = '<td><strong>' + (f.numeroFactura||'') + '</strong></td>'
-                    + '<td>' + (f.entidadPagadora && f.entidadPagadora.nombre || f.eps||'') + '</td>'
-                    + '<td>' + perTxt + '</td>'
-                    + '<td>' + (f.fechaEmision||'').substring(0,10) + '</td>'
-                    + '<td>' + (f.items?f.items.length:0) + '</td>'
-                    + '<td class="money">' + fmt$(f.valores && f.valores.subtotal) + '</td>'
-                    + '<td><span class="badge badge-' + (f.estado||'emitida') + '">' + (f.estado||'emitida').toUpperCase() + '</span></td>'
-                    + '<td>' + (f.cuv || f.cuv ? (f.cuv||f.cuv) : '—') + '</td>'
-                    + '<td>'
-                    +   '<button class="btn-action btn-ver" onclick="verDetalle(\''+f.id+'\')" title="Ver detalle"><i class="fas fa-eye"></i></button>'
-                    +   '<button class="btn-action btn-rips" onclick="verRipsDeFactura(\''+f.id+'\')" title="RIPS"><i class="fas fa-code"></i></button>'
-                    +   (f.estado==='emitida' ? '<button class="btn-action btn-editar" onclick="cambiarEstado(\''+f.id+'\',\'validada\')" title="Validar MUV"><i class="fas fa-check"></i></button>' : '')
-                    +   (f.estado==='validada' ? '<button class="btn-action btn-editar" onclick="cambiarEstado(\''+f.id+'\',\'radicada\')" title="Radicar"><i class="fas fa-paper-plane"></i></button>' : '')
-                    +   (f.estado==='radicada' ? '<button class="btn-action btn-success" onclick="cambiarEstado(\''+f.id+'\',\'pagada\')" title="Pagada"><i class="fas fa-dollar-sign"></i></button>' : '')
-                    + '</td>';
-                tbody.appendChild(tr);
-            });
-        }
-
-        window.filtrarFacturas = function() { renderFacturas(); };
-
-        /* Cambiar estado */
-        window.cambiarEstado = function(fId, nuevoEstado) {
-            facturaPendiente = { id: fId, estado: nuevoEstado };
-            var verb = { validada:'validar en el MUV', radicada:'radicar ante la EPS', pagada:'marcar como pagada' };
-            document.getElementById('modalEstadoTitulo').textContent = 'Confirmar: ' + (verb[nuevoEstado]||nuevoEstado);
-            document.getElementById('modalEstadoMsg').textContent = '¿Confirma que desea ' + (verb[nuevoEstado]||nuevoEstado) + ' esta factura?';
-            document.getElementById('modalEstadoCuv').value = '';
-            document.getElementById('grpCuv').style.display = (nuevoEstado==='validada') ? 'flex' : 'none';
-            abrirModal('modalEstado');
-        };
-
-        window.confirmarCambioEstado = function() {
-            if (!facturaPendiente) return;
-            var facturas = leer(K_FACTURAS) || [];
-            var f = facturas.find(function(x) { return x.id === facturaPendiente.id; });
-            if (!f) { toast('Factura no encontrada','error'); cerrarModal('modalEstado'); return; }
-            f.estado = facturaPendiente.estado;
-            if (facturaPendiente.estado === 'validada') {
-                f.cuv = document.getElementById('modalEstadoCuv').value.trim() || null;
-                f.fechaCUV = f.cuv ? ahora() : null;
-            }
-            if (!f.historial) f.historial = [];
-            var s = sesion();
-            f.historial.push({ fecha: ahora(), accion: facturaPendiente.estado, usuario: s && s.usuario || 'sistema', detalle: 'Estado cambiado a ' + facturaPendiente.estado });
-            f.modificadoEn = ahora();
-            guardar(K_FACTURAS, facturas);
-            cerrarModal('modalEstado');
-            renderFacturas();
-            toast('Factura ' + f.numeroFactura + ' → ' + facturaPendiente.estado.toUpperCase(), 'success');
-            facturaPendiente = null;
-        };
-
-        /* Ver detalle */
-        window.verDetalle = function(fId) {
-            var facturas = leer(K_FACTURAS) || [];
-            var f = facturas.find(function(x){ return x.id === fId; });
-            if (!f) return;
-
-            var html = '<div class="resumen-grid">'
-                + '<div class="resumen-card"><div class="rc-icon">📄</div><div class="rc-value">' + (f.numeroFactura||'') + '</div><div class="rc-label">Nº Factura</div></div>'
-                + '<div class="resumen-card"><div class="rc-icon">🏥</div><div class="rc-value">' + (f.entidadPagadora&&f.entidadPagadora.nombre||f.eps||'') + '</div><div class="rc-label">EPS</div></div>'
-                + '<div class="resumen-card"><div class="rc-icon">📅</div><div class="rc-value">' + (f.periodo?f.periodo.mes+'/'+f.periodo.anio:'') + '</div><div class="rc-label">Período</div></div>'
-                + '<div class="resumen-card"><div class="rc-icon">👥</div><div class="rc-value">' + (f.items?f.items.length:0) + '</div><div class="rc-label">Pacientes</div></div>'
-                + '<div class="resumen-card"><div class="rc-icon">💰</div><div class="rc-value">' + fmt$(f.valores&&f.valores.subtotal) + '</div><div class="rc-label">Subtotal</div></div>'
-                + '<div class="resumen-card"><div class="rc-icon">✅</div><div class="rc-value"><span class="badge badge-' + (f.estado||'emitida') + '">' + (f.estado||'EMITIDA').toUpperCase() + '</span></div><div class="rc-label">Estado</div></div>'
-                + '</div>';
-
-            if (f.items && f.items.length) {
-                html += '<div style="margin-top:14px">';
-                f.items.forEach(function(item) {
-                    html += '<div class="inv-card">'
-                        + '<div class="inv-card-header"><h4><i class="fas fa-user"></i> ' + (item.nombrePaciente||item.numeroDocumento||'') + ' — ' + item.tipoDocumento + ' ' + item.numeroDocumento + '</h4><span style="color:#90e0ef;font-weight:800">' + fmt$(item.subtotalPaciente) + '</span></div>'
-                        + '<div class="inv-pat-header"><span>CUPS</span><span>Servicio</span><span>Cant</span><span>V. Unit</span><span>V. Total</span><span>Dx</span></div>';
-                    (item.servicios||[]).forEach(function(sv) {
-                        html += '<div class="inv-svc-row">'
-                            + '<span style="color:#00b4d8;font-weight:800">' + (sv.codigoCUPS||'—') + '</span>'
-                            + '<span>' + (sv.nombre||'') + '</span>'
-                            + '<span>' + (sv.cantidad||0) + '</span>'
-                            + '<span class="val">' + fmt$(sv.valorUnitario) + '</span>'
-                            + '<span class="val">' + fmt$(sv.valorTotal) + '</span>'
-                            + '<span style="color:#48c78e">' + (sv.codDiagnosticoPrincipal||'') + '</span>'
-                            + '</div>';
-                    });
-                    html += '<div class="inv-subtotal">Subtotal paciente: ' + fmt$(item.subtotalPaciente) + '</div></div>';
-                });
-                html += '</div>';
-            }
-
-            if (f.historial && f.historial.length) {
-                html += '<div style="margin-top:14px;padding:12px;background:#0a1628;border:1px solid #1a3a5c;border-radius:8px">'
-                    + '<h4 style="color:#90e0ef;margin-bottom:8px"><i class="fas fa-history"></i> Historial</h4>';
-                f.historial.forEach(function(h) {
-                    html += '<div style="font-size:12px;color:#c0c0c0;padding:3px 0;border-bottom:1px solid #0d2137">'
-                        + '<span style="color:#5a7a9a">' + (h.fecha||'').substring(0,19) + '</span> — '
-                        + '<span style="color:#00b4d8;font-weight:700">' + (h.accion||'') + '</span> — '
-                        + (h.usuario||'') + ' — ' + (h.detalle||'')
-                        + '</div>';
-                });
-                html += '</div>';
-            }
-
-            document.getElementById('modalDetalleContenido').innerHTML = html;
-            abrirModal('modalDetalle');
-        };
-
-        /* ═══════ TAB 2: NUEVA FACTURA ═══════ */
-        var facturaBorrador = null;
-
-        window.alCambiarEps = function() {
-            var eps = document.getElementById('nuevaEps').value;
-            if (eps==='COOSALUD') document.getElementById('nuevaQuincena').value = 'completa';
-        };
-
-        window.generarFactura = function() {
-            var eps = document.getElementById('nuevaEps').value;
-            var mes = document.getElementById('nuevaMes').value;
-            var anio = document.getElementById('nuevaAnio').value;
-            var quincena = document.getElementById('nuevaQuincena').value;
-
-            if (!eps || !mes) { toast('Seleccione EPS y mes','error'); return; }
-
-            var servicios = leer(K_SERVICIOS) || [];
-            var pacientes = leer(K_PACIENTES) || [];
-
-            var pacEps = pacientes.filter(function(p) {
-                var pEps = (p.eps||'').toUpperCase();
-                return pEps.indexOf(eps.toUpperCase()) >= 0;
-            });
-
-            if (!pacEps.length) {
-                toast('No hay pacientes registrados para ' + eps + '. Registre pacientes primero en el módulo de Pacientes.','warning');
-                return;
-            }
-
-            var diasPorMes = {'01':31,'02':28,'03':31,'04':30,'05':31,'06':30,'07':31,'08':31,'09':30,'10':31,'11':30,'12':31};
-            var diasMes = diasPorMes[mes] || 30;
-
-            var fechaInicio, fechaFin;
-            if (quincena === '01') {
-                fechaInicio = anio + '-' + mes + '-01';
-                fechaFin = anio + '-' + mes + '-15';
-            } else if (quincena === '20') {
-                fechaInicio = anio + '-' + mes + '-16';
-                fechaFin = anio + '-' + mes + '-' + String(diasMes).padStart(2,'0');
-            } else {
-                fechaInicio = anio + '-' + mes + '-01';
-                fechaFin = anio + '-' + mes + '-' + String(diasMes).padStart(2,'0');
-            }
-
-            var items = [];
-            pacEps.forEach(function(p) {
-                var serviciosPac = [];
-
-                if (p.serviciosConciliacion && Array.isArray(p.serviciosConciliacion)) {
-                    p.serviciosConciliacion.forEach(function(sc) {
-                        var srv = servicios.find(function(s){ return s.nombre === sc.servicio || s.id === sc.servicioId; });
-                        if (!srv) return;
-                        if (sc.fecha && (sc.fecha < fechaInicio || sc.fecha > fechaFin)) return;
-                        serviciosPac.push({
-                            servicioId: srv.id, codigoCUPS: srv.codigoCUPS, nombre: srv.nombre,
-                            tipoServicioRIPS: srv.tipoServicio,
-                            fechaAtencion: (sc.fecha||fechaInicio) + 'T08:00:00',
-                            numAutorizacion: p.autorizacion || sc.autorizacion || '',
-                            codDiagnosticoPrincipal: p.diagnostico || sc.diagnostico || '',
-                            codDiagnosticoRel1: null, codDiagnosticoRel2: null, codDiagnosticoRel3: null,
-                            tipoDiagnosticoPrincipal: '1',
-                            finalidadTecnologiaSalud: srv.finalidadTecnologiaSalud,
-                            causaMotivoAtencion: srv.causaMotivoAtencion,
-                            viaIngresoServicioSalud: srv.ambito === 'domiciliario' ? '03' : '01',
-                            modalidadGrupoServicioTecSal: '01', grupoServicios: srv.grupoServicios,
-                            profesional: { tipoDocumento:'CC', numeroDocumento: p.documentoProfesional||'', nombre: p.profesional||'', codProfesion:'', registroProfesional:'' },
-                            cantidad: sc.cantidad || 1,
-                            valorUnitario: srv.valores[eps] ? srv.valores[eps].valorUnitario : 0,
-                            valorTotal: (sc.cantidad||1) * (srv.valores[eps] ? srv.valores[eps].valorUnitario : 0),
-                            conceptoRecaudo: srv.valores[eps] ? srv.valores[eps].conceptoRecaudo : '04',
-                            vrCopago: srv.valores[eps] ? srv.valores[eps].vrCopago : 0,
-                            vrDescuento: srv.valores[eps] ? srv.valores[eps].vrDescuento : 0
-                        });
-                    });
-                }
-
-                if (!serviciosPac.length && p.servicio) {
-                    var srvDef = servicios.find(function(s){ return s.nombre.toUpperCase().indexOf(p.servicio.toUpperCase()) >= 0; });
-                    if (srvDef) {
-                        var dias = (quincena==='completa') ? diasMes : (quincena==='01' ? 15 : diasMes - 15);
-                        serviciosPac.push({
-                            servicioId: srvDef.id, codigoCUPS: srvDef.codigoCUPS, nombre: srvDef.nombre,
-                            tipoServicioRIPS: srvDef.tipoServicio,
-                            fechaAtencion: fechaInicio + 'T08:00:00',
-                            numAutorizacion: p.autorizacion||'',
-                            codDiagnosticoPrincipal: p.diagnostico||'',
-                            codDiagnosticoRel1:null, codDiagnosticoRel2:null, codDiagnosticoRel3:null,
-                            tipoDiagnosticoPrincipal:'1',
-                            finalidadTecnologiaSalud: srvDef.finalidadTecnologiaSalud,
-                            causaMotivoAtencion: srvDef.causaMotivoAtencion,
-                            viaIngresoServicioSalud: srvDef.ambito==='domiciliario' ? '03' : '01',
-                            modalidadGrupoServicioTecSal:'01', grupoServicios: srvDef.grupoServicios,
-                            profesional:{ tipoDocumento:'CC', numeroDocumento:'', nombre: p.profesional||'', codProfesion:'', registroProfesional:'' },
-                            cantidad: dias, valorUnitario: srvDef.valores[eps]?srvDef.valores[eps].valorUnitario:0,
-                            valorTotal: dias * (srvDef.valores[eps]?srvDef.valores[eps].valorUnitario:0),
-                            conceptoRecaudo: srvDef.valores[eps]?srvDef.valores[eps].conceptoRecaudo:'04',
-                            vrCopago:0, vrDescuento:0
-                        });
-                    }
-                }
-
-                var agrupados = {};
-                serviciosPac.forEach(function(sv) {
-                    var clave = sv.codigoCUPS + '|' + sv.fechaAtencion.substring(0,10);
-                    if (!agrupados[clave]) agrupados[clave] = Object.assign({}, sv, { cantidad:0, valorTotal:0 });
-                    agrupados[clave].cantidad += sv.cantidad;
-                    agrupados[clave].valorTotal += sv.valorTotal;
-                });
-                var agrupList = Object.keys(agrupados).map(function(k){ return agrupados[k]; });
-
-                if (!agrupList.length) return;
-                var subPac = agrupList.reduce(function(s,sv){ return s + sv.valorTotal; }, 0);
-
-                items.push({
-                    pacienteId: p.id || p.documento,
-                    tipoDocumento: p.tipoDocumento || 'CC',
-                    numeroDocumento: p.documento || '',
-                    nombrePaciente: p.nombre || p.nombres || '',
-                    tipoUsuario: (function(){ var eArr = leerEps()||[]; var e = eArr.find(function(x){return x.codigo===eps;}); return e && e.regimen==='subsidiado'?'01':'04'; })(),
-                    fechaNacimiento: p.fechaNacimiento || p.fecha_nacimiento || '',
-                    codSexo: (p.genero||p.sexo||'')==='Masculino'?'M':(p.genero||p.sexo||'')==='Femenino'?'F':'M',
-                    codPaisResidencia: '170',
-                    codMunicipioResidencia: p.codMunicipio || '05001',
-                    codZonaTerritorial: (p.zona||'')==='Rural'?'01':'02',
-                    incapacidad: 'NO',
-                    codPaisOrigen: '170',
-                    registroSIRAS: null,
-                    servicios: agrupList,
-                    subtotalPaciente: subPac
-                });
-            });
-
-            if (!items.length) {
-                toast('No se encontraron servicios para facturar en este período','warning');
-                return;
-            }
-
-            var subtotal = items.reduce(function(s,it){ return s + it.subtotalPaciente; }, 0);
-
-            facturaBorrador = {
-                id: uid('fac'),
-                numeroFactura: siguienteNum(),
-                fechaEmision: hoy(),
-                estado: 'borrador',
-                eps: eps,
-                entidadPagadora: (function(){ var eArr = leerEps()||[]; var e = eArr.find(function(x){return x.codigo===eps;}); return e ? {codigoEPS:e.codigo, nombre:e.nombre} : {codigoEPS:eps, nombre:eps}; })(),
-                periodo: { mes: mes, anio: anio, fechaInicio: fechaInicio, fechaFin: fechaFin, quincena: quincena },
-                valores: { subtotal: subtotal, copago: 0, descuento: 0, iva: 0, totalFactura: subtotal },
-                items: items,
-                observaciones: 'Factura ' + eps + ' — ' + mes + '/' + anio + ' Q:' + quincena,
-                creadoPor: (sesion() && sesion().usuario) || 'admin',
-                creadoEn: ahora(),
-                historial: [{ fecha: ahora(), accion: 'borrador', usuario: sesion()&&sesion().usuario||'admin', detalle: 'Factura generada desde conciliación' }]
-            };
-
-            renderPreview();
-            document.getElementById('previewFactura').style.display = 'block';
-            toast('Vista previa generada con ' + items.length + ' pacientes', 'info');
-        };
-
-        function renderPreview() {
-            if (!facturaBorrador) return;
-            var fb = facturaBorrador;
-
-            var resHtml = '<div class="resumen-card"><div class="rc-icon">📄</div><div class="rc-value">' + fb.numeroFactura + '</div><div class="rc-label">Nº Factura</div></div>'
-                + '<div class="resumen-card"><div class="rc-icon">🏥</div><div class="rc-value">' + fb.entidadPagadora.nombre + '</div><div class="rc-label">EPS</div></div>'
-                + '<div class="resumen-card"><div class="rc-icon">📅</div><div class="rc-value">' + fb.periodo.mes + '/' + fb.periodo.anio + (fb.periodo.quincena!=='completa'?' Q'+fb.periodo.quincena:'') + '</div><div class="rc-label">Período</div></div>'
-                + '<div class="resumen-card"><div class="rc-icon">👥</div><div class="rc-value">' + fb.items.length + '</div><div class="rc-label">Pacientes</div></div>'
-                + '<div class="resumen-card"><div class="rc-icon">💰</div><div class="rc-value">' + fmt$(fb.valores.subtotal) + '</div><div class="rc-label">Total</div></div>';
-            document.getElementById('resumenFactura').innerHTML = resHtml;
-
-            var detHtml = '';
-            fb.items.forEach(function(item) {
-                detHtml += '<div class="inv-card">'
-                    + '<div class="inv-card-header"><h4><i class="fas fa-user"></i> ' + (item.nombrePaciente||'') + ' <span style="color:#5a7a9a;font-size:11px">' + item.tipoDocumento + ' ' + item.numeroDocumento + '</span></h4><span style="color:#90e0ef;font-weight:800">' + fmt$(item.subtotalPaciente) + '</span></div>'
-                    + '<div class="inv-pat-header"><span>CUPS</span><span>Servicio</span><span>Cant</span><span>V. Unit</span><span>V. Total</span><span>Dx</span></div>';
-                (item.servicios||[]).forEach(function(sv) {
-                    detHtml += '<div class="inv-svc-row">'
-                        + '<span style="color:#00b4d8;font-weight:800">' + (sv.codigoCUPS||'—') + '</span>'
-                        + '<span>' + (sv.nombre||'') + '</span>'
-                        + '<span>' + (sv.cantidad||0) + '</span>'
-                        + '<span class="val">' + fmt$(sv.valorUnitario) + '</span>'
-                        + '<span class="val">' + fmt$(sv.valorTotal) + '</span>'
-                        + '<span style="color:#48c78e">' + (sv.codDiagnosticoPrincipal||'') + '</span>'
-                        + '</div>';
-                });
-                detHtml += '</div>';
-            });
-
-            document.getElementById('detallePacientes').innerHTML = detHtml;
-        }
-
-        window.confirmarFactura = function() {
-            if (!facturaBorrador) return;
-            facturaBorrador.estado = 'emitida';
-            facturaBorrador.historial.push({ fecha: ahora(), accion: 'emitida', usuario: sesion()&&sesion().usuario||'admin', detalle: 'Factura confirmada y emitida' });
-            var facturas = leer(K_FACTURAS) || [];
-            facturas.push(facturaBorrador);
-            guardar(K_FACTURAS, facturas);
-            facturaBorrador = null;
-            document.getElementById('previewFactura').style.display = 'none';
-            toast('Factura emitida correctamente', 'success');
-            renderFacturas();
-            cargarSelectFacturas();
-            cambiarTab(document.querySelector('[data-tab="tabFacturas"]'));
-        };
-
-        window.descartarFactura = function() {
-            var c = (leer(K_CONTADOR)||1) - 1;
-            guardar(K_CONTADOR, Math.max(0,c));
-            facturaBorrador = null;
-            document.getElementById('previewFactura').style.display = 'none';
-            toast('Borrador descartado', 'info');
-        };
-
-        window.limpiarNueva = function() {
-            document.getElementById('nuevaEps').value = '';
-            document.getElementById('nuevaMes').value = '';
-            document.getElementById('nuevaQuincena').value = 'completa';
-            document.getElementById('previewFactura').style.display = 'none';
-            facturaBorrador = null;
-        };
-
-        /* ═══════ TAB 3: RIPS JSON ═══════ */
-        var ripsJsonActual = null;
-
-        function cargarSelectFacturas() {
-            var sel = document.getElementById('ripsFactura');
-            var facturas = leer(K_FACTURAS) || [];
-            sel.innerHTML = '<option value="">Seleccione una factura...</option>';
-            facturas.forEach(function(f) {
-                var per = f.periodo ? f.periodo.mes+'/'+f.periodo.anio + (f.periodo.quincena!=='completa'?' Q'+f.periodo.quincena:'') : '';
-                sel.innerHTML += '<option value="'+f.id+'">'+f.numeroFactura+' — '+(f.entidadPagadora&&f.entidadPagadora.nombre||f.eps)+' — '+per+' ['+f.estado+']</option>';
-            });
-        }
-
-        window.alSeleccionarRips = function() {
-            document.getElementById('ripsPreview').style.display = 'none';
-            document.getElementById('ripsValidacion').style.display = 'none';
-            ripsJsonActual = null;
-            document.getElementById('btnDescargarRips').disabled = true;
-        };
-
-        window.verRipsDeFactura = function(fId) {
-            document.getElementById('ripsFactura').value = fId;
-            cambiarTab(document.querySelector('[data-tab="tabRips"]'));
-            alSeleccionarRips();
-        };
-
-        window.generarRIPS = function() {
-            var fId = document.getElementById('ripsFactura').value;
-            if (!fId) { toast('Seleccione una factura','error'); return; }
-
-            var facturas = leer(K_FACTURAS) || [];
-            var f = facturas.find(function(x){ return x.id === fId; });
-            if (!f) { toast('Factura no encontrada','error'); return; }
-
-            var hospital = leer(K_HOSPITAL) || {};
-            var nit = (hospital.numeroIdentificacionPrestador || '').replace(/-/g,'');
-
-            var json = {
-                numDocumentoIdObligado: nit,
-                numFactura: f.numeroFactura,
-                tipoNota: f.tipoNota || null,
-                numNota: f.numNota || null,
-                usuarios: (f.items||[]).map(function(item, idx) {
-                    var usuario = {
-                        tipoDocumentoIdentificacion: item.tipoDocumento || 'CC',
-                        numDocumentoIdentificacion: item.numeroDocumento || '',
-                        tipoUsuario: item.tipoUsuario || '01',
-                        fechaNacimiento: item.fechaNacimiento || '',
-                        codSexo: item.codSexo || 'M',
-                        codPaisResidencia: item.codPaisResidencia || '170',
-                        codMunicipioResidencia: item.codMunicipioResidencia || '05001',
-                        codZonaTerritorialResidencia: item.codZonaTerritorial || '02',
-                        incapacidad: item.incapacidad || 'NO',
-                        consecutivo: idx + 1,
-                        codPaisOrigen: item.codPaisOrigen || '170',
-                        registroSIRAS: item.registroSIRAS || null,
-                        servicios: { consultas:[], procedimientos:[], urgencias:[], hospitalizacion:[], recienNacidos:[], medicamentos:[], otrosServicios:[] }
-                    };
-
-                    (item.servicios||[]).forEach(function(sv) {
-                        var base = {
-                            codPrestador: hospital.codigoPrestador || '',
-                            fechaInicioAtencion: sv.fechaAtencion || '',
-                            numAutorizacion: sv.numAutorizacion || '',
-                            vrServicio: sv.valorTotal || 0,
-                            conceptoRecaudo: sv.conceptoRecaudo || '04',
-                            vrCopago: sv.vrCopago || 0,
-                            vrDescuento: sv.vrDescuento || 0
-                        };
-
-                        if (sv.tipoServicioRIPS === 'consulta') {
-                            usuario.servicios.consultas.push(Object.assign({}, base, {
-                                codConsulta: sv.codigoCUPS || '',
-                                modalidadGrupoServicioTecSal: sv.modalidadGrupoServicioTecSal || '01',
-                                grupoServicios: sv.grupoServicios || '03',
-                                codDiagnosticoPrincipal: sv.codDiagnosticoPrincipal || '',
-                                codDiagnosticoRel1: sv.codDiagnosticoRel1 || null,
-                                codDiagnosticoRel2: sv.codDiagnosticoRel2 || null,
-                                codDiagnosticoRel3: sv.codDiagnosticoRel3 || null,
-                                tipoDiagnosticoPrincipal: sv.tipoDiagnosticoPrincipal || '1',
-                                finalidadTecnologiaSalud: sv.finalidadTecnologiaSalud || '04',
-                                causaMotivoAtencion: sv.causaMotivoAtencion || '02',
-                                consecutivo: usuario.servicios.consultas.length + 1
-                            }));
-                        } else if (sv.tipoServicioRIPS === 'procedimiento') {
-                            usuario.servicios.procedimientos.push(Object.assign({}, base, {
-                                codProcedimiento: sv.codigoCUPS || '',
-                                viaIngresoServicioSalud: sv.viaIngresoServicioSalud || '03',
-                                modalidadGrupoServicioTecSal: sv.modalidadGrupoServicioTecSal || '01',
-                                grupoServicios: sv.grupoServicios || '03',
-                                codDiagnosticoPrincipal: sv.codDiagnosticoPrincipal || '',
-                                codDiagnosticoRel1: sv.codDiagnosticoRel1 || null,
-                                tipoDiagnosticoPrincipal: sv.tipoDiagnosticoPrincipal || '1',
-                                finalidadTecnologiaSalud: sv.finalidadTecnologiaSalud || '04',
-                                causaMotivoAtencion: sv.causaMotivoAtencion || '02',
-                                consecutivo: usuario.servicios.procedimientos.length + 1
-                            }));
-                        } else if (sv.tipoServicioRIPS === 'otroServicio') {
-                            usuario.servicios.otrosServicios.push(Object.assign({}, base, {
-                                codTecnologiaSalud: sv.codigoCUPS || '0',
-                                nomTecnologiaSalud: sv.nombre || '',
-                                cantidadOServicio: sv.cantidad || 1,
-                                vrUnitOServicio: sv.valorUnitario || 0,
-                                consecutivo: usuario.servicios.otrosServicios.length + 1
-                            }));
-                        }
-                    });
-
-                    return usuario;
-                })
-            };
-
-            ripsJsonActual = json;
-            document.getElementById('ripsCodigo').textContent = syntaxHighlight(JSON.stringify(json, null, 2));
-            document.getElementById('ripsPreview').style.display = 'block';
-            document.getElementById('btnDescargarRips').disabled = false;
-            toast('RIPS JSON generado — Resolución 948 de 2026', 'success');
-        };
-
-        window.validarRIPS = function() {
-            if (!ripsJsonActual) { toast('Primero genere el RIPS JSON','error'); return; }
-
-            var errores = [], advertencias = [];
-            var json = ripsJsonActual;
-
-            if (!json.numDocumentoIdObligado) errores.push('Falta NIT del prestador');
-            if (!json.numFactura) errores.push('Falta número de factura');
-
-            var hospital = leer(K_HOSPITAL) || {};
-            if (!hospital.codigoPrestador) errores.push('Falta código prestador REPS — ingréselo en la pestaña Prestador');
-
-            json.usuarios.forEach(function(u, i) {
-                var pref = 'Usuario ' + (i+1) + ' (' + (u.numDocumentoIdentificacion||'?') + '): ';
-                if (!u.tipoDocumentoIdentificacion) errores.push(pref + 'falta tipo documento');
-                if (!u.numDocumentoIdentificacion) errores.push(pref + 'falta número documento');
-                if (!u.tipoUsuario) errores.push(pref + 'falta tipo de usuario');
-                if (!u.fechaNacimiento) advertencias.push(pref + 'falta fecha de nacimiento — ingrésela en Pacientes');
-                if (!u.codSexo) errores.push(pref + 'falta código de sexo');
-                if (!u.codPaisResidencia) errores.push(pref + 'falta país de residencia');
-                if (!u.codMunicipioResidencia) advertencias.push(pref + 'falta municipio DIVIPOLA');
-
-                var totalSvcs = [].concat(u.servicios.consultas, u.servicios.procedimientos, u.servicios.otrosServicios);
-                if (!totalSvcs.length) errores.push(pref + 'no tiene servicios registrados');
-
-                totalSvcs.forEach(function(sv, j) {
-                    var sp = pref + 'servicio ' + (j+1) + ': ';
-                    if (!sv.codPrestador) errores.push(sp + 'falta código prestador');
-                    if (!sv.fechaInicioAtencion) errores.push(sp + 'falta fecha atención');
-                    if (sv.vrServicio === undefined || sv.vrServicio < 0) errores.push(sp + 'valor inválido');
-                });
-            });
-
-            var html = '';
-            if (!errores.length && !advertencias.length) {
-                html = '<div style="text-align:center;padding:20px"><span style="color:#48c78e;font-size:48px"><i class="fas fa-check-circle"></i></span><p style="color:#48c78e;font-weight:700;font-size:16px;margin-top:10px">Validación exitosa — Listo para enviar al MUV</p></div>';
-            } else {
-                if (errores.length) {
-                    html += '<h4 style="color:#ff3860;margin-bottom:8px"><i class="fas fa-times-circle"></i> Errores (' + errores.length + ')</h4>';
-                    errores.forEach(function(e) { html += '<div style="color:#ff6b7a;font-size:13px;padding:3px 0"><i class="fas fa-exclamation-circle" style="margin-right:6px"></i>' + e + '</div>'; });
-                }
-                if (advertencias.length) {
-                    html += '<h4 style="color:#ffb700;margin:12px 0 8px"><i class="fas fa-exclamation-triangle"></i> Advertencias (' + advertencias.length + ')</h4>';
-                    advertencias.forEach(function(a) { html += '<div style="color:#ffd479;font-size:13px;padding:3px 0"><i class="fas fa-info-circle" style="margin-right:6px"></i>' + a + '</div>'; });
-                }
-            }
-
-            document.getElementById('ripsValResultados').innerHTML = html;
-            document.getElementById('ripsValidacion').style.display = 'block';
-        };
-
-        window.descargarRIPS = function() {
-            if (!ripsJsonActual) { toast('Primero genere el RIPS JSON','error'); return; }
-            var fId = document.getElementById('ripsFactura').value;
-            var facturas = leer(K_FACTURAS) || [];
-            var f = facturas.find(function(x){ return x.id === fId; });
-            var nombre = 'RIPS_' + (f?f.numeroFactura:'FACT') + '_' + hoy() + '.json';
-
-            var blob = new Blob([JSON.stringify(ripsJsonActual, null, 2)], { type: 'application/json' });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url; a.download = nombre;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            var rips = leer(K_RIPS) || [];
-            rips.push({ id: uid('rips'), facturaId: fId, numeroFactura: f?f.numeroFactura:'', contenido: ripsJsonActual, creadoEn: ahora(), creadoPor: sesion()&&sesion().usuario||'admin' });
-            guardar(K_RIPS, rips);
-
-            toast('RIPS JSON descargado: ' + nombre, 'success');
-        };
-
-        function syntaxHighlight(json) {
-            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return json.replace(/("\\u[^"]+"|""|'[^']+'")/g, '<span class="str">$1</span>')
-                .replace(/\b(\d+\.?\d*)\b/g, '<span class="num">$1</span>')
-                .replace(/\b(true|false)\b/g, '<span class="num">$1</span>')
-                .replace(/\bnull\b/g, '<span class="null">null</span>')
-                .replace(/("[^"]+")\s*:/g, '<span class="key">$1</span>:');
-        }
-
-        /* ═══════ TAB 4: CATÁLOGO ═══════ */
-        var catEditando = null;
-
-        function renderCatalogo() {
-            var servicios = leer(K_SERVICIOS) || [];
-            var grid = document.getElementById('catGrid');
-            var empty = document.getElementById('emptyCat');
-            document.getElementById('catCount').textContent = servicios.length;
-
-            if (!servicios.length) { grid.innerHTML=''; empty.style.display='block'; return; }
-            empty.style.display = 'none';
-
-            grid.innerHTML = '';
-            var tipoLabel = { consulta:'Consulta', procedimiento:'Procedimiento', otroServicio:'Otro Servicio' };
-            servicios.forEach(function(s) {
-                var card = document.createElement('div');
-                card.className = 'cat-card';
-                card.innerHTML = '<button class="cat-edit" onclick="editarServicio(\''+s.id+'\')" title="Editar"><i class="fas fa-pen"></i></button>'
-                    + '<div class="cat-cups">' + (s.codigoCUPS||'—') + '</div>'
-                    + '<h5>' + (s.nombre||'') + '</h5>'
-                    + '<div class="cat-ambito"><i class="fas fa-' + (s.ambito==='domiciliario'?'house-chimney-medical':'hospital') + '"></i> ' + (s.ambito||'') + '</div>'
-                    + '<div class="cat-rips-type"><i class="fas fa-tag"></i> ' + (tipoLabel[s.tipoServicio]||s.tipoServicio) + '</div>'
-                    + '<div class="cat-valores">'
-                    +   '<div class="cat-eps"><div class="eps-name">COOSALUD</div><div class="eps-valor">' + fmt$(s.valores&&s.valores.COOSALUD?s.valores.COOSALUD.valorUnitario:0) + '</div></div>'
-                    +   '<div class="cat-eps"><div class="eps-name">FOMAG</div><div class="eps-valor">' + fmt$(s.valores&&s.valores.FOMAG?s.valores.FOMAG.valorUnitario:0) + '</div></div>'
-                    + '</div>';
-                grid.appendChild(card);
-            });
-        }
-
-        window.guardarServicio = function() {
-            var servicios = leer(K_SERVICIOS) || [];
-            var data = {
-                id: catEditando || uid('sf'),
-                codigoCUPS: document.getElementById('catCups').value.trim(),
-                nombre: document.getElementById('catNombre').value.trim(),
-                tipoServicio: document.getElementById('catTipo').value,
-                ambito: document.getElementById('catAmbito').value,
-                valores: {
-                    COOSALUD: { valorUnitario: Number(document.getElementById('catValCoosalud').value)||0, conceptoRecaudo:'04', vrCopago:0, vrDescuento:0 },
-                    FOMAG:   { valorUnitario: Number(document.getElementById('catValFomag').value)||0,   conceptoRecaudo:'04', vrCopago:0, vrDescuento:0 }
-                },
-                finalidadTecnologiaSalud: document.getElementById('catFinalidad').value,
-                grupoServicios: document.getElementById('catGrupo').value,
-                causaMotivoAtencion: '02',
-                activo: true
-            };
-            if (!data.nombre) { toast('Ingrese nombre del servicio','error'); return; }
-
-            if (catEditando) {
-                var idx = servicios.findIndex(function(s){ return s.id === catEditando; });
-                if (idx>=0) servicios[idx] = data;
-            } else {
-                servicios.push(data);
-            }
-            guardar(K_SERVICIOS, servicios);
-            renderCatalogo();
-            limpiarCatalogo();
-            toast('Servicio guardado','success');
-        };
-
-        window.editarServicio = function(sId) {
-            var servicios = leer(K_SERVICIOS) || [];
-            var s = servicios.find(function(x){ return x.id === sId; });
-            if (!s) return;
-            catEditando = sId;
-            document.getElementById('catCups').value = s.codigoCUPS||'';
-            document.getElementById('catNombre').value = s.nombre||'';
-            document.getElementById('catTipo').value = s.tipoServicio||'consulta';
-            document.getElementById('catAmbito').value = s.ambito||'domiciliario';
-            document.getElementById('catValCoosalud').value = s.valores&&s.valores.COOSALUD?s.valores.COOSALUD.valorUnitario:0;
-            document.getElementById('catValFomag').value = s.valores&&s.valores.FOMAG?s.valores.FOMAG.valorUnitario:0;
-            document.getElementById('catFinalidad').value = s.finalidadTecnologiaSalud||'04';
-            document.getElementById('catGrupo').value = s.grupoServicios||'03';
-            toast('Editando: ' + s.nombre, 'info');
-        };
-
-        window.limpiarCatalogo = function() {
-            catEditando = null;
-            ['catCups','catNombre','catValCoosalud','catValFomag'].forEach(function(id){ document.getElementById(id).value=''; });
-            document.getElementById('catTipo').value = 'consulta';
-            document.getElementById('catAmbito').value = 'domiciliario';
-            document.getElementById('catFinalidad').value = '04';
-            document.getElementById('catGrupo').value = '03';
-        };
-
-        /* ═══════ TAB 5: PRESTADOR ═══════ */
-        function cargarPrestador() {
-            var h = leer(K_HOSPITAL) || {};
-            document.getElementById('prTipoId').value = h.tipoIdentificacionPrestador || 'NI';
-            document.getElementById('prNumId').value = h.numeroIdentificacionPrestador || '';
-            document.getElementById('prDV').value = h.digitoVerificacion || '';
-            document.getElementById('prRazon').value = h.razonSocial || '';
-            document.getElementById('prRepresentante').value = h.representanteLegal || '';
-            document.getElementById('prCodigo').value = h.codigoPrestador || '';
-            document.getElementById('prCodHabilitacion').value = h.codHabilitacion || '';
-            document.getElementById('prRegimen').value = h.regimenPrestador || '1';
-            document.getElementById('prDepto').value = h.deptoPrestador || '05';
-            document.getElementById('prMunicipio').value = h.municipioPrestador || '05001';
-            document.getElementById('prDireccion').value = h.direccionPrestador || '';
-            document.getElementById('prTelefono').value = h.telefonoPrestador || '';
-            document.getElementById('prEmail').value = h.emailPrestador || '';
-            document.getElementById('prPrefijo').value = h.prefijoFactura || 'FEV';
-            document.getElementById('prRangoInicio').value = h.rangoInicioFactura || 1;
-            document.getElementById('prRangoFin').value = h.rangoFinFactura || 9999;
-            document.getElementById('prResolucion').value = h.resolucionFactura || '';
-            document.getElementById('prAmbiente').value = h.tipoAmbienteDIAN || '2';
-        }
-
-        window.guardarPrestador = function() {
-            var h = leer(K_HOSPITAL) || {};
-            h.tipoIdentificacionPrestador = document.getElementById('prTipoId').value;
-            h.numeroIdentificacionPrestador = document.getElementById('prNumId').value.trim();
-            h.digitoVerificacion = document.getElementById('prDV').value.trim();
-            h.razonSocial = document.getElementById('prRazon').value.trim();
-            h.representanteLegal = document.getElementById('prRepresentante').value.trim();
-            h.codigoPrestador = document.getElementById('prCodigo').value.trim();
-            h.codHabilitacion = document.getElementById('prCodHabilitacion').value.trim();
-            h.regimenPrestador = document.getElementById('prRegimen').value;
-            h.deptoPrestador = document.getElementById('prDepto').value.trim();
-            h.municipioPrestador = document.getElementById('prMunicipio').value.trim();
-            h.direccionPrestador = document.getElementById('prDireccion').value.trim();
-            h.telefonoPrestador = document.getElementById('prTelefono').value.trim();
-            h.emailPrestador = document.getElementById('prEmail').value.trim();
-            h.prefijoFactura = document.getElementById('prPrefijo').value.trim();
-            h.rangoInicioFactura = Number(document.getElementById('prRangoInicio').value)||1;
-            h.rangoFinFactura = Number(document.getElementById('prRangoFin').value)||9999;
-            h.resolucionFactura = document.getElementById('prResolucion').value.trim();
-            h.tipoAmbienteDIAN = document.getElementById('prAmbiente').value;
-            guardar(K_HOSPITAL, h);
-            toast('Datos del prestador guardados','success');
-        };
-
-        /* ═══════ LOGOUT ═══════ */
-        window.cerrarSesion = function() {
-            localStorage.removeItem('nexus_sesion');
-            window.location.href = 'index.html';
-        };
-
-        /* ═══════ ARRANQUE ═══════ */
-        NX.iniciar('facturacion', {
-            C: ['generarFactura','guardarServicio','guardarPrestador'],
-            E: ['guardarServicio','guardarPrestador','confirmarFactura'],
-            B: []
-        });
-
-        cargarSesion();
-        initCatalogo();
-        initContador();
-        initEpsFact();
-        renderFacturas();
-        renderCatalogo();
-        cargarPrestador();
-        cargarSelectFacturas();
-
-    })();
-    </script>
+    <!-- PASO 4: Emitir -->
+    <div class="form-section" id="paso4Panel" style="display:none">
+      <div class="form-title"><i class="fas fa-paper-plane"></i> Paso 4 — Emitir Factura Definitiva</div>
+      <p style="color:#5a7a9a;font-size:13px;margin-bottom:14px">Revise la información y emita la factura definitiva. Esta acción le asigna un número consecutivo.</p>
+      <div id="resumenEmitir" style="background:#0a1628;border-radius:10px;padding:18px;border:1px solid #1a3a5c;margin-bottom:16px"></div>
+      <div style="display:flex;justify-content:space-between">
+        <button class="btn btn-secondary" onclick="irPaso(3)"><i class="fas fa-arrow-left"></i> Anterior</button>
+        <button class="btn btn-success" onclick="emitirFacturaDefinitiva()" id="btnEmitir"><i class="fas fa-check-circle"></i> Emitir Factura Definitiva</button>
+      </div>
+    </div>
+
+  </div><!-- /tabNueva -->
+
+  <!-- ═══════ TAB: HISTORIAL ═══════ -->
+  <div class="tab-panel" id="tabHistorial">
+    <div class="form-section">
+      <div class="form-title"><i class="fas fa-list"></i> Facturas Emitidas</div>
+      <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;align-items:end">
+        <div class="form-group" style="flex:1;min-width:180px">
+          <label>Filtrar por EPS</label>
+          <select id="filtroEps" onchange="renderHistorial()" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
+            <option value="">Todas</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1;min-width:150px">
+          <label>Estado</label>
+          <select id="filtroEstado" onchange="renderHistorial()" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
+            <option value="">Todos</option>
+            <option value="pre-factura">Pre-Factura</option>
+            <option value="definitiva">Definitiva</option>
+            <option value="anulada">Anulada</option>
+          </select>
+        </div>
+      </div>
+      <table class="data-table" id="tablaHistorial">
+        <thead><tr>
+          <th>N° Factura</th><th>EPS</th><th>Paciente</th><th>Documento</th><th>Fecha</th><th>Estado</th><th style="text-align:right">Total</th><th>Acciones</th>
+        </tr></thead>
+        <tbody id="bodyHistorial"></tbody>
+      </table>
+    </div>
+  </div><!-- /tabHistorial -->
+
+  <!-- ═══════ TAB: CONFIGURACIÓN ═══════ -->
+  <div class="tab-panel" id="tabConfig">
+    <div class="form-section">
+      <div class="form-title"><i class="fas fa-cogs"></i> Catálogo de Servicios de Facturación</div>
+      <p style="color:#5a7a9a;font-size:13px;margin-bottom:14px">Administre los servicios CUPS disponibles para facturación con sus valores unitarios por tipo (Domiciliaria / Intramural).</p>
+      <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;align-items:end">
+        <div class="form-group" style="flex:2;min-width:200px">
+          <label>Nombre del Servicio</label>
+          <input type="text" id="cfgSvcNombre" placeholder="Ej: ENFERMERÍA 12H" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
+        </div>
+        <div class="form-group" style="flex:0 0 140px">
+          <label>Código CUPS</label>
+          <input type="text" id="cfgSvcCups" placeholder="Ej: 890001" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
+        </div>
+        <div class="form-group" style="flex:0 0 140px">
+          <label>Tipo</label>
+          <select id="cfgSvcTipo" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
+            <option value="DOMICILIARIA">Domiciliaria</option>
+            <option value="INTRAMURAL">Intramural</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:0 0 120px">
+          <label>Valor Unit.</label>
+          <input type="number" id="cfgSvcValor" placeholder="0" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
+        </div>
+        <button class="btn btn-success" onclick="agregarServicioCatalogo()"><i class="fas fa-plus"></i> Agregar</button>
+      </div>
+      <table class="data-table" id="tablaCatalogo">
+        <thead><tr>
+          <th>CUPS</th><th>Servicio</th><th>Tipo</th><th style="text-align:right">Valor Unit.</th><th>Acción</th>
+        </tr></thead>
+        <tbody id="bodyCatalogo"></tbody>
+      </table>
+    </div>
+  </div><!-- /tabConfig -->
+
+</div><!-- /container -->
+
+<!-- Modal Anular -->
+<div class="modal-overlay" id="modalAnular">
+  <div class="modal-box">
+    <h3><i class="fas fa-exclamation-triangle" style="color:#ff3860"></i> Anular Factura</h3>
+    <p style="color:#c8d6e5;font-size:14px;margin-bottom:10px">¿Está seguro de que desea anular esta factura? Esta acción no se puede deshacer.</p>
+    <p style="color:#ff3860;font-size:12px;margin-bottom:18px"><i class="fas fa-info-circle"></i> La factura quedará marcada como ANULADA pero se conservará en el historial.</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="cerrarModal('modalAnular')">Cancelar</button>
+      <button class="btn btn-danger" id="btnConfirmarAnular">Anular Factura</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   NEXUSMED — FACTURACIÓN (Nueva Factura Individual)
+   ═══════════════════════════════════════════════ */
+
+// ─── textdb.online Motor ───
+const NS = 'nxmed_b7f3a9c2e4d1_';
+const K_PACIENTES  = NS + 'nexus_pacientes';
+const K_SERVICIOS  = NS + 'nexus_servicios_facturacion';
+const K_FACTURAS   = NS + 'nexus_facturas';
+const K_CONTADOR   = NS + 'nexus_contador_facturas';
+const K_HOSPITAL   = NS + 'nexus_hospital';
+const LIMIT = 195000;
+
+function leer(k)   { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch(e) { return null; } }
+function guardar(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+function hoy()     { return new Date().toISOString().split('T')[0]; }
+function ahora()   { return new Date().toISOString().replace('Z',''); }
+function fmt$(n)   { return '$' + Number(n||0).toLocaleString('es-CO'); }
+function uid(pref) { return pref + '_' + Date.now() + '_' + Math.random().toString(36).substring(2,7); }
+
+// ─── Estado de la factura en curso ───
+let facturaActual = {
+  admision: null,
+  servicios: [],
+  paso: 1
+};
+
+// ─── EPS code map ───
+function codigoEpsFromString(epsStr) {
+  if (!epsStr) return 'SDS001';
+  const s = epsStr.toUpperCase().trim();
+  if (s.includes('COOSALUD'))  return 'EPS017';
+  if (s.includes('FOMAG'))     return 'EPS019';
+  if (s.includes('SALUD'))     return 'EPS017';
+  return 'SDS001';
+}
+
+// ─── Catálogo por defecto (FOMAG + COOSALUD) ───
+const CATALOGO_DEFAULT = [
+  {codigo:'941006',nombre:'CAMA',tipo:'DOMICILIARIA',valor:250000},
+  {codigo:'923012',nombre:'ENFERMERÍA 24H',tipo:'DOMICILIARIA',valor:200000},
+  {codigo:'923010',nombre:'ENFERMERÍA 12H',tipo:'DOMICILIARIA',valor:100000},
+  {codigo:'923008',nombre:'ENFERMERÍA 8H',tipo:'DOMICILIARIA',valor:95000},
+  {codigo:'931610',nombre:'LIMPIEZA TRAQUEOSTOMÍA',tipo:'DOMICILIARIA',valor:42769},
+  {codigo:'931610',nombre:'FONIOLOGÍA',tipo:'DOMICILIARIA',valor:42769},
+  {codigo:'931610',nombre:'FONIOLOGÍA',tipo:'INTRAMURAL',valor:23345},
+  {codigo:'934010',nombre:'PSICOLOGÍA',tipo:'DOMICILIARIA',valor:42769},
+  {codigo:'934010',nombre:'PSICOLOGÍA',tipo:'INTRAMURAL',valor:23345},
+  {codigo:'931020',nombre:'FÍSICA',tipo:'DOMICILIARIA',valor:42769},
+  {codigo:'931020',nombre:'FÍSICA',tipo:'INTRAMURAL',valor:23345},
+  {codigo:'931030',nombre:'OCUPACIONAL',tipo:'DOMICILIARIA',valor:42769},
+  {codigo:'931030',nombre:'OCUPACIONAL',tipo:'INTRAMURAL',valor:23345},
+  {codigo:'931040',nombre:'RESPIRATORIA',tipo:'DOMICILIARIA',valor:42769},
+  {codigo:'931040',nombre:'RESPIRATORIA',tipo:'INTRAMURAL',valor:23345}
+];
+
+function initCatalogo() {
+  if (!leer(K_SERVICIOS)) guardar(K_SERVICIOS, CATALOGO_DEFAULT);
+}
+
+function initContador() {
+  if (!leer(K_CONTADOR)) guardar(K_CONTADOR, {ultimo: 0});
+}
+
+function siguienteNum() {
+  const c = leer(K_CONTADOR) || {ultimo:0};
+  c.ultimo++;
+  guardar(K_CONTADOR, c);
+  return 'FC-' + String(c.ultimo).padStart(6,'0');
+}
+
+// ─── Sesión ───
+function sesion() {
+  const s = leer(NS + 'nexus_sesion');
+  return s || null;
+}
+function cargarSesion() {
+  const s = sesion();
+  if (s) {
+    document.getElementById('nombreUsuario').textContent = s.nombre || 'Admin';
+    document.getElementById('avatarInicial').textContent = (s.nombre||'A').charAt(0).toUpperCase();
+  }
+}
+function cerrarSesion() {
+  guardar(NS + 'nexus_sesion', null);
+  window.location.href = 'index.html';
+}
+
+// ─── Toast ───
+function toast(msg, tipo) {
+  tipo = tipo || 'info';
+  const c = document.getElementById('toastContainer');
+  const iconos = {success:'fa-check-circle',error:'fa-times-circle',info:'fa-info-circle',warning:'fa-exclamation-triangle'};
+  const t = document.createElement('div');
+  t.className = 'toast ' + tipo;
+  t.innerHTML = '<i class="fas ' + (iconos[tipo]||'fa-info-circle') + '"></i> ' + msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 4200);
+}
+
+// ─── Modal ───
+function abrirModal(id) { document.getElementById(id).classList.add('active'); }
+function cerrarModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ─── Tabs ───
+function cambiarTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-tab="'+tabId+'"]').classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+  if (tabId === 'tabHistorial') renderHistorial();
+  if (tabId === 'tabConfig') renderCatalogo();
+}
+
+// ─── PASOS ───
+function irPaso(num) {
+  // Validación antes de avanzar
+  if (num >= 2 && !facturaActual.admision) {
+    toast('Primero seleccione una admisión egresada','warning');
+    return;
+  }
+  if (num >= 3 && facturaActual.servicios.length === 0) {
+    toast('Agregue al menos un servicio','warning');
+    return;
+  }
+  if (num === 3) recalcularLiquidacion();
+  if (num === 4) llenarResumenEmitir();
+
+  facturaActual.paso = num;
+
+  // Mostrar/ocultar paneles
+  for (let i = 1; i <= 4; i++) {
+    const panel = document.getElementById('paso'+i+'Panel');
+    if (panel) panel.style.display = (i === num) ? 'block' : 'none';
+  }
+
+  // Actualizar indicador
+  document.querySelectorAll('.paso-step').forEach(step => {
+    const p = parseInt(step.dataset.paso);
+    step.classList.remove('active','done');
+    if (p < num) step.classList.add('done');
+    else if (p === num) step.classList.add('active');
+  });
+  document.querySelectorAll('.paso-line').forEach(line => {
+    const l = parseInt(line.dataset.line);
+    line.classList.remove('done','active');
+    if (l < num) line.classList.add('done');
+    else if (l === num) line.classList.add('active');
+  });
+}
+
+// ─── PASO 1: Buscar admisiones egresadas ───
+function buscarAdmisiones(query) {
+  const pacientes = leer(K_PACIENTES) || [];
+  const q = query.toLowerCase().trim();
+  if (!q) return [];
+
+  return pacientes.filter(p => {
+    const estado = (p.estado || p.status || '').toLowerCase();
+    // Solo egresados
+    if (estado !== 'egresado' && estado !== 'egresada') return false;
+    const nombre = (p.nombre || p.nombres || '').toLowerCase();
+    const doc = (p.documento || p.cedula || p.numeroDocumento || '').toLowerCase();
+    return nombre.includes(q) || doc.includes(q);
+  });
+}
+
+function renderDropdownResultados(resultados) {
+  const lista = document.getElementById('admDropdownList');
+  if (!resultados.length) {
+    lista.innerHTML = '<div class="adm-no-results"><i class="fas fa-search"></i> No se encontraron admisiones egresadas</div>';
+    lista.classList.add('open');
+    return;
+  }
+  lista.innerHTML = resultados.map((p, idx) => {
+    const nombre = p.nombre || p.nombres || 'Sin nombre';
+    const doc = p.documento || p.cedula || p.numeroDocumento || '—';
+    const eps = p.eps || p.entidad || '—';
+    return '<div class="adm-dropdown-item" onclick="seleccionarAdmision(' + idx + ')">'
+      + '<span class="item-status egresado">Egresado</span>'
+      + '<div class="item-name">' + nombre + '</div>'
+      + '<div class="item-doc">Doc: ' + doc + '</div>'
+      + '<div class="item-eps">' + eps + '</div>'
+      + '</div>';
+  }).join('');
+  lista.classList.add('open');
+  // Guardar temporalmente para selección
+  window._admResultados = resultados;
+}
+
+function seleccionarAdmision(idx) {
+  const p = window._admResultados[idx];
+  facturaActual.admision = p;
+  facturaActual.servicios = [];
+  facturaActual.paso = 1;
+
+  document.getElementById('buscarAdmInput').value = '';
+  document.getElementById('admDropdownList').classList.remove('open');
+  document.getElementById('admSeleccionada').style.display = 'block';
+
+  llenarDatosPaciente(p);
+  llenarSelectServicios();
+  renderServiciosTabla();
+}
+
+function llenarDatosPaciente(p) {
+  const nombre = p.nombre || p.nombres || '—';
+  const doc = p.documento || p.cedula || p.numeroDocumento || '—';
+  const eps = p.eps || p.entidad || '—';
+  const codEps = codigoEpsFromString(eps);
+  const tipoDoc = p.tipoDocumento || p.tipo_documento || 'CC';
+  const municipio = p.municipio || p.ciudad || '—';
+  const dx = p.diagnostico || p.dx || '—';
+  const autorizacion = p.autorizacion || p.autorizacionNumero || '—';
+
+  const grid = document.getElementById('datosPacienteGrid');
+  grid.innerHTML = ''
+    + '<div class="form-group"><label>Paciente</label><input readonly value="'+nombre+'"></div>'
+    + '<div class="form-group"><label>Tipo Doc.</label><input readonly value="'+tipoDoc+'"></div>'
+    + '<div class="form-group"><label>Documento</label><input readonly value="'+doc+'"></div>'
+    + '<div class="form-group"><label>EPS</label><input readonly value="'+eps+'"></div>'
+    + '<div class="form-group"><label>Código EPS</label><input readonly value="'+codEps+'"></div>'
+    + '<div class="form-group"><label>Municipio</label><input readonly value="'+municipio+'"></div>'
+    + '<div class="form-group"><label>Diagnóstico</label><input readonly value="'+dx+'"></div>'
+    + '<div class="form-group"><label>Autorización</label><input readonly value="'+autorizacion+'"></div>';
+}
+
+// ─── PASO 2: Servicios ───
+function llenarSelectServicios() {
+  const catalogo = leer(K_SERVICIOS) || [];
+  const sel = document.getElementById('selectServicio');
+  sel.innerHTML = '<option value="">— Seleccione servicio —</option>';
+  catalogo.forEach((s, i) => {
+    sel.innerHTML += '<option value="'+i+'">' + s.nombre + ' (' + s.tipo + ') — ' + fmt$(s.valor) + '</option>';
+  });
+}
+
+function agregarServicio() {
+  const sel = document.getElementById('selectServicio');
+  const idx = sel.value;
+  if (!idx && idx !== 0) { toast('Seleccione un servicio','warning'); return; }
+  const catalogo = leer(K_SERVICIOS) || [];
+  const svc = catalogo[parseInt(idx)];
+  if (!svc) return;
+  const cant = parseInt(document.getElementById('inputCantidad').value) || 1;
+  if (cant < 1) { toast('La cantidad debe ser ≥ 1','warning'); return; }
+
+  // Verificar si ya existe el mismo servicio+tipo
+  const existente = facturaActual.servicios.find(s => s.nombre === svc.nombre && s.tipo === svc.tipo);
+  if (existente) {
+    existente.cantidad += cant;
+  } else {
+    facturaActual.servicios.push({
+      codigo: svc.codigo,
+      nombre: svc.nombre,
+      tipo: svc.tipo,
+      valorUnit: svc.valor,
+      cantidad: cant
+    });
+  }
+
+  renderServiciosTabla();
+  sel.value = '';
+  document.getElementById('inputCantidad').value = '1';
+  toast('Servicio agregado','success');
+}
+
+function eliminarServicio(idx) {
+  facturaActual.servicios.splice(idx, 1);
+  renderServiciosTabla();
+}
+
+function cambiarCantidad(idx, nuevaCant) {
+  const c = parseInt(nuevaCant);
+  if (c < 1) return;
+  facturaActual.servicios[idx].cantidad = c;
+  renderServiciosTabla();
+}
+
+function renderServiciosTabla() {
+  const tbody = document.getElementById('bodyServicios');
+  if (!facturaActual.servicios.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#5a7a9a;padding:20px"><i class="fas fa-inbox"></i> No hay servicios agregados</td></tr>';
+    return;
+  }
+  tbody.innerHTML = facturaActual.servicios.map((s, i) => {
+    const subtotal = s.cantidad * s.valorUnit;
+    return '<tr>'
+      + '<td>' + s.codigo + '</td>'
+      + '<td>' + s.nombre + '</td>'
+      + '<td><span class="badge" style="background:rgba(0,180,216,.15);color:#00b4d8">' + s.tipo + '</span></td>'
+      + '<td class="td-valor">' + fmt$(s.valorUnit) + '</td>'
+      + '<td class="td-cant"><input type="number" class="input-cant" value="'+s.cantidad+'" min="1" onchange="cambiarCantidad('+i+',this.value)"></td>'
+      + '<td class="td-subtotal">' + fmt$(subtotal) + '</td>'
+      + '<td style="text-align:center"><button class="btn-del" onclick="eliminarServicio('+i+')"><i class="fas fa-trash"></i></button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+// ─── PASO 3: Liquidación ───
+function recalcularLiquidacion() {
+  const p = facturaActual.admision;
+  if (!p) return;
+
+  const eps = p.eps || p.entidad || '—';
+  const codEps = codigoEpsFromString(eps);
+  const nombre = p.nombre || p.nombres || '—';
+  const doc = p.documento || p.cedula || p.numeroDocumento || '—';
+
+  document.getElementById('liqEps').textContent = eps;
+  document.getElementById('liqCodEps').textContent = codEps;
+  document.getElementById('liqPaciente').textContent = nombre;
+  document.getElementById('liqDocumento').textContent = doc;
+  document.getElementById('liqFecha').textContent = hoy();
+  document.getElementById('liqVigencia').textContent = hoy().substring(0,7); // mes vigencia
+
+  let subtotal = 0;
+  facturaActual.servicios.forEach(s => subtotal += s.cantidad * s.valorUnit);
+  const iva = 0; // servicios de salud exentos
+  const descuento = 0;
+  const total = subtotal - descuento;
+
+  document.getElementById('liqSubtotal').textContent = fmt$(subtotal);
+  document.getElementById('liqIva').textContent = fmt$(iva);
+  document.getElementById('liqDescuento').textContent = fmt$(descuento);
+  document.getElementById('liqTotal').textContent = fmt$(total);
+}
+
+// ─── Guardar Pre-Factura ───
+function guardarPreFactura() {
+  if (!facturaActual.admision) { toast('Seleccione una admisión','error'); return; }
+  if (!facturaActual.servicios.length) { toast('Agregue servicios','error'); return; }
+
+  const p = facturaActual.admision;
+  const facturas = leer(K_FACTURAS) || [];
+
+  const fac = construirFactura();
+  fac.estado = 'pre-factura';
+  fac.numeroFactura = fac.numeroFactura || uid('PF');
+
+  facturas.push(fac);
+  guardar(K_FACTURAS, facturas);
+
+  toast('Pre-Factura guardada correctamente','success');
+  actualizarStats();
+}
+
+function construirFactura() {
+  const p = facturaActual.admision;
+  const eps = p.eps || p.entidad || '—';
+  const codEps = codigoEpsFromString(eps);
+  const nombre = p.nombre || p.nombres || '—';
+  const doc = p.documento || p.cedula || p.numeroDocumento || '—';
+  const tipoDoc = p.tipoDocumento || p.tipo_documento || 'CC';
+  const municipio = p.municipio || p.ciudad || '—';
+  const dx = p.diagnostico || p.dx || '—';
+  const autorizacion = p.autorizacion || p.autorizacionNumero || '—';
+
+  let subtotal = 0;
+  facturaActual.servicios.forEach(s => subtotal += s.cantidad * s.valorUnit);
+
+  return {
+    id: uid('FAC'),
+    numeroFactura: facturaActual.numeroFactura || null,
+    admisionId: p.id || p._id || null,
+    paciente: nombre,
+    tipoDocumento: tipoDoc,
+    documento: doc,
+    eps: eps,
+    codigoEps: codEps,
+    municipio: municipio,
+    diagnostico: dx,
+    autorizacion: autorizacion,
+    servicios: JSON.parse(JSON.stringify(facturaActual.servicios)),
+    subtotal: subtotal,
+    iva: 0,
+    descuento: 0,
+    total: subtotal,
+    fecha: hoy(),
+    vigencia: hoy().substring(0,7),
+    creadoEn: ahora()
+  };
+}
+
+// ─── PASO 4: Emitir Factura Definitiva ───
+function llenarResumenEmitir() {
+  const p = facturaActual.admision;
+  const eps = p ? (p.eps || p.entidad || '—') : '—';
+  const nombre = p ? (p.nombre || p.nombres || '—') : '—';
+
+  let subtotal = 0;
+  facturaActual.servicios.forEach(s => subtotal += s.cantidad * s.valorUnit);
+
+  const resumen = document.getElementById('resumenEmitir');
+  resumen.innerHTML = ''
+    + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">Paciente:</strong> <span style="color:#c8d6e5">'+nombre+'</span></div>'
+    + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">EPS:</strong> <span style="color:#c8d6e5">'+eps+'</span></div>'
+    + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">Servicios:</strong> <span style="color:#c8d6e5">'+facturaActual.servicios.length+' ítem(s)</span></div>'
+    + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">Subtotal:</strong> <span style="color:#00b4d8;font-weight:700">'+fmt$(subtotal)+'</span></div>'
+    + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">IVA:</strong> <span style="color:#2ecc71">$0 (exento)</span></div>'
+    + '<div style="border-top:2px solid #00b4d8;padding-top:10px;margin-top:4px"><strong style="color:#00b4d8;font-size:18px">TOTAL:</strong> <span style="color:#00b4d8;font-size:20px;font-weight:800">'+fmt$(subtotal)+'</span></div>';
+}
+
+function emitirFacturaDefinitiva() {
+  if (!facturaActual.admision) { toast('Seleccione una admisión','error'); return; }
+  if (!facturaActual.servicios.length) { toast('Agregue servicios','error'); return; }
+
+  const facturas = leer(K_FACTURAS) || [];
+
+  // Si ya existe como pre-factura, actualizarla; si no, crear nueva
+  const fac = construirFactura();
+  fac.numeroFactura = siguienteNum();
+  fac.estado = 'definitiva';
+  fac.emitidaEn = ahora();
+
+  // Si teníamos una pre-factura con el mismo id, reemplazar
+  const existenteIdx = facturaActual.numeroFactura
+    ? facturas.findIndex(f => f.numeroFactura === facturaActual.numeroFactura)
+    : -1;
+
+  if (existenteIdx >= 0) {
+    // Preservar el número si era pre-factura
+    fac.numeroFactura = facturas[existenteIdx].numeroFactura;
+    facturas[existenteIdx] = fac;
+  } else {
+    facturas.push(fac);
+  }
+
+  guardar(K_FACTURAS, facturas);
+
+  toast('Factura definitiva emitida: ' + fac.numeroFactura, 'success');
+  actualizarStats();
+  resetFacturaActual();
+  irPaso(1);
+}
+
+// ─── Reset ───
+function resetFacturaActual() {
+  facturaActual = { admision: null, servicios: [], paso: 1 };
+  document.getElementById('admSeleccionada').style.display = 'none';
+  document.getElementById('buscarAdmInput').value = '';
+  renderServiciosTabla();
+}
+
+// ─── Historial ───
+function renderHistorial() {
+  const facturas = leer(K_FACTURAS) || [];
+  const filtroEps = document.getElementById('filtroEps').value;
+  const filtroEstado = document.getElementById('filtroEstado').value;
+
+  let filtradas = facturas;
+  if (filtroEps) filtradas = filtradas.filter(f => (f.eps||'').includes(filtroEps));
+  if (filtroEstado) filtradas = filtradas.filter(f => f.estado === filtroEstado);
+
+  // Ordenar por fecha descendente
+  filtradas.sort((a,b) => (b.creadoEn||'').localeCompare(a.creadoEn||''));
+
+  const tbody = document.getElementById('bodyHistorial');
+  if (!filtradas.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#5a7a9a;padding:20px"><i class="fas fa-inbox"></i> No hay facturas</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtradas.map(f => {
+    const badge = f.estado === 'pre-factura' ? '<span class="badge badge-prefactura">Pre-Factura</span>'
+      : f.estado === 'definitiva' ? '<span class="badge badge-definitiva">Definitiva</span>'
+      : '<span class="badge badge-anulada">Anulada</span>';
+
+    const acciones = [];
+    if (f.estado === 'pre-factura') {
+      acciones.push('<button class="btn btn-sm btn-primary" onclick="editarPreFactura(\''+f.id+'\')"><i class="fas fa-edit"></i></button>');
+      acciones.push('<button class="btn btn-sm btn-danger" onclick="anularPreFactura(\''+f.id+'\')"><i class="fas fa-ban"></i></button>');
+    }
+    if (f.estado === 'definitiva') {
+      acciones.push('<button class="btn btn-sm btn-danger" onclick="anularPreFactura(\''+f.id+'\')"><i class="fas fa-ban"></i></button>');
+    }
+
+    return '<tr>'
+      + '<td style="font-weight:700;color:#00b4d8">' + (f.numeroFactura||'—') + '</td>'
+      + '<td>' + (f.eps||'—') + '</td>'
+      + '<td>' + (f.paciente||'—') + '</td>'
+      + '<td>' + (f.documento||'—') + '</td>'
+      + '<td>' + (f.fecha||'—') + '</td>'
+      + '<td>' + badge + '</td>'
+      + '<td style="text-align:right;font-weight:700;color:#90e0ef">' + fmt$(f.total) + '</td>'
+      + '<td><div class="acciones">' + acciones.join('') + '</div></td>'
+      + '</tr>';
+  }).join('');
+
+  // Llenar filtro EPS
+  const epsSet = new Set(facturas.map(f => f.eps).filter(Boolean));
+  const selEps = document.getElementById('filtroEps');
+  const currentVal = selEps.value;
+  selEps.innerHTML = '<option value="">Todas</option>';
+  epsSet.forEach(e => {
+    selEps.innerHTML += '<option value="'+e+'"'+(currentVal===e?' selected':'')+'>'+e+'</option>';
+  });
+}
+
+// ─── Editar Pre-Factura ───
+function editarPreFactura(id) {
+  const facturas = leer(K_FACTURAS) || [];
+  const fac = facturas.find(f => f.id === id);
+  if (!fac) return;
+  if (fac.estado !== 'pre-factura') { toast('Solo se pueden editar pre-facturas','warning'); return; }
+
+  // Cargar en facturaActual
+  facturaActual.admision = {
+    nombre: fac.paciente,
+    tipoDocumento: fac.tipoDocumento,
+    documento: fac.documento,
+    eps: fac.eps,
+    municipio: fac.municipio,
+    diagnostico: fac.diagnostico,
+    autorizacion: fac.autorizacion,
+    estado: 'egresado'
+  };
+  facturaActual.servicios = JSON.parse(JSON.stringify(fac.servicios || []));
+  facturaActual.numeroFactura = fac.numeroFactura;
+  facturaActual._editandoId = id;
+
+  // Mostrar datos paciente
+  document.getElementById('admSeleccionada').style.display = 'block';
+  llenarDatosPaciente(facturaActual.admision);
+  llenarSelectServicios();
+  renderServiciosTabla();
+
+  cambiarTab('tabNueva');
+  irPaso(2);
+  toast('Editando pre-factura ' + fac.numeroFactura, 'info');
+}
+
+// ─── Anular ───
+let _anularId = null;
+function anularPreFactura(id) {
+  _anularId = id;
+  abrirModal('modalAnular');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('btnConfirmarAnular').addEventListener('click', function() {
+    if (!_anularId) return;
+    const facturas = leer(K_FACTURAS) || [];
+    const fac = facturas.find(f => f.id === _anularId);
+    if (fac) {
+      fac.estado = 'anulada';
+      fac.anuladaEn = ahora();
+      guardar(K_FACTURAS, facturas);
+      toast('Factura anulada','error');
+      actualizarStats();
+      renderHistorial();
+    }
+    cerrarModal('modalAnular');
+    _anularId = null;
+  });
+});
+
+// ─── Catálogo Config ───
+function renderCatalogo() {
+  const catalogo = leer(K_SERVICIOS) || [];
+  const tbody = document.getElementById('bodyCatalogo');
+  if (!catalogo.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#5a7a9a;padding:20px"><i class="fas fa-inbox"></i> No hay servicios configurados</td></tr>';
+    return;
+  }
+  tbody.innerHTML = catalogo.map((s, i) => {
+    return '<tr>'
+      + '<td>' + (s.codigo||'—') + '</td>'
+      + '<td>' + s.nombre + '</td>'
+      + '<td><span class="badge" style="background:rgba(0,180,216,.15);color:#00b4d8">' + s.tipo + '</span></td>'
+      + '<td style="text-align:right;font-weight:700;color:#90e0ef">' + fmt$(s.valor) + '</td>'
+      + '<td><button class="btn btn-sm btn-danger" onclick="eliminarServicioCatalogo('+i+')"><i class="fas fa-trash"></i></button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function agregarServicioCatalogo() {
+  const nombre = document.getElementById('cfgSvcNombre').value.trim();
+  const codigo = document.getElementById('cfgSvcCups').value.trim();
+  const tipo = document.getElementById('cfgSvcTipo').value;
+  const valor = parseInt(document.getElementById('cfgSvcValor').value) || 0;
+
+  if (!nombre) { toast('Ingrese nombre del servicio','warning'); return; }
+  if (!codigo) { toast('Ingrese código CUPS','warning'); return; }
+  if (valor <= 0) { toast('El valor debe ser mayor a 0','warning'); return; }
+
+  const catalogo = leer(K_SERVICIOS) || [];
+  catalogo.push({codigo, nombre, tipo, valor});
+  guardar(K_SERVICIOS, catalogo);
+
+  document.getElementById('cfgSvcNombre').value = '';
+  document.getElementById('cfgSvcCups').value = '';
+  document.getElementById('cfgSvcValor').value = '';
+
+  renderCatalogo();
+  llenarSelectServicios();
+  toast('Servicio agregado al catálogo','success');
+}
+
+function eliminarServicioCatalogo(idx) {
+  const catalogo = leer(K_SERVICIOS) || [];
+  catalogo.splice(idx, 1);
+  guardar(K_SERVICIOS, catalogo);
+  renderCatalogo();
+  llenarSelectServicios();
+  toast('Servicio eliminado del catálogo','info');
+}
+
+// ─── Stats ───
+function actualizarStats() {
+  const facturas = leer(K_FACTURAS) || [];
+  const pre = facturas.filter(f => f.estado === 'pre-factura').length;
+  const def = facturas.filter(f => f.estado === 'definitiva').length;
+  const anul = facturas.filter(f => f.estado === 'anulada').length;
+  const total$ = facturas.filter(f => f.estado === 'definitiva').reduce((sum, f) => sum + (f.total||0), 0);
+
+  document.getElementById('statPre').textContent = pre;
+  document.getElementById('statDef').textContent = def;
+  document.getElementById('statAnul').textContent = anul;
+  document.getElementById('statTotal$').textContent = fmt$(total$);
+}
+
+// ─── Event Listeners ───
+document.addEventListener('DOMContentLoaded', function() {
+  initCatalogo();
+  initContador();
+  cargarSesion();
+  actualizarStats();
+  renderHistorial();
+
+  // Buscar admisiones
+  const input = document.getElementById('buscarAdmInput');
+  input.addEventListener('input', function() {
+    const q = this.value.trim();
+    if (q.length < 2) {
+      document.getElementById('admDropdownList').classList.remove('open');
+      return;
+    }
+    const resultados = buscarAdmisiones(q);
+    renderDropdownResultados(resultados);
+  });
+
+  // Cerrar dropdown al hacer click fuera
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.adm-dropdown-wrap')) {
+      document.getElementById('admDropdownList').classList.remove('open');
+    }
+  });
+
+  // Click fuera del modal
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('active');
+    });
+  });
+});
+</script>
 </body>
 </html>
