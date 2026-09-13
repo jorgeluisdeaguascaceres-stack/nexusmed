@@ -1250,9 +1250,13 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('inputCups').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
       e.preventDefault();
-      onCupsInput();  // Buscar y autocompletar
-      // Si encontró servicio, agregarlo directamente; si no, ya onCupsInput mostró la alerta
-      if (window._cupsMatch) agregarServicio();
+      onCupsInput();  // Buscar y autocompletar campos (nombre, tipo, valor)
+      // Si encontró servicio, pasar foco a Cantidad para que el usuario la ingrese
+      // Si no encontró, onCupsInput ya mostró la alerta
+      if (window._cupsMatch) {
+        document.getElementById('inputCantidad').value = '1';
+        document.getElementById('inputCantidad').select();
+      }
     }
   });
 
