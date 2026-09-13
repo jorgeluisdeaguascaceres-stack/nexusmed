@@ -284,7 +284,7 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
         </div>
         <div class="form-group" style="flex:2;min-width:180px">
           <label>Nombre del Servicio</label>
-          <input type="text" id="inputServicioNombre" placeholder="Se auto-completa con CUPS o escriba manualmente" style="background:#0a1628;border:1px solid #1a3a5c;color:#90e0ef;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif">
+          <input type="text" id="inputServicioNombre" placeholder="Se auto-completa al escribir CUPS, o escriba el nombre del servicio" style="background:#0a1628;border:1px solid #1a3a5c;color:#90e0ef;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif">
         </div>
         <div class="form-group" style="flex:0 0 150px;min-width:120px">
           <label>Tipo</label>
@@ -312,8 +312,8 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
       <div id="alertNoParam" style="display:none;background:rgba(255,152,0,.12);border:1px solid rgba(255,152,0,.5);border-radius:10px;padding:16px 20px;margin-bottom:14px">
         <div style="color:#ff9800;font-weight:700;font-size:15px;margin-bottom:8px"><i class="fas fa-exclamation-triangle"></i> ⚠ Servicio No Parametrizado</div>
         <div style="color:#ffb74d;font-size:13px;margin-bottom:6px">El código CUPS <strong id="alertCupsCode"></strong> no está en el catálogo.</div>
-        <div id="alertAdminMsg" style="color:#2ecc71;font-size:12px"><i class="fas fa-shield-alt"></i> Como <strong>Administrador</strong>, puede completar los datos manualmente: nombre, tipo y valor unitario.</div>
-        <div id="alertNoAdminMsg" style="display:none;color:#ff3860;font-size:12px"><i class="fas fa-lock"></i> Solo un <strong>Administrador</strong> puede agregar servicios no parametrizados. Solicite autorización.</div>
+        <div id="alertAdminMsg" style="display:none;color:#ff3860;font-size:12px"><i class="fas fa-lock"></i> Los servicios no parametrizados <strong>solo se pueden agregar desde Configuración</strong>. Solicite al administrador que lo incluya en el catálogo.</div>
+        <div id="alertNoAdminMsg" style="color:#ff3860;font-size:12px"><i class="fas fa-lock"></i> Los servicios no parametrizados <strong>solo se pueden agregar desde Configuración</strong>. Solicite al administrador que lo incluya en el catálogo.</div>
       </div>
 
       <!-- Tabla de servicios agregados -->
@@ -456,27 +456,49 @@ function codigoEpsFromString(epsStr) {
   return 'SDS001';
 }
 
-// ─── Catálogo por defecto (FOMAG + COOSALUD) ───
-const CATALOGO_DEFAULT = [
-  {codigo:'941006',nombre:'CAMA',tipo:'DOMICILIARIA',valor:250000},
-  {codigo:'923012',nombre:'ENFERMERÍA 24H',tipo:'DOMICILIARIA',valor:200000},
-  {codigo:'923010',nombre:'ENFERMERÍA 12H',tipo:'DOMICILIARIA',valor:100000},
-  {codigo:'923008',nombre:'ENFERMERÍA 8H',tipo:'DOMICILIARIA',valor:95000},
-  {codigo:'931610',nombre:'LIMPIEZA TRAQUEOSTOMÍA',tipo:'DOMICILIARIA',valor:42769},
-  {codigo:'931610',nombre:'FONIOLOGÍA',tipo:'DOMICILIARIA',valor:42769},
-  {codigo:'931610',nombre:'FONIOLOGÍA',tipo:'INTRAMURAL',valor:23345},
-  {codigo:'934010',nombre:'PSICOLOGÍA',tipo:'DOMICILIARIA',valor:42769},
-  {codigo:'934010',nombre:'PSICOLOGÍA',tipo:'INTRAMURAL',valor:23345},
-  {codigo:'931020',nombre:'FÍSICA',tipo:'DOMICILIARIA',valor:42769},
-  {codigo:'931020',nombre:'FÍSICA',tipo:'INTRAMURAL',valor:23345},
-  {codigo:'931030',nombre:'OCUPACIONAL',tipo:'DOMICILIARIA',valor:42769},
-  {codigo:'931030',nombre:'OCUPACIONAL',tipo:'INTRAMURAL',valor:23345},
-  {codigo:'931040',nombre:'RESPIRATORIA',tipo:'DOMICILIARIA',valor:42769},
-  {codigo:'931040',nombre:'RESPIRATORIA',tipo:'INTRAMURAL',valor:23345}
-];
+// ─── Catálogo de servicios (gestionado desde Configuración) ───
+// La estructura real en localStorage es:
+//   { id, codigoCUPS, nombre, tipoServicio, ambito, valorGeneral, finalidadTecnologiaSalud, grupoServicios, causaMotivoAtencion, activo }
+// Configuración es la única pantalla que puede agregar/editar servicios.
+// Facturación SOLO lee el catálogo.
 
 function initCatalogo() {
-  if (!leer(K_SERVICIOS)) guardar(K_SERVICIOS, CATALOGO_DEFAULT);
+  // No inicializamos nada aquí — Configuración ya guardó el catálogo.
+  // Solo verificamos que exista la clave.
+  if (!leer(K_SERVICIOS)) guardar(K_SERVICIOS, []);
+}
+
+// Buscar servicios activos por código CUPS en el catálogo de Configuración
+function buscarPorCups(codigo) {
+  const catalogo = leer(K_SERVICIOS) || [];
+  const cod = (codigo || '').toUpperCase().trim();
+  if (!cod) return []; // CUPS vacío no busca
+  return catalogo.filter(s => {
+    const cups = (s.codigoCUPS || '').toUpperCase().trim();
+    return cups === cod && s.activo !== false;
+  });
+}
+
+// Buscar servicio por nombre en el catálogo (para servicios sin CUPS como CAMA, ENFERMERÍA)
+function buscarPorNombre(nombre) {
+  const catalogo = leer(K_SERVICIOS) || [];
+  const nom = (nombre || '').toLowerCase().trim();
+  if (!nom) return [];
+  return catalogo.filter(s => {
+    const n = (s.nombre || '').toLowerCase().trim();
+    return n.includes(nom) && s.activo !== false;
+  });
+}
+
+// Convertir servicio de Configuración al formato interno de facturación
+function servicioConfigAFactura(svc) {
+  const ambito = (svc.ambito || 'domiciliario').toUpperCase();
+  return {
+    codigo: svc.codigoCUPS || '',
+    nombre: svc.nombre || '',
+    tipo: ambito.startsWith('DOMICILI') ? 'DOMICILIARIA' : ambito.startsWith('INTRAMURAL') ? 'INTRAMURAL' : ambito.startsWith('HOSPIT') ? 'HOSPITARIA' : ambito,
+    valorUnit: svc.valorGeneral || 0
+  };
 }
 function initContador() {
   if (!leer(K_CONTADOR)) guardar(K_CONTADOR, {ultimo: 0});
@@ -650,13 +672,6 @@ function llenarDatosPaciente(p) {
     + '<div class="form-group"><label>Teléfono</label><input readonly value="'+telefono+'"></div>';
 }
 
-// ─── PASO 2: CUPS → auto-fill + Servicios ───
-
-// Mapa CUPS → servicios del catálogo (para autocompletar)
-function buscarPorCups(codigo) {
-  const catalogo = leer(K_SERVICIOS) || [];
-  const cod = codigo.toUpperCase().trim();
-  return catalogo.filter(s => s.codigo.toUpperCase() === cod);
 }
 
 // Auto-fill al escribir CUPS
@@ -681,83 +696,107 @@ function onCupsInput() {
 
   const matches = buscarPorCups(cups);
 
-  if (matches.length === 1) {
-    // ✅ Un solo match: autocompletar todo y bloquear edición
-    const m = matches[0];
-    nombreInput.value = m.nombre;
+  if (matches.length >= 1) {
+    // ✅ Encontrado en catálogo: autocompletar todo
+    // Si hay múltiples (dom+intra), auto-seleccionar según servicio del paciente
+    const p = facturaActual.admision;
+    const servPac = (p.servicio || '').toLowerCase();
+    const esDomicil = servPac.includes('domicil');
+    let elegido;
+
+    if (matches.length === 1) {
+      elegido = matches[0];
+    } else {
+      // Buscar el match del ambito correcto
+      const dom = matches.find(m => (m.ambito||'').toLowerCase().includes('domicil'));
+      const intr = matches.find(m => (m.ambito||'').toLowerCase().includes('intramural'));
+      elegido = esDomicil ? (dom || intr || matches[0]) : (intr || dom || matches[0]);
+      window._cupsMatches = matches;
+    }
+
+    const svc = servicioConfigAFactura(elegido);
+    nombreInput.value = svc.nombre;
     nombreInput.readOnly = true;
     nombreInput.style.borderColor = '#2ecc71';
     nombreInput.style.color = '#2ecc71';
-    tipoSelect.value = m.tipo;
-    tipoSelect.disabled = true;
-    valorInput.value = m.valor;
+    tipoSelect.value = svc.tipo;
+    tipoSelect.disabled = matches.length === 1;
+    valorInput.value = svc.valorUnit;
     valorInput.disabled = true;
-    window._cupsMatch = m;
+    window._cupsMatch = svc;
+    window._cupsMatchOriginal = elegido;
 
-  } else if (matches.length > 1) {
-    // ⚠️ Múltiples matches (ej: domiciliaria vs intramural)
-    window._cupsMatches = matches;
-    // Auto-seleccionar según tipo de servicio del paciente
-    const p = facturaActual.admision;
-    const servPac = (p.servicio || '').toLowerCase();
-    const idx = servPac.includes('domicil') ? 0 : (matches.length > 1 ? 1 : 0);
-    const elegido = matches[idx] || matches[0];
-    nombreInput.value = elegido.nombre;
-    nombreInput.readOnly = true;
-    nombreInput.style.borderColor = '#f39c12';
-    nombreInput.style.color = '#f39c12';
-    tipoSelect.value = elegido.tipo;
-    valorInput.value = elegido.valor;
-    window._cupsMatch = elegido;
-    // Si cambia el tipo, recalcular
-    tipoSelect.disabled = false;
-    tipoSelect.onchange = function() {
-      const sel = matches.find(m2 => m2.tipo === tipoSelect.value);
-      if (sel) {
-        nombreInput.value = sel.nombre;
-        valorInput.value = sel.valor;
-        window._cupsMatch = sel;
-        nombreInput.style.borderColor = '#2ecc71';
-        nombreInput.style.color = '#2ecc71';
-      }
-    };
+    // Si hay múltiples y cambia el tipo, recalcular
+    if (matches.length > 1) {
+      tipoSelect.disabled = false;
+      tipoSelect.onchange = function() {
+        const ambitoSel = tipoSelect.value;
+        const sel = matches.find(m2 => (m2.ambito||'').toUpperCase() === ambitoSel.toUpperCase());
+        if (sel) {
+          const svc2 = servicioConfigAFactura(sel);
+          nombreInput.value = svc2.nombre;
+          valorInput.value = svc2.valorUnit;
+          window._cupsMatch = svc2;
+          window._cupsMatchOriginal = sel;
+          nombreInput.style.borderColor = '#2ecc71';
+          nombreInput.style.color = '#2ecc71';
+        }
+      };
+    }
+
+    // Foco automático a cantidad
+    document.getElementById('inputCantidad').select();
 
   } else {
-    // ❌ No encontrado → alerta + campos editables SOLO para admin
-    const esAdmin = esAdministrador();
+    // ❌ No encontrado → alerta: solo se agrega desde Configuración
+    nombreInput.value = '';
+    nombreInput.readOnly = true;
+    nombreInput.placeholder = 'No encontrado';
+    nombreInput.style.borderColor = '#ff3860';
+    nombreInput.style.color = '#ff3860';
+    tipoSelect.disabled = true;
+    valorInput.disabled = true;
+    valorInput.value = '';
+    alerta.style.display = 'block';
     document.getElementById('alertCupsCode').textContent = cups.toUpperCase();
+    document.getElementById("alertAdminMsg").style.display = "block";
+    document.getElementById("alertNoAdminMsg").style.display = "block";
+    toast('⛔ Código CUPS no parametrizado — solicite al administrador agregarlo desde Configuración','error');
+  }
+}
 
-    if (esAdmin) {
-      // Admin: puede escribir manualmente
-      nombreInput.value = '';
-      nombreInput.readOnly = false;
-      nombreInput.placeholder = 'Escriba el nombre del servicio';
-      nombreInput.style.borderColor = '#ff9800';
-      nombreInput.style.color = '#ffb74d';
-      tipoSelect.disabled = false;
-      tipoSelect.value = 'DOMICILIARIA';
-      valorInput.disabled = false;
-      valorInput.value = '';
-      valorInput.placeholder = 'Ingrese valor';
-      alerta.style.display = 'block';
-      document.getElementById('alertAdminMsg').style.display = 'block';
-      document.getElementById('alertNoAdminMsg').style.display = 'none';
-      toast('⚠ Servicio no parametrizado — complete los datos manualmente','warning');
-    } else {
-      // No admin: bloquear edición, solo mostrar alerta
-      nombreInput.value = '';
-      nombreInput.readOnly = true;
-      nombreInput.placeholder = 'Código no encontrado';
-      nombreInput.style.borderColor = '#ff3860';
-      nombreInput.style.color = '#ff3860';
-      tipoSelect.disabled = true;
-      valorInput.disabled = true;
-      valorInput.value = '';
-      alerta.style.display = 'block';
-      document.getElementById('alertAdminMsg').style.display = 'none';
-      document.getElementById('alertNoAdminMsg').style.display = 'block';
-      toast('⛔ Servicio no parametrizado — solo el administrador puede agregarlo','error');
-    }
+// Auto-fill al escribir nombre de servicio (para servicios sin CUPS como CAMA, ENFERMERÍA)
+function onNombreInput() {
+  const cups = document.getElementById('inputCups').value.trim();
+  // Solo buscar por nombre si NO hay CUPS escrito
+  if (cups) return;
+  
+  const nombre = document.getElementById('inputServicioNombre').value.trim();
+  const tipoSelect = document.getElementById('inputTipoServ');
+  const valorInput = document.getElementById('inputValorUnit');
+  
+  if (!nombre) {
+    tipoSelect.disabled = false;
+    tipoSelect.value = 'DOMICILIARIA';
+    valorInput.disabled = false;
+    valorInput.value = '';
+    window._cupsMatch = null;
+    return;
+  }
+  
+  const matches = buscarPorNombre(nombre);
+  if (matches.length >= 1) {
+    const elegido = matches[0];
+    const svc = servicioConfigAFactura(elegido);
+    // Si el servicio tiene CUPS, llenarlo
+    if (svc.codigo) document.getElementById('inputCups').value = svc.codigo;
+    tipoSelect.value = svc.tipo;
+    tipoSelect.disabled = matches.length === 1;
+    valorInput.value = svc.valorUnit;
+    valorInput.disabled = true;
+    window._cupsMatch = svc;
+    window._cupsMatchOriginal = elegido;
+    document.getElementById('inputCantidad').select();
   }
 }
 
@@ -779,15 +818,18 @@ function agregarServicio() {
   const cant = parseInt(document.getElementById('inputCantidad').value) || 1;
   const autorizacion = document.getElementById('inputAutorizacion').value.trim();
 
-  if (!cups) { toast('Ingrese un código CUPS','warning'); return; }
+  if (!cups && !nombre) { toast('Ingrese un código CUPS o nombre de servicio','warning'); return; }
   if (!nombre) { toast('Ingrese el nombre del servicio','warning'); return; }
   if (valor <= 0) { toast('Ingrese el valor unitario del servicio','warning'); return; }
   if (cant < 1) { toast('La cantidad debe ser ≥ 1','warning'); return; }
 
-  // Si el servicio no está parametrizado, solo el admin puede agregarlo
-  const parametrizado = buscarPorCups(cups).length > 0;
-  if (!parametrizado && !esAdministrador()) {
-    toast('⛔ Solo el administrador puede agregar servicios no parametrizados','error');
+  // Si el servicio no está parametrizado, NADIE puede agregarlo desde facturación
+  // Verificar por CUPS o por nombre (para servicios sin CUPS como CAMA, ENFERMERÍA)
+  const porCups = cups ? buscarPorCups(cups).length > 0 : false;
+  const porNombre = !cups && nombre ? buscarPorNombre(nombre).length > 0 : false;
+  const parametrizado = porCups || porNombre || window._cupsMatch;
+  if (!parametrizado) {
+    toast('⛔ Servicio no parametrizado — solicite al administrador agregarlo desde Configuración','error');
     return;
   }
 
@@ -812,7 +854,7 @@ function agregarServicio() {
   document.getElementById('inputCups').value = '';
   document.getElementById('inputServicioNombre').value = '';
   document.getElementById('inputServicioNombre').readOnly = false;
-  document.getElementById('inputServicioNombre').placeholder = 'Se auto-completa con CUPS o escriba manualmente';
+  document.getElementById('inputServicioNombre').placeholder = 'Se auto-completa al escribir CUPS, o escriba el nombre del servicio';
   document.getElementById('inputServicioNombre').style.borderColor = '#1a3a5c';
   document.getElementById('inputServicioNombre').style.color = '#90e0ef';
   document.getElementById('inputTipoServ').disabled = false;
@@ -1171,13 +1213,18 @@ document.addEventListener('DOMContentLoaded', function() {
     onCupsInput();
   });
 
-  // Enter en CUPS → si está parametrizado agrega, si no avanza al nombre
+  // Enter en CUPS → si está parametrizado agrega, si no muestra alerta
   document.getElementById('inputCups').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
       e.preventDefault();
       if (window._cupsMatch) agregarServicio();
-      else document.getElementById('inputServicioNombre').focus();
+      else toast('⛔ Servicio no parametrizado — solicite al administrador agregarlo desde Configuración','error');
     }
+  });
+
+  // Buscar por nombre al escribir (para servicios sin CUPS)
+  document.getElementById('inputServicioNombre').addEventListener('input', function() {
+    onNombreInput();
   });
 
   // Enter en nombre de servicio
