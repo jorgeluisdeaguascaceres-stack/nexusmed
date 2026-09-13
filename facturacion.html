@@ -164,6 +164,12 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
 .form-grid{grid-template-columns:1fr}
 .stats-row{grid-template-columns:1fr 1fr}
 }
+/* Input readonly/disabled highlight */
+#inputServicioNombre[readonly]{opacity:.95;cursor:default}
+#inputTipoServ:disabled,#inputValorUnit:disabled{opacity:.8;cursor:not-allowed}
+/* Alerta no parametrizado */
+#alertNoParam{animation:alertPulse 2s ease-in-out 1}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.7}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
@@ -183,7 +189,7 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
   <div class="header-right">
     <div class="user-info">
       <div class="user-avatar" id="avatarInicial">A</div>
-      <div><div class="user-name" id="nombreUsuario">Administrador</div><div class="user-role">Facturación</div></div>
+      <div><div class="user-name" id="nombreUsuario">Administrador</div><div class="user-role" id="rolUsuario">Facturación</div></div>
     </div>
     <button class="btn-cerrar" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
   </div>
@@ -270,25 +276,44 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
     <div class="form-section" id="paso2Panel" style="display:none">
       <div class="form-title"><i class="fas fa-medkit"></i> Paso 2 — Agregar Servicios (CUPS)</div>
 
-      <!-- Fila: Código CUPS + auto-fill + Cantidad + Autorización + Agregar -->
+      <!-- Fila: Código CUPS + auto-fill + Tipo + Valor + Cantidad + Autorización + Agregar -->
       <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;align-items:end">
         <div class="form-group" style="flex:0 0 140px;min-width:120px">
           <label>Código CUPS</label>
           <input type="text" id="inputCups" placeholder="Ej: 941006" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;text-transform:uppercase">
         </div>
         <div class="form-group" style="flex:2;min-width:180px">
-          <label>Servicio (se auto-completa)</label>
-          <input type="text" id="inputServicioNombre" readonly placeholder="Se llena automáticamente al escribir CUPS" style="background:#0a1628;border:1px solid #1a3a5c;color:#90e0ef;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif">
+          <label>Nombre del Servicio</label>
+          <input type="text" id="inputServicioNombre" placeholder="Se auto-completa con CUPS o escriba manualmente" style="background:#0a1628;border:1px solid #1a3a5c;color:#90e0ef;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif">
         </div>
-        <div class="form-group" style="flex:0 0 100px">
+        <div class="form-group" style="flex:0 0 150px;min-width:120px">
+          <label>Tipo</label>
+          <select id="inputTipoServ" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif">
+            <option value="DOMICILIARIA">Domiciliaria</option>
+            <option value="INTRAMURAL">Intramural</option>
+            <option value="HOSPITARIA">Hospitalaria</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:0 0 140px;min-width:110px">
+          <label>Valor Unitario</label>
+          <input type="number" id="inputValorUnit" placeholder="$" min="0" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif">
+        </div>
+        <div class="form-group" style="flex:0 0 90px">
           <label>Cantidad</label>
           <input type="number" id="inputCantidad" value="1" min="1" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px;border-radius:8px;font-size:14px;text-align:center;font-family:'Inter',sans-serif">
         </div>
-        <div class="form-group" style="flex:0 0 180px;min-width:140px">
+        <div class="form-group" style="flex:0 0 160px;min-width:120px">
           <label>Autorización</label>
           <input type="text" id="inputAutorizacion" placeholder="N° autorización" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif">
         </div>
         <button class="btn btn-success" onclick="agregarServicio()" style="height:42px"><i class="fas fa-plus"></i> Agregar</button>
+      </div>
+      <!-- Alerta de servicio no parametrizado -->
+      <div id="alertNoParam" style="display:none;background:rgba(255,152,0,.12);border:1px solid rgba(255,152,0,.5);border-radius:10px;padding:16px 20px;margin-bottom:14px">
+        <div style="color:#ff9800;font-weight:700;font-size:15px;margin-bottom:8px"><i class="fas fa-exclamation-triangle"></i> ⚠ Servicio No Parametrizado</div>
+        <div style="color:#ffb74d;font-size:13px;margin-bottom:6px">El código CUPS <strong id="alertCupsCode"></strong> no está en el catálogo.</div>
+        <div id="alertAdminMsg" style="color:#2ecc71;font-size:12px"><i class="fas fa-shield-alt"></i> Como <strong>Administrador</strong>, puede completar los datos manualmente: nombre, tipo y valor unitario.</div>
+        <div id="alertNoAdminMsg" style="display:none;color:#ff3860;font-size:12px"><i class="fas fa-lock"></i> Solo un <strong>Administrador</strong> puede agregar servicios no parametrizados. Solicite autorización.</div>
       </div>
 
       <!-- Tabla de servicios agregados -->
@@ -472,6 +497,12 @@ function cargarSesion() {
   if (s) {
     document.getElementById('nombreUsuario').textContent = s.nombre || 'Admin';
     document.getElementById('avatarInicial').textContent = (s.nombre||'A').charAt(0).toUpperCase();
+    const rol = s.rol || 'Usuario';
+    document.getElementById('rolUsuario').textContent = rol;
+    // Si es admin, mostrar indicador visual en el avatar
+    if (esAdministrador()) {
+      document.getElementById('avatarInicial').style.background = '#00b4d8';
+    }
   }
 }
 function cerrarSesion() {
@@ -632,82 +663,145 @@ function buscarPorCups(codigo) {
 function onCupsInput() {
   const cups = document.getElementById('inputCups').value.trim();
   const nombreInput = document.getElementById('inputServicioNombre');
-  if (!cups) {
-    nombreInput.value = '';
-    nombreInput.style.color = '#90e0ef';
-    return;
-  }
+  const tipoSelect = document.getElementById('inputTipoServ');
+  const valorInput = document.getElementById('inputValorUnit');
+  const alerta = document.getElementById('alertNoParam');
+
+  // Reset
+  nombreInput.readOnly = false;
+  tipoSelect.disabled = false;
+  valorInput.disabled = false;
+  nombreInput.style.borderColor = '#1a3a5c';
+  nombreInput.style.color = '#90e0ef';
+  alerta.style.display = 'none';
+  window._cupsMatch = null;
+  window._cupsMatches = null;
+
+  if (!cups) return;
+
   const matches = buscarPorCups(cups);
+
   if (matches.length === 1) {
-    nombreInput.value = matches[0].nombre + ' (' + matches[0].tipo + ') — ' + fmt$(matches[0].valor);
+    // ✅ Un solo match: autocompletar todo y bloquear edición
+    const m = matches[0];
+    nombreInput.value = m.nombre;
+    nombreInput.readOnly = true;
+    nombreInput.style.borderColor = '#2ecc71';
     nombreInput.style.color = '#2ecc71';
-    window._cupsMatch = matches[0];
+    tipoSelect.value = m.tipo;
+    tipoSelect.disabled = true;
+    valorInput.value = m.valor;
+    valorInput.disabled = true;
+    window._cupsMatch = m;
+
   } else if (matches.length > 1) {
-    nombreInput.value = matches.length + ' servicios encontrados con código ' + cups;
-    nombreInput.style.color = '#f39c12';
-    window._cupsMatch = null;
+    // ⚠️ Múltiples matches (ej: domiciliaria vs intramural)
     window._cupsMatches = matches;
+    // Auto-seleccionar según tipo de servicio del paciente
+    const p = facturaActual.admision;
+    const servPac = (p.servicio || '').toLowerCase();
+    const idx = servPac.includes('domicil') ? 0 : (matches.length > 1 ? 1 : 0);
+    const elegido = matches[idx] || matches[0];
+    nombreInput.value = elegido.nombre;
+    nombreInput.readOnly = true;
+    nombreInput.style.borderColor = '#f39c12';
+    nombreInput.style.color = '#f39c12';
+    tipoSelect.value = elegido.tipo;
+    valorInput.value = elegido.valor;
+    window._cupsMatch = elegido;
+    // Si cambia el tipo, recalcular
+    tipoSelect.disabled = false;
+    tipoSelect.onchange = function() {
+      const sel = matches.find(m2 => m2.tipo === tipoSelect.value);
+      if (sel) {
+        nombreInput.value = sel.nombre;
+        valorInput.value = sel.valor;
+        window._cupsMatch = sel;
+        nombreInput.style.borderColor = '#2ecc71';
+        nombreInput.style.color = '#2ecc71';
+      }
+    };
+
   } else {
-    nombreInput.value = 'Código no encontrado en catálogo';
-    nombreInput.style.color = '#ff3860';
-    window._cupsMatch = null;
-    window._cupsMatches = null;
+    // ❌ No encontrado → alerta + campos editables SOLO para admin
+    const esAdmin = esAdministrador();
+    document.getElementById('alertCupsCode').textContent = cups.toUpperCase();
+
+    if (esAdmin) {
+      // Admin: puede escribir manualmente
+      nombreInput.value = '';
+      nombreInput.readOnly = false;
+      nombreInput.placeholder = 'Escriba el nombre del servicio';
+      nombreInput.style.borderColor = '#ff9800';
+      nombreInput.style.color = '#ffb74d';
+      tipoSelect.disabled = false;
+      tipoSelect.value = 'DOMICILIARIA';
+      valorInput.disabled = false;
+      valorInput.value = '';
+      valorInput.placeholder = 'Ingrese valor';
+      alerta.style.display = 'block';
+      document.getElementById('alertAdminMsg').style.display = 'block';
+      document.getElementById('alertNoAdminMsg').style.display = 'none';
+      toast('⚠ Servicio no parametrizado — complete los datos manualmente','warning');
+    } else {
+      // No admin: bloquear edición, solo mostrar alerta
+      nombreInput.value = '';
+      nombreInput.readOnly = true;
+      nombreInput.placeholder = 'Código no encontrado';
+      nombreInput.style.borderColor = '#ff3860';
+      nombreInput.style.color = '#ff3860';
+      tipoSelect.disabled = true;
+      valorInput.disabled = true;
+      valorInput.value = '';
+      alerta.style.display = 'block';
+      document.getElementById('alertAdminMsg').style.display = 'none';
+      document.getElementById('alertNoAdminMsg').style.display = 'block';
+      toast('⛔ Servicio no parametrizado — solo el administrador puede agregarlo','error');
+    }
   }
 }
 
-// Si hay múltiples matches con mismo CUPS, al hacer click en nombre se abre mini-selector
-function seleccionarMatchMultiple() {
-  const matches = window._cupsMatches;
-  if (!matches || !matches.length) return;
-  // Usar el primer match por ahora (se puede mejorar con un mini-dropdown)
-  // Si solo hay 2 (DOMICILIARIA / INTRAMURAL), preguntar tipo según el servicio del paciente
-  const p = facturaActual.admision;
-  const servPac = (p.servicio || '').toLowerCase();
-  // Si el paciente es "Domiciliario", priorizar domiciliaria
-  const idx = servPac.includes('domicil') ? 0 : (matches.length > 1 ? 1 : 0);
-  const elegido = matches[idx] || matches[0];
-  document.getElementById('inputServicioNombre').value = elegido.nombre + ' (' + elegido.tipo + ') — ' + fmt$(elegido.valor);
-  document.getElementById('inputServicioNombre').style.color = '#2ecc71';
-  window._cupsMatch = elegido;
+// ─── Verificar si el usuario es administrador ───
+function esAdministrador() {
+  const s = sesion();
+  if (!s) return false;
+  // El rol puede venir como 'Administrador', 'admin', 'Admin', etc.
+  const rol = (s.rol || s.role || s.tipo || '').toLowerCase();
+  return rol.includes('admin') || rol === 'super' || rol === 'administrador';
 }
 
 function agregarServicio() {
   const cups = document.getElementById('inputCups').value.trim().toUpperCase();
+  const nombre = document.getElementById('inputServicioNombre').value.trim();
+  const tipo = document.getElementById('inputTipoServ').value;
+  const valorStr = document.getElementById('inputValorUnit').value;
+  const valor = parseFloat(valorStr) || 0;
   const cant = parseInt(document.getElementById('inputCantidad').value) || 1;
   const autorizacion = document.getElementById('inputAutorizacion').value.trim();
 
   if (!cups) { toast('Ingrese un código CUPS','warning'); return; }
+  if (!nombre) { toast('Ingrese el nombre del servicio','warning'); return; }
+  if (valor <= 0) { toast('Ingrese el valor unitario del servicio','warning'); return; }
   if (cant < 1) { toast('La cantidad debe ser ≥ 1','warning'); return; }
 
-  // Buscar en catálogo
-  let svc = window._cupsMatch;
-  if (!svc) {
-    // Intentar buscar de nuevo
-    const matches = buscarPorCups(cups);
-    if (matches.length === 1) {
-      svc = matches[0];
-    } else if (matches.length > 1) {
-      seleccionarMatchMultiple();
-      svc = window._cupsMatch;
-    }
-  }
-
-  if (!svc) {
-    toast('Código CUPS no encontrado. Verifique el código.','warning');
+  // Si el servicio no está parametrizado, solo el admin puede agregarlo
+  const parametrizado = buscarPorCups(cups).length > 0;
+  if (!parametrizado && !esAdministrador()) {
+    toast('⛔ Solo el administrador puede agregar servicios no parametrizados','error');
     return;
   }
 
   // Verificar si ya existe el mismo servicio+tipo
-  const existente = facturaActual.servicios.find(s => s.codigo === svc.codigo && s.nombre === svc.nombre && s.tipo === svc.tipo);
+  const existente = facturaActual.servicios.find(s => s.codigo === cups && s.nombre === nombre && s.tipo === tipo);
   if (existente) {
     existente.cantidad += cant;
     if (autorizacion && !existente.autorizacion) existente.autorizacion = autorizacion;
   } else {
     facturaActual.servicios.push({
-      codigo: svc.codigo,
-      nombre: svc.nombre,
-      tipo: svc.tipo,
-      valorUnit: svc.valor,
+      codigo: cups,
+      nombre: nombre,
+      tipo: tipo,
+      valorUnit: valor,
       cantidad: cant,
       autorizacion: autorizacion || ''
     });
@@ -717,12 +811,21 @@ function agregarServicio() {
   // Limpiar inputs
   document.getElementById('inputCups').value = '';
   document.getElementById('inputServicioNombre').value = '';
+  document.getElementById('inputServicioNombre').readOnly = false;
+  document.getElementById('inputServicioNombre').placeholder = 'Se auto-completa con CUPS o escriba manualmente';
+  document.getElementById('inputServicioNombre').style.borderColor = '#1a3a5c';
   document.getElementById('inputServicioNombre').style.color = '#90e0ef';
+  document.getElementById('inputTipoServ').disabled = false;
+  document.getElementById('inputTipoServ').value = 'DOMICILIARIA';
+  document.getElementById('inputValorUnit').disabled = false;
+  document.getElementById('inputValorUnit').value = '';
+  document.getElementById('inputValorUnit').placeholder = '$';
   document.getElementById('inputCantidad').value = '1';
   document.getElementById('inputAutorizacion').value = '';
+  document.getElementById('alertNoParam').style.display = 'none';
   window._cupsMatch = null;
   window._cupsMatches = null;
-  toast('Servicio agregado','success');
+  toast('Servicio agregado ✓','success');
 }
 
 function eliminarServicio(idx) {
@@ -1068,8 +1171,22 @@ document.addEventListener('DOMContentLoaded', function() {
     onCupsInput();
   });
 
-  // Enter en CUPS agrega automáticamente
+  // Enter en CUPS → si está parametrizado agrega, si no avanza al nombre
   document.getElementById('inputCups').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (window._cupsMatch) agregarServicio();
+      else document.getElementById('inputServicioNombre').focus();
+    }
+  });
+
+  // Enter en nombre de servicio
+  document.getElementById('inputServicioNombre').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); agregarServicio(); }
+  });
+
+  // Enter en valor unitario
+  document.getElementById('inputValorUnit').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') { e.preventDefault(); agregarServicio(); }
   });
 
