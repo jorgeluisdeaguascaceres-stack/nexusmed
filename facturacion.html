@@ -1146,7 +1146,10 @@ function renderHistorial() {
         ? '<button class="btn-sm btn-danger-sm" onclick="anularFactura(\''+f.id+'\')"><i class="fas fa-ban"></i> Anular</button>'
         : f.estado === 'pre-factura'
         ? '<button class="btn-sm btn-primary-sm" onclick="cargarPreFactura(\''+f.id+'\')"><i class="fas fa-edit"></i> Editar</button> '
-          + '<button class="btn-sm btn-danger-sm" onclick="anularFactura(\''+f.id+'\')"><i class="fas fa-ban"></i> Anular</button>'
+          + '<button class="btn-sm btn-danger-sm" onclick="anularFactura(\''+f.id+'\')"><i class="fas fa-ban"></i> Anular</button> '
+          + '<button class="btn-sm btn-danger-sm" onclick="eliminarFactura(\''+f.id+'\')"><i class="fas fa-trash"></i> Eliminar</button>'
+        : f.estado === 'anulada'
+        ? '<button class="btn-sm btn-danger-sm" onclick="eliminarFactura(\''+f.id+'\')"><i class="fas fa-trash"></i> Eliminar</button>'
         : '';
 
       return '<tr>'
@@ -1196,6 +1199,24 @@ document.getElementById('btnConfirmarAnular').onclick = function() {
   cerrarModal('modalAnular');
   _idAnular = null;
 };
+
+// ─── Eliminar factura (solo pre-factura o anulada) ───
+function eliminarFactura(id) {
+  const facturas = leer(K_FACTURAS) || [];
+  const fac = facturas.find(f => f.id === id);
+  if (!fac) { toast('Factura no encontrada','error'); return; }
+  if (fac.estado === 'definitiva') { toast('No se puede eliminar una factura definitiva. Anúlela primero.','error'); return; }
+  if (!confirm('¿Eliminar la factura '+(fac.numeroFactura||id)+'? Esta acción no se puede deshacer.')) return;
+  const nuevas = facturas.filter(f => f.id !== id);
+  guardar(K_FACTURAS, nuevas);
+  /* También eliminar RIPS historial asociado */
+  const rips = leer('nexus_rips_generados') || [];
+  const nuevasRips = rips.filter(r => r.facturaId !== id);
+  guardar('nexus_rips_generados', nuevasRips);
+  toast('Factura eliminada','success');
+  actualizarStats();
+  renderHistorial();
+}
 
 // ─── Cargar pre-factura para editar ───
 function cargarPreFactura(id) {

@@ -985,6 +985,17 @@ function renderHistorialRIPS() {
   }).join('');
 }
 
+// ─── Eliminar registro RIPS del historial ───
+function eliminarRIPSHistorial(ripsId) {
+  if (!confirm('¿Eliminar este registro RIPS del historial? La factura no se afecta.')) return;
+  const historial = leer(K_RIPS) || [];
+  const nuevas = historial.filter(h => h.id !== ripsId);
+  guardar(K_RIPS, nuevas);
+  toast('Registro RIPS eliminado del historial','success');
+  actualizarStats();
+  renderHistorialRIPS();
+}
+
 function regenerarRIPS(facturaId) {
   const facturas = leer(K_FACTURAS) || [];
   const fac = facturas.find(f => f.id === facturaId);
