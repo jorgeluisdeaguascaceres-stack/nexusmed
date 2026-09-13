@@ -142,7 +142,7 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
 
 <!-- Nav -->
 <div class="nav-bar">
-  <a class="nav-item" href="index.html"><i class="fas fa-home"></i> Inicio</a>
+  <a class="nav-item" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
   <a class="nav-item" href="citas.html"><i class="fas fa-calendar-alt"></i> Citas</a>
   <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
   <a class="nav-item" href="egresados.html"><i class="fas fa-walking"></i> Egresados</a>
@@ -153,6 +153,9 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
   <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-medical-alt"></i> Epicrisis</a>
   <a class="nav-item" href="facturacion.html"><i class="fas fa-file-invoice-dollar"></i> Facturación</a>
   <a class="nav-item active" href="rips.html"><i class="fas fa-file-code"></i> RIPS JSON</a>
+  <a class="nav-item" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Doc.</a>
+  <a class="nav-item" href="generador_evoluciones.html"><i class="fas fa-file-medical-alt"></i> Generador Evol.</a>
+  <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
   <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
 </div>
 
@@ -278,6 +281,7 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
 <!-- Toast container -->
 <div class="toast-container" id="toastContainer"></div>
 
+<script src="permisos.js"></script>
 <script>
 // ─── Constantes localStorage ───
 const K_FACTURAS = 'nexus_facturas';
@@ -1063,6 +1067,7 @@ function generarRIPSMasivo(periodo) {
 // Inicialización
 // ═══════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function() {
+  if (window.NX) { NX.iniciar('rips'); NX.filtrarMenu(); }
   cargarSesion();
   cargarFacturasDefinitivas();
   actualizarStats();

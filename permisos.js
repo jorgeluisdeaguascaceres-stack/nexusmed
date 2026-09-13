@@ -11,7 +11,7 @@
     var PERMISOS_KEY = 'nexus_permisos';
     var SESION_KEY = 'nexus_sesion';
 
-    var ROLES = ['admin', 'recepcion', 'medico_general', 'enfermeria', 'terapia', 'especialista'];
+    var ROLES = ['admin', 'recepcion', 'medico_general', 'enfermeria', 'terapia', 'especialista', 'facturador'];
 
     var NOMBRE_ROL = {
         admin: 'Administrador',
@@ -19,7 +19,8 @@
         medico_general: 'Médico General',
         enfermeria: 'Enfermería',
         terapia: 'Terapia',
-        especialista: 'Especialista'
+        especialista: 'Especialista',
+        facturador: 'Facturador'
     };
 
     var NOMBRE_MODULO = {
@@ -32,7 +33,9 @@
         epicrisis: 'Epicrisis',
         citas: 'Citas',
         egresados: 'Egresados',
-        facturacion: 'Facturación'
+        facturacion: 'Facturación',
+        rips: 'RIPS JSON',
+        gestion_documental: 'Gestión Documental'
     };
 
     var T = ['C', 'V', 'E', 'B'];
@@ -43,16 +46,18 @@
     /* Matriz oficial de respaldo: identica a la de configuracion.html */
     function matrizOficial() {
         return {
-            admisiones:       { admin: T, recepcion: CVE, medico_general: NO,  enfermeria: NO,  terapia: NO,  especialista: NO },
-            configuracion:    { admin: T, recepcion: NO,  medico_general: NO,  enfermeria: NO,  terapia: NO,  especialista: NO },
-            historia_clinica: { admin: T, recepcion: SV,  medico_general: CVE, enfermeria: SV,  terapia: SV,  especialista: CVE },
-            evoluciones:      { admin: T, recepcion: SV,  medico_general: CVE, enfermeria: SV,  terapia: SV,  especialista: CVE },
-            notas_enfermeria: { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: CVE, terapia: SV,  especialista: SV },
-            terapia:          { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: NO,  terapia: CVE, especialista: SV },
-            epicrisis:        { admin: T, recepcion: SV,  medico_general: CVE, enfermeria: SV,  terapia: SV,  especialista: CVE },
-            citas:            { admin: T, recepcion: CVE, medico_general: CVE, enfermeria: CVE, terapia: CVE, especialista: CVE },
-            egresados:        { admin: T, recepcion: CVE, medico_general: CVE, enfermeria: CVE, terapia: CVE, especialista: CVE },
-            facturacion:      { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: NO,  terapia: SV,  especialista: SV }
+            admisiones:       { admin: T, recepcion: CVE, medico_general: NO,  enfermeria: NO,  terapia: NO,  especialista: NO,  facturador: SV },
+            configuracion:    { admin: T, recepcion: NO,  medico_general: NO,  enfermeria: NO,  terapia: NO,  especialista: NO,  facturador: NO },
+            historia_clinica: { admin: T, recepcion: SV,  medico_general: CVE, enfermeria: SV,  terapia: SV,  especialista: CVE, facturador: SV },
+            evoluciones:      { admin: T, recepcion: SV,  medico_general: CVE, enfermeria: SV,  terapia: SV,  especialista: CVE, facturador: SV },
+            notas_enfermeria: { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: CVE, terapia: SV,  especialista: SV,  facturador: SV },
+            terapia:          { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: NO,  terapia: CVE, especialista: SV,  facturador: SV },
+            epicrisis:        { admin: T, recepcion: SV,  medico_general: CVE, enfermeria: SV,  terapia: SV,  especialista: CVE, facturador: SV },
+            citas:            { admin: T, recepcion: CVE, medico_general: CVE, enfermeria: CVE, terapia: CVE, especialista: CVE, facturador: SV },
+            egresados:        { admin: T, recepcion: CVE, medico_general: CVE, enfermeria: CVE, terapia: CVE, especialista: CVE, facturador: SV },
+            facturacion:      { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: NO,  terapia: SV,  especialista: SV,  facturador: CVE },
+            rips:             { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: NO,  terapia: SV,  especialista: SV,  facturador: CVE },
+            gestion_documental:{ admin: T, recepcion: SV,  medico_general: SV,  enfermeria: SV,  terapia: SV,  especialista: SV,  facturador: SV }
         };
     }
 
@@ -65,6 +70,7 @@
         if (r === 'terapista' || r === 'terapeuta' || r === 'fisioterapeuta') return 'terapia';
         if (r === 'administrador' || r === 'administrator') return 'admin';
         if (r === 'recepcionista' || r === 'recepción') return 'recepcion';
+        if (r === 'facturacion' || r === 'facturación' || r === 'factura') return 'facturador';
         if (ROLES.indexOf(r) >= 0) return r;
         return 'recepcion';
     }
@@ -272,7 +278,9 @@
         'epicrisis.html': 'epicrisis',
         'citas.html': 'citas',
         'egresados.html': 'egresados',
-        'facturacion.html': 'facturacion'
+        'facturacion.html': 'facturacion',
+        'rips.html': 'rips',
+        'gestion_documental.html': 'gestion_documental'
     };
 
     NX.filtrarMenu = function () {
