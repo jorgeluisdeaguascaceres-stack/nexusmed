@@ -269,7 +269,7 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
       <div class="form-title"><i class="fas fa-list"></i> RIPS JSON Generados</div>
       <table class="data-table">
         <thead><tr>
-          <th>N° Factura</th><th>EPS</th><th>Paciente</th><th>Período</th><th>Fecha Generación</th><th>Usuarios</th><th>Servicios</th><th>Acciones</th>
+          <th>N° Factura</th><th>EPS</th><th>Paciente</th><th>Documento</th><th>Período</th><th>Fecha Generación</th><th>Usuarios</th><th>Servicios</th><th>Acciones</th>
         </tr></thead>
         <tbody id="bodyHistorialRIPS"></tbody>
       </table>
@@ -469,13 +469,13 @@ function cargarFacturasDefinitivas() {
   });
 
   // Actualizar filtros
-  const epsSet = new Set(definitivas.map(f => (f.eps||'').toUpperCase()));
+  const epsSet = new Set(visibles.map(f => (f.eps||'').toUpperCase()));
   const selEps = document.getElementById('filtroEps');
   const curEps = selEps.value;
   selEps.innerHTML = '<option value="">Todas</option>'
     + [...epsSet].filter(Boolean).sort().map(e => '<option value="'+e+'"'+(e===curEps?' selected':'')+'>'+e+'</option>').join('');
 
-  const perSet = new Set(definitivas.map(f => (f.fecha||'').slice(0,7)));
+  const perSet = new Set(visibles.map(f => (f.fecha||'').slice(0,7)));
   const selPer = document.getElementById('filtroPeriodo');
   const curPer = selPer.value;
   selPer.innerHTML = '<option value="">Todos</option>'
@@ -499,7 +499,7 @@ function cargarFacturasDefinitivas() {
       + '<td style="font-weight:600;color:#00b4d8">'+(f.numeroFactura||'—')+(esAnulada?' <span style="font-size:0.65em;background:rgba(255,56,96,.15);color:#ff3860;padding:2px 6px;border-radius:4px;margin-left:4px">ANULADA</span>':'')+'</td>'
       + '<td>'+(f.eps||'—')+'</td>'
       + '<td>'+(f.paciente||'—')+'</td>'
-      + '<td>'+(f.documento||'—')+'</td>'
+      + '<td>'+(f.tipoDoc||'CC')+' '+(f.documento||'—')+'</td>'
       + '<td>'+(f.fecha||'—')+'</td>'
       + '<td style="text-align:right;font-weight:700;color:#90e0ef">'+fmt$(f.total)+'</td>'
       + '<td>'+nServ+(tieneRIPS?' <span class="badge badge-ok"><i class=\"fas fa-check\"></i> RIPS</span>':'')+'</td>'
@@ -943,6 +943,7 @@ function guardarRIPSHistorial(fac, ripsJson) {
     eps: fac.eps,
     paciente: fac.paciente,
     documento: fac.documento,
+    tipoDoc: fac.tipoDoc || 'CC',
     periodo: (fac.fecha||'').slice(0,7),
     fechaGeneracion: ahora(),
     numUsuarios: ripsJson.usuarios.length,
@@ -959,7 +960,7 @@ function renderHistorialRIPS() {
 
   const tbody = document.getElementById('bodyHistorialRIPS');
   if (!sorted.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#5a7a9a;padding:20px"><i class="fas fa-folder-open"></i> No hay RIPS generados</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#5a7a9a;padding:20px"><i class="fas fa-folder-open"></i> No hay RIPS generados</td></tr>';
     return;
   }
 
@@ -974,6 +975,7 @@ function renderHistorialRIPS() {
       + '<td style="font-weight:600;color:#00b4d8">'+(h.numeroFactura||'—')+badge+'</td>'
       + '<td>'+(h.eps||'—')+'</td>'
       + '<td>'+(h.paciente||'—')+'</td>'
+      + '<td>'+(h.tipoDoc||'CC')+' '+(h.documento||'—')+'</td>'
       + '<td>'+formatPeriodo(h.periodo)+'</td>'
       + '<td>'+(h.fechaGeneracion||'').slice(0,10)+'</td>'
       + '<td style="text-align:center">'+h.numUsuarios+'</td>'

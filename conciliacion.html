@@ -337,7 +337,7 @@
                 </div>
                 <div style="overflow-x:auto">
                     <table class="result-table">
-                        <thead><tr><th>Paciente</th><th>Documento</th><th>Día</th><th>Agendado</th><th>Evolución</th><th>Estado</th></tr></thead>
+                        <thead><tr><th>Paciente</th><th>Tipo Doc</th><th>Documento</th><th>Día</th><th>Agendado</th><th>Evolución</th><th>Estado</th></tr></thead>
                         <tbody id="result-tbody"></tbody>
                     </table>
                 </div>
@@ -529,7 +529,7 @@
             const estado = r.agendado && r.evolucion ? 'verde' : r.agendado ? 'amarillo' : r.evolucion ? 'cyan' : 'rojo';
             const estadoText = r.agendado && r.evolucion ? '✅ Completo' : r.agendado ? '⚠️ Solo agendado' : r.evolucion ? 'ℹ️ Solo evolución' : '❌ Ninguno';
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${r.paciente||r.nombre||''}</td><td>${r.documento||''}</td><td>${r.dia||r.fecha||''}</td><td>${r.agendado?'✅':'❌'}</td><td>${r.evolucion?'✅':'❌'}</td><td class="${estado}" style="font-weight:600">${estadoText}</td>`;
+            tr.innerHTML = `<td>${r.paciente||r.nombre||''}</td><td>${r.tipoDoc||'CC'}</td><td>${r.documento||''}</td><td>${r.dia||r.fecha||''}</td><td>${r.agendado?'✅':'❌'}</td><td>${r.evolucion?'✅':'❌'}</td><td class="${estado}" style="font-weight:600">${estadoText}</td>`;
             tbody.appendChild(tr);
         });
     }

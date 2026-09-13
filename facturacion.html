@@ -641,7 +641,7 @@ function renderDropdownResultados(resultados) {
     return '<div class="adm-dropdown-item" onclick="seleccionarAdmision(' + idx + ')" style="' + estilosExtra + '">'
       + badgeAdm
       + '<div class="item-name">' + nombre + '</div>'
-      + '<div class="item-doc">Doc: ' + doc + ' | Adm: ' + numAdm + '</div>'
+      + '<div class="item-doc">Doc: ' + (p.tipoDoc||'CC') + ' ' + doc + ' | Adm: ' + numAdm + '</div>'
       + '<div class="item-eps">' + eps + '</div>'
       + '</div>';
   }).join('');
@@ -695,6 +695,7 @@ function llenarDatosPaciente(p) {
   grid.innerHTML = ''
     + '<div class="form-group"><label>N° Admisión</label><input readonly value="'+numAdm+'"></div>'
     + '<div class="form-group"><label>Paciente</label><input readonly value="'+nombre+'"></div>'
+    + '<div class="form-group"><label>Tipo Doc</label><input readonly value="'+(p.tipoDoc||'CC')+'"></div>'
     + '<div class="form-group"><label>Documento</label><input readonly value="'+doc+'"></div>'
     + '<div class="form-group"><label>EPS</label><input readonly value="'+eps+'"></div>'
     + '<div class="form-group"><label>Código EPS</label><input readonly value="'+codEps+'"></div>'
@@ -949,7 +950,7 @@ function recalcularLiquidacion() {
   document.getElementById('liqEps').textContent = eps;
   document.getElementById('liqCodEps').textContent = codEps;
   document.getElementById('liqPaciente').textContent = nombre;
-  document.getElementById('liqDocumento').textContent = doc;
+  document.getElementById('liqDocumento').textContent = (p.tipoDoc||'CC') + ' ' + doc;
   document.getElementById('liqDiagnostico').textContent = dx;
   document.getElementById('liqFecha').textContent = hoy();
 
@@ -1014,6 +1015,7 @@ function construirFactura() {
     numAdmision: p.numAdmision || '—',
     paciente: p.nombre || '—',
     documento: p.documento || '—',
+    tipoDoc: p.tipoDoc || 'CC',
     eps: eps,
     codigoEps: codEps,
     municipio: p.municipio || '—',
@@ -1152,7 +1154,7 @@ function renderHistorial() {
         + '<td>' + (f.numAdmision||'—') + '</td>'
         + '<td>' + (f.eps||'—') + '</td>'
         + '<td>' + (f.paciente||'—') + '</td>'
-        + '<td>' + (f.documento||'—') + '</td>'
+        + '<td>' + (f.tipoDoc||'CC') + ' ' + (f.documento||'—') + '</td>'
         + '<td>' + (f.fecha||'—') + '</td>'
         + '<td>' + estadoBadge + '</td>'
         + '<td class="td-valor">' + fmt$(f.total) + '</td>'

@@ -800,7 +800,7 @@ function limpiarCamposAdmision() {
 function llenarCamposAdmision(p) {
     document.getElementById('admNombreCompleto').value = p.nombre || '';
     document.getElementById('admTipoDoc').value = p.tipoDoc || '';
-    document.getElementById('admDocumento').value = (p.tipoDoc ? p.tipoDoc + ' ' : '') + p.documento || '';
+    document.getElementById('admDocumento').value = p.documento || '';
     // N° Admisión
     document.getElementById('admNumAdmision').value = p.numAdmision || '';
     // Fecha Ingreso — format nicely
@@ -1260,7 +1260,7 @@ function verDetalle(id) {
   const admFields = [
     ['Nombre Completo', adm.admNombreCompleto],
     ['Tipo Documento', adm.admTipoDoc],
-    ['Documento / Cédula', adm.admDocumento],
+    ['Documento', adm.admDocumento],
     ['N° Admisión', adm.admNumAdmision],
     ['Fecha de Ingreso', adm.admFechaIngreso],
     ['Fecha de Nacimiento', adm.admFechaNacimiento],
@@ -1364,7 +1364,7 @@ function descargarPDF() {
   html += `<div class="section-title"><i class="fas fa-database"></i> DATOS DE ADMISIÓN</div><table>`;
   html += row('Nombre Completo', adm.admNombreCompleto);
   html += row('Tipo Documento', adm.admTipoDoc);
-  html += row('Documento / Cédula', adm.admDocumento);
+  html += row('Documento', adm.admDocumento);
   html += row('N° Admisión', adm.admNumAdmision);
   html += row('Fecha de Ingreso', adm.admFechaIngreso);
   html += row('Fecha de Nacimiento', adm.admFechaNacimiento);
