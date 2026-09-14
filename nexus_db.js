@@ -34,6 +34,7 @@
 
     var espejo = {};        // ultimo contenido conocido del servidor
     var pendientes = {};    // claves con cambios sin enviar
+    var eliminadas = {};    // claves que el usuario elimino intencionalmente
     var enviando = false;
     var listo = false;
     var conectado = false;
@@ -173,18 +174,32 @@
             return p.then(function () {
                 var mio = localStorage.getItem(clave);
                 if (mio === null) mio = '';
+                var esEliminacion = !!eliminadas[clave];
+                /* Si el usuario elimino intencionalmente una clave (localStorage vacio + marca eliminadas),
+                   NO hacer merge con el servidor — sobrescribir el servidor con vacio.
+                   Esto evita que unir() restaure datos que se borraron a proposito. */
+                if (esEliminacion && (!String(mio).trim() || String(mio).trim() === '[]' || String(mio).trim() === 'null')) {
+                    return escribirRemoto(clave, '').then(function () {
+                        espejo[clave] = '';
+                        almacenarLocal(clave, '');
+                        delete pendientes[clave];
+                        delete eliminadas[clave];
+                    });
+                }
                 return leerRemoto(clave).then(function (ajeno) {
                     var final = unir(espejo[clave], mio, ajeno);
                     if (final === null || final === undefined) final = '';
                     if (String(final).length > LIMITE) {
                         avisar('Los datos de "' + etiqueta(clave) + '" son demasiado grandes para guardarse en la nube.', 'error');
                         delete pendientes[clave];
+                        delete eliminadas[clave];
                         return;
                     }
                     return escribirRemoto(clave, String(final)).then(function () {
                         espejo[clave] = String(final);
                         almacenarLocal(clave, String(final));
                         delete pendientes[clave];
+                        delete eliminadas[clave];
                     });
                 });
             }).catch(function () { /* se reintenta en el siguiente ciclo */ });
@@ -199,17 +214,25 @@
         var tareas = COMPARTIDAS.map(function (clave) {
             return leerRemoto(clave).then(function (texto) {
                 if (String(texto) !== String(espejo[clave] === undefined ? '' : espejo[clave])) {
-                    /* Guardar base (lo que cre\u00edamos que ten\u00eda el servidor) ANTES de actualizar espejo */
+                    var mio = localStorage.getItem(clave);
+                    if (mio === null) mio = '';
+                    /* PROTECCION CONTRA RESTAURACION DE DATOS ELIMINADOS:
+                       Si el usuario elimino intencionalmente una clave (marcada en eliminadas)
+                       y localStorage esta vacio/[] para esa clave, NO restaurar datos del servidor.
+                       Esperar a que enviarPendientes() sincronice la eliminacion con la nube. */
+                    if (eliminadas[clave] && (!String(mio).trim() || String(mio).trim() === '[]' || String(mio).trim() === 'null')) {
+                        /* Eliminacion intencional pendiente de sincronizar — NO restaurar */
+                        return;
+                    }
+                    /* Guardar base (lo que creiamos que tenia el servidor) ANTES de actualizar espejo */
                     var base = espejo[clave] === undefined ? '' : espejo[clave];
                     /* Usar merge (unir) en lugar de sobrescritura directa para
                        respetar eliminaciones locales y cambios de otros usuarios */
-                    var mio = localStorage.getItem(clave);
-                    if (mio === null) mio = '';
                     var merge = unir(base, mio, texto);
                     var mergeStr = merge !== null && merge !== undefined ? String(merge) : '';
                     almacenarLocal(clave, mergeStr);
                     /* Actualizar espejo al resultado fusionado (no al dato remoto crudo)
-                       para que la pr\u00f3xima comparaci\u00f3n detecte solo cambios REALES */
+                       para que la proxima comparacion detecte solo cambios REALES */
                     espejo[clave] = mergeStr;
                     if (clave !== 'nexus_sesion') cambio = true;
                 }
@@ -234,6 +257,12 @@
         _set(clave, valor);
         if (esCompartida(clave)) {
             pendientes[clave] = true;
+            /* Detectar cuando el usuario guarda [] o null — es una eliminacion intencional (purga) */
+            var v = String(valor || '').trim();
+            if (!v || v === '[]' || v === 'null') {
+                eliminadas[clave] = true;
+                espejo[clave] = '';
+            }
             programarEnvio();
         }
     };
@@ -242,6 +271,7 @@
         _remove(clave);
         if (esCompartida(clave)) {
             pendientes[clave] = true;
+            eliminadas[clave] = true;  // marca: eliminacion intencional
             espejo[clave] = '';        // borrado intencional: se vacia en la nube
             programarEnvio();
         }
@@ -251,7 +281,7 @@
         var sesion = localStorage.getItem('nexus_sesion');
         _clear();
         if (sesion) _set('nexus_sesion', sesion);
-        COMPARTIDAS.forEach(function (c) { pendientes[c] = true; espejo[c] = ''; });
+        COMPARTIDAS.forEach(function (c) { pendientes[c] = true; eliminadas[c] = true; espejo[c] = ''; });
         programarEnvio();
     };
 
@@ -631,7 +661,31 @@
         conectado: function () { return conectado; },
         sincronizar: function () { return enviarPendientes().then(bajarTodo); },
         guardar: function () { return enviarPendientes(); },
-        avisar: avisar
+        avisar: avisar,
+        /* Purgar datos de una clave en el SERVIDOR (no solo local).
+           Sobrescribe el servidor con [] para que los datos eliminados no reaparezcan.
+           Uso: NXDB.purgarRemoto('nexus_facturas') */
+        purgarRemoto: function (clave) {
+            if (!esCompartida(clave)) return Promise.resolve(false);
+            return escribirRemoto(clave, '[]').then(function () {
+                espejo[clave] = '[]';
+                delete eliminadas[clave];
+                delete pendientes[clave];
+                return true;
+            }).catch(function () { return false; });
+        },
+        /* Purgar multiples claves del servidor */
+        purgarRemotoTodo: function (claves) {
+            var lista = (claves || COMPARTIDAS).filter(esCompartida);
+            return Promise.all(lista.map(function (c) {
+                return escribirRemoto(c, '[]').then(function () {
+                    espejo[c] = '[]';
+                    delete eliminadas[c];
+                    delete pendientes[c];
+                    return true;
+                }).catch(function () { return false; });
+            }));
+        }
     };
     window.NXAUTH = NXAUTH;
 
