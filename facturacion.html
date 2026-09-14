@@ -463,6 +463,8 @@ function ahora()   { return new Date().toISOString().replace('Z',''); }
 function fmt$(n)   { return '$' + Number(n||0).toLocaleString('es-CO'); }
 function uid(pref) { return pref + '_' + Date.now() + '_' + Math.random().toString(36).substring(2,7); }
 
+// ─── (visibles helper removed — all deletions are now permanent) ───
+
 // ─── Estado de la factura en curso ───
 let facturaActual = {
   admision: null,
@@ -697,7 +699,7 @@ function renderDropdownResultados(resultados) {
 }
 
 function admisionYaFacturada(numAdmision) {
-  var facturas = leer(K_FACTURAS) || [];
+  var facturas = (leer(K_FACTURAS)||[]);
   // Solo bloquea si hay factura definitiva (no anulada)
   // Si la factura fue anulada, se permite nueva factura para esa admisión
   return facturas.some(function(f) {
@@ -705,16 +707,17 @@ function admisionYaFacturada(numAdmision) {
   });
 }
 
-// ─── Purge test data ───
+// ─── Purge test data: eliminación permanente ───
 function purgarDatosPrueba() {
-  if (!confirm('⚠️ ¿Eliminar TODAS las facturas y RIPS de prueba?\nEsto borrará:\n- Todas las facturas (pre-factura, definitiva y anulada)\n- Todos los RIPS generados\n\nLos PACIENTES y ADMISIONES NO se eliminan.\n\nEsta acción NO se puede deshacer.')) return;
-  if (!confirm('¿Está SEGURO? Escriba manualmente la confirmación en el siguiente diálogo.')) return;
+  if (!confirm('⚠️ ¿Eliminar TODAS las facturas y RIPS de prueba?\nEsto eliminará PERMANENTEMENTE:\n- Todas las facturas (pre-factura, definitiva y anulada)\n- Todos los RIPS generados\n\nLos PACIENTES y ADMISIONES NO se eliminan.\nEsta acción NO se puede deshacer.')) return;
   guardar(K_FACTURAS, []);
   guardar('nexus_rips_generados', []);
   actualizarStats();
   renderHistorial();
-  toast('✅ Datos de facturación y RIPS purgados. Puede empezar limpio.', 'success');
+  toast('✅ Datos de facturación y RIPS eliminados permanentemente.', 'success');
 }
+
+// ─── (Auto-purge removed — all deletions are now permanent) ───
 
 function seleccionarAdmision(idx) {
   const p = window._admResultados[idx];
@@ -1260,7 +1263,7 @@ function resetFacturaActual() {
 
 // ─── HISTORIAL ───
 function renderHistorial() {
-  const facturas = leer(K_FACTURAS) || [];
+  const facturas = (leer(K_FACTURAS)||[]);
   const filtroEps = document.getElementById('filtroEps').value;
   const filtroEstado = document.getElementById('filtroEstado').value;
 
@@ -1342,20 +1345,21 @@ document.getElementById('btnConfirmarAnular').onclick = function() {
   _idAnular = null;
 };
 
-// ─── Eliminar factura (solo pre-factura o anulada) ───
+// ─── Eliminar factura (eliminación permanente) ───
 function eliminarFactura(id) {
   const facturas = leer(K_FACTURAS) || [];
   const fac = facturas.find(f => f.id === id);
   if (!fac) { toast('Factura no encontrada','error'); return; }
   if (fac.estado === 'definitiva') { toast('No se puede eliminar una factura definitiva. Anúlela primero.','error'); return; }
   if (!confirm('¿Eliminar la factura '+(fac.numeroFactura||id)+'? Esta acción no se puede deshacer.')) return;
+  // Eliminar factura permanentemente del array
   const nuevas = facturas.filter(f => f.id !== id);
   guardar(K_FACTURAS, nuevas);
   /* También eliminar RIPS historial asociado */
   const rips = leer('nexus_rips_generados') || [];
   const nuevasRips = rips.filter(r => r.facturaId !== id);
   guardar('nexus_rips_generados', nuevasRips);
-  toast('Factura eliminada','success');
+  toast('Factura eliminada permanentemente','success');
   actualizarStats();
   renderHistorial();
 }
@@ -1393,7 +1397,7 @@ function cargarPreFactura(id) {
 
 // ─── Stats ───
 function actualizarStats() {
-  const facturas = leer(K_FACTURAS) || [];
+  const facturas = (leer(K_FACTURAS)||[]);
   const pre = facturas.filter(f => f.estado === 'pre-factura').length;
   const def = facturas.filter(f => f.estado === 'definitiva').length;
   const anul = facturas.filter(f => f.estado === 'anulada').length;

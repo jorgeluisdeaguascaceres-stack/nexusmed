@@ -298,6 +298,8 @@ function ahora() { return new Date().toISOString(); }
 function fmt$(n) { return '$' + Number(n||0).toLocaleString('es-CO'); }
 function uid(pref) { return pref + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
+// ─── (visibles helper removed — all deletions are now permanent) ───
+
 function toast(msg, tipo) {
   tipo = tipo || 'info';
   const c = document.getElementById('toastContainer');
@@ -455,27 +457,27 @@ let facturaSeleccionada = null;
 let ripsGenerado = null;
 
 function cargarFacturasDefinitivas() {
-  const facturas = leer(K_FACTURAS) || [];
+  const facturas = (leer(K_FACTURAS)||[]);
   // Mostrar facturas definitivas Y anuladas (para ver/regenerar RIPS de facturas anuladas)
-  const visibles = facturas.filter(f => f.estado === 'definitiva' || f.estado === 'anulada');
+  const factVisibles = facturas.filter(f => f.estado === 'definitiva' || f.estado === 'anulada');
 
   const filtroEps = document.getElementById('filtroEps').value;
   const filtroPeriodo = document.getElementById('filtroPeriodo').value;
 
-  const filtradas = visibles.filter(f => {
+  const filtradas = factVisibles.filter(f => {
     if (filtroEps && (f.eps||'').toUpperCase() !== filtroEps.toUpperCase()) return false;
     if (filtroPeriodo && (f.fecha||'').slice(0,7) !== filtroPeriodo) return false;
     return true;
   });
 
   // Actualizar filtros
-  const epsSet = new Set(visibles.map(f => (f.eps||'').toUpperCase()));
+  const epsSet = new Set(factVisibles.map(f => (f.eps||'').toUpperCase()));
   const selEps = document.getElementById('filtroEps');
   const curEps = selEps.value;
   selEps.innerHTML = '<option value="">Todas</option>'
     + [...epsSet].filter(Boolean).sort().map(e => '<option value="'+e+'"'+(e===curEps?' selected':'')+'>'+e+'</option>').join('');
 
-  const perSet = new Set(visibles.map(f => (f.fecha||'').slice(0,7)));
+  const perSet = new Set(factVisibles.map(f => (f.fecha||'').slice(0,7)));
   const selPer = document.getElementById('filtroPeriodo');
   const curPer = selPer.value;
   selPer.innerHTML = '<option value="">Todos</option>'
@@ -490,7 +492,7 @@ function cargarFacturasDefinitivas() {
   tbody.innerHTML = filtradas.map(f => {
     const sel = facturaSeleccionada && facturaSeleccionada.id === f.id;
     const nServ = (f.servicios||[]).length;
-    const ripExistente = (leer(K_RIPS) || []).find(r => r.facturaId === f.id);
+    const ripExistente = (leer(K_RIPS)||[]).find(r => r.facturaId === f.id);
     const tieneRIPS = !!ripExistente;
     const esAnulada = f.estado === 'anulada';
     const rowBg = sel ? 'background:rgba(0,180,216,.1)' : (esAnulada ? 'opacity:0.6' : '');
@@ -986,7 +988,7 @@ function guardarRIPSHistorial(fac, ripsJson) {
 }
 
 function renderHistorialRIPS() {
-  const historial = leer(K_RIPS) || [];
+  const historial = (leer(K_RIPS)||[]);
   const sorted = historial.slice().sort((a,b) => (b.fechaGeneracion||'').localeCompare(a.fechaGeneracion||''));
 
   const tbody = document.getElementById('bodyHistorialRIPS');
@@ -1016,13 +1018,13 @@ function renderHistorialRIPS() {
   }).join('');
 }
 
-// ─── Eliminar registro RIPS del historial ───
+// ─── Eliminar registro RIPS (eliminación permanente) ───
 function eliminarRIPSHistorial(ripsId) {
-  if (!confirm('¿Eliminar este registro RIPS del historial? La factura no se afecta.')) return;
+  if (!confirm('¿Eliminar este registro RIPS del historial? La factura no se afecta. Esta acción no se puede deshacer.')) return;
   const historial = leer(K_RIPS) || [];
   const nuevas = historial.filter(h => h.id !== ripsId);
   guardar(K_RIPS, nuevas);
-  toast('Registro RIPS eliminado del historial','success');
+  toast('Registro RIPS eliminado permanentemente','success');
   actualizarStats();
   renderHistorialRIPS();
 }
@@ -1030,7 +1032,7 @@ function eliminarRIPSHistorial(ripsId) {
 function regenerarRIPS(facturaId) {
   const facturas = leer(K_FACTURAS) || [];
   const fac = facturas.find(f => f.id === facturaId);
-  if (!fac) { toast('Factura no encontrada — puede haber sido eliminada. El registro RIPS se conserva como historial.','warning'); return; }
+  if (!fac) { toast('Factura no encontrada','error'); return; }
   if (fac.estado === 'anulada') { toast('Esta factura está anulada. El RIPS previo se mantiene solo como historial.','warning'); return; }
   facturaSeleccionada = fac;
   cambiarTab('tabGenerar');
@@ -1047,24 +1049,26 @@ function volverPaso1() {
   cargarFacturasDefinitivas();
 }
 
-// ─── Purgar historial RIPS ───
+// ─── Purgar historial RIPS (eliminación permanente) ───
 function purgarHistorialRIPS() {
-  if (!confirm('⚠️ ¿Eliminar TODO el historial de RIPS generados?\nLas facturas NO se eliminan, solo los registros RIPS.\n\nEsta acción NO se puede deshacer.')) return;
+  if (!confirm('⚠️ ¿Eliminar TODO el historial de RIPS generados?\nLas facturas NO se eliminan, solo los registros RIPS.\nEsta acción NO se puede deshacer.')) return;
   guardar(K_RIPS, []);
   actualizarStats();
   renderHistorialRIPS();
-  toast('✅ Historial RIPS purgado.', 'success');
+  toast('✅ Historial RIPS eliminado permanentemente.', 'success');
 }
+
+// ─── (Auto-purge removed — all deletions are now permanent) ───
 
 // ═══════════════════════════════════════════
 // Actualizar estadísticas
 // ═══════════════════════════════════════════
 function actualizarStats() {
-  const facturas = leer(K_FACTURAS) || [];
+  const facturas = (leer(K_FACTURAS)||[]);
   const definitivas = facturas.filter(f => f.estado === 'definitiva');
   document.getElementById('statDefinitivas').textContent = definitivas.length;
 
-  const historial = leer(K_RIPS) || [];
+  const historial = (leer(K_RIPS)||[]);
   document.getElementById('statRIPSGenerados').textContent = historial.length;
 
   let totalPacientes = 0;
@@ -1081,7 +1085,7 @@ function actualizarStats() {
 // Generación masiva por período
 // ═══════════════════════════════════════════
 function generarRIPSMasivo(periodo) {
-  const facturas = leer(K_FACTURAS) || [];
+  const facturas = (leer(K_FACTURAS)||[]);
   const delPeriodo = facturas.filter(f =>
     f.estado === 'definitiva' && (f.fecha||'').slice(0,7) === periodo
   );

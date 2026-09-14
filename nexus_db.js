@@ -21,7 +21,8 @@
         'nexus_contador_hc', 'nexus_contador_admision', 'nexus_contador_evo',
         'nexus_contador_ne', 'nexus_contador_te', 'nexus_contador_epi',
         'nexus_servicios_facturacion', 'nexus_entidades_pagadoras',
-        'nexus_facturas', 'nexus_rips_json', 'nexus_contador_facturas'
+        'nexus_facturas', 'nexus_rips_generados', 'nexus_contador_facturas',
+        'nexus_config_ips'
     ];
 
     /* Claves que NUNCA se comparten (son de cada navegador) */
@@ -177,8 +178,18 @@
         var tareas = COMPARTIDAS.map(function (clave) {
             return leerRemoto(clave).then(function (texto) {
                 if (String(texto) !== String(espejo[clave] === undefined ? '' : espejo[clave])) {
-                    espejo[clave] = texto;
-                    almacenarLocal(clave, texto);
+                    /* Guardar base (lo que cre\u00edamos que ten\u00eda el servidor) ANTES de actualizar espejo */
+                    var base = espejo[clave] === undefined ? '' : espejo[clave];
+                    /* Usar merge (unir) en lugar de sobrescritura directa para
+                       respetar eliminaciones locales y cambios de otros usuarios */
+                    var mio = localStorage.getItem(clave);
+                    if (mio === null) mio = '';
+                    var merge = unir(base, mio, texto);
+                    var mergeStr = merge !== null && merge !== undefined ? String(merge) : '';
+                    almacenarLocal(clave, mergeStr);
+                    /* Actualizar espejo al resultado fusionado (no al dato remoto crudo)
+                       para que la pr\u00f3xima comparaci\u00f3n detecte solo cambios REALES */
+                    espejo[clave] = mergeStr;
                     if (clave !== 'nexus_sesion') cambio = true;
                 }
             }).catch(function () { });
@@ -369,7 +380,7 @@
             nexus_evoluciones: 'Evoluciones', nexus_notas_enfermeria: 'Notas de enfermeria',
             nexus_terapias: 'Terapias', nexus_epicrisis: 'Epicrisis',
             nexus_servicios_facturacion: 'Catálogo servicios', nexus_entidades_pagadoras: 'Entidades pagadoras',
-            nexus_facturas: 'Facturas', nexus_rips_json: 'RIPS JSON',
+            nexus_facturas: 'Facturas', nexus_rips_generados: 'RIPS generados',
             nexus_contador_facturas: 'Contador facturas'
         };
         return n[clave] || clave;
