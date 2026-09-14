@@ -22,7 +22,7 @@
         'nexus_contador_ne', 'nexus_contador_te', 'nexus_contador_epi',
         'nexus_servicios_facturacion', 'nexus_entidades_pagadoras',
         'nexus_facturas', 'nexus_rips_generados', 'nexus_contador_facturas',
-        'nexus_config_ips'
+        'nexus_contador_prefacturas', 'nexus_config_ips'
     ];
 
     /* Claves que NUNCA se comparten (son de cada navegador) */
