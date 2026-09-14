@@ -226,6 +226,11 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
           <input type="text" id="ripCodHabilitacion" placeholder="12 caracteres">
         </div>
         <div class="form-group">
+          <label>Código Servicio REPS</label>
+          <input type="text" id="ripCodServicio" placeholder="Ej: 728 (Rehabilitación)" value="728">
+          <span style="font-size:11px;color:#5a7a9a">Código del servicio habilitado en REPS (tabla SISPRO)</span>
+        </div>
+        <div class="form-group">
           <label>Razón Social</label>
           <input type="text" id="ripRazonSocial" placeholder="Nombre de la IPS">
         </div>
@@ -536,6 +541,7 @@ function mostrarPaso2() {
   const config = leer('nexus_config_ips') || {};
   document.getElementById('ripNitPrestador').value = config.nit || '';
   document.getElementById('ripCodHabilitacion').value = config.codHabilitacion || '';
+  document.getElementById('ripCodServicio').value = config.codServicioREPS || '728';
   document.getElementById('ripRazonSocial').value = config.razonSocial || '';
   document.getElementById('ripCodDpto').value = config.codDepartamento || '';
   document.getElementById('ripCodMpio').value = config.codMunicipio || '';
@@ -565,12 +571,16 @@ function generarRIPS() {
 
   if (!nit) { toast('Ingrese el NIT del prestador','warning'); return; }
 
+  const codServ = document.getElementById('ripCodServicio').value.trim() || '728';
   // Guardar config para próxima vez
-  guardar('nexus_config_ips', { nit, codHabilitacion: codHab, razonSocial: razon, codDepartamento: codDpto, codMunicipio: codMpio, direccion });
+  guardar('nexus_config_ips', { nit, codHabilitacion: codHab, codServicioREPS: codServ, razonSocial: razon, codDepartamento: codDpto, codMunicipio: codMpio, direccion });
 
-  // codPrestador = NIT del prestador (sin guión, solo dígitos + dígito verificación)
-  // Per Resolución 948, NO es el código de habilitación REPS largo
-  window._codPrestador = nit.replace(/[^0-9]/g, '');
+  // Per Resolución 948/2026:
+  // codPrestador = Código Habilitación REPS (12 caracteres), NO el NIT
+  // numDocumentoIdObligado = NIT del prestador (encabezado)
+  window._codPrestador = codHab || nit.replace(/[^0-9]/g, '');
+  // codServicio = Código del servicio habilitado en REPS (tabla SISPRO)
+  window._codServicio = codServ;
 
   // Buscar datos completos del paciente
   const pacientes = leer(K_PACIENTES) || [];
@@ -649,12 +659,13 @@ function construirServicios(fac, catalogo) {
   const consultas = [];
   const procedimientos = [];
   const otrosServicios = [];
-  let consecutivoGlobal = 0; // Consecutivo global que suma TODOS los bloques
+  let consecutivoGlobal = 0; // Consecutivo global (solo para conteo total, NO para el campo consecutivo)
 
   const servicios = fac.servicios || [];
-  const codHab = document.getElementById('ripCodHabilitacion').value.trim();
-  // codPrestador = NIT del prestador (NO el código de habilitación REPS)
-  const codPrestador = window._codPrestador || codHab; // Fallback si no se capturó NIT
+  // codPrestador = Código Habilitación REPS (12 caracteres)
+  const codPrestador = window._codPrestador || document.getElementById('ripCodHabilitacion').value.trim();
+  // codServicio = Código del servicio habilitado en REPS (tabla SISPRO, ej: 728)
+  const codServicio = window._codServicio || '728';
   const eps = fac.eps || '';
   const dx = fac.diagnostico || '';
   const dxCodigo = fac.diagnosticoCodigo || extraerCIE10(dx);
@@ -663,6 +674,8 @@ function construirServicios(fac, catalogo) {
   let fechaCursor = new Date(fechaBase + 'T00:00:00'); // cursor para asignar fechas consecutivas
 
   servicios.forEach((svc, idx) => {
+    let consecutivoServicio = 0; // Reiniciar consecutivo por CADA servicio
+
     // Buscar en catálogo para enriquecer datos
     const catMatch = catalogo.find(c =>
       (c.codigoCUPS || '').toUpperCase() === (svc.codigo || '').toUpperCase() ||
@@ -715,7 +728,8 @@ function construirServicios(fac, catalogo) {
     // ═══════════════════════════════════════════════════════════
     for (let i = 0; i < cantidad; i++) {
       consecutivoGlobal++;
-      const consecutivo = consecutivoGlobal;
+      consecutivoServicio++;
+      const consecutivo = consecutivoServicio; // Consecutivo DENTRO de este servicio
 
       if (esTerapia) {
         // ─── Procedimientos (AP) — 1 bloque por sesión ───
@@ -728,11 +742,11 @@ function construirServicios(fac, catalogo) {
           codPrestador: codPrestador || '',
           fechaInicioAtencion: blockDateStr + ' 08:00:00',
           numAutorizacion: autorizacion || null,
-          codProcedimiento: codigoCUPS || '939800',
+          codProcedimiento: codigoCUPS || '',
           viaIngresoServicioSalud: viaIngresoServicio(),
           modalidadGrupoServicioTecSal: modalidad,
           grupoServicios: grupoServ,
-          codServicio: codPrestador || '',
+          codServicio: codServicio,
           finalidadTecnologiaSalud: finalidad,
           causaMotivoAtencion: causa,
           codDiagnosticoPrincipal: dxCodigo || 'Z000',
@@ -761,10 +775,10 @@ function construirServicios(fac, catalogo) {
           codPrestador: codPrestador || '',
           fechaInicioAtencion: blockDateStr + ' 08:00:00',
           numAutorizacion: autorizacion || null,
-          codConsulta: codigoCUPS || '090201',
+          codConsulta: codigoCUPS || '',
           modalidadGrupoServicioTecSal: modalidad,
           grupoServicios: grupoServ,
-          codServicio: codPrestador || '',
+          codServicio: codServicio,
           finalidadTecnologiaSalud: finalidad,
           causaMotivoAtencion: causa,
           codDiagnosticoPrincipal: dxCodigo || 'Z000',
@@ -913,12 +927,14 @@ function validarRIPS() {
       if (!p.codProcedimiento) advertencias.push('Procedimiento '+(j+1)+': falta código CUPS');
       if (!p.codDiagnosticoPrincipal) advertencias.push('Procedimiento '+(j+1)+': falta diagnóstico principal (CIE-10)');
       if (p.vrServicio <= 0) errores.push('Procedimiento '+(j+1)+': vrServicio debe ser mayor a 0');
-      if (!p.codPrestador) advertencias.push('Procedimiento '+(j+1)+': falta código del prestador (NIT)');
+      if (!p.codPrestador) advertencias.push('Procedimiento '+(j+1)+': falta código del prestador (Cód. Habilitación REPS)');
+      if (!p.codServicio) advertencias.push('Procedimiento '+(j+1)+': falta codServicio (código REPS del servicio, ej: 728)');
     });
 
     // Validar consultas
     (serv.consultas||[]).forEach((c, j) => {
       if (!c.codConsulta) advertencias.push('Consulta '+(j+1)+': falta código CUPS');
+      if (!c.codServicio) advertencias.push('Consulta '+(j+1)+': falta codServicio (código REPS del servicio, ej: 728)');
       if (!c.codDiagnosticoPrincipal) advertencias.push('Consulta '+(j+1)+': falta diagnóstico principal (CIE-10)');
       if (c.vrServicio <= 0) errores.push('Consulta '+(j+1)+': vrServicio debe ser mayor a 0');
     });
@@ -1095,6 +1111,10 @@ function generarRIPSMasivo(periodo) {
   // Generar un RIPS consolidado para todas las facturas del período
   const nit = document.getElementById('ripNitPrestador').value.trim().replace(/[^0-9]/g,'');
   const codHab = document.getElementById('ripCodHabilitacion').value.trim();
+  const codServ = document.getElementById('ripCodServicio').value.trim() || '728';
+  // Asegurar que _codPrestador y _codServicio estén disponibles para construirServicios()
+  window._codPrestador = codHab || nit;
+  window._codServicio = codServ;
   const catalogo = leer(K_SERVICIOS) || [];
   const pacientes = leer(K_PACIENTES) || [];
 
