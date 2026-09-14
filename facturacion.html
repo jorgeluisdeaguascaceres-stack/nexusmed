@@ -345,7 +345,15 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
           <div class="liq-row"><span class="liq-label">Paciente</span><span class="liq-value" id="liqPaciente">—</span></div>
           <div class="liq-row"><span class="liq-label">Documento</span><span class="liq-value" id="liqDocumento">—</span></div>
           <div class="liq-row"><span class="liq-label">Diagnóstico</span><span class="liq-value" id="liqDiagnostico">—</span></div>
-          <div class="liq-row"><span class="liq-label">Fecha</span><span class="liq-value" id="liqFecha">—</span></div>
+          <div class="liq-row"><span class="liq-label">Fecha Factura</span><span class="liq-value" id="liqFecha" style="cursor:pointer" onclick="editarFechaFactura()" title="Clic para editar fecha">—</span></div>
+          <div id="fechaEditBox" style="display:none;margin-top:6px">
+            <input type="date" id="fechaFacturaInput" style="background:#0a1628;border:1px solid #00b4d8;color:#e0e0e0;padding:8px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;width:100%" onfocus="this.style.borderColor='#00b4d8';this.style.boxShadow='0 0 0 3px rgba(0,180,216,.15)'" onblur="this.style.boxShadow='none'">
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <button class="btn btn-primary" style="padding:6px 14px;font-size:12px" onclick="aplicarFechaFactura()"><i class="fas fa-check"></i> Aplicar</button>
+              <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px" onclick="cancelarFechaEdit()"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+            <small style="color:#5a7a9a;font-size:10px;margin-top:4px;display:block">Esta fecha será la base para los RIPS. Los servicios recibirán fechas consecutivas a partir de este día.</small>
+          </div>
         </div>
         <div class="liq-card">
           <h4><i class="fas fa-dollar-sign"></i> Resumen Financiero</h4>
@@ -368,6 +376,11 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
       <p style="color:#5a7a9a;font-size:13px;margin-bottom:14px">Revise la información y emita la factura definitiva. Se asignará un número consecutivo automático, <strong style="color:#90e0ef">o ingrese manualmente el número si ya emitió la factura en otro aplicativo</strong>.</p>
       <div id="resumenEmitir" style="background:#0a1628;border-radius:10px;padding:18px;border:1px solid #1a3a5c;margin-bottom:16px"></div>
       <div style="background:#0a1628;border-radius:10px;padding:16px;border:1px dashed #1a3a5c;margin-bottom:16px">
+        <div class="form-group" style="margin-bottom:12px">
+          <label style="color:#90e0ef"><i class="fas fa-calendar-alt"></i> Fecha de Factura</label>
+          <input type="date" id="fechaFacturaPaso4" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;width:100%;transition:border-color .3s" onfocus="this.style.borderColor='#00b4d8';this.style.boxShadow='0 0 0 3px rgba(0,180,216,.15)'" onblur="this.style.borderColor='#1a3a5c';this.style.boxShadow='none'">
+          <small style="color:#5a7a9a;font-size:11px;margin-top:6px;display:block">Fecha base para RIPS. Si la modifica aquí, actualizará también la fecha de la factura.</small>
+        </div>
         <div class="form-group" style="margin-bottom:0">
           <label style="color:#90e0ef"><i class="fas fa-external-link-alt"></i> N° Factura Externo (Opcional)</label>
           <input type="text" id="facturaExterna" placeholder="Ej: FE12865 — Dejar vacío para consecutivo automático" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:10px 12px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;width:100%;transition:border-color .3s" onfocus="this.style.borderColor='#00b4d8';this.style.boxShadow='0 0 0 3px rgba(0,180,216,.15)'" onblur="this.style.borderColor='#1a3a5c';this.style.boxShadow='none'">
@@ -387,6 +400,7 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
     <div class="form-section">
       <div class="form-title"><i class="fas fa-list"></i> Facturas Emitidas</div>
       <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;align-items:end">
+        <button class="btn btn-secondary" style="padding:8px 14px;font-size:11px;border-color:#ff3860;color:#ff3860" onclick="purgarDatosPrueba()"><i class="fas fa-trash-alt"></i> Purgar Todo</button>
         <div class="form-group" style="flex:1;min-width:180px">
           <label>Filtrar por EPS</label>
           <select id="filtroEps" onchange="renderHistorial()" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
@@ -684,9 +698,22 @@ function renderDropdownResultados(resultados) {
 
 function admisionYaFacturada(numAdmision) {
   var facturas = leer(K_FACTURAS) || [];
+  // Solo bloquea si hay factura definitiva (no anulada)
+  // Si la factura fue anulada, se permite nueva factura para esa admisión
   return facturas.some(function(f) {
     return f.numAdmision === numAdmision && f.estado === 'definitiva';
   });
+}
+
+// ─── Purge test data ───
+function purgarDatosPrueba() {
+  if (!confirm('⚠️ ¿Eliminar TODAS las facturas y RIPS de prueba?\nEsto borrará:\n- Todas las facturas (pre-factura, definitiva y anulada)\n- Todos los RIPS generados\n\nLos PACIENTES y ADMISIONES NO se eliminan.\n\nEsta acción NO se puede deshacer.')) return;
+  if (!confirm('¿Está SEGURO? Escriba manualmente la confirmación en el siguiente diálogo.')) return;
+  guardar(K_FACTURAS, []);
+  guardar('nexus_rips_generados', []);
+  actualizarStats();
+  renderHistorial();
+  toast('✅ Datos de facturación y RIPS purgados. Puede empezar limpio.', 'success');
 }
 
 function seleccionarAdmision(idx) {
@@ -1032,7 +1059,10 @@ function recalcularLiquidacion() {
   document.getElementById('liqPaciente').textContent = nombre;
   document.getElementById('liqDocumento').textContent = (p.tipoDoc||'CC') + ' ' + doc;
   document.getElementById('liqDiagnostico').textContent = dx;
-  document.getElementById('liqFecha').textContent = hoy();
+  var fechaFac = facturaActual.fecha || hoy();
+  document.getElementById('liqFecha').textContent = fechaFac;
+  var fi = document.getElementById('fechaFacturaInput');
+  if (fi) fi.value = fechaFac;
 
   let subtotal = 0;
   facturaActual.servicios.forEach(s => subtotal += s.cantidad * s.valorUnit);
@@ -1080,6 +1110,28 @@ function guardarPreFactura() {
   actualizarStats();
 }
 
+// ─── Editar fecha de factura (Paso 3) ───
+function editarFechaFactura() {
+  var box = document.getElementById('fechaEditBox');
+  if (box) {
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    var fi = document.getElementById('fechaFacturaInput');
+    if (fi) fi.value = facturaActual.fecha || hoy();
+  }
+}
+function aplicarFechaFactura() {
+  var fi = document.getElementById('fechaFacturaInput');
+  var fecha = fi ? fi.value : '';
+  if (!fecha) { toast('Ingrese una fecha válida','error'); return; }
+  facturaActual.fecha = fecha;
+  document.getElementById('liqFecha').textContent = fecha;
+  document.getElementById('fechaEditBox').style.display = 'none';
+  toast('Fecha de factura actualizada: ' + fecha, 'success');
+}
+function cancelarFechaEdit() {
+  document.getElementById('fechaEditBox').style.display = 'none';
+}
+
 function construirFactura() {
   const p = facturaActual.admision;
   const eps = p.eps || '—';
@@ -1108,7 +1160,7 @@ function construirFactura() {
     iva: 0,
     descuento: 0,
     total: subtotal,
-    fecha: hoy(),
+    fecha: facturaActual.fecha || hoy(),
     creadoEn: ahora()
   };
 }
@@ -1124,15 +1176,20 @@ function llenarResumenEmitir() {
   facturaActual.servicios.forEach(s => subtotal += s.cantidad * s.valorUnit);
 
   const resumen = document.getElementById('resumenEmitir');
+  var fechaFac = facturaActual.fecha || hoy();
   resumen.innerHTML = ''
     + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">N° Admisión:</strong> <span style="color:#c8d6e5">'+numAdm+'</span></div>'
     + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">Paciente:</strong> <span style="color:#c8d6e5">'+nombre+'</span></div>'
     + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">EPS:</strong> <span style="color:#c8d6e5">'+eps+'</span></div>'
+    + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">Fecha:</strong> <span style="color:#f0c040">'+fechaFac+'</span></div>'
     + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">Servicios:</strong> <span style="color:#c8d6e5">'+facturaActual.servicios.length+' ítem(s)</span></div>'
     + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">Subtotal:</strong> <span style="color:#00b4d8;font-weight:700">'+fmt$(subtotal)+'</span></div>'
     + '<div style="margin-bottom:10px"><strong style="color:#90e0ef">IVA:</strong> <span style="color:#2ecc71">$0 (exento)</span></div>'
     + '<div style="border-top:2px solid #00b4d8;padding-top:10px;margin-top:4px"><strong style="color:#00b4d8;font-size:18px">TOTAL:</strong> <span style="color:#00b4d8;font-size:20px;font-weight:800">'+fmt$(subtotal)+'</span></div>'
     + '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed #1a3a5c"><small style="color:#5a7a9a"><i class="fas fa-info-circle"></i> Si esta factura ya fue emitida en otro aplicativo, ingrese el número real en el campo <strong style="color:#90e0ef">"N° Factura Externo"</strong> que aparece abajo. Si lo deja vacío, se asignará un consecutivo automático (FC-XXXXXX).</small></div>';
+  // Sincronizar campo fecha en Paso 4
+  var fp4 = document.getElementById('fechaFacturaPaso4');
+  if (fp4) fp4.value = fechaFac;
 
   // Limpiar campo externo al entrar al paso 4
   var fe = document.getElementById('facturaExterna');
@@ -1149,6 +1206,10 @@ function emitirFacturaDefinitiva() {
     toast('⛔ Esta admisión (' + numAdm + ') ya tiene factura definitiva. No se puede generar otra.', 'error');
     return;
   }
+
+  // Capturar fecha del Paso 4 si se modificó
+  var fp4 = document.getElementById('fechaFacturaPaso4');
+  if (fp4 && fp4.value) facturaActual.fecha = fp4.value;
 
   // Número externo opcional (si el usuario ya emitió la factura en otro aplicativo)
   var numExterno = (document.getElementById('facturaExterna').value || '').trim();
@@ -1189,7 +1250,7 @@ function emitirFacturaDefinitiva() {
 
 // ─── Reset ───
 function resetFacturaActual() {
-  facturaActual = { admision: null, servicios: [], paso: 1, numeroFactura: null, _editandoId: null };
+  facturaActual = { admision: null, servicios: [], paso: 1, numeroFactura: null, fecha: null, _editandoId: null };
   document.getElementById('admSeleccionada').style.display = 'none';
   document.getElementById('buscarAdmInput').value = '';
   var fe = document.getElementById('facturaExterna');
@@ -1304,6 +1365,9 @@ function cargarPreFactura(id) {
   const facturas = leer(K_FACTURAS) || [];
   const fac = facturas.find(f => f.id === id);
   if (!fac) { toast('Factura no encontrada','error'); return; }
+
+  // Restaurar fecha de la factura
+  facturaActual.fecha = fac.fecha || null;
 
   // Buscar el paciente en nexus_pacientes para obtener datos completos
   const pacientes = leer(K_PACIENTES) || [];

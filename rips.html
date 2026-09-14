@@ -566,6 +566,10 @@ function generarRIPS() {
   // Guardar config para próxima vez
   guardar('nexus_config_ips', { nit, codHabilitacion: codHab, razonSocial: razon, codDepartamento: codDpto, codMunicipio: codMpio, direccion });
 
+  // codPrestador = NIT del prestador (sin guión, solo dígitos + dígito verificación)
+  // Per Resolución 948, NO es el código de habilitación REPS largo
+  window._codPrestador = nit.replace(/[^0-9]/g, '');
+
   // Buscar datos completos del paciente
   const pacientes = leer(K_PACIENTES) || [];
   const pac = pacientes.find(p => p.numAdmision === fac.numAdmision) || {};
@@ -625,15 +629,15 @@ function construirUsuarios(fac, pac, catalogo) {
     codPaisOrigen: '170', // Colombia
     registroSIRAS: null, // Solo si tipoUsuario=10 (SOAT)
 
-    servicios: {
-      consultas: servicios.consultas,
-      procedimientos: servicios.procedimientos,
-      urgencias: [],
-      hospitalizacion: [],
-      recienNacidos: [],
-      medicamentos: [],
-      otrosServicios: servicios.otrosServicios
-    }
+    servicios: (function() {
+      // Per Resolución 948: solo incluir arrays que tengan datos
+      // Arrays vacíos deben omitirse del JSON
+      var s = {};
+      if (servicios.consultas && servicios.consultas.length > 0) s.consultas = servicios.consultas;
+      if (servicios.procedimientos && servicios.procedimientos.length > 0) s.procedimientos = servicios.procedimientos;
+      if (servicios.otrosServicios && servicios.otrosServicios.length > 0) s.otrosServicios = servicios.otrosServicios;
+      return s;
+    })()
   };
 
   return [usuario];
@@ -647,9 +651,14 @@ function construirServicios(fac, catalogo) {
 
   const servicios = fac.servicios || [];
   const codHab = document.getElementById('ripCodHabilitacion').value.trim();
+  // codPrestador = NIT del prestador (NO el código de habilitación REPS)
+  const codPrestador = window._codPrestador || codHab; // Fallback si no se capturó NIT
   const eps = fac.eps || '';
   const dx = fac.diagnostico || '';
   const dxCodigo = fac.diagnosticoCodigo || extraerCIE10(dx);
+  // Fecha base de la factura
+  const fechaBase = fac.fecha || hoy();
+  let fechaCursor = new Date(fechaBase + 'T00:00:00'); // cursor para asignar fechas consecutivas
 
   servicios.forEach((svc, idx) => {
     // Buscar en catálogo para enriquecer datos
@@ -664,6 +673,8 @@ function construirServicios(fac, catalogo) {
     const valorUnit = svc.valorUnit || 0;
     const cantidad = svc.cantidad || 1;
     const autorizacion = svc.autorizacion || '';
+    // Per-service date: use svc.fechaServicio if available, otherwise calculate from base
+    const fechaServicio = svc.fechaServicio || fechaBase;
 
     // Determinar modalidad de atención
     const modalidad = modalidadAtencion(ambito);
@@ -684,7 +695,14 @@ function construirServicios(fac, catalogo) {
                       n.includes('RESPIRATOR');
     const esConsulta = n.includes('CONSULTA') || n.includes('VALORACIÓN') || n.includes('VALORACION');
 
-    const fechaAtencion = fac.fecha || hoy();
+    // ═══════════════════════════════════════════════════════════
+    // FECHA POR SERVICIO: cada bloque individual tiene su propia fecha
+    // Los bloques de un mismo servicio comparten la fechaServicio;
+    // los bloques del siguiente servicio avanzan al día siguiente.
+    // Si la cantidad es >1, los bloques del MISMO servicio se
+    // distribuyen en días consecutivos a partir de fechaServicio.
+    // ═══════════════════════════════════════════════════════════
+    var svcStartDate = new Date(fechaServicio + 'T00:00:00');
 
     // ═══════════════════════════════════════════════════════════
     // DESBLOQUEAR CANTIDADES: crear 1 bloque por cada unidad
@@ -699,15 +717,20 @@ function construirServicios(fac, catalogo) {
 
       if (esTerapia) {
         // ─── Procedimientos (AP) — 1 bloque por sesión ───
+        // Cada bloque individual tiene su propia fecha (incrementa por día)
+        var blockDate = new Date(svcStartDate.getTime());
+        blockDate.setDate(blockDate.getDate() + i); // i = unidad actual dentro del for
+        var blockDateStr = blockDate.toISOString().split('T')[0];
+
         procedimientos.push({
-          codPrestador: codHab || '',
-          fechaInicioAtencion: fechaAtencion + ' 08:00:00',
+          codPrestador: codPrestador || '',
+          fechaInicioAtencion: blockDateStr + ' 08:00:00',
           numAutorizacion: autorizacion || null,
           codProcedimiento: codigoCUPS || '939800',
           viaIngresoServicioSalud: viaIngresoServicio(),
           modalidadGrupoServicioTecSal: modalidad,
           grupoServicios: grupoServ,
-          codServicio: codHab || '',
+          codServicio: codPrestador || '',
           finalidadTecnologiaSalud: finalidad,
           causaMotivoAtencion: causa,
           codDiagnosticoPrincipal: dxCodigo || 'Z000',
@@ -716,7 +739,7 @@ function construirServicios(fac, catalogo) {
           codDiagnosticoRelacionado: null,
           codDiagnosticoRelacionadoCIE11: null,
           nomCodDiagnosticoRelacionadoCIE11: null,
-          complicacion: 'NO',
+          complicacion: null,
           conceptoRecaudo: concepto,
           coberturaPlanBeneficios: cobertura,
           valorPagoModerador: 0,
@@ -728,14 +751,18 @@ function construirServicios(fac, catalogo) {
         });
       } else if (esConsulta) {
         // ─── Consultas (AC) — 1 bloque por consulta ───
+        var blockDate = new Date(svcStartDate.getTime());
+        blockDate.setDate(blockDate.getDate() + i);
+        var blockDateStr = blockDate.toISOString().split('T')[0];
+
         consultas.push({
-          codPrestador: codHab || '',
-          fechaInicioAtencion: fechaAtencion + ' 08:00:00',
+          codPrestador: codPrestador || '',
+          fechaInicioAtencion: blockDateStr + ' 08:00:00',
           numAutorizacion: autorizacion || null,
           codConsulta: codigoCUPS || '090201',
           modalidadGrupoServicioTecSal: modalidad,
           grupoServicios: grupoServ,
-          codServicio: codHab || '',
+          codServicio: codPrestador || '',
           finalidadTecnologiaSalud: finalidad,
           causaMotivoAtencion: causa,
           codDiagnosticoPrincipal: dxCodigo || 'Z000',
@@ -756,9 +783,13 @@ function construirServicios(fac, catalogo) {
         });
       } else {
         // ─── Otros Servicios (AT) — 1 bloque por unidad ───
+        var blockDate = new Date(svcStartDate.getTime());
+        blockDate.setDate(blockDate.getDate() + i);
+        var blockDateStr = blockDate.toISOString().split('T')[0];
+
         otrosServicios.push({
-          codPrestador: codHab || '',
-          fechaInicioAtencion: fechaAtencion + ' 08:00:00',
+          codPrestador: codPrestador || '',
+          fechaInicioAtencion: blockDateStr + ' 08:00:00',
           numAutorizacion: autorizacion || null,
           codTecnologiaSalud: codigoCUPS || '01.02.01.01.01',
           nomTecnologiaSalud: nombreServ || 'Servicio',
@@ -880,7 +911,7 @@ function validarRIPS() {
       if (!p.codProcedimiento) advertencias.push('Procedimiento '+(j+1)+': falta código CUPS');
       if (!p.codDiagnosticoPrincipal) advertencias.push('Procedimiento '+(j+1)+': falta diagnóstico principal (CIE-10)');
       if (p.vrServicio <= 0) errores.push('Procedimiento '+(j+1)+': vrServicio debe ser mayor a 0');
-      if (!p.codPrestador) advertencias.push('Procedimiento '+(j+1)+': falta código del prestador (código habilitación REPS)');
+      if (!p.codPrestador) advertencias.push('Procedimiento '+(j+1)+': falta código del prestador (NIT)');
     });
 
     // Validar consultas
@@ -1014,6 +1045,15 @@ function volverPaso1() {
   document.getElementById('paso3RIPS').style.display = 'none';
   document.getElementById('resultadoValidacion').style.display = 'none';
   cargarFacturasDefinitivas();
+}
+
+// ─── Purgar historial RIPS ───
+function purgarHistorialRIPS() {
+  if (!confirm('⚠️ ¿Eliminar TODO el historial de RIPS generados?\nLas facturas NO se eliminan, solo los registros RIPS.\n\nEsta acción NO se puede deshacer.')) return;
+  guardar(K_RIPS, []);
+  actualizarStats();
+  renderHistorialRIPS();
+  toast('✅ Historial RIPS purgado.', 'success');
 }
 
 // ═══════════════════════════════════════════
