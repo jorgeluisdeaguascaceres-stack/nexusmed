@@ -303,6 +303,30 @@ function ahora() { return new Date().toISOString(); }
 function fmt$(n) { return '$' + Number(n||0).toLocaleString('es-CO'); }
 function uid(pref) { return pref + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
+// ─── Sanitizar facturas corruptas al cargar ───
+function sanitizarFacturas() {
+  const facturas = leer(K_FACTURAS) || [];
+  let modificado = false;
+  const limpias = facturas.filter(f => {
+    if (!f.id || !f.estado) { modificado = true; return false; }
+    if (!['pre-factura','definitiva','anulada'].includes(f.estado)) { modificado = true; return false; }
+    f.total = Number(f.total);
+    if (!isFinite(f.total)) f.total = 0;
+    if (!Array.isArray(f.servicios)) f.servicios = [];
+    if (f.total === 0 && f.servicios.length > 0) {
+      let calcTotal = 0;
+      f.servicios.forEach(s => { calcTotal += (Number(s.cantidad)||0) * (Number(s.valorUnit)||0); });
+      if (calcTotal > 0) { f.total = calcTotal; modificado = true; }
+    }
+    return true;
+  });
+  if (modificado) {
+    guardar(K_FACTURAS, limpias);
+    console.log('[RIPS] Facturas sanitizadas: ' + facturas.length + ' → ' + limpias.length);
+  }
+  return limpias;
+}
+
 // ─── (visibles helper removed — all deletions are now permanent) ───
 
 function toast(msg, tipo) {
@@ -462,7 +486,7 @@ let facturaSeleccionada = null;
 let ripsGenerado = null;
 
 function cargarFacturasDefinitivas() {
-  const facturas = (leer(K_FACTURAS)||[]);
+  const facturas = sanitizarFacturas();
   // Mostrar facturas definitivas Y anuladas (para ver/regenerar RIPS de facturas anuladas)
   const factVisibles = facturas.filter(f => f.estado === 'definitiva' || f.estado === 'anulada');
 
@@ -522,7 +546,7 @@ function formatPeriodo(p) {
 }
 
 function seleccionarFactura(id) {
-  const facturas = leer(K_FACTURAS) || [];
+  const facturas = sanitizarFacturas();
   const fac = facturas.find(f => f.id === id);
   if (!fac) { toast('Factura no encontrada','error'); return; }
   if (fac.estado === 'anulada') { toast('No se puede generar RIPS de una factura anulada','error'); return; }
@@ -1046,7 +1070,7 @@ function eliminarRIPSHistorial(ripsId) {
 }
 
 function regenerarRIPS(facturaId) {
-  const facturas = leer(K_FACTURAS) || [];
+  const facturas = sanitizarFacturas();
   const fac = facturas.find(f => f.id === facturaId);
   if (!fac) { toast('Factura no encontrada','error'); return; }
   if (fac.estado === 'anulada') { toast('Esta factura está anulada. El RIPS previo se mantiene solo como historial.','warning'); return; }
@@ -1080,11 +1104,11 @@ function purgarHistorialRIPS() {
 // Actualizar estadísticas
 // ═══════════════════════════════════════════
 function actualizarStats() {
-  const facturas = (leer(K_FACTURAS)||[]);
+  const facturas = sanitizarFacturas();
   const definitivas = facturas.filter(f => f.estado === 'definitiva');
   document.getElementById('statDefinitivas').textContent = definitivas.length;
 
-  const historial = (leer(K_RIPS)||[]);
+  const historial = (leer(K_RIPS)||[]).filter(h => h.id && h.facturaId);
   document.getElementById('statRIPSGenerados').textContent = historial.length;
 
   let totalPacientes = 0;
@@ -1101,7 +1125,7 @@ function actualizarStats() {
 // Generación masiva por período
 // ═══════════════════════════════════════════
 function generarRIPSMasivo(periodo) {
-  const facturas = (leer(K_FACTURAS)||[]);
+  const facturas = sanitizarFacturas();
   const delPeriodo = facturas.filter(f =>
     f.estado === 'definitiva' && (f.fecha||'').slice(0,7) === periodo
   );

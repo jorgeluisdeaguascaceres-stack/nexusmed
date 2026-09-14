@@ -455,6 +455,7 @@ const K_PACIENTES  = 'nexus_pacientes';
 const K_SERVICIOS  = 'nexus_servicios_facturacion';
 const K_FACTURAS   = 'nexus_facturas';
 const K_CONTADOR   = 'nexus_contador_facturas';
+const K_CONTADOR_PF = 'nexus_contador_prefacturas';
 
 function leer(k)   { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch(e) { return null; } }
 function guardar(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
@@ -462,6 +463,24 @@ function hoy()     { return new Date().toISOString().split('T')[0]; }
 function ahora()   { return new Date().toISOString().replace('Z',''); }
 function fmt$(n)   { return '$' + Number(n||0).toLocaleString('es-CO'); }
 function uid(pref) { return pref + '_' + Date.now() + '_' + Math.random().toString(36).substring(2,7); }
+
+// ─── Consecutivos legibles (FC-000001, PF-000001) ───
+function initContador() {
+  if (!leer(K_CONTADOR)) guardar(K_CONTADOR, {ultimo: 0});
+  if (!leer(K_CONTADOR_PF)) guardar(K_CONTADOR_PF, {ultimo: 0});
+}
+function siguienteNumFC() {
+  const c = leer(K_CONTADOR) || {ultimo:0};
+  c.ultimo++;
+  guardar(K_CONTADOR, c);
+  return 'FC-' + String(c.ultimo).padStart(6,'0');
+}
+function siguienteNumPF() {
+  const c = leer(K_CONTADOR_PF) || {ultimo:0};
+  c.ultimo++;
+  guardar(K_CONTADOR_PF, c);
+  return 'PF-' + String(c.ultimo).padStart(6,'0');
+}
 
 // ─── (visibles helper removed — all deletions are now permanent) ───
 
@@ -561,15 +580,7 @@ function servicioConfigAFactura(svc, epsKey) {
     epsKey: epsKey || ''
   };
 }
-function initContador() {
-  if (!leer(K_CONTADOR)) guardar(K_CONTADOR, {ultimo: 0});
-}
-function siguienteNum() {
-  const c = leer(K_CONTADOR) || {ultimo:0};
-  c.ultimo++;
-  guardar(K_CONTADOR, c);
-  return 'FC-' + String(c.ultimo).padStart(6,'0');
-}
+// (initContador y siguienteNumFC/siguienteNumPF definidos arriba)
 
 // ─── Sesión ───
 function sesion() {
@@ -699,7 +710,7 @@ function renderDropdownResultados(resultados) {
 }
 
 function admisionYaFacturada(numAdmision) {
-  var facturas = (leer(K_FACTURAS)||[]);
+  var facturas = sanitizarFacturas();
   // Solo bloquea si hay factura definitiva (no anulada)
   // Si la factura fue anulada, se permite nueva factura para esa admisión
   return facturas.some(function(f) {
@@ -1091,7 +1102,7 @@ function guardarPreFactura() {
     return;
   }
 
-  const facturas = leer(K_FACTURAS) || [];
+  const facturas = sanitizarFacturas();
   const fac = construirFactura();
   fac.estado = 'pre-factura';
 
@@ -1104,7 +1115,7 @@ function guardarPreFactura() {
       facturas[idx] = fac;
     }
   } else {
-    fac.numeroFactura = uid('PF');
+    fac.numeroFactura = siguienteNumPF();
     facturas.push(fac);
   }
 
@@ -1217,7 +1228,7 @@ function emitirFacturaDefinitiva() {
   // Número externo opcional (si el usuario ya emitió la factura en otro aplicativo)
   var numExterno = (document.getElementById('facturaExterna').value || '').trim();
 
-  const facturas = leer(K_FACTURAS) || [];
+  const facturas = sanitizarFacturas();
   const fac = construirFactura();
   fac.estado = 'definitiva';
   fac.emitidaEn = ahora();
@@ -1226,9 +1237,9 @@ function emitirFacturaDefinitiva() {
   if (numExterno) {
     fac.numeroFactura = numExterno;
     fac.numeroFacturaExterno = numExterno;
-    fac.numeroFacturaInterno = siguienteNum(); // guardar interno como referencia
+    fac.numeroFacturaInterno = siguienteNumFC(); // guardar interno como referencia
   } else {
-    fac.numeroFactura = siguienteNum();
+    fac.numeroFactura = siguienteNumFC();
     fac.numeroFacturaExterno = null;
     fac.numeroFacturaInterno = null;
   }
@@ -1263,7 +1274,7 @@ function resetFacturaActual() {
 
 // ─── HISTORIAL ───
 function renderHistorial() {
-  const facturas = (leer(K_FACTURAS)||[]);
+  const facturas = sanitizarFacturas();
   const filtroEps = document.getElementById('filtroEps').value;
   const filtroEstado = document.getElementById('filtroEstado').value;
 
@@ -1327,7 +1338,7 @@ function anularFactura(id) {
 }
 document.getElementById('btnConfirmarAnular').onclick = function() {
   if (!_idAnular) return;
-  const facturas = leer(K_FACTURAS) || [];
+  const facturas = sanitizarFacturas();
   const idx = facturas.findIndex(f => f.id === _idAnular);
   if (idx >= 0) {
     facturas[idx].estado = 'anulada';
@@ -1347,7 +1358,7 @@ document.getElementById('btnConfirmarAnular').onclick = function() {
 
 // ─── Eliminar factura (eliminación permanente) ───
 function eliminarFactura(id) {
-  const facturas = leer(K_FACTURAS) || [];
+  const facturas = sanitizarFacturas();
   const fac = facturas.find(f => f.id === id);
   if (!fac) { toast('Factura no encontrada','error'); return; }
   if (fac.estado === 'definitiva') { toast('No se puede eliminar una factura definitiva. Anúlela primero.','error'); return; }
@@ -1366,7 +1377,7 @@ function eliminarFactura(id) {
 
 // ─── Cargar pre-factura para editar ───
 function cargarPreFactura(id) {
-  const facturas = leer(K_FACTURAS) || [];
+  const facturas = sanitizarFacturas();
   const fac = facturas.find(f => f.id === id);
   if (!fac) { toast('Factura no encontrada','error'); return; }
 
@@ -1395,13 +1406,44 @@ function cargarPreFactura(id) {
   toast('Pre-Factura cargada para edición','info');
 }
 
+// ─── Sanitizar datos corruptos al cargar ───
+function sanitizarFacturas() {
+  const facturas = leer(K_FACTURAS) || [];
+  let modificado = false;
+  const limpias = facturas.filter(f => {
+    // Eliminar facturas sin ID o sin estado
+    if (!f.id || !f.estado) { modificado = true; return false; }
+    // Solo permitir estados válidos
+    if (!['pre-factura','definitiva','anulada'].includes(f.estado)) { modificado = true; return false; }
+    // Sanitizar total: debe ser un número finito
+    f.total = Number(f.total);
+    if (!isFinite(f.total)) f.total = 0;
+    f.subtotal = Number(f.subtotal);
+    if (!isFinite(f.subtotal)) f.subtotal = 0;
+    // Sanitizar servicios
+    if (!Array.isArray(f.servicios)) f.servicios = [];
+    // Recalcular total si está en 0 pero servicios tienen valor
+    if (f.total === 0 && f.servicios.length > 0) {
+      let calcTotal = 0;
+      f.servicios.forEach(s => { calcTotal += (Number(s.cantidad)||0) * (Number(s.valorUnit)||0); });
+      if (calcTotal > 0) { f.total = calcTotal; f.subtotal = calcTotal; modificado = true; }
+    }
+    return true;
+  });
+  if (modificado) {
+    guardar(K_FACTURAS, limpias);
+    console.log('[Facturación] Datos sanitizados: ' + facturas.length + ' → ' + limpias.length + ' facturas');
+  }
+  return limpias;
+}
+
 // ─── Stats ───
 function actualizarStats() {
-  const facturas = (leer(K_FACTURAS)||[]);
+  const facturas = sanitizarFacturas();
   const pre = facturas.filter(f => f.estado === 'pre-factura').length;
   const def = facturas.filter(f => f.estado === 'definitiva').length;
   const anul = facturas.filter(f => f.estado === 'anulada').length;
-  const total$ = facturas.filter(f => f.estado === 'definitiva').reduce((s,f) => s + (f.total||0), 0);
+  const total$ = facturas.filter(f => f.estado === 'definitiva').reduce((s,f) => s + (isFinite(f.total)?f.total:0), 0);
 
   document.getElementById('statPre').textContent = pre;
   document.getElementById('statDef').textContent = def;
