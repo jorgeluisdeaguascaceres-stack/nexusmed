@@ -126,11 +126,32 @@
     function bajarTodo() {
         var tareas = COMPARTIDAS.map(function (clave) {
             return leerRemoto(clave).then(function (texto) {
+                var base = espejo[clave] === undefined ? '' : espejo[clave];
                 espejo[clave] = texto;
+                /* Si hay cambios locales pendientes, hacer MERGE en vez de sobrescribir.
+                   Esto preserva eliminaciones locales intencionales (ej: purgar datos)
+                   que aún no se han sincronizado con el servidor. */
+                var actual = localStorage.getItem(clave);
+                var tienePendientes = pendientes[clave];
                 if (String(texto).trim()) {
-                    almacenarLocal(clave, texto);
+                    if (tienePendientes) {
+                        /* Si hay cambios locales pendientes, hacer MERGE en vez de sobrescribir.
+                           Esto preserva eliminaciones locales intencionales (ej: purgar datos)
+                           que aún no se han sincronizado con el servidor.
+                           Si localStorage está vacío o null, significa que el usuario
+                           eliminó todo localmente → NO restaurar datos del servidor. */
+                        if (actual !== null && String(actual).trim()) {
+                            var merge = unir(base, actual, texto);
+                            var mergeStr = merge !== null && merge !== undefined ? String(merge) : '';
+                            almacenarLocal(clave, mergeStr);
+                            espejo[clave] = mergeStr;
+                        }
+                        /* Si actual es null/vacío con pendientes → eliminación intencional,
+                           NO sobrescribir con datos remotos. Se sincronizará en enviarPendientes(). */
+                    } else {
+                        almacenarLocal(clave, texto);
+                    }
                 } else {
-                    var actual = localStorage.getItem(clave);
                     if (actual && String(actual).trim()) pendientes[clave] = true;
                 }
                 return true;
