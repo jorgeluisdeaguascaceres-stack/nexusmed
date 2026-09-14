@@ -468,9 +468,26 @@ function codigoEpsFromString(epsStr) {
   return 'SDS001';
 }
 
+// Devuelve la clave EPS usada en catálogo.valores (FOMAG, COOSALUD, etc.)
+function epsKeyFromString(epsStr) {
+  if (!epsStr) return '';
+  const s = epsStr.toUpperCase().trim();
+  // Buscar coincidencia con EPS registradas en configuración
+  const epsArr = JSON.parse(localStorage.getItem('nexus_entidades_pagadoras') || '[]');
+  for (const e of epsArr) {
+    if (s.includes(e.codigo) || s.includes(e.nombre.toUpperCase())) return e.codigo;
+  }
+  // Fallback: heurística
+  if (s.includes('COOSALUD')) return 'COOSALUD';
+  if (s.includes('FOMAG'))    return 'FOMAG';
+  // Último fallback: devolver la primera EPS del catálogo si existe
+  if (epsArr.length) return epsArr[0].codigo;
+  return '';
+}
+
 // ─── Catálogo de servicios (gestionado desde Configuración) ───
-// La estructura real en localStorage es:
-//   { id, codigoCUPS, nombre, tipoServicio, ambito, valorGeneral, finalidadTecnologiaSalud, grupoServicios, causaMotivoAtencion, activo }
+// la estructura real en localStorage es:
+//   { id, codigoCUPS, nombre, tipoServicio, ambito, valores:{FOMAG:{valorUnitario,conceptoRecaudo,vrCopago,vrDescuento},COOSALUD:{...}}, finalidadTecnologiaSalud, grupoServicios, causaMotivoAtencion, activo }
 // Configuración es la única pantalla que puede agregar/editar servicios.
 // Facturación SOLO lee el catálogo.
 
@@ -503,13 +520,29 @@ function buscarPorNombre(nombre) {
 }
 
 // Convertir servicio de Configuración al formato interno de facturación
-function servicioConfigAFactura(svc) {
+// epsKey = clave EPS en catálogo (FOMAG, COOSALUD, etc.)
+function servicioConfigAFactura(svc, epsKey) {
   const ambito = (svc.ambito || 'domiciliario').toUpperCase();
+  // Buscar valor unitario específico de la EPS
+  let valorUnit = 0;
+  if (svc.valores && epsKey && svc.valores[epsKey]) {
+    valorUnit = svc.valores[epsKey].valorUnitario || 0;
+  } else if (svc.valores) {
+    // Fallback: usar la primera EPS disponible en valores
+    const firstKey = Object.keys(svc.valores)[0];
+    if (firstKey && svc.valores[firstKey]) {
+      valorUnit = svc.valores[firstKey].valorUnitario || 0;
+    }
+  }
+  // Legacy fallback: si aún tiene valorGeneral (servicios antiguos)
+  if (!valorUnit && svc.valorGeneral) valorUnit = svc.valorGeneral;
+
   return {
     codigo: svc.codigoCUPS || '',
     nombre: svc.nombre || '',
     tipo: ambito.startsWith('DOMICILI') ? 'DOMICILIARIA' : ambito.startsWith('INTRAMURAL') ? 'INTRAMURAL' : ambito.startsWith('HOSPIT') ? 'HOSPITARIA' : ambito,
-    valorUnit: svc.valorGeneral || 0
+    valorUnit: valorUnit,
+    epsKey: epsKey || ''
   };
 }
 function initContador() {
@@ -753,7 +786,8 @@ function onCupsInput() {
       window._cupsMatches = matches;
     }
 
-    const svc = servicioConfigAFactura(elegido);
+    const epsKey = facturaActual.admision ? epsKeyFromString(facturaActual.admision.eps) : '';
+    const svc = servicioConfigAFactura(elegido, epsKey);
     nombreInput.value = svc.nombre;
     nombreInput.readOnly = true;
     nombreInput.style.borderColor = '#2ecc71';
@@ -772,7 +806,7 @@ function onCupsInput() {
         const ambitoSel = tipoSelect.value;
         const sel = matches.find(m2 => (m2.ambito||'').toUpperCase() === ambitoSel.toUpperCase());
         if (sel) {
-          const svc2 = servicioConfigAFactura(sel);
+          const svc2 = servicioConfigAFactura(sel, epsKey);
           nombreInput.value = svc2.nombre;
           valorInput.value = svc2.valorUnit;
           window._cupsMatch = svc2;
@@ -847,7 +881,8 @@ function onNombreInput() {
       }
       window._cupsMatches = matches;
     }
-    const svc = servicioConfigAFactura(elegido);
+    const epsKey = facturaActual.admision ? epsKeyFromString(facturaActual.admision.eps) : '';
+    const svc = servicioConfigAFactura(elegido, epsKey);
     // Si el servicio tiene CUPS, llenarlo
     if (svc.codigo) document.getElementById('inputCups').value = svc.codigo;
     tipoSelect.value = svc.tipo;
@@ -863,7 +898,7 @@ function onNombreInput() {
         const ambitoSel = tipoSelect.value;
         const sel = matches.find(m2 => (m2.ambito||'').toUpperCase() === ambitoSel.toUpperCase());
         if (sel) {
-          const svc2 = servicioConfigAFactura(sel);
+          const svc2 = servicioConfigAFactura(sel, epsKey);
           nombreInput.value = svc2.nombre;
           valorInput.value = svc2.valorUnit;
           window._cupsMatch = svc2;
@@ -920,7 +955,8 @@ function agregarServicio() {
       tipo: tipo,
       valorUnit: valor,
       cantidad: cant,
-      autorizacion: autorizacion || ''
+      autorizacion: autorizacion,
+      epsKey: facturaActual.admision ? epsKeyFromString(facturaActual.admision.eps) : ''
     });
   }
 
@@ -1061,6 +1097,7 @@ function construirFactura() {
     documento: p.documento || '—',
     tipoDoc: p.tipoDoc || 'CC',
     eps: eps,
+    epsKey: epsKeyFromString(eps),
     codigoEps: codEps,
     municipio: p.municipio || '—',
     diagnostico: p.diagnostico || '—',
