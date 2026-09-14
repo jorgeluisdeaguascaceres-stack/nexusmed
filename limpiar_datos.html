@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>NEXUSMED - Limpiar Datos</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:linear-gradient(135deg,#0d2137,#122a45);border:2px solid #ff3860;border-radius:16px;padding:40px;max-width:600px;width:90%;text-align:center}
+.card h1{color:#ff3860;font-size:24px;margin-bottom:10px}
+.card p{color:#90e0ef;font-size:14px;margin-bottom:20px;line-height:1.6}
+.card .warning{color:#f39c12;font-size:13px;margin-bottom:20px;background:rgba(243,156,18,.1);padding:12px;border-radius:8px}
+.btn{padding:14px 28px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;border:1px solid;font-family:'Inter',sans-serif;margin:5px;display:inline-flex;align-items:center;gap:8px;transition:all .3s}
+.btn-danger{background:#ff3860;color:#fff;border-color:#ff3860}
+.btn-danger:hover{background:#e0245a;box-shadow:0 4px 20px rgba(255,56,96,.4)}
+.btn-secondary{background:transparent;color:#5a7a9a;border-color:#1a3a5c}
+.btn-secondary:hover{background:#1a3a5c}
+#log{margin-top:20px;text-align:left;font-family:monospace;font-size:12px;max-height:250px;overflow-y:auto;background:#0a1628;border:1px solid #1a3a5c;border-radius:8px;padding:15px;color:#2ecc71}
+.log-line{margin:3px 0}
+.log-ok{color:#2ecc71}
+.log-warn{color:#f39c12}
+.log-err{color:#ff3860}
+.log-info{color:#00b4d8}
+h2{color:#00b4d8;margin-top:20px;font-size:16px}
+#resultado{display:none;margin-top:15px}
+#resultado.ok{display:block;background:rgba(46,204,113,.1);border:1px solid #2ecc71;border-radius:8px;padding:15px;color:#2ecc71}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🗑️ Limpiar Datos NexusMed</h1>
+  <p>Esta herramienta elimina <strong>TODOS</strong> los datos de Facturación y RIPS del navegador y del servidor remoto.</p>
+  <div class="warning">⚠️ Esta acción NO se puede deshacer. Se eliminarán: facturas, RIPS generados, contadores, y datos de sync remoto.</div>
+  
+  <button class="btn btn-danger" onclick="limpiarTodo()">🗑️ ELIMINAR TODO</button>
+  <button class="btn btn-secondary" onclick="diagnosticar()">🔍 Solo Diagnosticar</button>
+  
+  <div id="resultado"></div>
+  <div id="log"></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   NEXUSMED — Herramienta de Limpieza Total
+   ═══════════════════════════════════════════════ */
+
+const NS = 'nxmed_b7f3a9c2e4d1_';
+const SYNC_URL = 'https://textdb.online/api/';
+
+// Claves de localStorage a limpiar
+const CLAVES_FACTURACION = [
+  'nexus_facturas',
+  'nexus_contador_facturas',
+  'nexus_contador_prefacturas',
+  'nexus_servicios_facturacion'
+];
+const CLAVES_RIPS = [
+  'nexus_rips_generados'
+];
+const CLAVES_SYNC = [
+  'nexus_sync_estado'
+];
+
+function log(msg, tipo) {
+  tipo = tipo || 'info';
+  const d = document.getElementById('log');
+  const span = document.createElement('div');
+  span.className = 'log-line log-' + tipo;
+  span.textContent = '[' + tipo.toUpperCase() + '] ' + msg;
+  d.appendChild(span);
+  d.scrollTop = d.scrollHeight;
+}
+
+function diagnosticar() {
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('resultado').className = '';
+  document.getElementById('resultado').id = 'resultado';
+  
+  log('=== DIAGNÓSTICO DE DATOS NEXUSMED ===', 'info');
+  log('');
+  
+  // Verificar cada clave de facturación
+  CLAVES_FACTURACION.forEach(k => {
+    const data = localStorage.getItem(k);
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) {
+          log(k + ': ' + parsed.length + ' registros', parsed.length > 0 ? 'warn' : 'ok');
+          if (parsed.length > 0 && parsed.length <= 20) {
+            parsed.forEach((item, i) => {
+              log('  [' + i + '] id=' + (item.id||'SIN-ID') + ' estado=' + (item.estado||'SIN-ESTADO') + ' total=' + (item.total||0) + ' num=' + (item.numeroFactura||'SIN-NUM'), 'info');
+            });
+          }
+        } else {
+          log(k + ': objeto con ' + Object.keys(parsed).length + ' claves', 'info');
+        }
+      } catch(e) {
+        log(k + ': DATOS CORRUPTOS (no es JSON válido)', 'err');
+      }
+    } else {
+      log(k + ': vacío (no existe)', 'ok');
+    }
+  });
+  
+  // Verificar RIPS
+  CLAVES_RIPS.forEach(k => {
+    const data = localStorage.getItem(k);
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        log(k + ': ' + parsed.length + ' registros', parsed.length > 0 ? 'warn' : 'ok');
+        if (parsed.length > 0 && parsed.length <= 10) {
+          parsed.forEach((item, i) => {
+            log('  [' + i + '] id=' + (item.id||'SIN-ID') + ' facturaId=' + (item.facturaId||'?') + ' anulada=' + (item.facturaAnulada||false), 'info');
+          });
+        }
+      } catch(e) {
+        log(k + ': DATOS CORRUPTOS', 'err');
+      }
+    } else {
+      log(k + ': vacío', 'ok');
+    }
+  });
+  
+  // Verificar sync remoto
+  log('');
+  log('=== VERIFICANDO SYNC REMOTO ===', 'info');
+  CLAVES_FACTURACION.concat(CLAVES_RIPS).forEach(k => {
+    const remoteKey = NS + k;
+    fetch(SYNC_URL + '?key=' + encodeURIComponent(remoteKey))
+      .then(r => r.text())
+      .then(data => {
+        if (data && data.length > 2) {
+          try {
+            const parsed = JSON.parse(data);
+            if (Array.isArray(parsed)) {
+              log('REMOTO ' + k + ': ' + parsed.length + ' registros ⚠️', 'warn');
+              if (parsed.length <= 10) {
+                parsed.forEach((item, i) => {
+                  log('  [' + i + '] id=' + (item.id||'SIN-ID') + ' estado=' + (item.estado||'?'), 'info');
+                });
+              }
+            } else {
+              log('REMOTO ' + k + ': objeto presente', 'warn');
+            }
+          } catch(e) {
+            log('REMOTO ' + k + ': datos presentes (len=' + data.length + ')', 'warn');
+          }
+        } else {
+          log('REMOTO ' + k + ': vacío ✅', 'ok');
+        }
+      })
+      .catch(e => log('REMOTO ' + k + ': error al consultar - ' + e.message, 'err'));
+  });
+}
+
+function limpiarTodo() {
+  if (!confirm('⚠️ ¿ELIMINAR TODOS los datos de Facturación y RIPS?\n\nEsto incluye:\n- Todas las facturas (pre-factura, definitiva, anulada)\n- Todos los RIPS generados\n- Contadores de facturación\n- Datos de sync remoto\n\nLos PACIENTES y ADMISIONES NO se eliminan.\n\nEsta acción NO se puede deshacer.')) return;
+  
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('resultado').className = '';
+  
+  log('=== LIMPIEZA TOTAL DE DATOS ===', 'info');
+  log('');
+  
+  // 1. Limpiar localStorage
+  log('1. Limpiando localStorage...', 'info');
+  CLAVES_FACTURACION.forEach(k => {
+    if (localStorage.getItem(k)) {
+      localStorage.removeItem(k);
+      log('  ✅ ' + k + ' eliminado', 'ok');
+    } else {
+      log('  ⏭️ ' + k + ' ya estaba vacío', 'ok');
+    }
+  });
+  CLAVES_RIPS.forEach(k => {
+    if (localStorage.getItem(k)) {
+      localStorage.removeItem(k);
+      log('  ✅ ' + k + ' eliminado', 'ok');
+    } else {
+      log('  ⏭️ ' + k + ' ya estaba vacío', 'ok');
+    }
+  });
+  CLAVES_SYNC.forEach(k => {
+    if (localStorage.getItem(k)) {
+      localStorage.removeItem(k);
+      log('  ✅ ' + k + ' eliminado', 'ok');
+    }
+  });
+  
+  // 2. Limpiar sync remoto
+  log('');
+  log('2. Limpiando datos en servidor remoto (textdb.online)...', 'info');
+  let pendientes = 0;
+  let completados = 0;
+  
+  const todasLasClaves = CLAVES_FACTURACION.concat(CLAVES_RIPS);
+  todasLasClaves.forEach(k => {
+    const remoteKey = NS + k;
+    pendientes++;
+    fetch(SYNC_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: 'key=' + encodeURIComponent(remoteKey) + '&data='
+    })
+    .then(r => {
+      completados++;
+      log('  ✅ REMOTO ' + k + ' eliminado', 'ok');
+      if (completados === pendientes) finalizarLimpieza();
+    })
+    .catch(e => {
+      completados++;
+      log('  ❌ Error al limpiar remoto ' + k + ': ' + e.message, 'err');
+      if (completados === pendientes) finalizarLimpieza();
+    });
+  });
+  
+  // También limpiar claves de eliminadas del sync
+  const elimKey = NS + 'nexus_eliminadas';
+  pendientes++;
+  fetch(SYNC_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: 'key=' + encodeURIComponent(elimKey) + '&data='
+  })
+  .then(r => {
+    completados++;
+    log('  ✅ REMOTO nexus_eliminadas limpiado', 'ok');
+    if (completados === pendientes) finalizarLimpieza();
+  })
+  .catch(e => {
+    completados++;
+    log('  ⚠️ Error limpiando eliminadas: ' + e.message, 'warn');
+    if (completados === pendientes) finalizarLimpieza();
+  });
+  
+  if (pendientes === 0) finalizarLimpieza();
+}
+
+function finalizarLimpieza() {
+  log('');
+  log('=== LIMPIEZA COMPLETADA ===', 'ok');
+  log('Todos los datos de Facturación y RIPS han sido eliminados.', 'ok');
+  log('Ahora puedes montar los archivos nuevos y empezar limpio.', 'ok');
+  
+  const r = document.getElementById('resultado');
+  r.className = 'ok';
+  r.innerHTML = '✅ <strong>LIMPIEZA EXITOSA</strong> — Todos los datos de Facturación y RIPS eliminados del navegador y del servidor remoto. <br><br>Ahora sube los archivos nuevos a GitHub y espera el deploy en Render.';
+}
+</script>
+</body>
+</html>
