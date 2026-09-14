@@ -393,8 +393,8 @@ function tipoUsuarioRIPS(eps) {
 function modalidadAtencion(tipoServ) {
   const t = (tipoServ||'').toUpperCase();
   if (t.includes('DOMICILI')) return '03'; // Extramural domiciliaria
+  if (t.includes('HOSPIT')) return '03';   // Hospitalización en Casa = Extramural domiciliaria
   if (t.includes('INTRAMURAL') || t.includes('INTRA')) return '01'; // Intramural
-  if (t.includes('HOSPIT')) return '01'; // Intramural
   return '01';
 }
 

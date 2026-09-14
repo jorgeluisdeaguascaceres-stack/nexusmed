@@ -741,7 +741,15 @@ function onCupsInput() {
       // Buscar el match del ambito correcto
       const dom = matches.find(m => (m.ambito||'').toLowerCase().includes('domicil'));
       const intr = matches.find(m => (m.ambito||'').toLowerCase().includes('intramural'));
-      elegido = esDomicil ? (dom || intr || matches[0]) : (intr || dom || matches[0]);
+      const hosp = matches.find(m => (m.ambito||'').toLowerCase().includes('hospital'));
+      const esHosp = servPac.includes('hospital') || servPac.includes('en casa');
+      if (esHosp) {
+        elegido = hosp || dom || intr || matches[0];
+      } else if (esDomicil) {
+        elegido = dom || intr || hosp || matches[0];
+      } else {
+        elegido = intr || dom || hosp || matches[0];
+      }
       window._cupsMatches = matches;
     }
 
@@ -802,7 +810,8 @@ function onNombreInput() {
   // Solo buscar por nombre si NO hay CUPS escrito
   if (cups) return;
   
-  const nombre = document.getElementById('inputServicioNombre').value.trim();
+  const nombreInput = document.getElementById('inputServicioNombre');
+  const nombre = nombreInput.value.trim();
   const tipoSelect = document.getElementById('inputTipoServ');
   const valorInput = document.getElementById('inputValorUnit');
   
@@ -817,7 +826,27 @@ function onNombreInput() {
   
   const matches = buscarPorNombre(nombre);
   if (matches.length >= 1) {
-    const elegido = matches[0];
+    // Filtrar por ámbito del paciente si hay múltiples matches
+    let elegido;
+    if (matches.length === 1) {
+      elegido = matches[0];
+    } else {
+      const p = facturaActual.admision;
+      const servPac = (p.servicio || '').toLowerCase();
+      const esDomicil = servPac.includes('domicil');
+      const esHospCasa = servPac.includes('hospital') || servPac.includes('en casa');
+      const dom = matches.find(m => (m.ambito||'').toLowerCase().includes('domicil'));
+      const intr = matches.find(m => (m.ambito||'').toLowerCase().includes('intramural'));
+      const hosp = matches.find(m => (m.ambito||'').toLowerCase().includes('hospital'));
+      if (esHospCasa) {
+        elegido = hosp || dom || intr || matches[0];
+      } else if (esDomicil) {
+        elegido = dom || intr || hosp || matches[0];
+      } else {
+        elegido = intr || dom || hosp || matches[0];
+      }
+      window._cupsMatches = matches;
+    }
     const svc = servicioConfigAFactura(elegido);
     // Si el servicio tiene CUPS, llenarlo
     if (svc.codigo) document.getElementById('inputCups').value = svc.codigo;
@@ -827,6 +856,21 @@ function onNombreInput() {
     valorInput.disabled = true;
     window._cupsMatch = svc;
     window._cupsMatchOriginal = elegido;
+    // Si hay múltiples matches, permitir cambiar tipo para recalcular
+    if (matches.length > 1) {
+      tipoSelect.disabled = false;
+      tipoSelect.onchange = function() {
+        const ambitoSel = tipoSelect.value;
+        const sel = matches.find(m2 => (m2.ambito||'').toUpperCase() === ambitoSel.toUpperCase());
+        if (sel) {
+          const svc2 = servicioConfigAFactura(sel);
+          nombreInput.value = svc2.nombre;
+          valorInput.value = svc2.valorUnit;
+          window._cupsMatch = svc2;
+          window._cupsMatchOriginal = sel;
+        }
+      };
+    }
     document.getElementById('inputCantidad').select();
   }
 }
