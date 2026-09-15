@@ -3,6 +3,10 @@
    Guarda y sincroniza los datos del sistema en un almacen
    remoto para que varios usuarios trabajen sobre la MISMA
    informacion. Debe cargarse ANTES de permisos.js.
+
+   v2.2 — Correccion critica: MERGE siempre, nunca sobrescribir
+           Perdida de facturas/RIPS al navegar entre modulos
+           + Persistencia de pendientes en sessionStorage
    ============================================================ */
 (function () {
     'use strict';
@@ -39,6 +43,32 @@
     var listo = false;
     var conectado = false;
 
+    /* Restaurar pendientes de sessionStorage para que sobrevivan
+       la navegacion entre paginas dentro de la misma pestana.
+       Sin esto, al cargar una nueva pagina pendientes={} y
+       bajarTodo() sobrescribe datos locales con datos remotos. */
+    try {
+        var savedPending = sessionStorage.getItem('NXDB_pending');
+        if (savedPending) {
+            var parsed = JSON.parse(savedPending);
+            if (parsed && typeof parsed === 'object') {
+                pendientes = parsed;
+                console.log('[NXDB] Pendientes restaurados de sessionStorage:', Object.keys(pendientes));
+            }
+        }
+    } catch(e) {}
+
+    /* Guardar pendientes en sessionStorage cada vez que cambien */
+    var _pendientesTimer = null;
+    function persistirPendientes() {
+        if (_pendientesTimer) clearTimeout(_pendientesTimer);
+        _pendientesTimer = setTimeout(function () {
+            try {
+                sessionStorage.setItem('NXDB_pending', JSON.stringify(pendientes));
+            } catch(e) {}
+        }, 100);
+    }
+
     /* ================== ACCESO AL ALMACEN REMOTO ================== */
 
     function leerRemoto(clave) {
@@ -71,6 +101,43 @@
         try { return JSON.parse(t); } catch (e) { return null; }
     }
 
+    /* Determina si un valor representa "datos vacios" (null, [], {}, 0, objeto con ultimo=0) */
+    function esVacio(valor) {
+        if (valor === null || valor === undefined) return true;
+        if (typeof valor === 'string') {
+            var t = valor.trim();
+            if (!t || t === '[]' || t === 'null' || t === '{}') return true;
+            /* Contadores con {"ultimo":0} tambien son vacios para nuestro proposito */
+            try {
+                var obj = JSON.parse(t);
+                if (typeof obj === 'object' && obj !== null && !Array.isArray(obj) &&
+                    Object.keys(obj).length === 1 && obj.ultimo === 0) return true;
+            } catch(e) {}
+            return false;
+        }
+        if (Array.isArray(valor)) return valor.length === 0;
+        if (typeof valor === 'object' && valor !== null) {
+            if (Object.keys(valor).length === 1 && valor.ultimo === 0) return true;
+            return Object.keys(valor).length === 0;
+        }
+        if (typeof valor === 'number') return valor === 0;
+        return false;
+    }
+
+    /* Determina si un string JSON representa datos con contenido real */
+    function tieneContenido(str) {
+        var d = analizar(str);
+        if (d === null) return false;
+        if (Array.isArray(d)) return d.length > 0;
+        if (typeof d === 'object' && d !== null) {
+            /* Contadores: {"ultimo": N} con N > 0 cuentan como contenido */
+            if (Object.keys(d).length === 1 && typeof d.ultimo === 'number') return d.ultimo > 0;
+            return Object.keys(d).length > 0;
+        }
+        if (typeof d === 'number') return d > 0;
+        return !!d;
+    }
+
     function identificador(item) {
         if (!item || typeof item !== 'object') return JSON.stringify(item);
         if (item.id !== undefined && item.id !== null && item.id !== '') return 'id:' + item.id;
@@ -94,6 +161,13 @@
             return JSON.stringify(Math.max(a, b));
         }
 
+        /* Objetos tipo contador {ultimo: N}: conservar el mayor */
+        if (typeof a === 'object' && a !== null && !Array.isArray(a) &&
+            typeof b === 'object' && b !== null && !Array.isArray(b) &&
+            'ultimo' in a && 'ultimo' in b) {
+            return JSON.stringify({ ultimo: Math.max(a.ultimo || 0, b.ultimo || 0) });
+        }
+
         /* Listas de registros: se combinan por identificador */
         if (Array.isArray(a) && Array.isArray(b)) {
             var mapaBase = {};
@@ -110,7 +184,13 @@
             b.forEach(function (x) {
                 var k = identificador(x);
                 if (vistos[k]) return;             // ya esta en mi version
-                if (mapaBase[k]) return;           // yo lo borre a proposito
+                /* FIX v2.4: Solo considerar como "borrado a proposito" si el local
+                   tiene datos (a.length > 0). Si local es un array vacio [],
+                   significa "no tengo datos" (primera carga, recarga sin pendientes),
+                   NO "borre todo a proposito". Sin este fix, unir() elimina registros
+                   del servidor cuando el navegador no tiene datos locales, causando
+                   perdida de facturas y RIPS. */
+                if (mapaBase[k] && a.length > 0) return;  // yo lo borre a proposito
                 vistos[k] = true;
                 resultado.push(x);                 // lo agrego otro usuario
             });
@@ -129,31 +209,63 @@
             return leerRemoto(clave).then(function (texto) {
                 var base = espejo[clave] === undefined ? '' : espejo[clave];
                 espejo[clave] = texto;
-                /* Si hay cambios locales pendientes, hacer MERGE en vez de sobrescribir.
-                   Esto preserva eliminaciones locales intencionales (ej: purgar datos)
-                   que aún no se han sincronizado con el servidor. */
                 var actual = localStorage.getItem(clave);
                 var tienePendientes = pendientes[clave];
+
                 if (String(texto).trim()) {
                     if (tienePendientes) {
-                        /* Si hay cambios locales pendientes, hacer MERGE en vez de sobrescribir.
-                           Esto preserva eliminaciones locales intencionales (ej: purgar datos)
-                           que aún no se han sincronizado con el servidor.
-                           Si localStorage está vacío o null, significa que el usuario
-                           eliminó todo localmente → NO restaurar datos del servidor. */
+                        /* Cambios locales pendientes → MERGE en vez de sobrescribir */
                         if (actual !== null && String(actual).trim()) {
+                            /* PROTECCION CRITICA: Si el remoto es vacio pero el local tiene datos,
+                               NO sobrescribir con vacio — esto previene perdida de datos cuando
+                               el servidor no recibio los datos aun */
+                            if (esVacio(analizar(texto)) && tieneContenido(actual)) {
+                                console.log('[NXDB] Proteccion: NO sobrescribir ' + clave + ' local con datos remotos vacios');
+                            } else {
+                                var merge = unir(base, actual, texto);
+                                var mergeStr = merge !== null && merge !== undefined ? String(merge) : '';
+                                almacenarLocal(clave, mergeStr);
+                                espejo[clave] = mergeStr;
+                            }
+                        }
+                        /* Si actual es null/vacio con pendientes → eliminacion intencional,
+                           NO sobrescribir con datos remotos. Se sincronizara en enviarPendientes(). */
+                    } else {
+                        /* PROTECCION CRITICA v2: Si el remoto tiene "[]" (vacio) pero el local
+                           tiene datos reales (array con elementos), NO sobrescribir.
+                           Esto previene que bajarTodo() elimine datos locales cuando el servidor
+                           no tiene los datos actualizados. En su lugar, marca como pendiente
+                           para que el dato local se suba al servidor. */
+                        if (esVacio(analizar(texto)) && tieneContenido(actual)) {
+                            console.log('[NXDB] Proteccion: ' + clave + ' local tiene datos, NO sobrescribir con remoto vacio — marcando pendiente');
+                            pendientes[clave] = true;
+                            persistirPendientes();
+                        } else if (tieneContenido(actual)) {
+                            /* CORRECCION CRITICA v2.2: SIEMPRE hacer MERGE cuando el local
+                               tiene datos, NUNCA sobrescribir directamente.
+                               Antes: almacenarLocal(clave, texto) → SOBRESCRIBIA datos locales
+                               con datos remotos (posiblemente viejos/fantasmas), perdiendo
+                               facturas y RIPS guardados en la pagina anterior.
+                               Ahora: unir(base, actual, texto) combina ambos, nunca pierde datos.
+                               El merge agrega registros remotos que no existen localmente,
+                               pero conserva todos los registros locales. */
                             var merge = unir(base, actual, texto);
                             var mergeStr = merge !== null && merge !== undefined ? String(merge) : '';
                             almacenarLocal(clave, mergeStr);
                             espejo[clave] = mergeStr;
+                            /* Si el merge agrego datos remotos, hay que subir la combinacion */
+                            if (String(mergeStr) !== String(actual)) {
+                                pendientes[clave] = true;
+                                persistirPendientes();
+                            }
+                        } else {
+                            /* Local vacio → aceptar datos remotos normalmente */
+                            almacenarLocal(clave, texto);
                         }
-                        /* Si actual es null/vacío con pendientes → eliminación intencional,
-                           NO sobrescribir con datos remotos. Se sincronizará en enviarPendientes(). */
-                    } else {
-                        almacenarLocal(clave, texto);
                     }
                 } else {
-                    if (actual && String(actual).trim()) pendientes[clave] = true;
+                    /* El servidor no tiene datos para esta clave */
+                    if (actual && String(actual).trim()) { pendientes[clave] = true; persistirPendientes(); }
                 }
                 return true;
             }).catch(function () { return false; });
@@ -161,6 +273,42 @@
 
         return Promise.all(tareas).then(function (res) {
             conectado = res.some(function (r) { return r; });
+
+            /* ── RESTAURAR BACKUP si se perdieron datos criticos ── */
+            ['nexus_facturas', 'nexus_rips_generados'].forEach(function(clave) {
+                var actual = localStorage.getItem(clave);
+                var backup = localStorage.getItem(clave + '_backup');
+                if ((!tieneContenido(actual) || esVacio(analizar(actual))) && tieneContenido(backup)) {
+                    console.warn('[NXDB] Restaurando ' + clave + ' desde backup — datos se perdieron en bajarTodo!');
+                    almacenarLocal(clave, backup);
+                    pendientes[clave] = true;
+                    persistirPendientes();
+                }
+                /* Limpiar backup viejo (>24h) */
+                if (tieneContenido(backup)) {
+                    try {
+                        var bData = JSON.parse(backup);
+                        var bTime = bData._backupTime;
+                        if (bTime && Date.now() - bTime > 86400000) {
+                            _remove(clave + '_backup');
+                        }
+                    } catch(e) {}
+                }
+            });
+
+            /* ── FORZAR SUBIDA: si local tiene datos y servidor no, subir ── */
+            setTimeout(function() {
+                ['nexus_facturas', 'nexus_rips_generados', 'nexus_contador_facturas'].forEach(function(clave) {
+                    var local = localStorage.getItem(clave);
+                    if (tieneContenido(local) && pendientes[clave]) {
+                        console.log('[NXDB] Forzando subida de ' + clave + ' despues de bajarTodo');
+                    }
+                });
+                if (Object.keys(pendientes).length > 0) {
+                    enviarPendientes();
+                }
+            }, 1500);
+
             return conectado;
         });
     }
@@ -169,6 +317,8 @@
         var claves = Object.keys(pendientes);
         if (!claves.length || enviando) return Promise.resolve(true);
         enviando = true;
+
+        var fallidas = [];  // claves que fallaron al escribir
 
         var cadena = claves.reduce(function (p, clave) {
             return p.then(function () {
@@ -184,6 +334,10 @@
                         almacenarLocal(clave, '');
                         delete pendientes[clave];
                         delete eliminadas[clave];
+                        persistirPendientes();
+                    }).catch(function(err) {
+                        console.error('[NXDB] Error escribiendo eliminacion para ' + clave + ':', err);
+                        fallidas.push(clave);
                     });
                 }
                 return leerRemoto(clave).then(function (ajeno) {
@@ -193,19 +347,61 @@
                         avisar('Los datos de "' + etiqueta(clave) + '" son demasiado grandes para guardarse en la nube.', 'error');
                         delete pendientes[clave];
                         delete eliminadas[clave];
+                        persistirPendientes();
                         return;
                     }
                     return escribirRemoto(clave, String(final)).then(function () {
+                        /* FIX v2.6: ANTES de sobrescribir localStorage con el merge,
+                           volver a leer el valor ACTUAL de localStorage. Si el usuario
+                           guardó datos MIENTRAS se hacía el upload, esos datos se
+                           perderían si simplemente sobrescribimos con `final`.
+                           Solución: hacer merge entre `final` y el localStorage actual. */
+                        var actualAhora = localStorage.getItem(clave);
+                        if (actualAhora !== null && String(actualAhora).trim() && tieneContenido(actualAhora)) {
+                            var reMerge = unir(String(final), actualAhora, String(final));
+                            if (reMerge !== null && reMerge !== undefined && tieneContenido(String(reMerge))) {
+                                final = reMerge;
+                            }
+                        }
                         espejo[clave] = String(final);
                         almacenarLocal(clave, String(final));
                         delete pendientes[clave];
                         delete eliminadas[clave];
+                        persistirPendientes();
+                        console.log('[NXDB] ✓ ' + clave + ' subido OK al servidor');
+                    }).catch(function(err) {
+                        console.error('[NXDB] ✗ Error escribiendo ' + clave + ':', err);
+                        fallidas.push(clave);
                     });
+                }).catch(function(err) {
+                    console.error('[NXDB] Error leyendo remoto para ' + clave + ':', err);
+                    fallidas.push(clave);
                 });
-            }).catch(function () { /* se reintenta en el siguiente ciclo */ });
+            });
         }, Promise.resolve());
 
-        return cadena.then(function () { enviando = false; return true; });
+        return cadena.then(function () {
+            enviando = false;
+            if (fallidas.length > 0) {
+                console.warn('[NXDB] ' + fallidas.length + ' clave(s) fallaron al enviar:', fallidas);
+                /* Re-marcar claves fallidas como pendientes para reintentar en el proximo ciclo */
+                fallidas.forEach(function(c) {
+                    pendientes[c] = true;
+                });
+                persistirPendientes();
+            }
+            /* FIX RACE CONDITION: si se agregaron nuevas claves pendientes durante el envio
+               (ej: guardar contador → NXDB.guardado() → enviarPendientes → luego guardar factura
+               → NXDB.guardado() saltado porque enviando=true), programar un reenvio inmediato */
+            var nuevasPendientes = Object.keys(pendientes).filter(function(c) {
+                return !fallidas.includes(c);
+            });
+            if (nuevasPendientes.length > 0) {
+                console.log('[NXDB] Nuevas claves pendientes detectadas post-envio, programando reenvio:', nuevasPendientes);
+                programarEnvio();
+            }
+            return true;
+        });
     }
 
     function revisarCambios() {
@@ -216,23 +412,25 @@
                 if (String(texto) !== String(espejo[clave] === undefined ? '' : espejo[clave])) {
                     var mio = localStorage.getItem(clave);
                     if (mio === null) mio = '';
-                    /* PROTECCION CONTRA RESTAURACION DE DATOS ELIMINADOS:
-                       Si el usuario elimino intencionalmente una clave (marcada en eliminadas)
-                       y localStorage esta vacio/[] para esa clave, NO restaurar datos del servidor.
-                       Esperar a que enviarPendientes() sincronice la eliminacion con la nube. */
+
+                    /* PROTECCION CONTRA RESTAURACION DE DATOS ELIMINADOS */
                     if (eliminadas[clave] && (!String(mio).trim() || String(mio).trim() === '[]' || String(mio).trim() === 'null')) {
-                        /* Eliminacion intencional pendiente de sincronizar — NO restaurar */
                         return;
                     }
-                    /* Guardar base (lo que creiamos que tenia el servidor) ANTES de actualizar espejo */
+
+                    /* PROTECCION CONTRA SOBRESCRITURA CON DATOS VACIOS */
+                    if (esVacio(analizar(texto)) && tieneContenido(mio)) {
+                        console.log('[NXDB] Proteccion: NO restaurar ' + clave + ' desde servidor vacio');
+                        espejo[clave] = String(mio);
+                        pendientes[clave] = true;
+                        persistirPendientes();
+                        return;
+                    }
+
                     var base = espejo[clave] === undefined ? '' : espejo[clave];
-                    /* Usar merge (unir) en lugar de sobrescritura directa para
-                       respetar eliminaciones locales y cambios de otros usuarios */
                     var merge = unir(base, mio, texto);
                     var mergeStr = merge !== null && merge !== undefined ? String(merge) : '';
                     almacenarLocal(clave, mergeStr);
-                    /* Actualizar espejo al resultado fusionado (no al dato remoto crudo)
-                       para que la proxima comparacion detecte solo cambios REALES */
                     espejo[clave] = mergeStr;
                     if (clave !== 'nexus_sesion') cambio = true;
                 }
@@ -245,24 +443,32 @@
 
     /* ================== PUENTE CON localStorage ================== */
 
+    var _getItem = localStorage.getItem.bind(localStorage);
     var _set = localStorage.setItem.bind(localStorage);
     var _remove = localStorage.removeItem.bind(localStorage);
     var _clear = localStorage.clear.bind(localStorage);
 
     function almacenarLocal(clave, valor) {
-        try { _set(clave, valor); } catch (e) { }
+        try { _set(clave, valor); } catch (e) { console.error("[NXDB] localStorage write failed for " + clave + ":", e); avisar("No se pudo guardar localmente: " + etiqueta(clave), "error"); }
     }
 
     localStorage.setItem = function (clave, valor) {
-        _set(clave, valor);
+        try { _set(clave, valor); } catch (e) {
+            console.error("[NXDB] localStorage.setItem FAILED for " + clave + ":", e);
+            avisar("Error al guardar " + etiqueta(clave) + ": " + (e.message||'quota'), "error");
+            return;
+        }
         if (esCompartida(clave)) {
             pendientes[clave] = true;
-            /* Detectar cuando el usuario guarda [] o null — es una eliminacion intencional (purga) */
             var v = String(valor || '').trim();
             if (!v || v === '[]' || v === 'null') {
                 eliminadas[clave] = true;
                 espejo[clave] = '';
+            } else {
+                /* Si guardamos datos reales, QUITAR marca de eliminada si existia */
+                delete eliminadas[clave];
             }
+            persistirPendientes();
             programarEnvio();
         }
     };
@@ -273,6 +479,7 @@
             pendientes[clave] = true;
             eliminadas[clave] = true;  // marca: eliminacion intencional
             espejo[clave] = '';        // borrado intencional: se vacia en la nube
+            persistirPendientes();
             programarEnvio();
         }
     };
@@ -282,6 +489,7 @@
         _clear();
         if (sesion) _set('nexus_sesion', sesion);
         COMPARTIDAS.forEach(function (c) { pendientes[c] = true; eliminadas[c] = true; espejo[c] = ''; });
+        persistirPendientes();
         programarEnvio();
     };
 
@@ -329,7 +537,7 @@
         listo = true;
         var correr = function () {
             enEspera.forEach(function (fn) {
-                try { fn(); } catch (e) { console.error(e); } // eslint-disable-line
+                try { fn(); } catch (e) { console.error(e); }
             });
             enEspera = [];
             quitarCortina();
@@ -430,9 +638,10 @@
             nexus_pacientes: 'Pacientes', nexus_citas: 'Citas', nexus_historias_clinicas: 'Historias clinicas',
             nexus_evoluciones: 'Evoluciones', nexus_notas_enfermeria: 'Notas de enfermeria',
             nexus_terapias: 'Terapias', nexus_epicrisis: 'Epicrisis',
-            nexus_servicios_facturacion: 'Catálogo servicios', nexus_entidades_pagadoras: 'Entidades pagadoras',
+            nexus_servicios_facturacion: 'Catalogo servicios', nexus_entidades_pagadoras: 'Entidades pagadoras',
             nexus_facturas: 'Facturas', nexus_rips_generados: 'RIPS generados',
-            nexus_contador_facturas: 'Contador facturas'
+            nexus_contador_facturas: 'Contador facturas', nexus_contador_prefacturas: 'Contador pre-facturas',
+            nexus_config_ips: 'Configuracion IPS'
         };
         return n[clave] || clave;
     }
@@ -515,10 +724,8 @@
         usuarios: usuarios,
         guardarUsuarios: guardarUsuarios,
 
-        /* Todavia no hay ningun usuario creado en la nube */
         sinUsuarios: function () { return usuarios().length === 0; },
 
-        /* Comprueba credenciales contra la base compartida */
         verificar: function (usuario, clave) {
             var lista = usuarios();
             var u = lista.filter(function (x) {
@@ -527,7 +734,6 @@
             if (!u) return null;
             var esperado = u.clave || u.hash || '';
             if (esperado && esperado === resumen(u.usuario, clave)) return u;
-            /* Compatibilidad con datos antiguos guardados en texto plano */
             if (!esperado && (u.password === clave || u.contrasena === clave)) {
                 u.clave = resumen(u.usuario, clave);
                 delete u.password; delete u.contrasena;
@@ -570,7 +776,6 @@
             return true;
         },
 
-        /* Espera a que termine el envio de datos a la nube */
         guardado: function () { return enviarPendientes(); }
     };
 
@@ -585,7 +790,6 @@
         especialista: 'Especialista'
     };
 
-    /* Convierte cualquier forma de escribir el rol al identificador oficial */
     function normalizarRol(rol) {
         var r = String(rol === undefined || rol === null ? '' : rol)
             .toLowerCase().trim().replace(/\s+/g, '_');
@@ -608,8 +812,6 @@
         return NOMBRE_ROL[r] || String(rol === undefined || rol === null ? '' : rol);
     }
 
-    /* Un administrador aparece en las listas clinicas solo si tiene
-       registro profesional o una especialidad medica declarada */
     function adminEsProfesional(u) {
         var reg = String(u.registro || '').trim();
         var esp = String(u.especialidad || '').trim().toLowerCase();
@@ -624,7 +826,6 @@
         });
     }
 
-    /* Devuelve los usuarios cuyos roles estan en la lista pedida */
     function profesionales(roles) {
         return ordenarPorNombre(usuarios().filter(function (u) {
             var r = normalizarRol(u.rol);
@@ -644,7 +845,6 @@
         clinicos: function () {
             return profesionales(['medico_general', 'especialista', 'enfermeria', 'terapia', 'admin_clinico']);
         },
-        /* Texto visible del profesional: nombre + especialidad */
         etiquetaPersona: function (u) {
             var n = String(u.nombre || u.usuario || '').trim();
             var e = String(u.especialidad || '').trim();
@@ -661,20 +861,25 @@
         conectado: function () { return conectado; },
         sincronizar: function () { return enviarPendientes().then(bajarTodo); },
         guardar: function () { return enviarPendientes(); },
+        _marcarPendiente: function (clave) {
+            if (esCompartida(clave)) {
+                pendientes[clave] = true;
+                delete eliminadas[clave];
+                persistirPendientes();
+                programarEnvio();
+            }
+        },
         avisar: avisar,
-        /* Purgar datos de una clave en el SERVIDOR (no solo local).
-           Sobrescribe el servidor con [] para que los datos eliminados no reaparezcan.
-           Uso: NXDB.purgarRemoto('nexus_facturas') */
         purgarRemoto: function (clave) {
             if (!esCompartida(clave)) return Promise.resolve(false);
             return escribirRemoto(clave, '[]').then(function () {
                 espejo[clave] = '[]';
                 delete eliminadas[clave];
                 delete pendientes[clave];
+                persistirPendientes();
                 return true;
             }).catch(function () { return false; });
         },
-        /* Purgar multiples claves del servidor */
         purgarRemotoTodo: function (claves) {
             var lista = (claves || COMPARTIDAS).filter(esCompartida);
             return Promise.all(lista.map(function (c) {
@@ -682,9 +887,60 @@
                     espejo[c] = '[]';
                     delete eliminadas[c];
                     delete pendientes[c];
+                    persistirPendientes();
                     return true;
                 }).catch(function () { return false; });
             }));
+        },
+        /* Verificar si una clave local tiene datos */
+        tieneDatosLocales: function (clave) {
+            var v = localStorage.getItem(clave);
+            return v !== null && tieneContenido(v);
+        },
+        /* Forzar subida de datos locales al servidor (sin merge) */
+        forzarSubida: function (clave) {
+            if (!esCompartida(clave)) return Promise.resolve(false);
+            var v = localStorage.getItem(clave) || '';
+            console.log('[NXDB] forzarSubida: ' + clave + ' (' + v.length + ' chars)');
+            return escribirRemoto(clave, v).then(function () {
+                espejo[clave] = v;
+                delete pendientes[clave];
+                delete eliminadas[clave];
+                persistirPendientes();
+                console.log('[NXDB] ✓ forzarSubida OK: ' + clave);
+                return true;
+            }).catch(function (err) {
+                console.error('[NXDB] ✗ forzarSubida FALLO: ' + clave, err);
+                return false;
+            });
+        },
+        /* Restaurar facturas/RIPS desde backup */
+        restaurarBackup: function (clave) {
+            var backup = localStorage.getItem(clave + '_backup');
+            if (!tieneContenido(backup)) return false;
+            try {
+                almacenarLocal(clave, backup);
+                pendientes[clave] = true;
+                persistirPendientes();
+                console.log('[NXDB] Restaurado ' + clave + ' desde backup');
+                return true;
+            } catch(e) { return false; }
+        },
+        /* Diagnosticar estado de persistencia */
+        diagnosticar: function () {
+            var info = {};
+            ['nexus_facturas', 'nexus_rips_generados', 'nexus_contador_facturas',
+             'nexus_contador_prefacturas'].forEach(function(c) {
+                var local = localStorage.getItem(c);
+                info[c] = {
+                    localLength: local ? local.length : 0,
+                    localItems: analizar(local) ? (Array.isArray(analizar(local)) ? analizar(local).length : JSON.stringify(analizar(local))) : 0,
+                    pendiente: !!pendientes[c],
+                    espejoLength: (espejo[c] || '').length
+                };
+            });
+            console.log('[NXDB] Diagnostico:', JSON.stringify(info, null, 2));
+            return info;
         }
     };
     window.NXAUTH = NXAUTH;

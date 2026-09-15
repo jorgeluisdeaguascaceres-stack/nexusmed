@@ -1,4 +1,3 @@
-<!-- NexusMed Facturación v2.4 - Bug fix: persistencia facturas/RIPS -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -460,87 +459,24 @@ const K_CONTADOR   = 'nexus_contador_facturas';
 const K_CONTADOR_PF = 'nexus_contador_prefacturas';
 
 function leer(k)   { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch(e) { return null; } }
-function tieneContenido(str) {
-  if (!str || !String(str).trim()) return false;
-  try {
-    var d = JSON.parse(str);
-    if (d === null) return false;
-    if (Array.isArray(d)) return d.length > 0;
-    if (typeof d === 'object' && d !== null) return Object.keys(d).length > 0;
-    if (typeof d === 'number') return d > 0;
-    return !!d;
-  } catch(e) { return false; }
-}
 function guardar(k,v){
-  // ── v2.4: Backup + try-catch robusto + sin NXDB.guardado() redundante ──
-  var valorStr = JSON.stringify(v);
-  var backupHecho = false;
-
-  if (k === K_FACTURAS || k === K_RIPS) {
-    try {
-      var prev = localStorage.getItem(k);
-      if (tieneContenido(prev)) {
-        var bk = JSON.parse(prev);
-        bk._backupTime = Date.now();
-        localStorage.setItem(k + '_backup', JSON.stringify(bk));
-        backupHecho = true;
-      }
-    } catch(e) {
-      console.warn('[FACT] Backup skipped for ' + k + ': ' + e.message);
-    }
-  }
-
-  try {
-    localStorage.setItem(k, valorStr);
-  } catch(e1) {
-    console.error('[FACT] SAVE FAILED for ' + k + ': ' + e1.message);
-    if (backupHecho && (k === K_FACTURAS || k === K_RIPS)) {
-      try {
-        localStorage.removeItem(k + '_backup');
-        console.log('[FACT] Removed backup to free space, retrying...');
-      } catch(e2) {}
-      try {
-        localStorage.setItem(k, valorStr);
-      } catch(e3) {
-        toast('⛔ ERROR CRÍTICO: No se pudo guardar ' + k + '. Almacenamiento lleno.', 'error');
-        return;
-      }
-    } else {
-      toast('⛔ ERROR: No se pudo guardar ' + k + '. ' + e1.message, 'error');
-      return;
-    }
-  }
-
+  localStorage.setItem(k, JSON.stringify(v));
+  // ── Post-save verification ──
   var verificacion = null;
   try { verificacion = JSON.parse(localStorage.getItem(k)); } catch(e) {}
   if (verificacion === null && v !== null) {
-    console.error('[FACT] Post-save verification failed for', k, '- retrying...');
-    try {
-      localStorage.setItem(k, valorStr);
-      verificacion = JSON.parse(localStorage.getItem(k));
-    } catch(e) {}
+    console.error('[FACT] SAVE FAILED for', k, '- retrying...');
+    localStorage.setItem(k, JSON.stringify(v));
+    try { verificacion = JSON.parse(localStorage.getItem(k)); } catch(e) {}
     if (verificacion === null) {
-      toast('⚠️ ERROR: Verificación falló para ' + k + '. Datos pueden perderse.', 'error');
+      toast('⚠️ ERROR: No se pudo guardar ' + k + '. Datos pueden perderse al recargar.', 'error');
     }
   }
-  // v2.4: NXDB.guardado() eliminado — el interceptor localStorage.setItem YA llama programarEnvio()
-}
-// ── v2.4: Recovery automático desde backup ──
-function recuperarBackup(k) {
-  try {
-    var bk = localStorage.getItem(k + '_backup');
-    if (!tieneContenido(bk)) return false;
-    var datos = JSON.parse(bk);
-    delete datos._backupTime;
-    console.warn('[FACT] Recovering ' + k + ' from backup (' + (Array.isArray(datos)?datos.length:'?') + ' items)');
-    guardar(k, datos);
-    return true;
-  } catch(e) {
-    console.error('[FACT] Backup recovery failed for ' + k + ':', e);
-    return false;
+  // ── Force cloud sync if NXDB available ──
+  if (typeof NXDB !== 'undefined' && NXDB.forzarSubida) {
+    try { NXDB.forzarSubida(k); } catch(e) { console.warn('[FACT] NXDB sync error:', e); }
   }
 }
-
 function hoy()     { return new Date().toISOString().split('T')[0]; }
 function ahora()   { return new Date().toISOString().replace('Z',''); }
 function fmt$(n)   { return '$' + Number(n||0).toLocaleString('es-CO'); }
@@ -554,16 +490,7 @@ function initContador() {
 function siguienteNumFC() {
   const c = leer(K_CONTADOR) || {ultimo:0};
   c.ultimo++;
-  // FIX v2.4: Usar escritura directa para evitar race condition con NXDB.
-  // guardar() activa NXDB.guardado() → enviarPendientes() se ejecuta async →
-  // bloquea el guardado posterior de la factura (enviando=true).
-  // Usamos localStorage nativo + marcado manual de pendiente.
-  localStorage.setItem(K_CONTADOR, JSON.stringify(c));
-  if (typeof NXDB !== 'undefined' && NXDB._marcarPendiente) {
-    NXDB._marcarPendiente(K_CONTADOR);
-  } else if (typeof NXDB !== 'undefined' && NXDB.guardado) {
-    try { NXDB.guardado(); } catch(e) {}
-  }
+  guardar(K_CONTADOR, c);
   return 'FC-' + String(c.ultimo).padStart(6,'0');
 }
 function siguienteNumPF() {
@@ -1204,11 +1131,6 @@ function guardarPreFactura() {
       fac.numeroFactura = facturas[idx].numeroFactura;
       fac.id = facturas[idx].id;
       facturas[idx] = fac;
-    } else {
-      // FIX v2.5: Pre-factura original no encontrada — agregar como nueva
-      console.warn('[FACT] Pre-factura editandoId=' + facturaActual._editandoId + ' no encontrada — creando nueva');
-      fac.numeroFactura = siguienteNumPF();
-      facturas.push(fac);
     }
   } else {
     fac.numeroFactura = siguienteNumPF();
@@ -1330,15 +1252,10 @@ function emitirFacturaDefinitiva() {
   fac.emitidaEn = ahora();
 
   // Asignar número: externo si se proporcionó, si no consecutivo automático
-  // FIX v2.5: Cuando hay número externo, PRIMERO asignarlo y guardar la factura,
-  // DESPUÉS incrementar el contador interno. Antes, siguienteNumFC() se llamaba
-  // ANTES de guardar(), lo que activaba NXDB y causaba race conditions que
-  // perdían la factura (especialmente con números externos).
-  var numeroInternoPendiente = null;
   if (numExterno) {
     fac.numeroFactura = numExterno;
     fac.numeroFacturaExterno = numExterno;
-    numeroInternoPendiente = true; // marcar para asignar DESPUÉS de guardar
+    fac.numeroFacturaInterno = siguienteNumFC(); // guardar interno como referencia
   } else {
     fac.numeroFactura = siguienteNumFC();
     fac.numeroFacturaExterno = null;
@@ -1351,50 +1268,12 @@ function emitirFacturaDefinitiva() {
     if (idx >= 0) {
       fac.id = facturas[idx].id;
       facturas[idx] = fac;
-    } else {
-      // FIX v2.5: La pre-factura original ya no existe (fue eliminada por otro navegador
-      // o por limpieza). Agregar la nueva factura en vez de descartarla silenciosamente.
-      console.warn('[FACT] _editandoId=' + facturaActual._editandoId + ' no encontrado — agregando nueva factura');
-      facturas.push(fac);
     }
   } else {
     facturas.push(fac);
   }
 
   guardar(K_FACTURAS, facturas);
-  // ── FIX v2.5: Asignar número interno DESPUÉS de guardar la factura ──
-  // Esto evita race conditions con NXDB: antes, siguienteNumFC() activaba
-  // NXDB y programarEnvio() ANTES de que la factura se guardara, lo que
-  // podía causar que enviarPendientes() subiera datos sin la factura nueva.
-  if (numeroInternoPendiente) {
-    fac.numeroFacturaInterno = siguienteNumFC();
-    // Actualizar la factura ya guardada con el número interno
-    var facturasActualizadas = leer(K_FACTURAS) || [];
-    var idxFac = facturasActualizadas.findIndex(function(f2) { return f2.id === fac.id; });
-    if (idxFac >= 0) {
-      facturasActualizadas[idxFac].numeroFacturaInterno = fac.numeroFacturaInterno;
-      guardar(K_FACTURAS, facturasActualizadas);
-      console.log('[FACT] Número interno asignado post-save: ' + fac.numeroFacturaInterno);
-    }
-  }
-  // ── Post-save verification ──
-  var verif = null;
-  try { verif = JSON.parse(localStorage.getItem(K_FACTURAS)); } catch(e) {}
-  if (verif === null) {
-    console.error('[FACT] Facturas save FAILED after emitir! Retrying...');
-    guardar(K_FACTURAS, facturas);
-    /* FIX v2.3: Actualizar verif despues del reintento */
-    try { verif = JSON.parse(localStorage.getItem(K_FACTURAS)); } catch(e) {}
-  }
-  var savedFac = (verif || []).find(function(f2) { return f2.id === fac.id; });
-  if (!savedFac) {
-    console.error('[FACT] Factura ' + fac.id + ' NOT found in storage after save!');
-    toast('⚠️ La factura se guardó pero no se encontró al verificar. Recargue la página.', 'warning');
-  } else {
-    console.log('[FACT] Factura ' + fac.numeroFactura + ' (id=' + fac.id + ') saved OK. Total facturas: ' + (verif||[]).length);
-    // Diagnóstico NXDB
-    if (typeof NXDB !== 'undefined' && NXDB.diagnosticar) { NXDB.diagnosticar(); }
-  }
   toast('✅ Factura definitiva emitida: ' + fac.numeroFactura, 'success');
   actualizarStats();
   resetFacturaActual();
@@ -1570,10 +1449,8 @@ function sanitizarFacturas() {
     return true;
   });
   if (modificado) {
-    // FIX: NO llamar guardar() aquí — solo retornar datos limpios.
-    // El CALLER (emitirFacturaDefinitiva, actualizarStats, etc.) 
-    // debe decidir si guardar. Esto evita saves duplicados/race conditions.
-    console.log('[Facturación] Datos sanitizados: ' + facturas.length + ' → ' + limpias.length + ' facturas (sin auto-guardar)');
+    guardar(K_FACTURAS, limpias);
+    console.log('[Facturación] Datos sanitizados: ' + facturas.length + ' → ' + limpias.length + ' facturas');
   }
   return limpias;
 }
@@ -1581,13 +1458,6 @@ function sanitizarFacturas() {
 // ─── Stats ───
 function actualizarStats() {
   const facturas = sanitizarFacturas();
-  // v2.4: Solo guardar si sanitizar eliminó facturas corruptas
-  // Comparar contenido real, no solo length (evita save innecesario)
-  const stored = leer(K_FACTURAS) || [];
-  if (facturas.length !== stored.length && facturas.length < stored.length) {
-    console.log('[FACT] actualizarStats: sanitizado redujo facturas ' + stored.length + ' → ' + facturas.length);
-    guardar(K_FACTURAS, facturas);
-  }
   const pre = facturas.filter(f => f.estado === 'pre-factura').length;
   const def = facturas.filter(f => f.estado === 'definitiva').length;
   const anul = facturas.filter(f => f.estado === 'anulada').length;
@@ -1603,19 +1473,6 @@ function actualizarStats() {
 document.addEventListener('DOMContentLoaded', function() {
   if (window.NX) { NX.iniciar('facturacion'); NX.filtrarMenu(); }
   initCatalogo();
-  // v2.4: Auto-recovery from backup if facturas vacías
-  var facCheck = leer(K_FACTURAS);
-  if (!facCheck || !Array.isArray(facCheck) || facCheck.length === 0) {
-    if (recuperarBackup(K_FACTURAS)) {
-      toast('🔄 Facturas recuperadas desde backup', 'warning');
-    }
-  }
-  var ripsCheck = leer(K_RIPS);
-  if (!ripsCheck || !Array.isArray(ripsCheck) || ripsCheck.length === 0) {
-    if (recuperarBackup(K_RIPS)) {
-      toast('🔄 RIPS recuperados desde backup', 'warning');
-    }
-  }
   initContador();
   cargarSesion();
   actualizarStats();
