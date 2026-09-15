@@ -575,10 +575,90 @@ function epsKeyFromString(epsStr) {
 // Configuración es la única pantalla que puede agregar/editar servicios.
 // Facturación SOLO lee el catálogo.
 
+// ─── Catálogo por defecto (igual que Configuración) ───
+const CUPS_DEFAULT = [
+  { id:'sf_01', codigoCUPS:'',       nombre:'CAMA DOMICILIARIA',           tipoServicio:'otroServicio', ambito:'domiciliario',
+    valores:{ FOMAG:{valorUnitario:250000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_02', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA DOMICILIARIA',   tipoServicio:'consulta', ambito:'domiciliario',
+    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_03', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA INTRAMURAL',    tipoServicio:'consulta', ambito:'intramural',
+    valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_04', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL DOMICILIARIA', tipoServicio:'consulta', ambito:'domiciliario',
+    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_05', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL INTRAMURAL',  tipoServicio:'consulta', ambito:'intramural',
+    valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_06', codigoCUPS:'931001', nombre:'FISIOTERAPIA DOMICILIARIA',      tipoServicio:'consulta', ambito:'domiciliario',
+    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_07', codigoCUPS:'931001', nombre:'FISIOTERAPIA INTRAMURAL',       tipoServicio:'consulta', ambito:'intramural',
+    valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_08', codigoCUPS:'943102', nombre:'PSICOLOGÍA DOMICILIARIA',       tipoServicio:'consulta', ambito:'domiciliario',
+    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_09', codigoCUPS:'943102', nombre:'PSICOLOGÍA INTRAMURAL',         tipoServicio:'consulta', ambito:'intramural',
+    valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_10', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA DOMICILIARIA', tipoServicio:'procedimiento', ambito:'domiciliario',
+    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_11', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA INTRAMURAL',  tipoServicio:'procedimiento', ambito:'intramural',
+    valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_12', codigoCUPS:'',       nombre:'ENFERMERÍA 24H DOMICILIARIA',  tipoServicio:'otroServicio', ambito:'domiciliario',
+    valores:{ FOMAG:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:150000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_13', codigoCUPS:'',       nombre:'ENFERMERÍA 12H DOMICILIARIA',  tipoServicio:'otroServicio', ambito:'domiciliario',
+    valores:{ FOMAG:{valorUnitario:100000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:80000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_14', codigoCUPS:'',       nombre:'ENFERMERÍA 8H DOMICILIARIA',   tipoServicio:'otroServicio', ambito:'domiciliario',
+    valores:{ FOMAG:{valorUnitario:95000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:75000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_15', codigoCUPS:'',       nombre:'LIMPIEZA TRAQUEOSTOMÍA DOM.',  tipoServicio:'otroServicio', ambito:'domiciliario',
+    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_16', codigoCUPS:'',       nombre:'CAMA HOSP. EN CASA',            tipoServicio:'otroServicio', ambito:'hospitalario',
+    valores:{ FOMAG:{valorUnitario:250000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_17', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA HOSP. EN CASA',   tipoServicio:'consulta', ambito:'hospitalario',
+    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_18', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL HOSP. EN CASA', tipoServicio:'consulta', ambito:'hospitalario',
+    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_19', codigoCUPS:'931001', nombre:'FISIOTERAPIA HOSP. EN CASA',      tipoServicio:'consulta', ambito:'hospitalario',
+    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_20', codigoCUPS:'943102', nombre:'PSICOLOGÍA HOSP. EN CASA',       tipoServicio:'consulta', ambito:'hospitalario',
+    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_21', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA HOSP. EN CASA', tipoServicio:'procedimiento', ambito:'hospitalario',
+    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_22', codigoCUPS:'',       nombre:'ENFERMERÍA 24H HOSP. EN CASA',  tipoServicio:'otroServicio', ambito:'hospitalario',
+    valores:{ FOMAG:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:150000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_23', codigoCUPS:'',       nombre:'ENFERMERÍA 12H HOSP. EN CASA',  tipoServicio:'otroServicio', ambito:'hospitalario',
+    valores:{ FOMAG:{valorUnitario:100000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:80000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_24', codigoCUPS:'',       nombre:'ENFERMERÍA 8H HOSP. EN CASA',   tipoServicio:'otroServicio', ambito:'hospitalario',
+    valores:{ FOMAG:{valorUnitario:95000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:75000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+  { id:'sf_25', codigoCUPS:'',       nombre:'LIMPIEZA TRAQUEOSTOMÍA HOSP. EN CASA', tipoServicio:'otroServicio', ambito:'hospitalario',
+    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true }
+];
+const CUPS_VERSION = 3;
+
 function initCatalogo() {
-  // No inicializamos nada aquí — Configuración ya guardó el catálogo.
-  // Solo verificamos que exista la clave.
-  if (!leer(K_SERVICIOS)) guardar(K_SERVICIOS, []);
+  // Si el catálogo está vacío o desactualizado, cargar los servicios por defecto
+  // (igual que hace Configuración con initCups)
+  let cat = leer(K_SERVICIOS);
+  const savedVer = parseInt(localStorage.getItem(K_SERVICIOS + '_ver') || '0');
+  if (!cat || !Array.isArray(cat) || (!cat.length && savedVer < CUPS_VERSION)) {
+    guardar(K_SERVICIOS, CUPS_DEFAULT);
+    localStorage.setItem(K_SERVICIOS + '_ver', String(CUPS_VERSION));
+    console.log('[FACT] Catálogo inicializado con', CUPS_DEFAULT.length, 'servicios por defecto');
+  } else if (cat.length && savedVer < CUPS_VERSION) {
+    // Merge: agregar nuevos servicios que no existan
+    const existingIds = new Set(cat.map(s => s.id));
+    CUPS_DEFAULT.forEach(def => {
+      if (!existingIds.has(def.id)) {
+        cat.push({...def});
+      } else {
+        const idx = cat.findIndex(s => s.id === def.id);
+        if (idx !== -1 && (!cat[idx].valores || !Object.keys(cat[idx].valores || {}).length)) {
+          cat[idx].valores = def.valores;
+          delete cat[idx].valorGeneral;
+        }
+      }
+    });
+    guardar(K_SERVICIOS, cat);
+    localStorage.setItem(K_SERVICIOS + '_ver', String(CUPS_VERSION));
+    console.log('[FACT] Catálogo actualizado (merge) — total:', cat.length, 'servicios');
+  } else {
+    console.log('[FACT] Catálogo OK —', cat.length, 'servicios (ver', savedVer, ')');
+  }
 }
 
 // Buscar servicios activos por código CUPS en el catálogo de Configuración
@@ -693,10 +773,9 @@ function irPaso(num) {
 
   facturaActual.paso = num;
 
-  for (let i = 1; i <= 4; i++) {
-    const panel = document.getElementById('paso'+i+'Panel');
-    if (panel) panel.style.display = (i === num) ? 'block' : 'none';
-  }
+  // Activar el config-panel externo correspondiente via switchPanel
+  const panelMap = {1:'paso1',2:'paso2',3:'paso3',4:'paso4'};
+  if (typeof switchPanel === 'function') switchPanel(panelMap[num] || 'paso1');
 
   document.querySelectorAll('.paso-step').forEach(step => {
     const p = parseInt(step.dataset.paso);
@@ -1743,6 +1822,23 @@ function switchPanel(pid){
   const item=document.querySelector('[data-panel="'+pid+'"]');
   if(item)item.classList.add('active');
   if(!PANEL_INIT[pid]){PANEL_INIT[pid]=true;}
+  // Sincronizar indicadores de paso cuando se navega por sidebar
+  var pasoNum = parseInt(pid.replace('paso','')) || 0;
+  if(pasoNum >= 1 && pasoNum <= 4 && typeof facturaActual !== 'undefined'){
+    facturaActual.paso = pasoNum;
+    document.querySelectorAll('.paso-step').forEach(function(step){
+      var p = parseInt(step.dataset.paso);
+      step.classList.remove('active','done');
+      if(p < pasoNum) step.classList.add('done');
+      else if(p === pasoNum) step.classList.add('active');
+    });
+    document.querySelectorAll('.paso-line').forEach(function(line){
+      var l = parseInt(line.dataset.line);
+      line.classList.remove('done','active');
+      if(l < pasoNum) line.classList.add('done');
+      else if(l === pasoNum) line.classList.add('active');
+    });
+  }
 }
 </script>
 <script>
