@@ -162,6 +162,20 @@ body.noscroll{overflow:hidden}
 .saved-tag .fa-check-circle{font-size:9px}
 .box.done{border-color:#1f5c3c;background:linear-gradient(135deg,#0c1f15,#0f2a1c)}
 
+
+/* ── Sidebar + Panel Layout v2.8 ── */
+.config-layout{display:flex;gap:0;min-height:calc(100vh - 200px);border-radius:14px;overflow:hidden;border:1px solid #1a3a5c}
+.config-sidebar{width:230px;min-width:230px;background:#0d1f33;border-right:1px solid #1a3a5c;padding:10px 0;border-radius:0}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:13px 20px;cursor:pointer;color:#5a7a9a;font-size:13px;font-weight:600;transition:all .25s;border-left:3px solid transparent;border-bottom:1px solid rgba(26,58,92,.4)}
+.sidebar-item:hover{color:#90e0ef;background:rgba(0,180,216,0.06)}
+.sidebar-item.active{color:#00b4d8;background:rgba(0,180,216,0.15);border-left-color:#00b4d8;font-weight:700}
+.sidebar-item i{width:18px;text-align:center;font-size:14px}
+.config-content{flex:1;background:rgba(13,33,55,0.4);border-radius:0;padding:25px;overflow-y:auto;max-height:none}
+.config-panel{display:none;animation:fadeInPanel .3s ease}
+.config-panel.active{display:block}
+@keyframes fadeInPanel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.config-layout{flex-direction:column;border-radius:0}.config-sidebar{width:100%;min-width:unset;border-right:none;border-bottom:1px solid #1a3a5c;border-radius:0;display:flex;flex-wrap:wrap}.sidebar-item{padding:10px 14px;font-size:12px;border-left:none;border-bottom:none}.config-content{border-radius:0}}
+
 </style>
 </head>
 <body>
@@ -210,21 +224,17 @@ body.noscroll{overflow:hidden}
   <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
 </nav>
 
-<div class="main">
-  <div class="top-bar">
-    <div>
-      <h1>Gestión Documental y Nomenclatura Automatizada</h1>
-      <p class="sub">Auditoría médica y facturación en salud · renombrado automático, carga masiva y consulta histórica.</p>
-    </div>
-    <div class="mode"><span class="dot" id="dot"></span><span id="modeTxt">Detectando almacenamiento…</span></div>
-  </div>
+<div class="container">
 
-  <div class="tabs">
-    <button class="tab sel" id="tabA" type="button">Pantalla A · Carga y creación</button>
-    <button class="tab" id="tabB" type="button">Pantalla B · Consulta histórica</button>
-  </div>
+<div class="config-layout">
+<div class="config-sidebar">
+  <div class="sidebar-item active" data-panel="documentos" onclick="switchPanel('documentos')"><i class="fas fa-folder-open"></i>Documentos</div>
+  <div class="sidebar-item" data-panel="busqueda" onclick="switchPanel('busqueda')"><i class="fas fa-search"></i>Búsqueda</div>
+</div>
+<div class="config-content">
 
-  <section class="screen sel" id="scrA">
+<div class="config-panel active" id="panel-documentos">
+<section class="section-card" id="scrA">
     <div class="card">
       <h2>Sección 1 · Configuración de destino y datos</h2>
       <div class="fields">
@@ -274,8 +284,9 @@ body.noscroll{overflow:hidden}
       <div class="msg" id="msgP"></div>
     </div>
   </section>
-
-  <section class="screen" id="scrB">
+</div>
+<div class="config-panel" id="panel-busqueda">
+<section class="section-card" id="scrB">
     <div class="card">
       <h2>Buscador inteligente</h2>
       <div class="search">
@@ -307,8 +318,8 @@ body.noscroll{overflow:hidden}
       <div class="msg" id="msgB"></div>
     </div>
   </section>
-
-  <footer>Nomenclatura estricta: SIGLA + separador + NIT + separador + carpeta + .pdf</footer>
+</div>
+</div>
 </div>
 
 <!-- Modal Reemplazar/Añadir -->
@@ -2237,6 +2248,19 @@ document.head.appendChild(sty);
 /* ===== Iniciar ===== */
 init();
 
+</script>
+<script>
+/* ── Sidebar panel switching v2.8 ── */
+const PANEL_INIT={};
+function switchPanel(pid){
+  document.querySelectorAll('.config-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+  const panel=document.getElementById('panel-'+pid);
+  if(panel)panel.classList.add('active');
+  const item=document.querySelector('[data-panel="'+pid+'"]');
+  if(item)item.classList.add('active');
+  if(!PANEL_INIT[pid]){PANEL_INIT[pid]=true;}
+}
 </script>
 </body>
 </html>

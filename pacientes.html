@@ -306,51 +306,17 @@
 
     <!-- MAIN CONTENT -->
     <div class="container">
-        <div class="hero-title">
-            <h2><i class="fas fa-satellite-dish"></i> Centro de Consulta</h2>
-            <div class="hero-badge"><i class="fas fa-bolt"></i> Command Hub</div>
-        </div>
-        <p class="hero-subtitle">Consulte y consolide toda la información clínica de cualquier paciente del sistema NEXUSMED IPS Domiciliaria</p>
 
-        <!-- FILTERS -->
-        <div class="filters-section">
-            <div class="filter-group">
-                <label>Estado</label>
-                <select id="filtroEstado" onchange="aplicarFiltros()">
-                    <option value="">Todos</option>
-                    <option value="Activo">Activo</option>
-                    <option value="Observación">Observación</option>
-                    <option value="Crítico">Crítico</option>
-                    <option value="Egresado">Egresado</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Servicio</label>
-                <select id="filtroServicio" onchange="aplicarFiltros()">
-                    <option value="">Todos</option>
-                    <option value="Emergencia">Emergencia</option>
-                    <option value="UCI">UCI</option>
-                    <option value="Cirugía">Cirugía</option>
-                    <option value="Medicina Interna">Medicina Interna</option>
-                    <option value="Pediatría">Pediatría</option>
-                    <option value="Obstetricia">Obstetricia</option>
-                    <option value="Traumatología">Traumatología</option>
-                    <option value="Oncología">Oncología</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Género</label>
-                <select id="filtroGenero" onchange="aplicarFiltros()">
-                    <option value="">Todos</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Femenino">Femenino</option>
-                    <option value="Otro">Otro</option>
-                </select>
-            </div>
-        </div>
 
-        <!-- TOOLBAR -->
-        <div class="toolbar">
+<div class="config-layout">
+<div class="config-sidebar">
+  <div class="sidebar-item active" data-panel="listado" onclick="switchPanel('listado')"><i class="fas fa-users"></i>Pacientes</div>
+  <div class="sidebar-item" data-panel="estadisticas" onclick="switchPanel('estadisticas')"><i class="fas fa-chart-bar"></i>Estadísticas</div>
+</div>
+<div class="config-content">
+
+<div class="config-panel active" id="panel-listado">
+<div class="toolbar">
             <div class="search-box">
                 <span class="search-icon"><i class="fas fa-search"></i></span>
                 <input type="text" id="busqueda" placeholder="Buscar por nombre, documento o diagnóstico..." onkeyup="aplicarFiltros()">
@@ -360,7 +326,14 @@
                 <div class="stat-card stat-activos"><div class="stat-number" id="activosPacientes">0</div><div class="stat-label">Activos</div></div>
                 <div class="stat-card stat-observacion"><div class="stat-number" id="observacionPacientes">0</div><div class="stat-label">Observación</div></div>
                 <div class="stat-card stat-criticos"><div class="stat-number" id="criticosPacientes">0</div><div class="stat-label">Críticos</div></div>
-                <div class="stat-card stat-egresados"><div class="stat-number" id="egresadosPacientes">0</div><div class="stat-label">Egresados</div></div>
+                <div class="stat-card stat-egresados"><div class="stat-number" id="egresadosPacientes">0</div><div class="stat-label">Egresados</div>
+<div class="config-panel" id="panel-estadisticas">
+<div class="section-card"><h3 class="section-title"><i class="fas fa-chart-bar"></i> Estadísticas</h3>
+<p style="color:#5a7a9a">Las estadísticas se calculan automáticamente desde los registros del módulo.</p>
+<div id="stats-pacientes" class="stats-bar" style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap"></div>
+</div>
+</div>
+</div>
             </div>
         </div>
 
@@ -392,7 +365,10 @@
                 <p>No hay pacientes registrados en el sistema</p>
             </div>
         </div>
-    </div>
+    
+</div>
+</div>
+</div>
 
     <!-- ============================================================ -->
     <!-- CONSULTA MODAL - THE COMMAND CENTER                          -->
@@ -1031,7 +1007,21 @@
         html += '.pdf-divider { border-top: 2px dashed #00b4d8; margin: 16px 0; }';
         html += '.pdf-footer { text-align: center; font-size: 9px; color: #999; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 8px; }';
         html += '@media print { body { padding: 10px; } .pdf-page { padding: 0; } }';
-        html += '</style></head><body>';
+        html += '
+/* ── Sidebar + Panel Layout v2.8 ── */
+.config-layout{display:flex;gap:0;min-height:calc(100vh - 200px);border-radius:14px;overflow:hidden;border:1px solid #1a3a5c}
+.config-sidebar{width:230px;min-width:230px;background:#0d1f33;border-right:1px solid #1a3a5c;padding:10px 0;border-radius:0}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:13px 20px;cursor:pointer;color:#5a7a9a;font-size:13px;font-weight:600;transition:all .25s;border-left:3px solid transparent;border-bottom:1px solid rgba(26,58,92,.4)}
+.sidebar-item:hover{color:#90e0ef;background:rgba(0,180,216,0.06)}
+.sidebar-item.active{color:#00b4d8;background:rgba(0,180,216,0.15);border-left-color:#00b4d8;font-weight:700}
+.sidebar-item i{width:18px;text-align:center;font-size:14px}
+.config-content{flex:1;background:rgba(13,33,55,0.4);border-radius:0;padding:25px;overflow-y:auto;max-height:none}
+.config-panel{display:none;animation:fadeInPanel .3s ease}
+.config-panel.active{display:block}
+@keyframes fadeInPanel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.config-layout{flex-direction:column;border-radius:0}.config-sidebar{width:100%;min-width:unset;border-right:none;border-bottom:1px solid #1a3a5c;border-radius:0;display:flex;flex-wrap:wrap}.sidebar-item{padding:10px 14px;font-size:12px;border-left:none;border-bottom:none}.config-content{border-radius:0}}
+
+</style></head><body>';
 
         html += '<div class="pdf-page">';
 
@@ -1217,6 +1207,19 @@ function pieIPS() {
     '</div>';
 }
 
+</script>
+<script>
+/* ── Sidebar panel switching v2.8 ── */
+const PANEL_INIT={};
+function switchPanel(pid){
+  document.querySelectorAll('.config-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+  const panel=document.getElementById('panel-'+pid);
+  if(panel)panel.classList.add('active');
+  const item=document.querySelector('[data-panel="'+pid+'"]');
+  if(item)item.classList.add('active');
+  if(!PANEL_INIT[pid]){PANEL_INIT[pid]=true;}
+}
 </script>
 </body>
 </html>
