@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>NexusMed — Diagnóstico Número Externo</title>
+<style>
+body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;padding:20px;margin:0}
+h1{color:#00b4d8;margin-bottom:20px}
+h2{color:#90e0ef;margin:20px 0 10px}
+pre{background:#0d1b2a;border:1px solid #1a3a5c;border-radius:8px;padding:12px;overflow-x:auto;font-size:12px;white-space:pre-wrap;max-height:400px}
+.btn{background:#00b4d8;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;margin:5px;font-size:14px}
+.btn:hover{background:#0096c7}
+.btn-danger{background:#dc3545}
+.btn-danger:hover{background:#c82333}
+.ok{color:#2ecc71} .err{color:#dc3545} .warn{color:#f0c040}
+.log{margin:5px 0;padding:8px;border-radius:6px;background:rgba(0,180,216,.05);border-left:3px solid #00b4d8}
+table{border-collapse:collapse;width:100%;margin:10px 0}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #1a3a5c}
+th{color:#90e0ef;font-weight:600}
+td{color:#c8d6e5}
+</style>
+</head>
+<body>
+<h1>🔍 Diagnóstico: Número Externo en Facturación</h1>
+
+<div id="status">Cargando diagnóstico...</div>
+
+<h2>1. Estado actual de localStorage</h2>
+<div id="localStatus"></div>
+
+<h2>2. Datos remotos (textdb.online)</h2>
+<div id="remoteStatus"></div>
+
+<h2>3. Comparación local vs remoto</h2>
+<div id="comparison"></div>
+
+<h2>4. Simulación: emitir factura con número externo</h2>
+<div id="simResult"></div>
+
+<h2>5. Acciones</h2>
+<button class="btn" onclick="diagnosticoCompleto()">🔄 Ejecutar Diagnóstico Completo</button>
+<button class="btn btn-danger" onclick="purgarYResincronizar()">🗑️ Purgar Remoto + Re-sincronizar</button>
+<button class="btn" onclick="crearFacturaExternaPrueba()">📝 Crear Factura con Número Externo (Prueba)</button>
+<button class="btn" onclick="verificarPersistencia()">✅ Verificar Persistencia</button>
+
+<h2>6. Log</h2>
+<div id="logContainer"></div>
+
+<script>
+var NS = 'nxmed_b7f3a9c2e4d1_';
+var BASE = 'https://textdb.online/';
+var K_FACTURAS = 'nexus_facturas';
+var K_RIPS = 'nexus_rips_generados';
+var K_CONTADOR = 'nexus_contador_facturas';
+
+function log(msg, tipo) {
+  tipo = tipo || 'info';
+  var el = document.getElementById('logContainer');
+  var d = document.createElement('div');
+  d.className = 'log';
+  d.innerHTML = '<span class="' + (tipo==='error'?'err':tipo==='warning'?'warn':'ok') + '">[' + tipo.toUpperCase() + ']</span> ' + msg;
+  el.appendChild(d);
+  console.log('[DIAG] ' + msg);
+}
+
+function leerLocal(k) {
+  try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch(e) { return null; }
+}
+
+function leerRemoto(clave) {
+  return fetch(BASE + NS + clave).then(r => r.text()).then(t => {
+    try { return JSON.parse(t); } catch(e) { return t; }
+  });
+}
+
+function escribirRemoto(clave, valor) {
+  var datos = new URLSearchParams();
+  datos.set('key', NS + clave);
+  datos.set('value', typeof valor === 'string' ? valor : JSON.stringify(valor));
+  return fetch(BASE + 'update', { method: 'POST', body: datos }).then(r => r.text());
+}
+
+async function diagnosticoCompleto() {
+  document.getElementById('status').innerHTML = '<span class="warn">⏳ Ejecutando diagnóstico...</span>';
+  document.getElementById('logContainer').innerHTML = '';
+  
+  log('Iniciando diagnóstico completo...', 'info');
+  
+  // 1. Estado local
+  var facLocales = leerLocal(K_FACTURAS) || [];
+  var ripsLocales = leerLocal(K_RIPS) || [];
+  var contadorLocal = leerLocal(K_CONTADOR) || { ultimo: 0 };
+  
+  log('Facturas locales: ' + facLocales.length, 'info');
+  log('RIPS locales: ' + ripsLocales.length, 'info');
+  log('Contador local: ' + JSON.stringify(contadorLocal), 'info');
+  
+  var localHtml = '<table><tr><th>ID</th><th>Número</th><th>Externo</th><th>Interno</th><th>Estado</th><th>EPS</th><th>Paciente</th><th>Total</th></tr>';
+  facLocales.forEach(f => {
+    var ext = f.numeroFacturaExterno ? '<span class="warn">' + f.numeroFacturaExterno + '</span>' : '—';
+    var int = f.numeroFacturaInterno || '—';
+    localHtml += '<tr><td style="font-size:10px">' + f.id + '</td><td>' + (f.numeroFactura||'—') + '</td><td>' + ext + '</td><td>' + int + '</td><td>' + f.estado + '</td><td>' + (f.eps||'—') + '</td><td>' + (f.paciente||'—') + '</td><td>$' + (f.total||0).toLocaleString() + '</td></tr>';
+  });
+  localHtml += '</table>';
+  if (!facLocales.length) localHtml = '<p style="color:#dc3545">NO hay facturas en localStorage</p>';
+  document.getElementById('localStatus').innerHTML = localHtml;
+  
+  // 2. Datos remotos
+  try {
+    var facRemotas = await leerRemoto(K_FACTURAS);
+    var ripsRemotos = await leerRemoto(K_RIPS);
+    var contadorRemoto = await leerRemoto(K_CONTADOR);
+    
+    log('Facturas remotas: ' + (Array.isArray(facRemotas) ? facRemotas.length : 'NO es array: ' + JSON.stringify(facRemotas).substring(0,200)), 'info');
+    log('RIPS remotos: ' + (Array.isArray(ripsRemotos) ? ripsRemotos.length : 'NO es array: ' + JSON.stringify(ripsRemotos).substring(0,200)), 'info');
+    log('Contador remoto: ' + JSON.stringify(contadorRemoto), 'info');
+    
+    var remoteHtml = '<table><tr><th>ID</th><th>Número</th><th>Externo</th><th>Estado</th><th>EPS</th><th>Paciente</th></tr>';
+    if (Array.isArray(facRemotas)) {
+      facRemotas.forEach(f => {
+        if (f && f.id) {
+          remoteHtml += '<tr><td style="font-size:10px">' + f.id + '</td><td>' + (f.numeroFactura||'—') + '</td><td>' + (f.numeroFacturaExterno||'—') + '</td><td>' + (f.estado||'?') + '</td><td>' + (f.eps||'—') + '</td><td>' + (f.paciente||'—') + '</td></tr>';
+        }
+      });
+    }
+    remoteHtml += '</table>';
+    if (!Array.isArray(facRemotas) || !facRemotas.length) remoteHtml = '<p style="color:#f0c040">Servidor NO tiene facturas o datos corruptos</p>';
+    document.getElementById('remoteStatus').innerHTML = remoteHtml;
+    
+    // 3. Comparación
+    var soloLocal = [];
+    var soloRemoto = [];
+    var enAmbos = [];
+    
+    if (Array.isArray(facRemotas)) {
+      var idsRemotos = new Set(facRemotas.filter(f=>f&&f.id).map(f=>f.id));
+      facLocales.forEach(f => {
+        if (idsRemotos.has(f.id)) enAmbos.push(f);
+        else soloLocal.push(f);
+      });
+      facRemotas.filter(f=>f&&f.id).forEach(f => {
+        if (!facLocales.find(fl => fl.id === f.id)) soloRemoto.push(f);
+      });
+    }
+    
+    var compHtml = '';
+    if (soloLocal.length) {
+      compHtml += '<h3 style="color:#2ecc71">✅ Solo en LOCAL (se perderían si el servidor sobrescribe):</h3>';
+      compHtml += '<table><tr><th>ID</th><th>Número</th><th>Externo</th><th>Estado</th></tr>';
+      soloLocal.forEach(f => {
+        compHtml += '<tr><td style="font-size:10px">' + f.id + '</td><td>' + (f.numeroFactura||'—') + '</td><td>' + (f.numeroFacturaExterno||'—') + '</td><td>' + f.estado + '</td></tr>';
+      });
+      compHtml += '</table>';
+    }
+    if (soloRemoto.length) {
+      compHtml += '<h3 style="color:#f0c040">⚠️ Solo en REMOTO (fantasmas):</h3>';
+      compHtml += '<table><tr><th>ID</th><th>Número</th><th>Estado</th></tr>';
+      soloRemoto.forEach(f => {
+        compHtml += '<tr><td style="font-size:10px">' + f.id + '</td><td>' + (f.numeroFactura||'—') + '</td><td>' + (f.estado||'?') + '</td></tr>';
+      });
+      compHtml += '</table>';
+    }
+    if (enAmbos.length) {
+      compHtml += '<h3 style="color:#90e0ef">📋 En AMBOS (sincronizados):</h3>';
+      compHtml += '<p>' + enAmbos.length + ' factura(s)</p>';
+    }
+    if (!compHtml) compHtml = '<p>No hay facturas en ningún lado</p>';
+    document.getElementById('comparison').innerHTML = compHtml;
+    
+  } catch(e) {
+    log('Error leyendo datos remotos: ' + e.message, 'error');
+    document.getElementById('remoteStatus').innerHTML = '<p class="err">Error: ' + e.message + '</p>';
+  }
+  
+  // Verificar NXDB
+  if (typeof NXDB !== 'undefined') {
+    var diag = NXDB.diagnosticar();
+    log('NXDB diagnóstico: ' + JSON.stringify(diag), 'info');
+  }
+  
+  // Verificar pendientes
+  var pendStr = sessionStorage.getItem('NXDB_pending');
+  log('Pendientes NXDB: ' + pendStr, 'info');
+  
+  document.getElementById('status').innerHTML = '<span class="ok">✅ Diagnóstico completado</span>';
+}
+
+async function purgarYResincronizar() {
+  if (!confirm('⚠️ ¿Purgar datos remotos de facturas y RIPS?\nEsto eliminará los datos en textdb.online y forzará una re-subida desde localStorage.')) return;
+  
+  log('Purgando datos remotos...', 'warning');
+  
+  try {
+    await escribirRemoto(K_FACTURAS, '[]');
+    log('Facturas remotas purgadas', 'ok');
+    await escribirRemoto(K_RIPS, '[]');
+    log('RIPS remotos purgados', 'ok');
+    
+    // Limpiar espejo NXDB
+    if (typeof NXDB !== 'undefined') {
+      await NXDB.purgarRemotoTodo([K_FACTURAS, K_RIPS]);
+      log('Espejo NXDB actualizado', 'ok');
+    }
+    
+    // Forzar subida
+    if (typeof NXDB !== 'undefined') {
+      log('Forzando subida de datos locales...', 'info');
+      await NXDB.forzarSubida(K_FACTURAS);
+      await NXDB.forzarSubida(K_RIPS);
+      log('Subida forzada completada', 'ok');
+    }
+    
+    toast('✅ Datos remotos purgados y re-subidos', 'success');
+  } catch(e) {
+    log('Error en purga: ' + e.message, 'error');
+  }
+  
+  diagnosticoCompleto();
+}
+
+async function crearFacturaExternaPrueba() {
+  var numExterno = 'TEST-' + Date.now();
+  var facLocales = leerLocal(K_FACTURAS) || [];
+  
+  var nuevaFac = {
+    id: 'FAC_' + Date.now() + '_' + Math.random().toString(36).substring(2,7),
+    numeroFactura: numExterno,
+    numeroFacturaExterno: numExterno,
+    numeroFacturaInterno: null,
+    estado: 'definitiva',
+    paciente: 'PACIENTE PRUEBA',
+    documento: '12345678',
+    tipoDoc: 'CC',
+    eps: 'FOMAG',
+    epsKey: 'FOMAG',
+    numAdmision: 'ADM-TEST',
+    servicios: [{ cups: '933600', servicio: 'TERAPIA FÍSICA DOM', cantidad: 5, valorUnit: 42769, epsKey: 'FOMAG' }],
+    subtotal: 213845,
+    total: 213845,
+    fecha: new Date().toISOString().split('T')[0],
+    creadoEn: new Date().toISOString(),
+    emitidaEn: new Date().toISOString()
+  };
+  
+  facLocales.push(nuevaFac);
+  localStorage.setItem(K_FACTURAS, JSON.stringify(facLocales));
+  
+  log('Factura de prueba creada con número externo: ' + numExterno, 'ok');
+  log('ID: ' + nuevaFac.id, 'info');
+  
+  // Verificar inmediatamente
+  var verif = leerLocal(K_FACTURAS);
+  var found = verif.find(f => f.id === nuevaFac.id);
+  if (found) {
+    log('✅ Factura encontrada en localStorage inmediatamente después de guardar', 'ok');
+  } else {
+    log('❌ Factura NO encontrada en localStorage después de guardar!', 'error');
+  }
+  
+  // Marcar pendiente en NXDB si existe
+  if (typeof NXDB !== 'undefined' && NXDB._marcarPendiente) {
+    NXDB._marcarPendiente(K_FACTURAS);
+    log('Factura marcada como pendiente en NXDB', 'info');
+  }
+  
+  document.getElementById('simResult').innerHTML = '<p class="ok">Factura creada: ' + numExterno + ' (ID: ' + nuevaFac.id + ')</p><p>Total facturas: ' + verif.length + '</p>';
+  
+  diagnosticoCompleto();
+}
+
+async function verificarPersistencia() {
+  log('Verificando persistencia de facturas...', 'info');
+  
+  var antes = leerLocal(K_FACTURAS) || [];
+  log('Facturas ANTES: ' + antes.length, 'info');
+  
+  // Forzar sincronización NXDB si existe
+  if (typeof NXDB !== 'undefined') {
+    log('Forzando sincronización NXDB...', 'info');
+    try {
+      await NXDB.sincronizar();
+      log('Sincronización NXDB completada', 'ok');
+    } catch(e) {
+      log('Error en sincronización: ' + e.message, 'error');
+    }
+  }
+  
+  // Simular recarga: ejecutar bajarTodo manualmente
+  log('Simulando recarga de página (bajarTodo)...', 'warning');
+  try {
+    var facRemotas = await leerRemoto(K_FACTURAS);
+    log('Datos remotos obtenidos: ' + (Array.isArray(facRemotas) ? facRemotas.length + ' facturas' : JSON.stringify(facRemotas).substring(0,100)), 'info');
+    
+    // Simular merge de unir()
+    var local = antes;
+    var remoto = Array.isArray(facRemotas) ? facRemotas : [];
+    
+    var resultado = [];
+    var vistos = {};
+    
+    // Items locales primero (siempre se conservan)
+    local.forEach(f => {
+      var k = f.id ? 'id:' + f.id : JSON.stringify(f);
+      if (!vistos[k]) { vistos[k] = true; resultado.push(f); }
+    });
+    
+    // Items remotos (se añaden si no están en local)
+    remoto.forEach(f => {
+      var k = f.id ? 'id:' + f.id : JSON.stringify(f);
+      if (vistos[k]) return;
+      vistos[k] = true;
+      resultado.push(f);
+    });
+    
+    log('Resultado del merge simulado: ' + resultado.length + ' facturas', 'info');
+    
+    // Verificar si la factura externa sobrevive
+    var externas = resultado.filter(f => f.numeroFacturaExterno);
+    if (externas.length) {
+      log('✅ Facturas con número externo SOBREVIVEN al merge: ' + externas.map(f => f.numeroFactura).join(', '), 'ok');
+    } else {
+      log('❌ NINGUNA factura con número externo sobrevive al merge!', 'error');
+    }
+    
+  } catch(e) {
+    log('Error simulando recarga: ' + e.message, 'error');
+  }
+  
+  var despues = leerLocal(K_FACTURAS) || [];
+  log('Facturas DESPUÉS: ' + despues.length, 'info');
+  
+  if (despues.length < antes.length) {
+    log('⚠️ PÉRDIDA DE DATOS: ' + (antes.length - despues.length) + ' factura(s) perdidas!', 'error');
+    var perdidas = antes.filter(a => !despues.find(d => d.id === a.id));
+    perdidas.forEach(p => {
+      log('  Perdida: ' + p.numeroFactura + ' (' + p.id + ') Externo=' + (p.numeroFacturaExterno||'no'), 'error');
+    });
+  } else {
+    log('✅ No se perdieron datos', 'ok');
+  }
+}
+
+function toast(msg, tipo) {
+  tipo = tipo || 'info';
+  var d = document.createElement('div');
+  d.style.cssText = 'position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:8px;color:#fff;z-index:9999;font-size:14px;';
+  d.style.background = tipo === 'success' ? '#2ecc71' : tipo === 'error' ? '#dc3545' : tipo === 'warning' ? '#f0c040' : '#00b4d8';
+  d.textContent = msg;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 3000);
+}
+
+// Auto-diagnóstico al cargar
+window.addEventListener('DOMContentLoaded', diagnosticoCompleto);
+</script>
+</body>
+</html>
