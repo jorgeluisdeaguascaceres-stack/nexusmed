@@ -269,6 +269,9 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
           <div class="adm-dropdown-list" id="admDropdownList"></div>
         </div>
       </div>
+      <div style="margin-top:10px;text-align:center">
+        <button class="btn" style="background:rgba(0,180,216,.12);color:#00b4d8;border:1px solid rgba(0,180,216,.3);padding:8px 18px;border-radius:8px;font-size:12px;cursor:pointer" onclick="listarEgresados()"><i class="fas fa-list"></i> Ver todas las admisiones egresadas</button>
+      </div>
       <div id="admSeleccionada" style="display:none;margin-top:18px">
         <div class="form-grid" id="datosPacienteGrid" style="background:#0a1628;border-radius:10px;padding:16px;border:1px solid #1a3a5c"></div>
         <div style="margin-top:14px;text-align:right">
@@ -757,6 +760,7 @@ function irPaso(num) {
 // ─── PASO 1: Buscar admisiones egresadas ───
 function buscarAdmisiones(query) {
   const pacientes = leer(K_PACIENTES) || [];
+  console.log('[FACT] Pacientes en localStorage:', pacientes.length, '| Estados:', pacientes.map(p=>p.estado).join(', '));
   const q = query.toLowerCase().trim();
   if (!q) return [];
 
@@ -770,6 +774,27 @@ function buscarAdmisiones(query) {
     const numAdm = (p.numAdmision || '').toLowerCase();
     return nombre.includes(q) || doc.includes(q) || numAdm.includes(q);
   });
+}
+
+// ─── Listar TODOS los egresados (botón) ───
+function listarEgresados() {
+  const pacientes = leer(K_PACIENTES) || [];
+  console.log('[FACT] listarEgresados — Total pacientes:', pacientes.length);
+  const egresados = pacientes.filter(p => {
+    const estado = (p.estado || '').toLowerCase();
+    return estado === 'egresado';
+  });
+  console.log('[FACT] Egresados encontrados:', egresados.length);
+  if (!egresados.length) {
+    toast('⚠️ No hay admisiones egresadas en el sistema. Registre admisiones en el módulo de Admisiones y délas de alta primero.', 'warning');
+    // Mostrar diagnóstico en consola
+    const estados = {};
+    pacientes.forEach(p => { const e = p.estado || 'SIN ESTADO'; estados[e] = (estados[e]||0) + 1; });
+    console.log('[FACT] Distribución de estados:', estados);
+    return;
+  }
+  renderDropdownResultados(egresados);
+  document.getElementById('admDropdownList').classList.add('open');
 }
 
 function renderDropdownResultados(resultados) {
@@ -1631,13 +1656,44 @@ document.addEventListener('DOMContentLoaded', function() {
   actualizarStats();
   renderServiciosTabla();
 
+  // v2.7: Esperar sincronización NXDB antes de habilitar búsqueda de admisiones
+  var buscarAdmInput = document.getElementById('buscarAdmInput');
+  buscarAdmInput.disabled = true;
+  buscarAdmInput.placeholder = 'Sincronizando datos con la nube…';
+  function habilitarBusqueda() {
+    buscarAdmInput.disabled = false;
+    buscarAdmInput.placeholder = 'Escriba nombre, documento o N° admisión…';
+    console.log('[FACT] Búsqueda de admisiones habilitada — pacientes en localStorage:', (leer(K_PACIENTES)||[]).length);
+    // Mostrar cuántos egresados hay
+    var egresados = (leer(K_PACIENTES)||[]).filter(function(p){ return (p.estado||'').toLowerCase()==='egresado'; });
+    if (egresados.length > 0) {
+      toast('✅ ' + egresados.length + ' admisión(es) egresada(s) disponible(s) para facturar', 'success');
+    } else {
+      var todos = leer(K_PACIENTES) || [];
+      if (todos.length === 0) {
+        toast('ℹ️ No hay pacientes registrados. Registre admisiones primero.', 'warning');
+      } else {
+        var estados = {};
+        todos.forEach(function(p){ var e = p.estado||'Sin estado'; estados[e]=(estados[e]||0)+1; });
+        toast('ℹ️ Hay ' + todos.length + ' pacientes pero ninguno egresado. Estados: ' + Object.entries(estados).map(function(e){return e[0]+'('+e[1]+')';}).join(', '), 'warning');
+      }
+    }
+  }
+  // Esperar que NXDB termine de sincronizar (máximo 5 segundos)
+  if (window.NX && window.NX.sincronizar) {
+    window.NX.sincronizar().then(habilitarBusqueda).catch(habilitarBusqueda);
+    setTimeout(habilitarBusqueda, 5000); // fallback timeout
+  } else {
+    setTimeout(habilitarBusqueda, 2000); // sin NXDB, esperar 2s
+  }
+
   // Búsqueda de admisiones egresadas
-  const inputBuscar = document.getElementById('buscarAdmInput');
+  // (inputBuscar ya referenciado arriba, pero creamos debounceTimer aquí)
   let debounceTimer;
-  inputBuscar.addEventListener('input', function() {
+  buscarAdmInput.addEventListener('input', function() {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      const q = inputBuscar.value.trim();
+      const q = buscarAdmInput.value.trim();
       if (q.length < 2) {
         document.getElementById('admDropdownList').classList.remove('open');
         return;
@@ -1647,9 +1703,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 250);
   });
 
-  inputBuscar.addEventListener('focus', function() {
-    if (inputBuscar.value.trim().length >= 2) {
-      const resultados = buscarAdmisiones(inputBuscar.value.trim());
+  buscarAdmInput.addEventListener('focus', function() {
+    if (buscarAdmInput.value.trim().length >= 2) {
+      const resultados = buscarAdmisiones(buscarAdmInput.value.trim());
       renderDropdownResultados(resultados);
     }
   });
