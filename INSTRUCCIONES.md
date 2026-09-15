@@ -1,91 +1,82 @@
-# NEXUSMED PATCH v2.6 — Instrucciones de Instalación
+# NexusMed Patch v2.7 — Instrucciones de Deploy
 
 ## Archivos incluidos
 
-| Archivo | Versión | Cambios |
-|---------|---------|----------|
-| `nexus_db.js` | v2.6 | Motor de sincronización corregido — previene pérdida de facturas y RIPS |
-| `facturacion.html` | v2.5 | Facturación corregida — guarda con número alternativo y pre-facturas |
-| `rips.html` | v2.3 | Exportación XML de RIPS + corrección de typo |
+| Archivo | Cambio principal |
+|---|---|
+| `configuracion.html` | Rediseño completo: layout sidebar + paneles individuales (7 secciones) con lazy-init |
+| `facturacion.html` | Fallback defensivo `obtenerNumAdmision(p)` para numAdmision vacío |
+| `nexus_db.js` | Sin cambios (persistencia NXDB v2.6) |
+| `rips.html` | Sin cambios |
+| `permisos.js` | Sin cambios |
 
-## Pasos para actualizar GitHub
+## Cambios detallados
 
-### Opción A: Editor Web de GitHub (más fácil)
+### configuracion.html — Sidebar + Paneles
 
-1. Abra su repositorio: https://github.com/jorgeluisdeaguascaceres-stack/nexusmed
-2. Para CADA archivo, haga lo siguiente:
-   - Navegue al archivo (ej: `nexus_db.js`)
-   - Haga clic en el ícono de lápiz ✏️ (Edit this file)
-   - **Seleccione TODO el contenido** (Ctrl+A) y **Borre** (Delete)
-   - **Copie TODO el contenido** del archivo nuevo de este patch
-   - **Pegue** en el editor de GitHub
-   - Haga clic en **Commit changes** (verde)
-   - Ponga un mensaje como: `fix: nexus_db.js v2.6 - previene pérdida de facturas`
+- **Antes**: Las 7 secciones (Usuarios, IPS, CUPS, EPS, Matriz, Prueba, Mantenimiento) estaban apiladas verticalmente en una sola página con scroll infinito.
+- **Ahora**: Sidebar izquierdo con íconos + panel derecho individual. Solo se muestra un panel a la vez; clic en sidebar cambia el panel activo.
+- **CSS**: Nuevo `.config-layout` (flex), `.config-sidebar` (230px), `.config-content` (flex:1), `.config-panel` (display:none except `.active`).
+- **Responsive**: En pantallas <900px el sidebar se convierte en fila horizontal de íconos.
+- **JS**: `PANEL_INIT` object + `switchPanel(pid)` / `initPanel(pid)` con lazy-init (solo inicializa la primera vez que se visita cada panel).
+- **Modales** (`modalEditar`, `modalFicha`) quedan fuera del layout y no se ven afectados.
+- **Panel EPS** incluye también "Estado del Sistema" (como antes).
 
-3. Repita para los 3 archivos:
-   - `nexus_db.js` → Mensaje: `fix: motor sincronización v2.6 - previene pérdida de facturas/RIPS`
-   - `facturacion.html` → Mensaje: `fix: facturación v2.5 - guarda con número alternativo`
-   - `rips.html` → Mensaje: `feat: exportación XML de RIPS`
+### facturacion.html — Fallback numAdmision
 
-4. **Render se redespliega automáticamente** al detectar el push (si está conectado al repo)
+- Se agregó función helper `obtenerNumAdmision(p)` que:
+  1. Retorna `p.numAdmision` si existe y no está vacío.
+  2. Si no, busca en `nexus_pacientes` por documento y obtiene el último numAdmision.
+  3. Si lo encuentra, actualiza `p.numAdmision` en el objeto para llamadas futuras.
+- Reemplazó 3 ocurrencias críticas: `llenarDatosPaciente`, `recalcularLiquidacion`, `construirFactura` / `llenarResumenEmitir`.
+- Las 2 ocurrencias en la lista de búsqueda de admisiones NO se cambiaron (no necesitan fallback).
 
-### Opción B: Subir archivos directamente
+## Pasos de deploy
 
-1. Vaya a: https://github.com/jorgeluisdeaguascaceres-stack/nexusmed
-2. Haga clic en **Add file** → **Upload files**
-3. Arrastre los 3 archivos
-4. Commit con mensaje: `fix: patch v2.6 - corrige persistencia de facturas y RIPS`
+### Opción A: Repositorio GitHub
 
----
+```bash
+# 1. Clonar o actualizar repo
+gh repo clone jorgeluisdeaguascaceres-stack/nexusmed
+# (o cd al directorio existente)
 
-## Resumen de Bugs Corregidos
+# 2. Copiar archivos del patch
+cp configuracion.html  nexusmed/configuracion.html
+cp facturacion.html     nexusmed/facturacion.html
+cp nexus_db.js          nexusmed/nexus_db.js
+cp rips.html            nexusmed/rips.html
+cp permisos.js          nexusmed/permisos.js
 
-### BUG #1 — CRÍTICO: `bajarTodo()` sobrescribe datos locales
-**Problema:** Al navegar a otro módulo, la nueva página carga `nexus_db.js` desde cero. La variable `pendientes={}` queda vacía. `bajarTodo()` lee del servidor (que tiene `[]`) y como no hay pendientes, SOBRESCRIBE localStorage con `[]`, **destruyendo toda factura o RIPS guardado localmente**.
+# 3. Commit y push
+cd nexusmed
+git add .
+git commit -m "v2.7: sidebar config + fallback numAdmision"
+git push
 
-**Fix v2.6:** 
-- `pendientes` se persiste en `sessionStorage` (sobrevive navegación entre páginas)
-- `bajarTodo()` NUNCA sobrescribe datos locales con datos remotos vacíos
-- Si el local tiene datos y el remoto está vacío, marca como pendiente para SUBIR, no para sobrescribir
-- Siempre hace MERGE (nunca sobrescribe directamente)
+# 4. Render detecta el push y redespliega automáticamente
+```
 
-### BUG #2 — Race condition en `enviarPendientes()`
-**Problema:** `enviarPendientes()` lee `mio` al inicio, hace fetch/upload asíncrono, luego `almacenarLocal(clave, String(final))` sobrescribe localStorage con un merge obsoleto. Si el usuario guardó datos DURANTE la ventana asíncrona, esos datos se PIERDEN.
+### Opción B: Deploy manual en Render Dashboard
 
-**Fix v2.6:**
-- Antes de sobrescribir, se re-lee localStorage y se hace un segundo merge
-- Post-envío: detecta nuevas claves pendientes y programa reenvío inmediato
-- `sendBeacon()` en `beforeunload` como respaldo final
+1. Ir a https://dashboard.render.com → seleccionar servicio `nexusmed-plto`
+2. Si usa conexión GitHub, el push anterior basta.
+3. Si usa deploy manual, subir los archivos vía drag-and-drop o conectar branch actualizada.
 
-### BUG #3 — Factura silenciosamente descartada con `_editandoId`
-**Problema:** Cuando `_editandoId` está seteado pero `idx < 0` (la pre-factura original fue eliminada), tanto `emitirFacturaDefinitiva()` como `guardarPreFactura()` descartan silenciosamente la factura nueva.
+## Verificación post-deploy
 
-**Fix v2.5:**
-- Bloque `else` agrega la factura como nueva en vez de descartarla
-- Console.warn para diagnóstico
+1. Acceder a `https://nexusmed-plto.onrender.com/configuracion.html`
+2. Verificar sidebar izquierdo con 7 ítems.
+3. Clic en cada ítem → solo ese panel debe mostrarse.
+4. Probar lazy-init: abrir DevTools → Console → cambiar de panel → verificar que funciones init solo se ejecutan la primera vez.
+5. Ir a `facturacion.html` → seleccionar un paciente con admisión → verificar que numAdmision se muestra correctamente.
+6. Probar con un paciente SIN numAdmision explícito → debe buscar en nexus_pacientes.
 
-### BUG #4 — `siguienteNumFC()` causa race condition
-**Problema:** `siguienteNumFC()` llama `guardar()` que activa NXDB.enviarPendientes() ANTES de que la factura se guarde. Con números alternativos (externos como FE12865), esto es especialmente problemático.
+## Rollback
 
-**Fix v2.5:**
-- Con número externo: primero guardar la factura, DESPUÉS asignar número interno
-- Post-save verification: re-lee localStorage para confirmar que la factura se guardó
-- Si falla, reintento automático + aviso al usuario
+Si algo falla, restaurar versión anterior desde Git:
+```bash
+git revert HEAD
+git push
+```
 
-### NUEVA CARACTERÍSTICA: Exportar RIPS en XML
-- Botón "Descargar XML" en la página de RIPS
-- Genera archivo XML con estructura válida para entidades pagadoras
-- Corrección de typo: `codZonaTerritorialResidencia` (antes tenía error)
-
----
-
-## Verificación Post-Deploy
-
-Después de que Render redespliegue:
-
-1. Vaya a https://nexusmed-plto.onrender.com
-2. Abra DevTools (F12) → Console
-3. Debería ver: `[NXDB] Pendientes restaurados de sessionStorage: [...]`
-4. Pruebe crear una factura con número alternativo
-5. Navegue a otra página y vuelva — la factura debe seguir ahí
-6. Verifique que el botón "Descargar XML" aparece en RIPS
+O restaurar backup local: `configuracion.html.bak` (1520 líneas originales).

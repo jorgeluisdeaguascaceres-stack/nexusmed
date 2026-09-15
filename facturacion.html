@@ -845,12 +845,22 @@ function seleccionarAdmision(idx) {
   renderServiciosTabla();
 }
 
+/* ── Fallback defensivo numAdmision v2.7 ── */
+function obtenerNumAdmision(p) {
+  if (p.numAdmision && p.numAdmision !== '—' && String(p.numAdmision).trim()) return p.numAdmision;
+  var todos = [];
+  try { todos = JSON.parse(localStorage.getItem('nexus_pacientes') || '[]'); } catch(e) { todos = []; }
+  var match = todos.find(function(x) { return String(x.documento) === String(p.documento) && x.numAdmision; });
+  if (match && match.numAdmision) { p.numAdmision = match.numAdmision; return match.numAdmision; }
+  return '—';
+}
+
 function llenarDatosPaciente(p) {
   const nombre = p.nombre || '—';
   const doc = p.documento || '—';
   const eps = p.eps || '—';
   const codEps = codigoEpsFromString(eps);
-  const numAdm = p.numAdmision || '—';
+  const numAdm = obtenerNumAdmision(p);
   const municipio = p.municipio || '—';
   const dx = p.diagnostico || '—';
   const servicio = p.servicio || '—';
@@ -1155,7 +1165,7 @@ function recalcularLiquidacion() {
   const codEps = codigoEpsFromString(eps);
   const nombre = p.nombre || '—';
   const doc = p.documento || '—';
-  const numAdm = p.numAdmision || '—';
+  const numAdm = obtenerNumAdmision(p);
   const dx = p.diagnostico || '—';
 
   document.getElementById('liqNumAdm').textContent = numAdm;
@@ -1254,7 +1264,7 @@ function construirFactura() {
     id: facturaActual._editandoId || uid('FAC'),
     numeroFactura: facturaActual.numeroFactura || null,
     admisionId: p.id || null,
-    numAdmision: p.numAdmision || '—',
+    numAdmision: obtenerNumAdmision(p),
     paciente: p.nombre || '—',
     documento: p.documento || '—',
     tipoDoc: p.tipoDoc || 'CC',
@@ -1280,7 +1290,7 @@ function llenarResumenEmitir() {
   const p = facturaActual.admision;
   const eps = p ? (p.eps || '—') : '—';
   const nombre = p ? (p.nombre || '—') : '—';
-  const numAdm = p ? (p.numAdmision || '—') : '—';
+  const numAdm = p ? obtenerNumAdmision(p) : '—';
 
   let subtotal = 0;
   facturaActual.servicios.forEach(s => subtotal += s.cantidad * s.valorUnit);
