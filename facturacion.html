@@ -1,4 +1,3 @@
-<!-- NexusMed Facturación v2.4 - Bug fix: persistencia facturas/RIPS -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -171,20 +170,6 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
 /* Alerta no parametrizado */
 #alertNoParam{animation:alertPulse 2s ease-in-out 1}
 @keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.7}}
-
-/* ── Sidebar + Panel Layout v2.8 ── */
-.config-layout{display:flex;gap:0;min-height:calc(100vh - 200px);border-radius:14px;overflow:hidden;border:1px solid #1a3a5c}
-.config-sidebar{width:230px;min-width:230px;background:#0d1f33;border-right:1px solid #1a3a5c;padding:10px 0;border-radius:0}
-.sidebar-item{display:flex;align-items:center;gap:10px;padding:13px 20px;cursor:pointer;color:#5a7a9a;font-size:13px;font-weight:600;transition:all .25s;border-left:3px solid transparent;border-bottom:1px solid rgba(26,58,92,.4)}
-.sidebar-item:hover{color:#90e0ef;background:rgba(0,180,216,0.06)}
-.sidebar-item.active{color:#00b4d8;background:rgba(0,180,216,0.15);border-left-color:#00b4d8;font-weight:700}
-.sidebar-item i{width:18px;text-align:center;font-size:14px}
-.config-content{flex:1;background:rgba(13,33,55,0.4);border-radius:0;padding:25px;overflow-y:auto;max-height:none}
-.config-panel{display:none;animation:fadeInPanel .3s ease}
-.config-panel.active{display:block}
-@keyframes fadeInPanel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:900px){.config-layout{flex-direction:column;border-radius:0}.config-sidebar{width:100%;min-width:unset;border-right:none;border-bottom:1px solid #1a3a5c;border-radius:0;display:flex;flex-wrap:wrap}.sidebar-item{padding:10px 14px;font-size:12px;border-left:none;border-bottom:none}.config-content{border-radius:0}}
-
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
@@ -230,20 +215,50 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
 </div>
 
 <div class="container">
-<div class="titulo"><i class="fas fa-file-invoice-dollar"></i> Facturación</div>
+  <div class="titulo"><i class="fas fa-file-invoice-dollar"></i> Facturación</div>
 
-<div class="config-layout">
-<div class="config-sidebar">
-  <div class="sidebar-item active" data-panel="paso1" onclick="switchPanel('paso1')"><i class="fas fa-user-plus"></i>Paso 1 – Admisión</div>
-  <div class="sidebar-item" data-panel="paso2" onclick="switchPanel('paso2')"><i class="fas fa-list-alt"></i>Paso 2 – Servicios</div>
-  <div class="sidebar-item" data-panel="paso3" onclick="switchPanel('paso3')"><i class="fas fa-calculator"></i>Paso 3 – Liquidación</div>
-  <div class="sidebar-item" data-panel="paso4" onclick="switchPanel('paso4')"><i class="fas fa-file-invoice"></i>Paso 4 – Emitir</div>
-  <div class="sidebar-item" data-panel="historial" onclick="switchPanel('historial')"><i class="fas fa-history"></i>Historial</div>
-</div>
-<div class="config-content">
+  <!-- Stats -->
+  <div class="stats-row" id="statsFacturacion">
+    <div class="stat-card"><div class="stat-num" id="statPre">0</div><div class="stat-label">Pre-Facturas</div></div>
+    <div class="stat-card"><div class="stat-num" id="statDef">0</div><div class="stat-label">Definitivas</div></div>
+    <div class="stat-card"><div class="stat-num" id="statAnul">0</div><div class="stat-label">Anuladas</div></div>
+    <div class="stat-card"><div class="stat-num" id="statTotal$">$0</div><div class="stat-label">Total Facturado</div></div>
+  </div>
 
-<div class="config-panel active" id="panel-paso1">
-<div class="section-card" id="paso1Panel">
+  <!-- Tabs (solo 2: Nueva Factura + Historial) -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" data-tab="tabNueva" onclick="cambiarTab('tabNueva')"><i class="fas fa-plus-circle"></i> Nueva Factura</button>
+    <button class="tab-btn" data-tab="tabHistorial" onclick="cambiarTab('tabHistorial')"><i class="fas fa-list"></i> Historial</button>
+  </div>
+
+  <!-- ═══════ TAB: NUEVA FACTURA ═══════ -->
+  <div class="tab-panel active" id="tabNueva">
+
+    <!-- Paso Indicator -->
+    <div class="paso-indicator" id="pasoIndicator">
+      <div class="paso-step active" data-paso="1">
+        <div class="paso-num">1</div>
+        <div class="paso-label">Admisión</div>
+      </div>
+      <div class="paso-line" data-line="1"></div>
+      <div class="paso-step" data-paso="2">
+        <div class="paso-num">2</div>
+        <div class="paso-label">Servicios</div>
+      </div>
+      <div class="paso-line" data-line="2"></div>
+      <div class="paso-step" data-paso="3">
+        <div class="paso-num">3</div>
+        <div class="paso-label">Liquidación</div>
+      </div>
+      <div class="paso-line" data-line="3"></div>
+      <div class="paso-step" data-paso="4">
+        <div class="paso-num">4</div>
+        <div class="paso-label">Emitir</div>
+      </div>
+    </div>
+
+    <!-- PASO 1: Buscar Admisión -->
+    <div class="form-section" id="paso1Panel">
       <div class="form-title"><i class="fas fa-search"></i> Paso 1 — Buscar Admisión Egresada</div>
       <p style="color:#5a7a9a;font-size:13px;margin-bottom:14px">Solo admisiones con estado <strong style="color:#2ecc71">Egresado</strong> pueden facturarse.</p>
       <div class="form-group" style="margin-bottom:0">
@@ -253,9 +268,6 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
           <div class="adm-dropdown-list" id="admDropdownList"></div>
         </div>
       </div>
-      <div style="margin-top:10px;text-align:center">
-        <button class="btn" style="background:rgba(0,180,216,.12);color:#00b4d8;border:1px solid rgba(0,180,216,.3);padding:8px 18px;border-radius:8px;font-size:12px;cursor:pointer" onclick="listarEgresados()"><i class="fas fa-list"></i> Ver todas las admisiones egresadas</button>
-      </div>
       <div id="admSeleccionada" style="display:none;margin-top:18px">
         <div class="form-grid" id="datosPacienteGrid" style="background:#0a1628;border-radius:10px;padding:16px;border:1px solid #1a3a5c"></div>
         <div style="margin-top:14px;text-align:right">
@@ -263,9 +275,9 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
         </div>
       </div>
     </div>
-</div>
-<div class="config-panel" id="panel-paso2">
-<div class="section-card" id="paso2Panel" >
+
+    <!-- PASO 2: Servicios -->
+    <div class="form-section" id="paso2Panel" style="display:none">
       <div class="form-title"><i class="fas fa-medkit"></i> Paso 2 — Agregar Servicios (CUPS)</div>
 
       <!-- Fila: Código CUPS + auto-fill + Tipo + Valor + Cantidad + Autorización + Agregar -->
@@ -320,9 +332,9 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
         <button class="btn btn-primary" onclick="irPaso(3)"><i class="fas fa-arrow-right"></i> Siguiente — Liquidación</button>
       </div>
     </div>
-</div>
-<div class="config-panel" id="panel-paso3">
-<div class="section-card" id="paso3Panel" >
+
+    <!-- PASO 3: Liquidación -->
+    <div class="form-section" id="paso3Panel" style="display:none">
       <div class="form-title"><i class="fas fa-calculator"></i> Paso 3 — Liquidación</div>
       <div class="liq-grid" id="liqGrid">
         <div class="liq-card">
@@ -357,9 +369,9 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
         <button class="btn btn-primary" onclick="irPaso(4)"><i class="fas fa-arrow-right"></i> Siguiente — Emitir</button>
       </div>
     </div>
-</div>
-<div class="config-panel" id="panel-paso4">
-<div class="section-card" id="paso4Panel" >
+
+    <!-- PASO 4: Emitir -->
+    <div class="form-section" id="paso4Panel" style="display:none">
       <div class="form-title"><i class="fas fa-paper-plane"></i> Paso 4 — Emitir Factura Definitiva</div>
       <p style="color:#5a7a9a;font-size:13px;margin-bottom:14px">Revise la información y emita la factura definitiva. Se asignará un número consecutivo automático, <strong style="color:#90e0ef">o ingrese manualmente el número si ya emitió la factura en otro aplicativo</strong>.</p>
       <div id="resumenEmitir" style="background:#0a1628;border-radius:10px;padding:18px;border:1px solid #1a3a5c;margin-bottom:16px"></div>
@@ -380,11 +392,40 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
         <button class="btn btn-success" onclick="emitirFacturaDefinitiva()" id="btnEmitir"><i class="fas fa-check-circle"></i> Emitir Factura Definitiva</button>
       </div>
     </div>
-</div>
-<div class="config-panel" id="panel-historial">
-<p>Contenido no disponible</p>
-</div>
-</div>
+
+  </div><!-- /tabNueva -->
+
+  <!-- ═══════ TAB: HISTORIAL ═══════ -->
+  <div class="tab-panel" id="tabHistorial">
+    <div class="form-section">
+      <div class="form-title"><i class="fas fa-list"></i> Facturas Emitidas</div>
+      <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;align-items:end">
+        <button class="btn btn-secondary" style="padding:8px 14px;font-size:11px;border-color:#ff3860;color:#ff3860" onclick="purgarDatosPrueba()"><i class="fas fa-trash-alt"></i> Purgar Todo</button>
+        <div class="form-group" style="flex:1;min-width:180px">
+          <label>Filtrar por EPS</label>
+          <select id="filtroEps" onchange="renderHistorial()" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
+            <option value="">Todas</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1;min-width:150px">
+          <label>Estado</label>
+          <select id="filtroEstado" onchange="renderHistorial()" style="background:#0a1628;border:1px solid #1a3a5c;color:#e0e0e0;padding:8px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif">
+            <option value="">Todos</option>
+            <option value="pre-factura">Pre-Factura</option>
+            <option value="definitiva">Definitiva</option>
+            <option value="anulada">Anulada</option>
+          </select>
+        </div>
+      </div>
+      <table class="data-table" id="tablaHistorial">
+        <thead><tr>
+          <th>N° Factura</th><th>N° Adm</th><th>EPS</th><th>Paciente</th><th>Documento</th><th>Fecha</th><th>Estado</th><th style="text-align:right">Total</th><th>Acciones</th>
+        </tr></thead>
+        <tbody id="bodyHistorial"></tbody>
+      </table>
+    </div>
+  </div><!-- /tabHistorial -->
+
 </div><!-- /container -->
 
 <!-- Modal Anular -->
@@ -403,7 +444,6 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
-<script src="nexus_db.js"></script>
 <script src="permisos.js"></script>
 <script>
 /* ═══════════════════════════════════════════════
@@ -415,121 +455,13 @@ const K_PACIENTES  = 'nexus_pacientes';
 const K_SERVICIOS  = 'nexus_servicios_facturacion';
 const K_FACTURAS   = 'nexus_facturas';
 const K_CONTADOR   = 'nexus_contador_facturas';
-const K_CONTADOR_PF = 'nexus_contador_prefacturas';
 
 function leer(k)   { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch(e) { return null; } }
-function tieneContenido(str) {
-  if (!str || !String(str).trim()) return false;
-  try {
-    var d = JSON.parse(str);
-    if (d === null) return false;
-    if (Array.isArray(d)) return d.length > 0;
-    if (typeof d === 'object' && d !== null) return Object.keys(d).length > 0;
-    if (typeof d === 'number') return d > 0;
-    return !!d;
-  } catch(e) { return false; }
-}
-function guardar(k,v){
-  // ── v2.4: Backup + try-catch robusto + sin NXDB.guardado() redundante ──
-  var valorStr = JSON.stringify(v);
-  var backupHecho = false;
-
-  if (k === K_FACTURAS || k === K_RIPS) {
-    try {
-      var prev = localStorage.getItem(k);
-      if (tieneContenido(prev)) {
-        var bk = JSON.parse(prev);
-        bk._backupTime = Date.now();
-        localStorage.setItem(k + '_backup', JSON.stringify(bk));
-        backupHecho = true;
-      }
-    } catch(e) {
-      console.warn('[FACT] Backup skipped for ' + k + ': ' + e.message);
-    }
-  }
-
-  try {
-    localStorage.setItem(k, valorStr);
-  } catch(e1) {
-    console.error('[FACT] SAVE FAILED for ' + k + ': ' + e1.message);
-    if (backupHecho && (k === K_FACTURAS || k === K_RIPS)) {
-      try {
-        localStorage.removeItem(k + '_backup');
-        console.log('[FACT] Removed backup to free space, retrying...');
-      } catch(e2) {}
-      try {
-        localStorage.setItem(k, valorStr);
-      } catch(e3) {
-        toast('⛔ ERROR CRÍTICO: No se pudo guardar ' + k + '. Almacenamiento lleno.', 'error');
-        return;
-      }
-    } else {
-      toast('⛔ ERROR: No se pudo guardar ' + k + '. ' + e1.message, 'error');
-      return;
-    }
-  }
-
-  var verificacion = null;
-  try { verificacion = JSON.parse(localStorage.getItem(k)); } catch(e) {}
-  if (verificacion === null && v !== null) {
-    console.error('[FACT] Post-save verification failed for', k, '- retrying...');
-    try {
-      localStorage.setItem(k, valorStr);
-      verificacion = JSON.parse(localStorage.getItem(k));
-    } catch(e) {}
-    if (verificacion === null) {
-      toast('⚠️ ERROR: Verificación falló para ' + k + '. Datos pueden perderse.', 'error');
-    }
-  }
-  // v2.4: NXDB.guardado() eliminado — el interceptor localStorage.setItem YA llama programarEnvio()
-}
-// ── v2.4: Recovery automático desde backup ──
-function recuperarBackup(k) {
-  try {
-    var bk = localStorage.getItem(k + '_backup');
-    if (!tieneContenido(bk)) return false;
-    var datos = JSON.parse(bk);
-    delete datos._backupTime;
-    console.warn('[FACT] Recovering ' + k + ' from backup (' + (Array.isArray(datos)?datos.length:'?') + ' items)');
-    guardar(k, datos);
-    return true;
-  } catch(e) {
-    console.error('[FACT] Backup recovery failed for ' + k + ':', e);
-    return false;
-  }
-}
-
+function guardar(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
 function hoy()     { return new Date().toISOString().split('T')[0]; }
 function ahora()   { return new Date().toISOString().replace('Z',''); }
 function fmt$(n)   { return '$' + Number(n||0).toLocaleString('es-CO'); }
 function uid(pref) { return pref + '_' + Date.now() + '_' + Math.random().toString(36).substring(2,7); }
-
-// ─── Consecutivos legibles (FC-000001, PF-000001) ───
-function initContador() {
-  if (!leer(K_CONTADOR)) guardar(K_CONTADOR, {ultimo: 0});
-  if (!leer(K_CONTADOR_PF)) guardar(K_CONTADOR_PF, {ultimo: 0});
-}
-function siguienteNumFC() {
-  const c = leer(K_CONTADOR) || {ultimo:0};
-  c.ultimo++;
-  // FIX v2.4: Usar escritura directa para evitar race condition con NXDB.
-  // guardar() activa NXDB.guardado() → enviarPendientes() se ejecuta async →
-  // bloquea el guardado posterior de la factura (enviando=true).
-  // Usamos localStorage nativo + marcado manual de pendiente.
-  localStorage.setItem(K_CONTADOR, JSON.stringify(c));
-  if (typeof NXDB !== 'undefined' && NXDB._marcarPendiente) {
-    NXDB._marcarPendiente(K_CONTADOR);
-  } else if (typeof NXDB !== 'undefined' && NXDB.guardado) {
-    try { NXDB.guardado(); } catch(e) {}
-  }
-  return 'FC-' + String(c.ultimo).padStart(6,'0');
-}
-function siguienteNumPF() {
-  const c = leer(K_CONTADOR_PF) || {ultimo:0};
-  c.ultimo++;
-  guardar(K_CONTADOR_PF, c);
-  return 'PF-' + String(c.ultimo).padStart(6,'0');
-}
 
 // ─── (visibles helper removed — all deletions are now permanent) ───
 
@@ -575,90 +507,10 @@ function epsKeyFromString(epsStr) {
 // Configuración es la única pantalla que puede agregar/editar servicios.
 // Facturación SOLO lee el catálogo.
 
-// ─── Catálogo por defecto (igual que Configuración) ───
-const CUPS_DEFAULT = [
-  { id:'sf_01', codigoCUPS:'',       nombre:'CAMA DOMICILIARIA',           tipoServicio:'otroServicio', ambito:'domiciliario',
-    valores:{ FOMAG:{valorUnitario:250000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_02', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA DOMICILIARIA',   tipoServicio:'consulta', ambito:'domiciliario',
-    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_03', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA INTRAMURAL',    tipoServicio:'consulta', ambito:'intramural',
-    valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_04', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL DOMICILIARIA', tipoServicio:'consulta', ambito:'domiciliario',
-    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_05', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL INTRAMURAL',  tipoServicio:'consulta', ambito:'intramural',
-    valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_06', codigoCUPS:'931001', nombre:'FISIOTERAPIA DOMICILIARIA',      tipoServicio:'consulta', ambito:'domiciliario',
-    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_07', codigoCUPS:'931001', nombre:'FISIOTERAPIA INTRAMURAL',       tipoServicio:'consulta', ambito:'intramural',
-    valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_08', codigoCUPS:'943102', nombre:'PSICOLOGÍA DOMICILIARIA',       tipoServicio:'consulta', ambito:'domiciliario',
-    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_09', codigoCUPS:'943102', nombre:'PSICOLOGÍA INTRAMURAL',         tipoServicio:'consulta', ambito:'intramural',
-    valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_10', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA DOMICILIARIA', tipoServicio:'procedimiento', ambito:'domiciliario',
-    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_11', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA INTRAMURAL',  tipoServicio:'procedimiento', ambito:'intramural',
-    valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_12', codigoCUPS:'',       nombre:'ENFERMERÍA 24H DOMICILIARIA',  tipoServicio:'otroServicio', ambito:'domiciliario',
-    valores:{ FOMAG:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:150000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_13', codigoCUPS:'',       nombre:'ENFERMERÍA 12H DOMICILIARIA',  tipoServicio:'otroServicio', ambito:'domiciliario',
-    valores:{ FOMAG:{valorUnitario:100000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:80000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_14', codigoCUPS:'',       nombre:'ENFERMERÍA 8H DOMICILIARIA',   tipoServicio:'otroServicio', ambito:'domiciliario',
-    valores:{ FOMAG:{valorUnitario:95000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:75000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_15', codigoCUPS:'',       nombre:'LIMPIEZA TRAQUEOSTOMÍA DOM.',  tipoServicio:'otroServicio', ambito:'domiciliario',
-    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_16', codigoCUPS:'',       nombre:'CAMA HOSP. EN CASA',            tipoServicio:'otroServicio', ambito:'hospitalario',
-    valores:{ FOMAG:{valorUnitario:250000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_17', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA HOSP. EN CASA',   tipoServicio:'consulta', ambito:'hospitalario',
-    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_18', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL HOSP. EN CASA', tipoServicio:'consulta', ambito:'hospitalario',
-    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_19', codigoCUPS:'931001', nombre:'FISIOTERAPIA HOSP. EN CASA',      tipoServicio:'consulta', ambito:'hospitalario',
-    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_20', codigoCUPS:'943102', nombre:'PSICOLOGÍA HOSP. EN CASA',       tipoServicio:'consulta', ambito:'hospitalario',
-    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_21', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA HOSP. EN CASA', tipoServicio:'procedimiento', ambito:'hospitalario',
-    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_22', codigoCUPS:'',       nombre:'ENFERMERÍA 24H HOSP. EN CASA',  tipoServicio:'otroServicio', ambito:'hospitalario',
-    valores:{ FOMAG:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:150000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_23', codigoCUPS:'',       nombre:'ENFERMERÍA 12H HOSP. EN CASA',  tipoServicio:'otroServicio', ambito:'hospitalario',
-    valores:{ FOMAG:{valorUnitario:100000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:80000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_24', codigoCUPS:'',       nombre:'ENFERMERÍA 8H HOSP. EN CASA',   tipoServicio:'otroServicio', ambito:'hospitalario',
-    valores:{ FOMAG:{valorUnitario:95000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:75000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
-  { id:'sf_25', codigoCUPS:'',       nombre:'LIMPIEZA TRAQUEOSTOMÍA HOSP. EN CASA', tipoServicio:'otroServicio', ambito:'hospitalario',
-    valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true }
-];
-const CUPS_VERSION = 3;
-
 function initCatalogo() {
-  // Si el catálogo está vacío o desactualizado, cargar los servicios por defecto
-  // (igual que hace Configuración con initCups)
-  let cat = leer(K_SERVICIOS);
-  const savedVer = parseInt(localStorage.getItem(K_SERVICIOS + '_ver') || '0');
-  if (!cat || !Array.isArray(cat) || (!cat.length && savedVer < CUPS_VERSION)) {
-    guardar(K_SERVICIOS, CUPS_DEFAULT);
-    localStorage.setItem(K_SERVICIOS + '_ver', String(CUPS_VERSION));
-    console.log('[FACT] Catálogo inicializado con', CUPS_DEFAULT.length, 'servicios por defecto');
-  } else if (cat.length && savedVer < CUPS_VERSION) {
-    // Merge: agregar nuevos servicios que no existan
-    const existingIds = new Set(cat.map(s => s.id));
-    CUPS_DEFAULT.forEach(def => {
-      if (!existingIds.has(def.id)) {
-        cat.push({...def});
-      } else {
-        const idx = cat.findIndex(s => s.id === def.id);
-        if (idx !== -1 && (!cat[idx].valores || !Object.keys(cat[idx].valores || {}).length)) {
-          cat[idx].valores = def.valores;
-          delete cat[idx].valorGeneral;
-        }
-      }
-    });
-    guardar(K_SERVICIOS, cat);
-    localStorage.setItem(K_SERVICIOS + '_ver', String(CUPS_VERSION));
-    console.log('[FACT] Catálogo actualizado (merge) — total:', cat.length, 'servicios');
-  } else {
-    console.log('[FACT] Catálogo OK —', cat.length, 'servicios (ver', savedVer, ')');
-  }
+  // No inicializamos nada aquí — Configuración ya guardó el catálogo.
+  // Solo verificamos que exista la clave.
+  if (!leer(K_SERVICIOS)) guardar(K_SERVICIOS, []);
 }
 
 // Buscar servicios activos por código CUPS en el catálogo de Configuración
@@ -709,7 +561,15 @@ function servicioConfigAFactura(svc, epsKey) {
     epsKey: epsKey || ''
   };
 }
-// (initContador y siguienteNumFC/siguienteNumPF definidos arriba)
+function initContador() {
+  if (!leer(K_CONTADOR)) guardar(K_CONTADOR, {ultimo: 0});
+}
+function siguienteNum() {
+  const c = leer(K_CONTADOR) || {ultimo:0};
+  c.ultimo++;
+  guardar(K_CONTADOR, c);
+  return 'FC-' + String(c.ultimo).padStart(6,'0');
+}
 
 // ─── Sesión ───
 function sesion() {
@@ -773,9 +633,10 @@ function irPaso(num) {
 
   facturaActual.paso = num;
 
-  // Activar el config-panel externo correspondiente via switchPanel
-  const panelMap = {1:'paso1',2:'paso2',3:'paso3',4:'paso4'};
-  if (typeof switchPanel === 'function') switchPanel(panelMap[num] || 'paso1');
+  for (let i = 1; i <= 4; i++) {
+    const panel = document.getElementById('paso'+i+'Panel');
+    if (panel) panel.style.display = (i === num) ? 'block' : 'none';
+  }
 
   document.querySelectorAll('.paso-step').forEach(step => {
     const p = parseInt(step.dataset.paso);
@@ -794,7 +655,6 @@ function irPaso(num) {
 // ─── PASO 1: Buscar admisiones egresadas ───
 function buscarAdmisiones(query) {
   const pacientes = leer(K_PACIENTES) || [];
-  console.log('[FACT] Pacientes en localStorage:', pacientes.length, '| Estados:', pacientes.map(p=>p.estado).join(', '));
   const q = query.toLowerCase().trim();
   if (!q) return [];
 
@@ -808,27 +668,6 @@ function buscarAdmisiones(query) {
     const numAdm = (p.numAdmision || '').toLowerCase();
     return nombre.includes(q) || doc.includes(q) || numAdm.includes(q);
   });
-}
-
-// ─── Listar TODOS los egresados (botón) ───
-function listarEgresados() {
-  const pacientes = leer(K_PACIENTES) || [];
-  console.log('[FACT] listarEgresados — Total pacientes:', pacientes.length);
-  const egresados = pacientes.filter(p => {
-    const estado = (p.estado || '').toLowerCase();
-    return estado === 'egresado';
-  });
-  console.log('[FACT] Egresados encontrados:', egresados.length);
-  if (!egresados.length) {
-    toast('⚠️ No hay admisiones egresadas en el sistema. Registre admisiones en el módulo de Admisiones y délas de alta primero.', 'warning');
-    // Mostrar diagnóstico en consola
-    const estados = {};
-    pacientes.forEach(p => { const e = p.estado || 'SIN ESTADO'; estados[e] = (estados[e]||0) + 1; });
-    console.log('[FACT] Distribución de estados:', estados);
-    return;
-  }
-  renderDropdownResultados(egresados);
-  document.getElementById('admDropdownList').classList.add('open');
 }
 
 function renderDropdownResultados(resultados) {
@@ -860,7 +699,7 @@ function renderDropdownResultados(resultados) {
 }
 
 function admisionYaFacturada(numAdmision) {
-  var facturas = sanitizarFacturas();
+  var facturas = (leer(K_FACTURAS)||[]);
   // Solo bloquea si hay factura definitiva (no anulada)
   // Si la factura fue anulada, se permite nueva factura para esa admisión
   return facturas.some(function(f) {
@@ -904,22 +743,12 @@ function seleccionarAdmision(idx) {
   renderServiciosTabla();
 }
 
-/* ── Fallback defensivo numAdmision v2.7 ── */
-function obtenerNumAdmision(p) {
-  if (p.numAdmision && p.numAdmision !== '—' && String(p.numAdmision).trim()) return p.numAdmision;
-  var todos = [];
-  try { todos = JSON.parse(localStorage.getItem('nexus_pacientes') || '[]'); } catch(e) { todos = []; }
-  var match = todos.find(function(x) { return String(x.documento) === String(p.documento) && x.numAdmision; });
-  if (match && match.numAdmision) { p.numAdmision = match.numAdmision; return match.numAdmision; }
-  return '—';
-}
-
 function llenarDatosPaciente(p) {
   const nombre = p.nombre || '—';
   const doc = p.documento || '—';
   const eps = p.eps || '—';
   const codEps = codigoEpsFromString(eps);
-  const numAdm = obtenerNumAdmision(p);
+  const numAdm = p.numAdmision || '—';
   const municipio = p.municipio || '—';
   const dx = p.diagnostico || '—';
   const servicio = p.servicio || '—';
@@ -1224,7 +1053,7 @@ function recalcularLiquidacion() {
   const codEps = codigoEpsFromString(eps);
   const nombre = p.nombre || '—';
   const doc = p.documento || '—';
-  const numAdm = obtenerNumAdmision(p);
+  const numAdm = p.numAdmision || '—';
   const dx = p.diagnostico || '—';
 
   document.getElementById('liqNumAdm').textContent = numAdm;
@@ -1262,7 +1091,7 @@ function guardarPreFactura() {
     return;
   }
 
-  const facturas = sanitizarFacturas();
+  const facturas = leer(K_FACTURAS) || [];
   const fac = construirFactura();
   fac.estado = 'pre-factura';
 
@@ -1273,14 +1102,9 @@ function guardarPreFactura() {
       fac.numeroFactura = facturas[idx].numeroFactura;
       fac.id = facturas[idx].id;
       facturas[idx] = fac;
-    } else {
-      // FIX v2.5: Pre-factura original no encontrada — agregar como nueva
-      console.warn('[FACT] Pre-factura editandoId=' + facturaActual._editandoId + ' no encontrada — creando nueva');
-      fac.numeroFactura = siguienteNumPF();
-      facturas.push(fac);
     }
   } else {
-    fac.numeroFactura = siguienteNumPF();
+    fac.numeroFactura = uid('PF');
     facturas.push(fac);
   }
 
@@ -1323,7 +1147,7 @@ function construirFactura() {
     id: facturaActual._editandoId || uid('FAC'),
     numeroFactura: facturaActual.numeroFactura || null,
     admisionId: p.id || null,
-    numAdmision: obtenerNumAdmision(p),
+    numAdmision: p.numAdmision || '—',
     paciente: p.nombre || '—',
     documento: p.documento || '—',
     tipoDoc: p.tipoDoc || 'CC',
@@ -1349,7 +1173,7 @@ function llenarResumenEmitir() {
   const p = facturaActual.admision;
   const eps = p ? (p.eps || '—') : '—';
   const nombre = p ? (p.nombre || '—') : '—';
-  const numAdm = p ? obtenerNumAdmision(p) : '—';
+  const numAdm = p ? (p.numAdmision || '—') : '—';
 
   let subtotal = 0;
   facturaActual.servicios.forEach(s => subtotal += s.cantidad * s.valorUnit);
@@ -1393,23 +1217,18 @@ function emitirFacturaDefinitiva() {
   // Número externo opcional (si el usuario ya emitió la factura en otro aplicativo)
   var numExterno = (document.getElementById('facturaExterna').value || '').trim();
 
-  const facturas = sanitizarFacturas();
+  const facturas = leer(K_FACTURAS) || [];
   const fac = construirFactura();
   fac.estado = 'definitiva';
   fac.emitidaEn = ahora();
 
   // Asignar número: externo si se proporcionó, si no consecutivo automático
-  // FIX v2.5: Cuando hay número externo, PRIMERO asignarlo y guardar la factura,
-  // DESPUÉS incrementar el contador interno. Antes, siguienteNumFC() se llamaba
-  // ANTES de guardar(), lo que activaba NXDB y causaba race conditions que
-  // perdían la factura (especialmente con números externos).
-  var numeroInternoPendiente = null;
   if (numExterno) {
     fac.numeroFactura = numExterno;
     fac.numeroFacturaExterno = numExterno;
-    numeroInternoPendiente = true; // marcar para asignar DESPUÉS de guardar
+    fac.numeroFacturaInterno = siguienteNum(); // guardar interno como referencia
   } else {
-    fac.numeroFactura = siguienteNumFC();
+    fac.numeroFactura = siguienteNum();
     fac.numeroFacturaExterno = null;
     fac.numeroFacturaInterno = null;
   }
@@ -1420,50 +1239,12 @@ function emitirFacturaDefinitiva() {
     if (idx >= 0) {
       fac.id = facturas[idx].id;
       facturas[idx] = fac;
-    } else {
-      // FIX v2.5: La pre-factura original ya no existe (fue eliminada por otro navegador
-      // o por limpieza). Agregar la nueva factura en vez de descartarla silenciosamente.
-      console.warn('[FACT] _editandoId=' + facturaActual._editandoId + ' no encontrado — agregando nueva factura');
-      facturas.push(fac);
     }
   } else {
     facturas.push(fac);
   }
 
   guardar(K_FACTURAS, facturas);
-  // ── FIX v2.5: Asignar número interno DESPUÉS de guardar la factura ──
-  // Esto evita race conditions con NXDB: antes, siguienteNumFC() activaba
-  // NXDB y programarEnvio() ANTES de que la factura se guardara, lo que
-  // podía causar que enviarPendientes() subiera datos sin la factura nueva.
-  if (numeroInternoPendiente) {
-    fac.numeroFacturaInterno = siguienteNumFC();
-    // Actualizar la factura ya guardada con el número interno
-    var facturasActualizadas = leer(K_FACTURAS) || [];
-    var idxFac = facturasActualizadas.findIndex(function(f2) { return f2.id === fac.id; });
-    if (idxFac >= 0) {
-      facturasActualizadas[idxFac].numeroFacturaInterno = fac.numeroFacturaInterno;
-      guardar(K_FACTURAS, facturasActualizadas);
-      console.log('[FACT] Número interno asignado post-save: ' + fac.numeroFacturaInterno);
-    }
-  }
-  // ── Post-save verification ──
-  var verif = null;
-  try { verif = JSON.parse(localStorage.getItem(K_FACTURAS)); } catch(e) {}
-  if (verif === null) {
-    console.error('[FACT] Facturas save FAILED after emitir! Retrying...');
-    guardar(K_FACTURAS, facturas);
-    /* FIX v2.3: Actualizar verif despues del reintento */
-    try { verif = JSON.parse(localStorage.getItem(K_FACTURAS)); } catch(e) {}
-  }
-  var savedFac = (verif || []).find(function(f2) { return f2.id === fac.id; });
-  if (!savedFac) {
-    console.error('[FACT] Factura ' + fac.id + ' NOT found in storage after save!');
-    toast('⚠️ La factura se guardó pero no se encontró al verificar. Recargue la página.', 'warning');
-  } else {
-    console.log('[FACT] Factura ' + fac.numeroFactura + ' (id=' + fac.id + ') saved OK. Total facturas: ' + (verif||[]).length);
-    // Diagnóstico NXDB
-    if (typeof NXDB !== 'undefined' && NXDB.diagnosticar) { NXDB.diagnosticar(); }
-  }
   toast('✅ Factura definitiva emitida: ' + fac.numeroFactura, 'success');
   actualizarStats();
   resetFacturaActual();
@@ -1482,7 +1263,7 @@ function resetFacturaActual() {
 
 // ─── HISTORIAL ───
 function renderHistorial() {
-  const facturas = sanitizarFacturas();
+  const facturas = (leer(K_FACTURAS)||[]);
   const filtroEps = document.getElementById('filtroEps').value;
   const filtroEstado = document.getElementById('filtroEstado').value;
 
@@ -1546,7 +1327,7 @@ function anularFactura(id) {
 }
 document.getElementById('btnConfirmarAnular').onclick = function() {
   if (!_idAnular) return;
-  const facturas = sanitizarFacturas();
+  const facturas = leer(K_FACTURAS) || [];
   const idx = facturas.findIndex(f => f.id === _idAnular);
   if (idx >= 0) {
     facturas[idx].estado = 'anulada';
@@ -1566,7 +1347,7 @@ document.getElementById('btnConfirmarAnular').onclick = function() {
 
 // ─── Eliminar factura (eliminación permanente) ───
 function eliminarFactura(id) {
-  const facturas = sanitizarFacturas();
+  const facturas = leer(K_FACTURAS) || [];
   const fac = facturas.find(f => f.id === id);
   if (!fac) { toast('Factura no encontrada','error'); return; }
   if (fac.estado === 'definitiva') { toast('No se puede eliminar una factura definitiva. Anúlela primero.','error'); return; }
@@ -1585,7 +1366,7 @@ function eliminarFactura(id) {
 
 // ─── Cargar pre-factura para editar ───
 function cargarPreFactura(id) {
-  const facturas = sanitizarFacturas();
+  const facturas = leer(K_FACTURAS) || [];
   const fac = facturas.find(f => f.id === id);
   if (!fac) { toast('Factura no encontrada','error'); return; }
 
@@ -1614,53 +1395,13 @@ function cargarPreFactura(id) {
   toast('Pre-Factura cargada para edición','info');
 }
 
-// ─── Sanitizar datos corruptos al cargar ───
-function sanitizarFacturas() {
-  const facturas = leer(K_FACTURAS) || [];
-  let modificado = false;
-  const limpias = facturas.filter(f => {
-    // Eliminar facturas sin ID o sin estado
-    if (!f.id || !f.estado) { modificado = true; return false; }
-    // Solo permitir estados válidos
-    if (!['pre-factura','definitiva','anulada'].includes(f.estado)) { modificado = true; return false; }
-    // Sanitizar total: debe ser un número finito
-    f.total = Number(f.total);
-    if (!isFinite(f.total)) f.total = 0;
-    f.subtotal = Number(f.subtotal);
-    if (!isFinite(f.subtotal)) f.subtotal = 0;
-    // Sanitizar servicios
-    if (!Array.isArray(f.servicios)) f.servicios = [];
-    // Recalcular total si está en 0 pero servicios tienen valor
-    if (f.total === 0 && f.servicios.length > 0) {
-      let calcTotal = 0;
-      f.servicios.forEach(s => { calcTotal += (Number(s.cantidad)||0) * (Number(s.valorUnit)||0); });
-      if (calcTotal > 0) { f.total = calcTotal; f.subtotal = calcTotal; modificado = true; }
-    }
-    return true;
-  });
-  if (modificado) {
-    // FIX: NO llamar guardar() aquí — solo retornar datos limpios.
-    // El CALLER (emitirFacturaDefinitiva, actualizarStats, etc.) 
-    // debe decidir si guardar. Esto evita saves duplicados/race conditions.
-    console.log('[Facturación] Datos sanitizados: ' + facturas.length + ' → ' + limpias.length + ' facturas (sin auto-guardar)');
-  }
-  return limpias;
-}
-
 // ─── Stats ───
 function actualizarStats() {
-  const facturas = sanitizarFacturas();
-  // v2.4: Solo guardar si sanitizar eliminó facturas corruptas
-  // Comparar contenido real, no solo length (evita save innecesario)
-  const stored = leer(K_FACTURAS) || [];
-  if (facturas.length !== stored.length && facturas.length < stored.length) {
-    console.log('[FACT] actualizarStats: sanitizado redujo facturas ' + stored.length + ' → ' + facturas.length);
-    guardar(K_FACTURAS, facturas);
-  }
+  const facturas = (leer(K_FACTURAS)||[]);
   const pre = facturas.filter(f => f.estado === 'pre-factura').length;
   const def = facturas.filter(f => f.estado === 'definitiva').length;
   const anul = facturas.filter(f => f.estado === 'anulada').length;
-  const total$ = facturas.filter(f => f.estado === 'definitiva').reduce((s,f) => s + (isFinite(f.total)?f.total:0), 0);
+  const total$ = facturas.filter(f => f.estado === 'definitiva').reduce((s,f) => s + (f.total||0), 0);
 
   document.getElementById('statPre').textContent = pre;
   document.getElementById('statDef').textContent = def;
@@ -1672,62 +1413,18 @@ function actualizarStats() {
 document.addEventListener('DOMContentLoaded', function() {
   if (window.NX) { NX.iniciar('facturacion'); NX.filtrarMenu(); }
   initCatalogo();
-  // v2.4: Auto-recovery from backup if facturas vacías
-  var facCheck = leer(K_FACTURAS);
-  if (!facCheck || !Array.isArray(facCheck) || facCheck.length === 0) {
-    if (recuperarBackup(K_FACTURAS)) {
-      toast('🔄 Facturas recuperadas desde backup', 'warning');
-    }
-  }
-  var ripsCheck = leer(K_RIPS);
-  if (!ripsCheck || !Array.isArray(ripsCheck) || ripsCheck.length === 0) {
-    if (recuperarBackup(K_RIPS)) {
-      toast('🔄 RIPS recuperados desde backup', 'warning');
-    }
-  }
   initContador();
   cargarSesion();
   actualizarStats();
   renderServiciosTabla();
 
-  // v2.7: Esperar sincronización NXDB antes de habilitar búsqueda de admisiones
-  var buscarAdmInput = document.getElementById('buscarAdmInput');
-  buscarAdmInput.disabled = true;
-  buscarAdmInput.placeholder = 'Sincronizando datos con la nube…';
-  function habilitarBusqueda() {
-    buscarAdmInput.disabled = false;
-    buscarAdmInput.placeholder = 'Escriba nombre, documento o N° admisión…';
-    console.log('[FACT] Búsqueda de admisiones habilitada — pacientes en localStorage:', (leer(K_PACIENTES)||[]).length);
-    // Mostrar cuántos egresados hay
-    var egresados = (leer(K_PACIENTES)||[]).filter(function(p){ return (p.estado||'').toLowerCase()==='egresado'; });
-    if (egresados.length > 0) {
-      toast('✅ ' + egresados.length + ' admisión(es) egresada(s) disponible(s) para facturar', 'success');
-    } else {
-      var todos = leer(K_PACIENTES) || [];
-      if (todos.length === 0) {
-        toast('ℹ️ No hay pacientes registrados. Registre admisiones primero.', 'warning');
-      } else {
-        var estados = {};
-        todos.forEach(function(p){ var e = p.estado||'Sin estado'; estados[e]=(estados[e]||0)+1; });
-        toast('ℹ️ Hay ' + todos.length + ' pacientes pero ninguno egresado. Estados: ' + Object.entries(estados).map(function(e){return e[0]+'('+e[1]+')';}).join(', '), 'warning');
-      }
-    }
-  }
-  // Esperar que NXDB termine de sincronizar (máximo 5 segundos)
-  if (window.NX && window.NX.sincronizar) {
-    window.NX.sincronizar().then(habilitarBusqueda).catch(habilitarBusqueda);
-    setTimeout(habilitarBusqueda, 5000); // fallback timeout
-  } else {
-    setTimeout(habilitarBusqueda, 2000); // sin NXDB, esperar 2s
-  }
-
   // Búsqueda de admisiones egresadas
-  // (inputBuscar ya referenciado arriba, pero creamos debounceTimer aquí)
+  const inputBuscar = document.getElementById('buscarAdmInput');
   let debounceTimer;
-  buscarAdmInput.addEventListener('input', function() {
+  inputBuscar.addEventListener('input', function() {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      const q = buscarAdmInput.value.trim();
+      const q = inputBuscar.value.trim();
       if (q.length < 2) {
         document.getElementById('admDropdownList').classList.remove('open');
         return;
@@ -1737,9 +1434,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 250);
   });
 
-  buscarAdmInput.addEventListener('focus', function() {
-    if (buscarAdmInput.value.trim().length >= 2) {
-      const resultados = buscarAdmisiones(buscarAdmInput.value.trim());
+  inputBuscar.addEventListener('focus', function() {
+    if (inputBuscar.value.trim().length >= 2) {
+      const resultados = buscarAdmisiones(inputBuscar.value.trim());
       renderDropdownResultados(resultados);
     }
   });
@@ -1811,42 +1508,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-</script>
-<script>
-const PANEL_INIT={};
-function switchPanel(pid){
-  document.querySelectorAll('.config-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
-  const panel=document.getElementById('panel-'+pid);
-  if(panel)panel.classList.add('active');
-  const item=document.querySelector('[data-panel="'+pid+'"]');
-  if(item)item.classList.add('active');
-  if(!PANEL_INIT[pid]){PANEL_INIT[pid]=true;}
-  // Sincronizar indicadores de paso cuando se navega por sidebar
-  var pasoNum = parseInt(pid.replace('paso','')) || 0;
-  if(pasoNum >= 1 && pasoNum <= 4 && typeof facturaActual !== 'undefined'){
-    facturaActual.paso = pasoNum;
-    document.querySelectorAll('.paso-step').forEach(function(step){
-      var p = parseInt(step.dataset.paso);
-      step.classList.remove('active','done');
-      if(p < pasoNum) step.classList.add('done');
-      else if(p === pasoNum) step.classList.add('active');
-    });
-    document.querySelectorAll('.paso-line').forEach(function(line){
-      var l = parseInt(line.dataset.line);
-      line.classList.remove('done','active');
-      if(l < pasoNum) line.classList.add('done');
-      else if(l === pasoNum) line.classList.add('active');
-    });
-  }
-}
-</script>
-<script>
-const _origIrAPaso = window.irAPaso;
-window.irAPaso = function(n) {
-  const map = {1:'paso1',2:'paso2',3:'paso3',4:'paso4'};
-  switchPanel(map[n] || 'paso1');
-};
 </script>
 </body>
 </html>
