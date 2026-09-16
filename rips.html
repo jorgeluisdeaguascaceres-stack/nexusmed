@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXUSMED - RIPS JSON</title>
+<title>NEXUSMED - RIPS</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -258,6 +258,7 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
       <div class="form-title"><i class="fas fa-check-circle"></i> Paso 3 — RIPS JSON Generado</div>
       <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap">
         <button class="btn btn-success" onclick="descargarRIPS()"><i class="fas fa-download"></i> Descargar JSON</button>
+        <button class="btn btn-primary" onclick="descargarRIPSXML()" style="background:linear-gradient(135deg,#6c3483,#a855f7);border-color:#a855f7"><i class="fas fa-file-code"></i> Descargar XML</button>
         <button class="btn btn-warning" onclick="copiarRIPS()"><i class="fas fa-copy"></i> Copiar al Portapapeles</button>
         <button class="btn btn-secondary" onclick="validarRIPS()"><i class="fas fa-stethoscope"></i> Verificar Estructura</button>
         <button class="btn btn-danger" onclick="volverPaso1()"><i class="fas fa-arrow-left"></i> Volver</button>
@@ -1149,6 +1150,205 @@ function generarRIPSMasivo(periodo) {
   ripsGenerado = ripsConsolidado;
   mostrarResultado(ripsConsolidado);
   toast('✅ RIPS consolidado generado: ' + delPeriodo.length + ' facturas, ' + usuarios.length + ' pacientes','success');
+}
+
+// ═══════════════════════════════════════════
+// BUG FIX #2: GENERACIÓN DE ARCHIVO XML
+// La Resolución 948 de 2026 requiere tanto JSON como XML.
+// Se agrega la función generarRIPSXML() que convierte
+// la estructura JSON a formato XML conforme al estándar,
+// y descargarRIPSXML() que genera el archivo descargable.
+// ═══════════════════════════════════════════
+
+function descargarRIPSXML() {
+  if (!ripsGenerado) { toast('No hay RIPS generado','error'); return; }
+  try {
+    const xmlStr = generarRIPSXML(ripsGenerado);
+    const blob = new Blob([xmlStr], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'RIPS_' + (facturaSeleccionada.numeroFactura||'sin-num') + '_' + hoy() + '.xml';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('✅ Archivo XML descargado','success');
+  } catch(e) {
+    toast('Error al generar XML: ' + e.message,'error');
+  }
+}
+
+function generarRIPSXML(ripsJson) {
+  // Escape XML special characters
+  function esc(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  // Format date for XML (YYYY-MM-DD)
+  function fmtDate(d) {
+    if (!d) return hoy();
+    return String(d).split('T')[0].split(' ')[0];
+  }
+
+  // Format number without locale (dot as decimal)
+  function fmtNum(n) {
+    if (n === null || n === undefined) return '0';
+    return Number(n).toFixed(0);
+  }
+
+  // Indent helper
+  const IND = '    ';
+  function indent(level) { return IND.repeat(level); }
+
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<RIPS xmlns="http://www.habilitacion.co/rips/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n';
+
+  // ─── Encabezado ───
+  xml += indent(1) + '<encabezado>\n';
+  xml += indent(2) + '<numDocumentoIdObligado>' + esc(ripsJson.numDocumentoIdObligado) + '</numDocumentoIdObligado>\n';
+  xml += indent(2) + '<numFactura>' + esc(ripsJson.numFactura) + '</numFactura>\n';
+  if (ripsJson.tipoNota !== null && ripsJson.tipoNota !== undefined) {
+    xml += indent(2) + '<tipoNota>' + esc(ripsJson.tipoNota) + '</tipoNota>\n';
+  }
+  if (ripsJson.numNota !== null && ripsJson.numNota !== undefined) {
+    xml += indent(2) + '<numNota>' + esc(ripsJson.numNota) + '</numNota>\n';
+  }
+  xml += indent(1) + '</encabezado>\n';
+
+  // ─── Usuarios ───
+  const usuarios = ripsJson.usuarios || [];
+  xml += indent(1) + '<usuarios>\n';
+
+  usuarios.forEach(function(u) {
+    xml += indent(2) + '<usuario>\n';
+    xml += indent(3) + '<tipoDocumentoIdentificacion>' + esc(u.tipoDocumentoIdentificacion) + '</tipoDocumentoIdentificacion>\n';
+    xml += indent(3) + '<numDocumentoIdentificacion>' + esc(u.numDocumentoIdentificacion) + '</numDocumentoIdentificacion>\n';
+    xml += indent(3) + '<tipoUsuario>' + esc(u.tipoUsuario) + '</tipoUsuario>\n';
+    xml += indent(3) + '<fechaNacimiento>' + esc(fmtDate(u.fechaNacimiento)) + '</fechaNacimiento>\n';
+    xml += indent(3) + '<codSexo>' + esc(u.codSexo) + '</codSexo>\n';
+    xml += indent(3) + '<codPaisResidencia>' + esc(u.codPaisResidencia) + '</codPaisResidencia>\n';
+    xml += indent(3) + '<codMunicipioResidencia>' + esc(u.codMunicipioResidencia) + '</codMunicipioResidencia>\n';
+    xml += indent(3) + '<codZonaTerritorialResidencia>' + esc(u.codZonaTerritorialResidencia) + '</codZonaTerritorialResidencia>\n';
+    xml += indent(3) + '<incapacidad>' + esc(u.incapacidad) + '</incapacidad>\n';
+    xml += indent(3) + '<consecutivo>' + fmtNum(u.consecutivo) + '</consecutivo>\n';
+    xml += indent(3) + '<codPaisOrigen>' + esc(u.codPaisOrigen) + '</codPaisOrigen>\n';
+    if (u.registroSIRAS) {
+      xml += indent(3) + '<registroSIRAS>' + esc(u.registroSIRAS) + '</registroSIRAS>\n';
+    }
+
+    // ─── Servicios del usuario ───
+    const serv = u.servicios || {};
+    xml += indent(3) + '<servicios>\n';
+
+    // Consultas (AC)
+    const consultas = serv.consultas || [];
+    if (consultas.length > 0) {
+      xml += indent(4) + '<consultas>\n';
+      consultas.forEach(function(c) {
+        xml += indent(5) + '<consulta>\n';
+        xml += indent(6) + '<codPrestador>' + esc(c.codPrestador) + '</codPrestador>\n';
+        xml += indent(6) + '<fechaInicioAtencion>' + esc(c.fechaInicioAtencion) + '</fechaInicioAtencion>\n';
+        xml += indent(6) + '<numAutorizacion>' + (c.numAutorizacion != null ? esc(c.numAutorizacion) : '') + '</numAutorizacion>\n';
+        xml += indent(6) + '<codConsulta>' + esc(c.codConsulta) + '</codConsulta>\n';
+        xml += indent(6) + '<modalidadGrupoServicioTecSal>' + esc(c.modalidadGrupoServicioTecSal) + '</modalidadGrupoServicioTecSal>\n';
+        xml += indent(6) + '<grupoServicios>' + esc(c.grupoServicios) + '</grupoServicios>\n';
+        xml += indent(6) + '<codServicio>' + esc(c.codServicio) + '</codServicio>\n';
+        xml += indent(6) + '<finalidadTecnologiaSalud>' + esc(c.finalidadTecnologiaSalud) + '</finalidadTecnologiaSalud>\n';
+        xml += indent(6) + '<causaMotivoAtencion>' + esc(c.causaMotivoAtencion) + '</causaMotivoAtencion>\n';
+        xml += indent(6) + '<codDiagnosticoPrincipal>' + esc(c.codDiagnosticoPrincipal) + '</codDiagnosticoPrincipal>\n';
+        if (c.codDiagnosticoPrincipalCIE11) xml += indent(6) + '<codDiagnosticoPrincipalCIE11>' + esc(c.codDiagnosticoPrincipalCIE11) + '</codDiagnosticoPrincipalCIE11>\n';
+        if (c.nomCodDiagnosticoPrincipalCIE11) xml += indent(6) + '<nomCodDiagnosticoPrincipalCIE11>' + esc(c.nomCodDiagnosticoPrincipalCIE11) + '</nomCodDiagnosticoPrincipalCIE11>\n';
+        if (c.codDiagnosticoRelacionado1) xml += indent(6) + '<codDiagnosticoRelacionado1>' + esc(c.codDiagnosticoRelacionado1) + '</codDiagnosticoRelacionado1>\n';
+        if (c.codDiagnosticoRelacionado1CIE11) xml += indent(6) + '<codDiagnosticoRelacionado1CIE11>' + esc(c.codDiagnosticoRelacionado1CIE11) + '</codDiagnosticoRelacionado1CIE11>\n';
+        xml += indent(6) + '<tipoDiagnosticoPrincipal>' + esc(c.tipoDiagnosticoPrincipal) + '</tipoDiagnosticoPrincipal>\n';
+        xml += indent(6) + '<conceptoRecaudo>' + esc(c.conceptoRecaudo) + '</conceptoRecaudo>\n';
+        xml += indent(6) + '<coberturaPlanBeneficios>' + esc(c.coberturaPlanBeneficios) + '</coberturaPlanBeneficios>\n';
+        xml += indent(6) + '<valorPagoModerador>' + fmtNum(c.valorPagoModerador) + '</valorPagoModerador>\n';
+        xml += indent(6) + '<vrServicio>' + fmtNum(c.vrServicio) + '</vrServicio>\n';
+        xml += indent(6) + '<valorPagoEfectivo>' + fmtNum(c.valorPagoEfectivo) + '</valorPagoEfectivo>\n';
+        xml += indent(6) + '<numeroConsultas>' + fmtNum(c.numeroConsultas) + '</numeroConsultas>\n';
+        if (c.codigoVIDA) xml += indent(6) + '<codigoVIDA>' + esc(c.codigoVIDA) + '</codigoVIDA>\n';
+        xml += indent(6) + '<consecutivo>' + fmtNum(c.consecutivo) + '</consecutivo>\n';
+        xml += indent(5) + '</consulta>\n';
+      });
+      xml += indent(4) + '</consultas>\n';
+    }
+
+    // Procedimientos (AP)
+    const procedimientos = serv.procedimientos || [];
+    if (procedimientos.length > 0) {
+      xml += indent(4) + '<procedimientos>\n';
+      procedimientos.forEach(function(p) {
+        xml += indent(5) + '<procedimiento>\n';
+        xml += indent(6) + '<codPrestador>' + esc(p.codPrestador) + '</codPrestador>\n';
+        xml += indent(6) + '<fechaInicioAtencion>' + esc(p.fechaInicioAtencion) + '</fechaInicioAtencion>\n';
+        xml += indent(6) + '<numAutorizacion>' + (p.numAutorizacion != null ? esc(p.numAutorizacion) : '') + '</numAutorizacion>\n';
+        xml += indent(6) + '<codProcedimiento>' + esc(p.codProcedimiento) + '</codProcedimiento>\n';
+        xml += indent(6) + '<viaIngresoServicioSalud>' + esc(p.viaIngresoServicioSalud) + '</viaIngresoServicioSalud>\n';
+        xml += indent(6) + '<modalidadGrupoServicioTecSal>' + esc(p.modalidadGrupoServicioTecSal) + '</modalidadGrupoServicioTecSal>\n';
+        xml += indent(6) + '<grupoServicios>' + esc(p.grupoServicios) + '</grupoServicios>\n';
+        xml += indent(6) + '<codServicio>' + esc(p.codServicio) + '</codServicio>\n';
+        xml += indent(6) + '<finalidadTecnologiaSalud>' + esc(p.finalidadTecnologiaSalud) + '</finalidadTecnologiaSalud>\n';
+        xml += indent(6) + '<causaMotivoAtencion>' + esc(p.causaMotivoAtencion) + '</causaMotivoAtencion>\n';
+        xml += indent(6) + '<codDiagnosticoPrincipal>' + esc(p.codDiagnosticoPrincipal) + '</codDiagnosticoPrincipal>\n';
+        if (p.codDiagnosticoPrincipalCIE11) xml += indent(6) + '<codDiagnosticoPrincipalCIE11>' + esc(p.codDiagnosticoPrincipalCIE11) + '</codDiagnosticoPrincipalCIE11>\n';
+        if (p.nomCodDiagnosticoPrincipalCIE11) xml += indent(6) + '<nomCodDiagnosticoPrincipalCIE11>' + esc(p.nomCodDiagnosticoPrincipalCIE11) + '</nomCodDiagnosticoPrincipalCIE11>\n';
+        if (p.codDiagnosticoRelacionado) xml += indent(6) + '<codDiagnosticoRelacionado>' + esc(p.codDiagnosticoRelacionado) + '</codDiagnosticoRelacionado>\n';
+        if (p.codDiagnosticoRelacionadoCIE11) xml += indent(6) + '<codDiagnosticoRelacionadoCIE11>' + esc(p.codDiagnosticoRelacionadoCIE11) + '</codDiagnosticoRelacionadoCIE11>\n';
+        if (p.complicacion) xml += indent(6) + '<complicacion>' + esc(p.complicacion) + '</complicacion>\n';
+        xml += indent(6) + '<conceptoRecaudo>' + esc(p.conceptoRecaudo) + '</conceptoRecaudo>\n';
+        xml += indent(6) + '<coberturaPlanBeneficios>' + esc(p.coberturaPlanBeneficios) + '</coberturaPlanBeneficios>\n';
+        xml += indent(6) + '<valorPagoModerador>' + fmtNum(p.valorPagoModerador) + '</valorPagoModerador>\n';
+        xml += indent(6) + '<numeroSesiones>' + fmtNum(p.numeroSesiones) + '</numeroSesiones>\n';
+        xml += indent(6) + '<vrServicio>' + fmtNum(p.vrServicio) + '</vrServicio>\n';
+        xml += indent(6) + '<valorPagoEfectivo>' + fmtNum(p.valorPagoEfectivo) + '</valorPagoEfectivo>\n';
+        if (p.codigoVIDA) xml += indent(6) + '<codigoVIDA>' + esc(p.codigoVIDA) + '</codigoVIDA>\n';
+        xml += indent(6) + '<consecutivo>' + fmtNum(p.consecutivo) + '</consecutivo>\n';
+        xml += indent(5) + '</procedimiento>\n';
+      });
+      xml += indent(4) + '</procedimientos>\n';
+    }
+
+    // Otros Servicios (AT)
+    const otrosServicios = serv.otrosServicios || [];
+    if (otrosServicios.length > 0) {
+      xml += indent(4) + '<otrosServicios>\n';
+      otrosServicios.forEach(function(o) {
+        xml += indent(5) + '<otroServicio>\n';
+        xml += indent(6) + '<codPrestador>' + esc(o.codPrestador) + '</codPrestador>\n';
+        xml += indent(6) + '<fechaInicioAtencion>' + esc(o.fechaInicioAtencion) + '</fechaInicioAtencion>\n';
+        xml += indent(6) + '<numAutorizacion>' + (o.numAutorizacion != null ? esc(o.numAutorizacion) : '') + '</numAutorizacion>\n';
+        xml += indent(6) + '<codTecnologiaSalud>' + esc(o.codTecnologiaSalud) + '</codTecnologiaSalud>\n';
+        xml += indent(6) + '<nomTecnologiaSalud>' + esc(o.nomTecnologiaSalud) + '</nomTecnologiaSalud>\n';
+        xml += indent(6) + '<cantidadOServicio>' + fmtNum(o.cantidadOServicio) + '</cantidadOServicio>\n';
+        xml += indent(6) + '<vrUnitOServicio>' + fmtNum(o.vrUnitOServicio) + '</vrUnitOServicio>\n';
+        xml += indent(6) + '<vrServicio>' + fmtNum(o.vrServicio) + '</vrServicio>\n';
+        xml += indent(6) + '<conceptoRecaudo>' + esc(o.conceptoRecaudo) + '</conceptoRecaudo>\n';
+        xml += indent(6) + '<coberturaPlanBeneficios>' + esc(o.coberturaPlanBeneficios) + '</coberturaPlanBeneficios>\n';
+        xml += indent(6) + '<valorPagoModerador>' + fmtNum(o.valorPagoModerador) + '</valorPagoModerador>\n';
+        xml += indent(6) + '<valorPagoEfectivo>' + fmtNum(o.valorPagoEfectivo) + '</valorPagoEfectivo>\n';
+        if (o.codigoVIDA) xml += indent(6) + '<codigoVIDA>' + esc(o.codigoVIDA) + '</codigoVIDA>\n';
+        xml += indent(6) + '<consecutivo>' + fmtNum(o.consecutivo) + '</consecutivo>\n';
+        xml += indent(5) + '</otroServicio>\n';
+      });
+      xml += indent(4) + '</otrosServicios>\n';
+    }
+
+    xml += indent(3) + '</servicios>\n';
+    xml += indent(2) + '</usuario>\n';
+  });
+
+  xml += indent(1) + '</usuarios>\n';
+  xml += '</RIPS>\n';
+
+  return xml;
 }
 
 // ═══════════════════════════════════════════
