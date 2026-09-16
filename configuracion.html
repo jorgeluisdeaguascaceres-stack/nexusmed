@@ -43,7 +43,7 @@
         .sidebar-item:hover { color: #90e0ef; background: rgba(0,180,216,0.06); }
         .sidebar-item.active { color: #00b4d8; background: rgba(0,180,216,0.15); border-left-color: #00b4d8; font-weight: 700; }
         .sidebar-item i { width: 18px; text-align: center; font-size: 14px; }
-        .config-content { flex: 1; background: rgba(13,33,55,0.4); border-radius: 0; padding: 25px; overflow-y: auto; max-height: calc(100vh - 200px); }
+        .config-content { flex: 1; min-width: 0; background: rgba(13,33,55,0.4); border-radius: 0; padding: 25px; overflow-y: auto; overflow-x: auto; max-height: calc(100vh - 200px); }
         .config-panel { display: none; animation: fadeInPanel .3s ease; }
         .config-panel.active { display: block; }
         @keyframes fadeInPanel { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -286,7 +286,7 @@
                 </div>
             </div>
 
-            </div></div><!-- /panel-usuarios -->
+            </div><!-- /panel-usuarios -->
             <div class="config-panel" id="panel-ips">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-hospital"></i> Información de la IPS</div>
@@ -325,7 +325,7 @@
             </div>
 
             
-            </div></div><!-- /panel-ips -->
+            </div><!-- /panel-ips -->
             <div class="config-panel" id="panel-cups">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-clipboard-list"></i> Catálogo de Servicios (CUPS) <span class="hint">Código · Nombre · Tipo · Ámbito · Valor por EPS</span></div>
@@ -356,7 +356,7 @@
                 </div>
             </div>
 
-            </div></div><!-- /panel-cups -->
+            </div><!-- /panel-cups -->
             <div class="config-panel" id="panel-eps">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-hospital-alt"></i> Gestión de EPS / Entidades Pagadoras <span class="hint">Código · Nombre · Régimen · Contacto</span></div>
@@ -381,7 +381,7 @@
                 </div>
             </div>
 
-            </div></div><!-- /panel-eps -->
+            </div><!-- /panel-eps -->
             <div class="config-panel" id="panel-matriz">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-table-cells-large"></i> Matriz Global Definitiva de Permisos <span class="hint">Haga clic en cada letra para activar o desactivar el permiso</span></div>
@@ -410,7 +410,7 @@
                 </div>
             </div>
 
-            </div></div><!-- /panel-matriz -->
+            </div><!-- /panel-matriz -->
             <div class="config-panel" id="panel-prueba">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-flask"></i> Datos de Prueba</div>
@@ -420,7 +420,7 @@
                 </div>
             </div>
 
-            </div></div><!-- /panel-prueba -->
+            </div><!-- /panel-prueba -->
             <div class="config-panel" id="panel-mante">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-screwdriver-wrench"></i> Mantenimiento</div>
