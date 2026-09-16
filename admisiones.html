@@ -282,7 +282,7 @@
                     </div>
                     <div class="form-group">
                         <label>Documento</label>
-                        <input type="text" id="documento" placeholder="Ej: 12345678" required>
+                        <input type="text" id="documento" placeholder="Ej: 12345678" required onchange="autocompletarPaciente()" onblur="autocompletarPaciente()">
                     </div>
                     <div class="form-group">
                         <label>Nombre Completo</label>
@@ -792,6 +792,62 @@
            ═══════════════════════════════════════════ */
         function obtenerPacientes() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
         function guardarPacientes(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+
+        /* ═══════════════════════════════════════════
+           AUTOCOMPLETAR PACIENTE POR DOCUMENTO
+           Si el paciente ya tiene un registro anterior,
+           al escribir el documento trae sus datos.
+           Solo rellena datos del paciente (no los de
+           admisión: Nº, fecha ingreso, servicio, etc.)
+           ═══════════════════════════════════════════ */
+        function autocompletarPaciente() {
+            const doc = document.getElementById('documento').value.trim();
+            if (!doc) return;
+            const pacientes = obtenerPacientes();
+            // Coincidencias por documento; se toma el registro más reciente
+            const coincidencias = pacientes.filter(p => (p.documento || '').trim() === doc);
+            if (coincidencias.length === 0) return;
+            coincidencias.sort((a, b) => {
+                const fa = new Date(a.fechaRegistro || 0).getTime() || (a.id || 0);
+                const fb = new Date(b.fechaRegistro || 0).getTime() || (b.id || 0);
+                return fb - fa;
+            });
+            const p = coincidencias[0];
+            const set = (id, val) => { const el = document.getElementById(id); if (el != null && val != null) el.value = val; };
+
+            set('tipoDoc', p.tipoDoc || '');
+            set('nombre', p.nombre || '');
+            set('fechaNacimiento', p.fechaNacimiento || '');
+            set('genero', p.genero || '');
+            set('eps', p.eps || '');
+            // Diagnóstico (referencia del último registro, editable)
+            set('diagnostico', p.diagnostico || '');
+            set('diagnosticoCodigo', p.diagnosticoCodigo || '');
+            // Dirección
+            set('direccion', p.direccion || '');
+            set('barrio', p.barrio || '');
+            set('telefono', p.telefono || '');
+            // Departamento -> cargar municipios -> municipio
+            if (p.departamento) {
+                set('departamento', p.departamento);
+                if (typeof cargarMunicipios === 'function') cargarMunicipios();
+                set('municipio', p.municipio || '');
+            }
+            // Familiar responsable
+            set('familiarNombre', p.familiarNombre || '');
+            set('familiarTelefono', p.familiarTelefono || '');
+            set('familiarParentesco', p.familiarParentesco || '');
+
+            // Recalcular edad segun fecha de ingreso actual
+            if (typeof calcularEdad === 'function') calcularEdad();
+
+            const activo = coincidencias.find(c => c.estado && c.estado !== 'Egresado');
+            if (activo) {
+                mostrarToast('Este paciente ya tiene una admisión activa. Datos cargados.', 'info');
+            } else {
+                mostrarToast('Paciente encontrado: datos cargados automáticamente', 'success');
+            }
+        }
 
         function registrarAdmision() {
             const numAdmision = document.getElementById('numAdmision').value.trim();
