@@ -54,6 +54,7 @@
         tbody tr:hover { background-color: #122a45; }
         tbody td { padding: 10px 14px; font-size: 13px; color: #c0c0c0; }
         .badge-egresado { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; background-color: rgba(72, 199, 142, 0.2); color: #48c78e; border: 1px solid #48c78e; }
+        .badge-facturada { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; background-color: rgba(255, 56, 96, 0.18); color: #ff3860; border: 1px solid #ff3860; vertical-align: middle; }
         .btn-action { padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; transition: all 0.2s; margin: 0 2px; font-family: 'Inter', sans-serif; }
         .btn-ver { background-color: rgba(0, 180, 216, 0.2); color: #00b4d8; border: 1px solid rgba(0, 180, 216, 0.4); }
         .btn-ver:hover { background-color: #00b4d8; color: #0a1628; }
@@ -79,6 +80,7 @@
         .toast { padding: 12px 20px; border-radius: 8px; font-size: 14px; animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
         .toast-success { background: linear-gradient(135deg, #48c78e, #38a06d); color: #fff; }
         .toast-info { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; }
+        .toast-error { background: linear-gradient(135deg, #ff3860, #c0392b); color: #fff; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
         @media (max-width: 768px) { .header { flex-direction: column; gap: 10px; } .toolbar { flex-direction: column;
@@ -173,6 +175,7 @@
 
     <script>
         const STORAGE_KEY = 'nexus_pacientes';
+        const K_FACTURAS = 'nexus_facturas';
         const sesion = JSON.parse(localStorage.getItem('nexus_sesion'));
         if (!sesion || !sesion.logueado) window.location.href = 'index.html';
         else {
@@ -186,6 +189,13 @@
         function obtenerPacientes() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
         function guardarPacientes(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
 
+        // Verifica si la admisión del paciente ya tiene una factura definitiva
+        function admisionYaFacturada(numAdmision) {
+            if (!numAdmision) return false;
+            const facturas = JSON.parse(localStorage.getItem(K_FACTURAS) || '[]');
+            return facturas.some(f => f.numAdmision === numAdmision && f.estado === 'definitiva');
+        }
+
         function cargarTabla(lista = null) {
             const tbody = document.getElementById('tablaEgresados');
             const emptyState = document.getElementById('emptyState');
@@ -197,7 +207,12 @@
                 const tr = document.createElement('tr');
                 const fIngreso = new Date(p.fechaIngreso).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
                 const fSalida = p.fechaSalida ? new Date(p.fechaSalida).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
-                tr.innerHTML = `<td><strong>${p.numAdmision}</strong></td><td>${fIngreso}</td><td>${fSalida}</td><td>${p.documento}</td><td>${p.nombre}</td><td>${p.servicio}</td><td>${p.diagnostico}</td><td><span class="badge-egresado">Egresado</span></td><td><button class="btn-action btn-ver" onclick="verDetalle(${p.id})">👁️</button><button class="btn-action btn-reingresar" onclick="reingresar(${p.id})" title="Reingresar">🔄</button></td>`;
+                const facturada = admisionYaFacturada(p.numAdmision);
+                const badgeFact = facturada ? ' <span class="badge-facturada" title="Admisión facturada">🧾 Facturada</span>' : '';
+                const btnReingreso = facturada
+                    ? `<button class="btn-action btn-reingresar" onclick="reingresar(${p.id})" title="Admisión facturada — no se puede reingresar" style="opacity:.4;cursor:not-allowed">🔒</button>`
+                    : `<button class="btn-action btn-reingresar" onclick="reingresar(${p.id})" title="Reingresar">🔄</button>`;
+                tr.innerHTML = `<td><strong>${p.numAdmision}</strong>${badgeFact}</td><td>${fIngreso}</td><td>${fSalida}</td><td>${p.documento}</td><td>${p.nombre}</td><td>${p.servicio}</td><td>${p.diagnostico}</td><td><span class="badge-egresado">Egresado</span></td><td><button class="btn-action btn-ver" onclick="verDetalle(${p.id})">👁️</button>${btnReingreso}</td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -243,6 +258,11 @@
             const pacientes = obtenerPacientes();
             const idx = pacientes.findIndex(p => p.id === id);
             if (idx === -1) return;
+            // Bloqueo: si la admisión ya fue facturada (factura definitiva) no se puede reingresar
+            if (admisionYaFacturada(pacientes[idx].numAdmision)) {
+                mostrarToast(`⛔ Admisión ${pacientes[idx].numAdmision} facturada — no se puede reingresar`, 'error');
+                return;
+            }
             if (!confirm(`¿Reingresar a ${pacientes[idx].nombre}?`)) return;
             pacientes[idx].estado = 'Activo';
             pacientes[idx].fechaSalida = '';
