@@ -35,32 +35,35 @@
         .nav-item.active { color:#00b4d8; background:rgba(0,180,216,.15); border:1px solid rgba(0,180,216,.3); }
 
         /* MAIN */
-        .main { max-width:1100px; margin:25px auto; padding:0 20px; }
-        .page-title { font-size:22px; font-weight:800; color:#00b4d8; margin-bottom:6px; }
+        .container { max-width:1500px; margin:25px auto; padding:0 20px; }
+        .page-title { font-size:22px; font-weight:800; color:#00b4d8; margin-bottom:6px; display:flex; align-items:center; gap:10px; }
         .page-sub { font-size:13px; color:#5a7a9a; margin-bottom:20px; }
 
         /* CARDS */
         .card { background:linear-gradient(135deg,#0d2137,#122a45); border:1px solid #1a3a5c; border-radius:16px; padding:24px; margin-bottom:20px; }
         .card-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
-        .step-num { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#fff; }
+        .step-num { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#fff; flex-shrink:0; }
         .step-num.blue { background:linear-gradient(135deg,#00b4d8,#0077b6); }
         .step-num.green { background:linear-gradient(135deg,#48c78e,#38a06d); }
         .card-title h3 { font-size:16px; font-weight:700; color:#c8d6e5; }
+        .card-title .hint { font-size:11px; color:#5a7a9a; margin-left:auto; }
 
         /* UPLOAD ZONE */
         .upload-zone { border:2px dashed #1a3a5c; border-radius:16px; padding:40px; text-align:center; cursor:pointer; transition:all .3s; background:rgba(0,180,216,.03); }
-        .upload-zone:hover, .upload-zone.dragover { border-color:#00b4d8; background:rgba(0,180,216,.08); }
+        .upload-zone:hover, .upload-zone.dragover { border-color:#00b4d8; background:rgba(0,180,216,.08); transform:scale(1.01); }
         .upload-icon { width:56px; height:56px; border-radius:50%; background:rgba(0,180,216,.15); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:24px; color:#00b4d8; }
         .upload-zone p { color:#5a7a9a; font-size:14px; }
+        .upload-zone p.sub { color:#3a5a7a; font-size:12px; margin-top:4px; }
 
         /* FILE INFO */
-        .file-ok { display:none; margin-top:10px; padding:10px 16px; background:rgba(72,199,142,.1); border:1px solid rgba(72,199,142,.3); border-radius:10px; color:#48c78e; font-size:13px; font-weight:600; }
+        .file-ok { display:none; margin-top:12px; padding:10px 16px; background:rgba(72,199,142,.1); border:1px solid rgba(72,199,142,.3); border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; }
+        .file-ok.visible { display:flex; }
 
         /* INPUTS */
         .nx-input { background:#0a1628; border:1px solid #1a3a5c; border-radius:10px; padding:10px 14px; color:#c8d6e5; font-size:13px; font-family:inherit; width:100%; transition:border .3s; }
         .nx-input:focus { outline:none; border-color:#00b4d8; box-shadow:0 0 0 2px rgba(0,180,216,.2); }
         .nx-select { background:#0a1628; border:1px solid #1a3a5c; border-radius:10px; padding:10px 14px; color:#c8d6e5; font-size:13px; font-family:inherit; }
-        .nx-label { display:block; font-size:12px; color:#5a7a9a; margin-bottom:6px; font-weight:600; }
+        .nx-label { display:block; font-size:11px; color:#5a7a9a; margin-bottom:6px; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
         .nx-btn { border:none; border-radius:10px; padding:10px 20px; font-weight:700; cursor:pointer; font-size:13px; font-family:inherit; transition:all .3s; display:inline-flex; align-items:center; gap:8px; }
         .nx-btn-primary { background:linear-gradient(135deg,#00b4d8,#0090b3); color:#03202c; }
         .nx-btn-primary:hover { box-shadow:0 6px 20px rgba(0,180,216,.35); transform:translateY(-1px); }
@@ -73,7 +76,9 @@
         /* GRID */
         .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
         .grid-3-2 { display:grid; grid-template-columns:3fr 2fr; gap:20px; }
-        @media(max-width:768px) { .grid-2, .grid-3-2 { grid-template-columns:1fr; } }
+        .grid-2-3 { display:grid; grid-template-columns:2fr 3fr; gap:20px; }
+        .inline-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+        @media(max-width:768px) { .grid-2, .grid-3-2, .grid-2-3, .inline-grid-3 { grid-template-columns:1fr; } }
 
         /* PREVIEW */
         #pdf-preview-canvas { max-width:100%; height:auto; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,.4); }
@@ -116,15 +121,67 @@
 
         /* DATE RANGES */
         .range-box { background:rgba(0,180,216,.06); border:1px solid rgba(0,180,216,.2); border-radius:12px; padding:14px; }
-        .range-box h4 { font-size:12px; font-weight:700; color:#00b4d8; margin-bottom:10px; }
+        .range-box h4 { font-size:12px; font-weight:700; color:#00b4d8; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+
+        /* GREEN INFO BOX */
+        .info-box-green { background:rgba(72,199,142,.08); border:1px solid rgba(72,199,142,.25); border-radius:12px; padding:14px; }
+        .info-box-green h4 { font-size:11px; font-weight:700; color:#48c78e; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+        .info-box-green p { font-size:11px; color:#5a7a9a; }
+
+        /* AMBER INFO BOX */
+        .info-box-amber { background:rgba(245,158,11,.06); border:1px solid rgba(245,158,11,.2); border-radius:12px; padding:14px; }
+        .info-box-amber h4 { font-size:11px; font-weight:700; color:#f59e0b; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+        .info-box-amber p { font-size:11px; color:#5a7a9a; }
+
+        /* SLATE INFO BOX */
+        .info-box-slate { background:rgba(13,33,55,.6); border:1px solid #1a3a5c; border-radius:12px; padding:14px; }
+        .info-box-slate h4 { font-size:11px; font-weight:700; color:#5a7a9a; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+        .info-box-slate p { font-size:11px; color:#3a5a7a; }
+
+        /* SUMMARY BOX */
+        .summary-box { background:rgba(72,199,142,.08); border:1px solid rgba(72,199,142,.25); border-radius:14px; padding:20px; text-align:center; }
+        .summary-box .icon { font-size:32px; color:#48c78e; margin-bottom:8px; }
+        .summary-box .count { font-size:18px; font-weight:700; color:#c8d6e5; }
+        .summary-box .detail { font-size:12px; color:#5a7a9a; margin-top:4px; }
 
         /* RADIO */
         .nx-radio { display:flex; align-items:center; gap:8px; padding:6px 0; font-size:13px; color:#c8d6e5; cursor:pointer; }
         .nx-radio input[type=radio] { accent-color:#00b4d8; }
+        .nx-radio .mono { font-family:monospace; color:#90e0ef; }
+
+        /* CHECKBOX */
+        .nx-check { display:flex; align-items:center; gap:6px; font-size:12px; color:#5a7a9a; cursor:pointer; }
+        .nx-check input[type=checkbox] { accent-color:#00b4d8; }
 
         /* PROGRESS */
-        .progress-wrap { width:100%; background:#1a3a5c; border-radius:10px; height:10px; overflow:hidden; margin-top:12px; }
-        .progress-fill { height:100%; background:linear-gradient(90deg,#00b4d8,#48c78e); border-radius:10px; transition:width .3s; }
+        .progress-wrap { width:100%; background:#1a3a5c; border-radius:10px; height:10px; overflow:hidden; margin-top:12px; display:none; }
+        .progress-wrap.visible { display:block; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,#00b4d8,#48c78e); border-radius:10px; transition:width .3s; width:0%; }
+
+        /* CUSTOM FIELD BOX */
+        .custom-field-box { background:rgba(13,33,55,.6); border:1px solid #1a3a5c; border-radius:10px; padding:12px; }
+        .custom-field-box p { font-size:11px; font-weight:700; color:#5a7a9a; margin-bottom:8px; }
+        .custom-field-row { display:flex; gap:8px; }
+        .custom-field-row .nx-input { flex:1; }
+        .custom-field-row .nx-select { min-width:110px; }
+
+        /* FIELDS SECTION HEADERS */
+        .fields-section-header { font-size:12px; font-weight:600; color:#5a7a9a; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+        .fields-section-header i { color:#00b4d8; }
+        .bold-hint { font-size:11px; color:#3a5a7a; margin-bottom:8px; }
+
+        /* DATES FOOTER */
+        .dates-footer { display:flex; align-items:center; justify-content:space-between; margin-top:12px; padding-top:12px; border-top:1px solid #1a3a5c; }
+        .dates-footer .count-label { font-size:13px; font-weight:600; color:#5a7a9a; display:flex; align-items:center; gap:6px; }
+        .dates-footer .count-label i { color:#00b4d8; }
+        .dates-footer .btn-clear { font-size:11px; color:#ff3860; cursor:pointer; background:none; border:none; display:flex; align-items:center; gap:4px; transition:color .3s; }
+        .dates-footer .btn-clear:hover { color:#ff6b8a; }
+
+        /* DATES SCROLL */
+        .dates-scroll { max-height:260px; overflow-y:auto; padding-right:4px; }
+
+        /* GENERATE SECTION */
+        .gen-center { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
 
         /* TOAST */
         .toast-container { position:fixed; top:20px; right:20px; z-index:2000; display:flex; flex-direction:column; gap:8px; }
@@ -135,23 +192,22 @@
         @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
         @keyframes fadeOut { from{opacity:1} to{opacity:0} }
 
-        /* RESPONSIVE */
-        @media(max-width:768px) { .header{flex-direction:column;gap:10px} .header-right{flex-wrap:wrap;justify-content:center} .nav-bar{justify-content:center} .grid-2,.grid-3-2{grid-template-columns:1fr} }
-    
-/* ── Sidebar + Panel Layout v2.8 ── */
-.config-layout{display:flex;gap:0;min-height:calc(100vh - 200px);border-radius:14px;overflow:hidden;border:1px solid #1a3a5c}
-.config-sidebar{width:230px;min-width:230px;background:#0d1f33;border-right:1px solid #1a3a5c;padding:10px 0;border-radius:0}
-.sidebar-item{display:flex;align-items:center;gap:10px;padding:13px 20px;cursor:pointer;color:#5a7a9a;font-size:13px;font-weight:600;transition:all .25s;border-left:3px solid transparent;border-bottom:1px solid rgba(26,58,92,.4)}
-.sidebar-item:hover{color:#90e0ef;background:rgba(0,180,216,0.06)}
-.sidebar-item.active{color:#00b4d8;background:rgba(0,180,216,0.15);border-left-color:#00b4d8;font-weight:700}
-.sidebar-item i{width:18px;text-align:center;font-size:14px}
-.config-content{flex:1;min-width:0;background:rgba(13,33,55,0.4);border-radius:0;padding:25px;overflow-y:auto;max-height:none}
-.config-panel{display:none;animation:fadeInPanel .3s ease}
-.config-panel.active{display:block}
-@keyframes fadeInPanel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:900px){.config-layout{flex-direction:column;border-radius:0}.config-sidebar{width:100%;min-width:unset;border-right:none;border-bottom:1px solid #1a3a5c;border-radius:0;display:flex;flex-wrap:wrap}.sidebar-item{padding:10px 14px;font-size:12px;border-left:none;border-bottom:none}.config-content{border-radius:0}}
-
-</style>
+        /* ── Sidebar + Panel Layout v2.8 ── */
+        .config-layout { display:flex; gap:0; min-height:calc(100vh - 200px); border-radius:14px; overflow:hidden; border:1px solid #1a3a5c; }
+        .config-sidebar { width:230px; min-width:230px; background:#0d1f33; border-right:1px solid #1a3a5c; padding:10px 0; border-radius:0; }
+        .sidebar-item { display:flex; align-items:center; gap:10px; padding:13px 20px; cursor:pointer; color:#5a7a9a; font-size:13px; font-weight:600; transition:all .25s; border-left:3px solid transparent; border-bottom:1px solid rgba(26,58,92,.4); }
+        .sidebar-item:hover { color:#90e0ef; background:rgba(0,180,216,0.06); }
+        .sidebar-item.active { color:#00b4d8; background:rgba(0,180,216,0.15); border-left-color:#00b4d8; font-weight:700; }
+        .sidebar-item.locked { opacity:.4; cursor:not-allowed; }
+        .sidebar-item.locked:hover { color:#5a7a9a; background:transparent; }
+        .sidebar-item i { width:18px; text-align:center; font-size:14px; }
+        .config-content { flex:1; min-width:0; background:rgba(13,33,55,0.4); border-radius:0; padding:25px; overflow-y:auto; max-height:calc(100vh - 200px); }
+        .config-panel { display:none; animation:fadeInPanel .3s ease; }
+        .config-panel.active { display:block; }
+        @keyframes fadeInPanel { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @media(max-width:900px) { .config-layout{flex-direction:column;border-radius:0} .config-sidebar{width:100%;min-width:unset;border-right:none;border-bottom:1px solid #1a3a5c;border-radius:0;display:flex;flex-wrap:wrap} .sidebar-item{padding:10px 14px;font-size:12px;border-left:none;border-bottom:none} .config-content{border-radius:0} }
+        @media(max-width:768px) { .header{flex-direction:column;gap:10px} .header-right{flex-wrap:wrap;justify-content:center} .nav-bar{justify-content:center} }
+    </style>
 </head>
 <body>
     <script src="nexus_db.js"></script>
@@ -205,29 +261,213 @@
 
     <div class="container">
 
-<div class="config-layout">
-<div class="config-sidebar">
-  <div class="sidebar-item active" data-panel="step1" onclick="switchPanel('step1')"><i class="fas fa-user"></i>Paso 1 – Paciente</div>
-  <div class="sidebar-item" data-panel="step2" onclick="switchPanel('step2')"><i class="fas fa-stethoscope"></i>Paso 2 – Evolución</div>
-  <div class="sidebar-item" data-panel="step3" onclick="switchPanel('step3')"><i class="fas fa-file-alt"></i>Paso 3 – Revisión</div>
-  <div class="sidebar-item" data-panel="step4" onclick="switchPanel('step4')"><i class="fas fa-file-pdf"></i>Paso 4 – Generar PDF</div>
-</div>
-<div class="config-content">
+    <div class="config-layout">
+    <div class="config-sidebar">
+      <div class="sidebar-item active" data-panel="step1" onclick="switchPanel('step1')"><i class="fas fa-cloud-upload-alt"></i>Paso 1 – Subir PDF</div>
+      <div class="sidebar-item locked" data-panel="step2" onclick="switchPanel('step2')"><i class="fas fa-search"></i>Paso 2 – Campos Detectados</div>
+      <div class="sidebar-item locked" data-panel="step3" onclick="switchPanel('step3')"><i class="fas fa-calendar-alt"></i>Paso 3 – Fechas</div>
+      <div class="sidebar-item locked" data-panel="step4" onclick="switchPanel('step4')"><i class="fas fa-file-pdf"></i>Paso 4 – Generar PDF</div>
+    </div>
+    <div class="config-content">
 
-<div class="config-panel active" id="panel-step1">
+    <!-- ========== PANEL STEP 1: UPLOAD ========== -->
+    <div class="config-panel active" id="panel-step1">
+        <div class="card-title">
+            <div class="step-num blue">1</div>
+            <h3>Sube tu evolución en PDF</h3>
+            <span id="step1-status" class="hint"></span>
+        </div>
+        <div id="upload-zone" class="upload-zone">
+            <input type="file" id="file-input" accept=".pdf" style="display:none">
+            <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+            <p>Arrastra tu PDF aquí o haz clic para seleccionar</p>
+            <p class="sub">Solo archivos PDF (máx 15 MB)</p>
+        </div>
+        <div id="file-info" class="file-ok">
+            <i class="fas fa-check-circle" style="color:#48c78e"></i>
+            <span id="file-name" style="color:#48c78e"></span>
+            <button onclick="resetUpload()" class="nx-btn-danger nx-btn-sm" title="Subir otro" style="margin-left:auto"><i class="fas fa-redo"></i></button>
+        </div>
+    </div>
 
-</div>
-<div class="config-panel" id="panel-step2">
+    <!-- ========== PANEL STEP 2: DETECTED FIELDS ========== -->
+    <div class="config-panel" id="panel-step2">
+        <div class="card-title">
+            <div class="step-num blue">2</div>
+            <h3>Revisa los campos detectados</h3>
+            <span class="hint">Clic en área = activar/desactivar</span>
+        </div>
+        <div class="grid-3-2">
+            <!-- LEFT: Preview -->
+            <div>
+                <div class="preview-wrap">
+                    <div id="preview-container" style="position:relative;display:inline-block;width:100%">
+                        <canvas id="pdf-preview-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- RIGHT: Fields -->
+            <div style="display:flex;flex-direction:column;gap:14px">
+                <div>
+                    <div class="fields-section-header"><i class="fas fa-align-left"></i> Texto extraído</div>
+                    <div id="extracted-text" class="extracted-box"></div>
+                </div>
+                <div>
+                    <div class="fields-section-header"><i class="fas fa-tags"></i> Campos a reemplazar</div>
+                    <p class="bold-hint">Los números de Cita y Formato se imprimirán en <strong style="color:#90e0ef">NEGRITA</strong>.</p>
+                    <div id="fields-list"></div>
+                </div>
+                <div class="custom-field-box">
+                    <p><i class="fas fa-plus-circle" style="margin-right:4px"></i> Agregar campo manual</p>
+                    <div class="custom-field-row">
+                        <input type="text" id="custom-find" placeholder="Texto exacto" class="nx-input">
+                        <select id="custom-type" class="nx-select">
+                            <option value="fecha">Fecha</option>
+                            <option value="cita">No. Cita</option>
+                            <option value="formato">Formato No.</option>
+                            <option value="custom">Otro</option>
+                            <option value="pagina">Página</option>
+                        </select>
+                        <button onclick="addCustomField()" class="nx-btn nx-btn-primary nx-btn-sm"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-</div>
-<div class="config-panel" id="panel-step3">
+    <!-- ========== PANEL STEP 3: DATES ========== -->
+    <div class="config-panel" id="panel-step3">
+        <div class="card-title">
+            <div class="step-num blue">3</div>
+            <h3>Configura las fechas</h3>
+        </div>
+        <div class="grid-2">
+            <!-- LEFT: Date config -->
+            <div style="display:flex;flex-direction:column;gap:14px">
+                <div class="range-box">
+                    <h4><i class="fas fa-magic"></i> Rango rápido</h4>
+                    <div class="inline-grid-3" style="margin-bottom:10px">
+                        <div>
+                            <label class="nx-label">Desde</label>
+                            <input type="date" id="range-start" class="nx-input">
+                        </div>
+                        <div>
+                            <label class="nx-label">Hasta</label>
+                            <input type="date" id="range-end" class="nx-input">
+                        </div>
+                        <div style="display:flex;align-items:flex-end">
+                            <button onclick="generateDateRange()" class="nx-btn nx-btn-primary" style="width:100%"><i class="fas fa-calendar-plus"></i> Generar</button>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                        <label class="nx-label" style="margin:0">Cada</label>
+                        <input type="number" id="range-interval" value="1" min="1" max="30" class="nx-input" style="width:56px;text-align:center;padding:8px">
+                        <span style="font-size:12px;color:#5a7a9a">día(s)</span>
+                        <label class="nx-check" style="margin-left:12px"><input type="checkbox" id="weekdays-only"> Solo laborales</label>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px">
+                    <input type="date" id="manual-date" class="nx-input" style="flex:1">
+                    <button onclick="addManualDate()" class="nx-btn nx-btn-primary"><i class="fas fa-plus"></i> Agregar</button>
+                </div>
+            </div>
+            <!-- RIGHT: Date list -->
+            <div>
+                <div id="dates-list" class="dates-scroll"></div>
+                <div class="dates-footer">
+                    <span class="count-label"><i class="fas fa-calendar-check"></i><span id="date-count">0</span> fechas</span>
+                    <button onclick="clearAllDates()" class="btn-clear"><i class="fas fa-trash"></i> Limpiar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-</div>
-<div class="config-panel" id="panel-step4">
+    <!-- ========== PANEL STEP 4: GENERATE ========== -->
+    <div class="config-panel" id="panel-step4">
+        <div class="card-title">
+            <div class="step-num green">4</div>
+            <h3>Genera y descarga</h3>
+        </div>
+        <div class="grid-2">
+            <!-- LEFT: Config -->
+            <div style="display:flex;flex-direction:column;gap:14px">
+                <!-- Cita / Formato numbering -->
+                <div class="grid-2" style="gap:14px">
+                    <div>
+                        <label class="nx-label">No. de Cita inicial</label>
+                        <input type="number" id="cita-start" value="13" min="1" class="nx-input">
+                        <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+                            <span style="font-size:11px;color:#3a5a7a">Incremento +</span>
+                            <input type="number" id="cita-increment" value="1" min="1" class="nx-input" style="width:60px;text-align:center;padding:6px">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="nx-label">Formato No. inicial</label>
+                        <input type="number" id="formato-start" value="21" min="1" class="nx-input">
+                        <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+                            <span style="font-size:11px;color:#3a5a7a">Incremento +</span>
+                            <input type="number" id="formato-increment" value="13" min="1" class="nx-input" style="width:60px;text-align:center;padding:6px">
+                        </div>
+                    </div>
+                </div>
 
-</div>
-</div>
-</div>
+                <!-- Page numbering -->
+                <div class="info-box-green">
+                    <h4><i class="fas fa-file-alt"></i> Numeración de página</h4>
+                    <div class="grid-2" style="gap:10px">
+                        <div>
+                            <label class="nx-label">Página inicial</label>
+                            <input type="number" id="pagina-start" value="1" min="1" class="nx-input">
+                        </div>
+                        <div>
+                            <label class="nx-label">Total páginas</label>
+                            <input type="number" id="pagina-total" value="16" min="1" class="nx-input">
+                        </div>
+                    </div>
+                    <p style="margin-top:6px;color:#48c78e">Se reemplazará "Página X de Y" en cada página</p>
+                </div>
+
+                <!-- Date format -->
+                <div class="info-box-amber">
+                    <h4><i class="fas fa-calendar-day"></i> Formato de fecha</h4>
+                    <label class="nx-radio"><input type="radio" name="date-format" value="dd/mm/yyyy" checked> <span class="mono">04/08/2026</span></label>
+                    <label class="nx-radio"><input type="radio" name="date-format" value="dd-mm-yyyy"> <span class="mono">04-08-2026</span></label>
+                    <label class="nx-radio"><input type="radio" name="date-format" value="dd-AAA-yy"> <span class="mono">04-AGO-26</span></label>
+                </div>
+
+                <!-- Cover padding -->
+                <div class="info-box-slate">
+                    <h4><i class="fas fa-sliders-h"></i> Ajuste de cobertura</h4>
+                    <p>Si el texto original se ve duplicado, aumenta el padding.</p>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+                        <label class="nx-label" style="margin:0">Padding extra (mm)</label>
+                        <input type="number" id="cover-padding" value="0.5" min="0" max="10" step="0.25" class="nx-input" style="width:80px;text-align:center">
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Summary + Generate -->
+            <div class="gen-center">
+                <div class="summary-box">
+                    <div class="icon"><i class="fas fa-file-pdf"></i></div>
+                    <div class="count" id="gen-summary-text">0 evoluciones</div>
+                    <div class="detail" id="gen-detail-text"></div>
+                </div>
+                <button id="generate-btn" onclick="generatePDF()" class="nx-btn nx-btn-success" style="width:100%;max-width:300px;padding:14px 24px;font-size:15px">
+                    <i class="fas fa-download"></i> Generar y Descargar PDF
+                </button>
+                <div id="progress-bar" class="progress-wrap">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <p id="progress-text" style="font-size:12px;color:#5a7a9a;display:none"></p>
+            </div>
+        </div>
+    </div>
+
+    </div><!-- /config-content -->
+    </div><!-- /config-layout -->
+
+    </div><!-- /container -->
 
     <script>
     /* ===== SESSION CHECK ===== */
@@ -249,42 +489,81 @@
     let originalPdfBytes = null, extractedTextItems = [], detectedFields = [], dates = [], pdfPage = null, pageViewport = null, pdfDocument = null, fieldIdCounter = 0;
     const MONTHS_ES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
 
+    /* ===== SIDEBAR PANEL SWITCHING ===== */
+    const PANEL_INIT = {};
+    let pdfUploaded = false;
+
+    function switchPanel(pid) {
+        /* Steps 2-4 are locked until PDF is uploaded */
+        if (['step2','step3','step4'].includes(pid) && !pdfUploaded) return;
+        document.querySelectorAll('.config-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+        const panel = document.getElementById('panel-' + pid);
+        if (panel) panel.classList.add('active');
+        const item = document.querySelector('[data-panel="' + pid + '"]');
+        if (item) item.classList.add('active');
+        if (!PANEL_INIT[pid]) { PANEL_INIT[pid] = true; }
+    }
+
+    function unlockSteps() {
+        pdfUploaded = true;
+        document.querySelectorAll('.sidebar-item.locked').forEach(s => s.classList.remove('locked'));
+    }
+
+    function lockSteps() {
+        pdfUploaded = false;
+        document.querySelectorAll('.sidebar-item[data-panel="step2"],.sidebar-item[data-panel="step3"],.sidebar-item[data-panel="step4"]').forEach(s => s.classList.add('locked'));
+    }
+
     /* ===== UPLOAD ===== */
     const uploadZone = document.getElementById('upload-zone');
     const fileInput = document.getElementById('file-input');
     uploadZone.addEventListener('click', () => fileInput.click());
     uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
     uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-    uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); const file = e.dataTransfer.files[0]; if (file && (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) handleFile(file); else showToast('Solo se aceptan archivos PDF','error'); });
+    uploadZone.addEventListener('drop', e => {
+        e.preventDefault(); uploadZone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file && (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) handleFile(file);
+        else showToast('Solo se aceptan archivos PDF', 'error');
+    });
     fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
 
     async function handleFile(file) {
-        if (file.size > 15*1024*1024) { showToast('Archivo muy grande (máx 15 MB)','error'); return; }
-        document.getElementById('step1-status').innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#00b4d8"></i> <span style="color:#00b4d8">Procesando...</span>';
+        if (file.size > 15 * 1024 * 1024) { showToast('Archivo muy grande (máx 15 MB)', 'error'); return; }
+        document.getElementById('step1-status').innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#00b4d8"></i> <span style="color:#00b4d8;font-size:12px">Procesando...</span>';
         try {
             const arrayBuffer = await file.arrayBuffer();
             originalPdfBytes = new Uint8Array(arrayBuffer);
-            pdfDocument = await pdfjsLib.getDocument({data:originalPdfBytes.slice()}).promise;
+            const header = new TextDecoder().decode(originalPdfBytes.slice(0, 8));
+            if (!header.startsWith('%PDF')) {
+                showToast('El archivo no es un PDF válido', 'error');
+                document.getElementById('step1-status').innerHTML = '<i class="fas fa-times-circle" style="color:#ff3860"></i> <span style="color:#ff3860;font-size:12px">PDF inválido</span>';
+                return;
+            }
+            pdfDocument = await pdfjsLib.getDocument({data: originalPdfBytes.slice()}).promise;
             pdfPage = await pdfDocument.getPage(1);
-            document.getElementById('file-info').style.display = 'block';
-            document.getElementById('file-name').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
-            document.getElementById('step1-status').innerHTML = '<i class="fas fa-check-circle" style="color:#48c78e"></i> <span style="color:#48c78e">OK</span>';
+            document.getElementById('file-info').classList.add('visible');
+            document.getElementById('file-name').textContent = file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
+            document.getElementById('step1-status').innerHTML = '<i class="fas fa-check-circle" style="color:#48c78e"></i> <span style="color:#48c78e;font-size:12px">OK</span>';
             await extractAndPreview();
-            ['step2','step3','step4'].forEach(id => document.getElementById(id).style.display = 'block');
+            unlockSteps();
+            switchPanel('step2');
             updateGenSummary();
-            showToast('PDF cargado correctamente','success');
+            showToast('PDF cargado correctamente', 'success');
         } catch(err) {
-            document.getElementById('step1-status').innerHTML = '<i class="fas fa-times-circle" style="color:#ff3860"></i> <span style="color:#ff3860">Error</span>';
-            showToast('Error: ' + err.message,'error');
+            document.getElementById('step1-status').innerHTML = '<i class="fas fa-times-circle" style="color:#ff3860"></i> <span style="color:#ff3860;font-size:12px">Error</span>';
+            showToast('Error: ' + err.message, 'error');
         }
     }
 
     function resetUpload() {
         originalPdfBytes = null; pdfDocument = null; pdfPage = null; detectedFields = []; dates = [];
         fileInput.value = '';
-        document.getElementById('file-info').style.display = 'none';
+        document.getElementById('file-info').classList.remove('visible');
         document.getElementById('step1-status').innerHTML = '';
-        ['step2','step3','step4'].forEach(id => document.getElementById(id).style.display = 'none');
+        lockSteps();
+        switchPanel('step1');
     }
 
     /* ===== EXTRACT & PREVIEW ===== */
@@ -294,7 +573,7 @@
         const canvas = document.getElementById('pdf-preview-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = pageViewport.width; canvas.height = pageViewport.height;
-        await pdfPage.render({canvasContext:ctx, viewport:pageViewport}).promise;
+        await pdfPage.render({canvasContext: ctx, viewport: pageViewport}).promise;
         const textContent = await pdfPage.getTextContent();
         extractedTextItems = textContent.items.filter(item => item.str.trim().length > 0);
         document.getElementById('extracted-text').textContent = extractedTextItems.map(item => item.str).join(' ');
@@ -313,19 +592,19 @@
             if (/fecha/i.test(text) && !/hora/i.test(text)) pendingLabel = 'fecha';
             if (/no\.?\s*de\s*cita/i.test(text)) pendingLabel = 'cita';
             if (/formato\s*no/i.test(text)) pendingLabel = 'formato';
-            if (/página\s*\d+\s*de\s*\d+/i.test(text) || /pagina\s*\d+\s*de\s*\d+/i.test(text)) addDetectedField('pagina','Página',text,item);
-            for (const pat of datePatterns) { if (pat.test(text)) { addDetectedField('fecha','Fecha',text,item); pendingLabel = null; break; } }
+            if (/página\s*\d+\s*de\s*\d+/i.test(text) || /pagina\s*\d+\s*de\s*\d+/i.test(text)) addDetectedField('pagina', 'Página', text, item);
+            for (const pat of datePatterns) { if (pat.test(text)) { addDetectedField('fecha', 'Fecha', text, item); pendingLabel = null; break; } }
             if (pendingLabel && /^\d+$/.test(text)) {
                 const label = pendingLabel === 'cita' ? 'No. de Cita' : pendingLabel === 'formato' ? 'Formato No.' : 'Fecha (num)';
-                addDetectedField(pendingLabel,label,text,item); pendingLabel = null;
+                addDetectedField(pendingLabel, label, text, item); pendingLabel = null;
             }
         }
         if (!detectedFields.some(f => f.type === 'pagina')) {
             for (let i = 0; i < extractedTextItems.length; i++) {
                 const t = extractedTextItems[i].str.trim();
                 if (/^página$/i.test(t) || /^pagina$/i.test(t)) {
-                    const combined = t + ' ' + extractedTextItems.slice(i+1,i+4).map(x=>x.str.trim()).join(' ');
-                    if (/página\s*\d+\s*de\s*\d+/i.test(combined) || /pagina\s*\d+\s*de\s*\d+/i.test(combined)) addDetectedField('pagina','Página',combined.replace(/\s+/g,' '),extractedTextItems[i]);
+                    const combined = t + ' ' + extractedTextItems.slice(i + 1, i + 4).map(x => x.str.trim()).join(' ');
+                    if (/página\s*\d+\s*de\s*\d+/i.test(combined) || /pagina\s*\d+\s*de\s*\d+/i.test(combined)) addDetectedField('pagina', 'Página', combined.replace(/\s+/g, ' '), extractedTextItems[i]);
                 }
             }
         }
@@ -333,7 +612,7 @@
             for (let i = 0; i < extractedTextItems.length; i++) {
                 if (/^FECHA$/i.test(extractedTextItems[i].str.trim())) {
                     for (let j = i + 1; j < Math.min(i + 5, extractedTextItems.length); j++) {
-                        if (extractedTextItems[j].str.trim().length > 1) { addDetectedField('fecha','Fecha (fallback)',extractedTextItems[j].str.trim(),extractedTextItems[j]); break; }
+                        if (extractedTextItems[j].str.trim().length > 1) { addDetectedField('fecha', 'Fecha (fallback)', extractedTextItems[j].str.trim(), extractedTextItems[j]); break; }
                     }
                     break;
                 }
@@ -341,10 +620,10 @@
         }
     }
 
-    function addDetectedField(type,label,text,item) {
+    function addDetectedField(type, label, text, item) {
         if (detectedFields.some(f => f.type === type && Math.abs(f.srcX - item.transform[4]) < 3 && Math.abs(f.srcY - item.transform[5]) < 3)) return;
-        const id = fieldIdCounter++; const fontSize = Math.max(Math.abs(item.transform[0]),Math.abs(item.transform[3]),8);
-        detectedFields.push({ id,type,label,searchText:text, srcX:item.transform[4],srcY:item.transform[5],srcFontSize:fontSize, itemWidth:item.width||fontSize*text.length*0.55,itemHeight:item.height||fontSize,enabled:true });
+        const id = fieldIdCounter++; const fontSize = Math.max(Math.abs(item.transform[0]), Math.abs(item.transform[3]), 8);
+        detectedFields.push({ id, type, label, searchText: text, srcX: item.transform[4], srcY: item.transform[5], srcFontSize: fontSize, itemWidth: item.width || fontSize * text.length * 0.55, itemHeight: item.height || fontSize, enabled: true });
     }
 
     function renderFieldOverlays() {
@@ -352,15 +631,15 @@
         const container = document.getElementById('preview-container');
         for (const field of detectedFields) {
             const div = document.createElement('div');
-            div.className = `overlay-rect ${field.type} ${field.enabled?'':'disabled'}`;
+            div.className = `overlay-rect ${field.type} ${field.enabled ? '' : 'disabled'}`;
             const vp = pageViewport;
-            const [cx,cy] = vp.convertToViewportPoint(field.srcX,field.srcY);
+            const [cx, cy] = vp.convertToViewportPoint(field.srcX, field.srcY);
             const topY = cy - field.srcFontSize * vp.scale;
-            const w = Math.max(field.itemWidth * vp.scale,50);
+            const w = Math.max(field.itemWidth * vp.scale, 50);
             const h = field.srcFontSize * vp.scale * 1.5;
-            div.style.left = (cx-2)+'px'; div.style.top = (topY-2)+'px'; div.style.width = (w+4)+'px'; div.style.height = (h+4)+'px';
-            const tag = field.type==='fecha'?'📅':field.type==='cita'?'🔢':field.type==='formato'?'📋':'✏️';
-            div.innerHTML = '<span style="font-size:8px;color:#fff;background:rgba(0,0,0,.6);padding:1px 4px;border-radius:2px;position:absolute;top:-16px;left:0;white-space:nowrap">'+tag+' '+field.label+': "'+field.searchText+'"</span>';
+            div.style.left = (cx - 2) + 'px'; div.style.top = (topY - 2) + 'px'; div.style.width = (w + 4) + 'px'; div.style.height = (h + 4) + 'px';
+            const tag = field.type === 'fecha' ? '📅' : field.type === 'cita' ? '🔢' : field.type === 'formato' ? '📋' : field.type === 'pagina' ? '📄' : '✏️';
+            div.innerHTML = '<span style="font-size:8px;color:#fff;background:rgba(0,0,0,.6);padding:1px 4px;border-radius:2px;position:absolute;top:-16px;left:0;white-space:nowrap">' + tag + ' ' + field.label + ': "' + field.searchText + '"</span>';
             div.addEventListener('click', e => { e.stopPropagation(); toggleField(field.id); });
             container.appendChild(div);
         }
@@ -372,16 +651,16 @@
     function renderFieldsList() {
         const c = document.getElementById('fields-list'); c.innerHTML = '';
         for (const field of detectedFields) {
-            const icons = {fecha:'📅',cita:'🔢',formato:'📋',custom:'✏️',pagina:'📄'};
-            const bold = (field.type==='cita'||field.type==='formato'||field.type==='pagina') ? 'font-weight:700' : '';
+            const icons = {fecha: '📅', cita: '🔢', formato: '📋', custom: '✏️', pagina: '📄'};
+            const bold = (field.type === 'cita' || field.type === 'formato' || field.type === 'pagina') ? 'font-weight:700' : '';
             const div = document.createElement('div');
-            div.className = `field-item ${field.type} ${field.enabled?'':'disabled'}`;
+            div.className = `field-item ${field.type} ${field.enabled ? '' : 'disabled'}`;
             div.innerHTML = `
-                <button onclick="toggleField(${field.id})" style="width:18px;height:18px;border-radius:4px;border:1px solid ${field.enabled?'#00b4d8':'#1a3a5c'};background:${field.enabled?'#00b4d8':'transparent'};cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                    ${field.enabled?'<i class="fas fa-check" style="color:#fff;font-size:9px"></i>':''}
+                <button onclick="toggleField(${field.id})" style="width:18px;height:18px;border-radius:4px;border:1px solid ${field.enabled ? '#00b4d8' : '#1a3a5c'};background:${field.enabled ? '#00b4d8' : 'transparent'};cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    ${field.enabled ? '<i class="fas fa-check" style="color:#fff;font-size:9px"></i>' : ''}
                 </button>
-                <span class="field-tag ${field.type}">${icons[field.type]||'✏️'} ${field.label}</span>
-                <span style="flex:1;overflow:hidden;text-overflow:ellipsis;color:#c8d6e5;${bold}">"${field.searchText}" ${field.type==='pagina'?'→ PÁGINA':bold?'→ NEGRILLA':''}</span>
+                <span class="field-tag ${field.type}">${icons[field.type] || '✏️'} ${field.label}</span>
+                <span style="flex:1;overflow:hidden;text-overflow:ellipsis;color:#c8d6e5;${bold}">"${field.searchText}" ${field.type === 'pagina' ? '→ PÁGINA' : bold ? '→ NEGRILLA' : ''}</span>
                 <button onclick="removeField(${field.id})" style="background:none;border:none;color:#ff3860;cursor:pointer;font-size:11px;flex-shrink:0"><i class="fas fa-times"></i></button>
             `;
             c.appendChild(div);
@@ -392,35 +671,35 @@
     function addCustomField() {
         const findText = document.getElementById('custom-find').value.trim();
         const type = document.getElementById('custom-type').value;
-        if (!findText) { showToast('Escribe el texto','error'); return; }
+        if (!findText) { showToast('Escribe el texto', 'error'); return; }
         let found = extractedTextItems.find(item => item.str.includes(findText));
-        if (found) { addDetectedField(type,findText,findText,found); renderFieldOverlays(); }
-        else { detectedFields.push({ id:fieldIdCounter++,type,label:findText,searchText:findText,srcX:0,srcY:0,srcFontSize:10,itemWidth:80,itemHeight:12,enabled:true,noPosition:true }); }
-        renderFieldsList(); document.getElementById('custom-find').value = ''; showToast('Campo agregado','success');
+        if (found) { addDetectedField(type, findText, findText, found); renderFieldOverlays(); }
+        else { detectedFields.push({ id: fieldIdCounter++, type, label: findText, searchText: findText, srcX: 0, srcY: 0, srcFontSize: 10, itemWidth: 80, itemHeight: 12, enabled: true, noPosition: true }); }
+        renderFieldsList(); document.getElementById('custom-find').value = ''; showToast('Campo agregado', 'success');
     }
 
     /* ===== DATES ===== */
     function generateDateRange() {
         const start = document.getElementById('range-start').value;
         const end = document.getElementById('range-end').value;
-        const interval = parseInt(document.getElementById('range-interval').value)||1;
+        const interval = parseInt(document.getElementById('range-interval').value) || 1;
         const weekdaysOnly = document.getElementById('weekdays-only').checked;
-        if (!start||!end) { showToast('Selecciona inicio y fin','error'); return; }
-        const s = new Date(start+'T12:00:00'), e = new Date(end+'T12:00:00');
-        if (s > e) { showToast('Inicio debe ser menor','error'); return; }
+        if (!start || !end) { showToast('Selecciona inicio y fin', 'error'); return; }
+        const s = new Date(start + 'T12:00:00'), e = new Date(end + 'T12:00:00');
+        if (s > e) { showToast('Inicio debe ser menor', 'error'); return; }
         const nd = []; let c = new Date(s);
-        while (c <= e) { if (!weekdaysOnly||(c.getDay()!==0&&c.getDay()!==6)) nd.push(c.toISOString().split('T')[0]); c.setDate(c.getDate()+interval); }
-        dates = [...new Set([...dates,...nd])].sort(); renderDatesList(); updateGenSummary(); showToast(`${nd.length} fechas generadas`,'success');
+        while (c <= e) { if (!weekdaysOnly || (c.getDay() !== 0 && c.getDay() !== 6)) nd.push(c.toISOString().split('T')[0]); c.setDate(c.getDate() + interval); }
+        dates = [...new Set([...dates, ...nd])].sort(); renderDatesList(); updateGenSummary(); showToast(`${nd.length} fechas generadas`, 'success');
     }
     function addManualDate() { const v = document.getElementById('manual-date').value; if (!v) return; if (!dates.includes(v)) { dates.push(v); dates.sort(); } renderDatesList(); updateGenSummary(); }
-    function removeDate(i) { dates.splice(i,1); renderDatesList(); updateGenSummary(); }
-    function clearAllDates() { dates=[]; renderDatesList(); updateGenSummary(); }
+    function removeDate(i) { dates.splice(i, 1); renderDatesList(); updateGenSummary(); }
+    function clearAllDates() { dates = []; renderDatesList(); updateGenSummary(); }
 
     function formatDateStr(dateStr) {
         const fmt = document.querySelector('input[name="date-format"]:checked').value;
-        const d = new Date(dateStr+'T12:00:00');
-        const dd = String(d.getDate()).padStart(2,'0'), mm = String(d.getMonth()+1).padStart(2,'0'), yy = String(d.getFullYear()).slice(-2);
-        switch(fmt) {
+        const d = new Date(dateStr + 'T12:00:00');
+        const dd = String(d.getDate()).padStart(2, '0'), mm = String(d.getMonth() + 1).padStart(2, '0'), yy = String(d.getFullYear()).slice(-2);
+        switch (fmt) {
             case 'dd/mm/yyyy': return `${dd}/${mm}/${d.getFullYear()}`;
             case 'dd-mm-yyyy': return `${dd}-${mm}-${d.getFullYear()}`;
             case 'dd-AAA-yy': return `${dd}-${MONTHS_ES[d.getMonth()]}-${yy}`;
@@ -430,9 +709,9 @@
 
     function renderDatesList() {
         const c = document.getElementById('dates-list'); c.innerHTML = '';
-        dates.forEach((date,i) => {
+        dates.forEach((date, i) => {
             const div = document.createElement('div'); div.className = 'date-item';
-            div.innerHTML = `<span class="num">${i+1}.</span><span class="orig">${date}</span><span class="fmt">→ ${formatDateStr(date)}</span><button onclick="removeDate(${i})" style="background:none;border:none;color:#ff3860;cursor:pointer;font-size:11px"><i class="fas fa-times"></i></button>`;
+            div.innerHTML = `<span class="num">${i + 1}.</span><span class="orig">${date}</span><span class="fmt">→ ${formatDateStr(date)}</span><button onclick="removeDate(${i})" style="background:none;border:none;color:#ff3860;cursor:pointer;font-size:11px"><i class="fas fa-times"></i></button>`;
             c.appendChild(div);
         });
         document.getElementById('date-count').textContent = dates.length;
@@ -440,12 +719,12 @@
 
     function updateGenSummary() {
         const n = dates.length;
-        const cs = parseInt(document.getElementById('cita-start').value)||1;
-        const ci = parseInt(document.getElementById('cita-increment').value)||1;
-        const fs = parseInt(document.getElementById('formato-start').value)||1;
-        const fi = parseInt(document.getElementById('formato-increment').value)||1;
-        document.getElementById('gen-summary-text').textContent = `${n} evolución${n!==1?'es':''}`;
-        document.getElementById('gen-detail-text').textContent = n>0 ? `Cita ${cs}→${cs+(n-1)*ci} (+${ci}) | Formato ${fs}→${fs+(n-1)*fi} (+${fi})` : 'Agrega fechas';
+        const cs = parseInt(document.getElementById('cita-start').value) || 1;
+        const ci = parseInt(document.getElementById('cita-increment').value) || 1;
+        const fs = parseInt(document.getElementById('formato-start').value) || 1;
+        const fi = parseInt(document.getElementById('formato-increment').value) || 1;
+        document.getElementById('gen-summary-text').textContent = `${n} evolución${n !== 1 ? 'es' : ''}`;
+        document.getElementById('gen-detail-text').textContent = n > 0 ? `Cita ${cs}→${cs + (n - 1) * ci} (+${ci}) | Formato ${fs}→${fs + (n - 1) * fi} (+${fi})` : 'Agrega fechas';
     }
 
     document.getElementById('cita-start').addEventListener('input', updateGenSummary);
@@ -456,70 +735,70 @@
 
     /* ===== PDF GENERATION ===== */
     async function generatePDF() {
-        if (dates.length === 0) { showToast('Agrega al menos una fecha','error'); return; }
-        if (detectedFields.filter(f => f.enabled).length === 0) { showToast('Activa al menos un campo','error'); return; }
+        if (dates.length === 0) { showToast('Agrega al menos una fecha', 'error'); return; }
+        if (detectedFields.filter(f => f.enabled).length === 0) { showToast('Activa al menos un campo', 'error'); return; }
         const btn = document.getElementById('generate-btn');
         btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
-        document.getElementById('progress-bar').style.display = 'block';
+        document.getElementById('progress-bar').classList.add('visible');
         document.getElementById('progress-text').style.display = 'block';
         try {
-            const citaStart = parseInt(document.getElementById('cita-start').value)||1;
-            const formatoStart = parseInt(document.getElementById('formato-start').value)||1;
-            const citaIncrement = parseInt(document.getElementById('cita-increment').value)||1;
-            const formatoIncrement = parseInt(document.getElementById('formato-increment').value)||1;
-            const paginaStart = parseInt(document.getElementById('pagina-start').value)||1;
-            const paginaTotal = parseInt(document.getElementById('pagina-total').value)||1;
-            const coverPadding = parseFloat(document.getElementById('cover-padding').value)||0.5;
+            const citaStart = parseInt(document.getElementById('cita-start').value) || 1;
+            const formatoStart = parseInt(document.getElementById('formato-start').value) || 1;
+            const citaIncrement = parseInt(document.getElementById('cita-increment').value) || 1;
+            const formatoIncrement = parseInt(document.getElementById('formato-increment').value) || 1;
+            const paginaStart = parseInt(document.getElementById('pagina-start').value) || 1;
+            const paginaTotal = parseInt(document.getElementById('pagina-total').value) || 1;
+            const coverPadding = parseFloat(document.getElementById('cover-padding').value) || 0.5;
             const enabledFields = detectedFields.filter(f => f.enabled);
             const { jsPDF } = window.jspdf;
-            const vp1 = pdfPage.getViewport({scale:1});
+            const vp1 = pdfPage.getViewport({scale: 1});
             const pageWmm = vp1.width * 25.4 / 96;
             const pageHmm = vp1.height * 25.4 / 96;
-            const doc = new jsPDF({ orientation:pageWmm>pageHmm?'landscape':'portrait', unit:'mm', format:[pageWmm,pageHmm] });
+            const doc = new jsPDF({ orientation: pageWmm > pageHmm ? 'landscape' : 'portrait', unit: 'mm', format: [pageWmm, pageHmm] });
             const renderScale = 4;
-            const renderVp = pdfPage.getViewport({scale:renderScale});
+            const renderVp = pdfPage.getViewport({scale: renderScale});
             const renderCanvas = document.createElement('canvas');
             renderCanvas.width = renderVp.width; renderCanvas.height = renderVp.height;
             const renderCtx = renderCanvas.getContext('2d');
-            await pdfPage.render({canvasContext:renderCtx,viewport:renderVp}).promise;
-            const pageImage = renderCanvas.toDataURL('image/jpeg',0.95);
-            function toMM(srcX,srcY) { return [srcX*25.4/96, pageHmm-(srcY*25.4/96)]; }
-            function pxToPt(px) { return px*72/96; }
-            function pxToMM(px) { return px*25.4/96; }
+            await pdfPage.render({canvasContext: renderCtx, viewport: renderVp}).promise;
+            const pageImage = renderCanvas.toDataURL('image/jpeg', 0.95);
+            function toMM(srcX, srcY) { return [srcX * 25.4 / 96, pageHmm - (srcY * 25.4 / 96)]; }
+            function pxToPt(px) { return px * 72 / 96; }
+            function pxToMM(px) { return px * 25.4 / 96; }
             for (let i = 0; i < dates.length; i++) {
-                if (i > 0) doc.addPage([pageWmm,pageHmm]);
-                doc.addImage(pageImage,'JPEG',0,0,pageWmm,pageHmm);
+                if (i > 0) doc.addPage([pageWmm, pageHmm]);
+                doc.addImage(pageImage, 'JPEG', 0, 0, pageWmm, pageHmm);
                 for (const field of enabledFields) {
                     if (field.noPosition) continue;
                     let replacementText = ''; let useBold = false;
-                    if (field.type==='fecha') replacementText = formatDateStr(dates[i]);
-                    else if (field.type==='cita') { replacementText = String(citaStart+i*citaIncrement); useBold=true; }
-                    else if (field.type==='formato') { replacementText = String(formatoStart+i*formatoIncrement); useBold=true; }
-                    else if (field.type==='pagina') { replacementText = 'Página '+(paginaStart+i)+' de '+paginaTotal; useBold=true; }
+                    if (field.type === 'fecha') replacementText = formatDateStr(dates[i]);
+                    else if (field.type === 'cita') { replacementText = String(citaStart + i * citaIncrement); useBold = true; }
+                    else if (field.type === 'formato') { replacementText = String(formatoStart + i * formatoIncrement); useBold = true; }
+                    else if (field.type === 'pagina') { replacementText = 'Página ' + (paginaStart + i) + ' de ' + paginaTotal; useBold = true; }
                     else replacementText = formatDateStr(dates[i]);
-                    const [xMM_base,yMM_base] = toMM(field.srcX,field.srcY);
+                    const [xMM_base, yMM_base] = toMM(field.srcX, field.srcY);
                     const fsPt = pxToPt(field.srcFontSize); const fsMM = pxToMM(field.srcFontSize);
-                    const origW = pxToMM(field.itemWidth||field.srcFontSize*field.searchText.length*0.55);
-                    const replW = fsPt*doc.getStringUnitWidth(replacementText)/72*25.4;
-                    const rectW = Math.max(origW,replW)+coverPadding*0.6;
-                    const rectH = fsMM*0.92+coverPadding*0.2;
-                    const rectX = xMM_base-coverPadding*0.15;
-                    const rectY = yMM_base-fsMM*0.75;
-                    doc.setFillColor(255,255,255); doc.setDrawColor(255,255,255);
-                    doc.rect(rectX,rectY,rectW,rectH,'FD');
-                    doc.setFont('helvetica',useBold?'bold':'normal');
-                    doc.setFontSize(fsPt); doc.setTextColor(0,0,0);
-                    doc.text(replacementText,xMM_base,yMM_base-fsMM*0.15);
+                    const origW = pxToMM(field.itemWidth || field.srcFontSize * field.searchText.length * 0.55);
+                    const replW = fsPt * doc.getStringUnitWidth(replacementText) / 72 * 25.4;
+                    const rectW = Math.max(origW, replW) + coverPadding * 0.6;
+                    const rectH = fsMM * 0.92 + coverPadding * 0.2;
+                    const rectX = xMM_base - coverPadding * 0.15;
+                    const rectY = yMM_base - fsMM * 0.75;
+                    doc.setFillColor(255, 255, 255); doc.setDrawColor(255, 255, 255);
+                    doc.rect(rectX, rectY, rectW, rectH, 'FD');
+                    doc.setFont('helvetica', useBold ? 'bold' : 'normal');
+                    doc.setFontSize(fsPt); doc.setTextColor(0, 0, 0);
+                    doc.text(replacementText, xMM_base, yMM_base - fsMM * 0.15);
                 }
-                const pct = Math.round(((i+1)/dates.length)*100);
-                document.getElementById('progress-fill').style.width = pct+'%';
-                document.getElementById('progress-text').textContent = `Evolución ${i+1} de ${dates.length}...`;
+                const pct = Math.round(((i + 1) / dates.length) * 100);
+                document.getElementById('progress-fill').style.width = pct + '%';
+                document.getElementById('progress-text').textContent = `Evolución ${i + 1} de ${dates.length}...`;
             }
             doc.save('evoluciones_generadas.pdf');
             document.getElementById('progress-text').textContent = '✅ ¡PDF descargado!';
-            showToast(`${dates.length} evoluciones generadas`,'success');
-        } catch(err) {
-            showToast('Error: '+err.message,'error');
+            showToast(`${dates.length} evoluciones generadas`, 'success');
+        } catch (err) {
+            showToast('Error: ' + err.message, 'error');
             document.getElementById('progress-text').textContent = '❌ Error';
         } finally {
             btn.disabled = false; btn.innerHTML = '<i class="fas fa-download"></i> Generar y Descargar PDF';
@@ -527,34 +806,15 @@
     }
 
     /* ===== TOAST ===== */
-    function showToast(msg,type='info') {
+    function showToast(msg, type) {
+        type = type || 'info';
         const c = document.getElementById('toastContainer');
         const d = document.createElement('div');
-        d.className = `toast toast-${type==='success'?'success':type==='error'?'error':'info'}`;
-        const icon = type==='success'?'check-circle':type==='error'?'exclamation-triangle':'info-circle';
+        d.className = `toast toast-${type === 'success' ? 'success' : type === 'error' ? 'error' : 'info'}`;
+        const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle';
         d.innerHTML = `<i class="fas fa-${icon}"></i> ${msg}`;
-        c.appendChild(d); setTimeout(()=>d.remove(),3000);
+        c.appendChild(d); setTimeout(() => d.remove(), 3000);
     }
     </script>
-<script>
-/* ── Sidebar panel switching v2.8 ── */
-const PANEL_INIT={};
-function switchPanel(pid){
-  document.querySelectorAll('.config-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
-  const panel=document.getElementById('panel-'+pid);
-  if(panel)panel.classList.add('active');
-  const item=document.querySelector('[data-panel="'+pid+'"]');
-  if(item)item.classList.add('active');
-  if(!PANEL_INIT[pid]){PANEL_INIT[pid]=true;}
-}
-</script>
-<script>
-    function irAPaso(n) {
-      const map = {1:'step1',2:'step2',3:'step3',4:'step4'};
-      switchPanel(map[n] || 'step1');
-    }
-    </script>
-</div>
 </body>
 </html>
