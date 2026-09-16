@@ -256,12 +256,14 @@ body{font-family:'Inter',sans-serif;background:#0a1628;color:#e0e0e0;min-height:
     <!-- PASO 3: Resultado -->
     <div class="form-section" id="paso3RIPS" style="display:none">
       <div class="form-title"><i class="fas fa-check-circle"></i> Paso 3 — RIPS JSON Generado</div>
-      <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+      <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
         <button class="btn btn-success" onclick="descargarRIPS()"><i class="fas fa-download"></i> Descargar JSON</button>
         <button class="btn btn-primary" onclick="descargarRIPSXML()" style="background:linear-gradient(135deg,#6c3483,#a855f7);border-color:#a855f7"><i class="fas fa-file-code"></i> Descargar XML</button>
         <button class="btn btn-warning" onclick="copiarRIPS()"><i class="fas fa-copy"></i> Copiar al Portapapeles</button>
         <button class="btn btn-secondary" onclick="validarRIPS()"><i class="fas fa-stethoscope"></i> Verificar Estructura</button>
+        <button class="btn" onclick="guardarRIPSActual()" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8);border-color:#38bdf8;color:#fff"><i class="fas fa-save"></i> Guardar</button>
         <button class="btn btn-danger" onclick="volverPaso1()"><i class="fas fa-arrow-left"></i> Volver</button>
+        <span id="guardadoIndicator" style="display:none;color:#2ecc71;font-size:13px;font-weight:600"><i class="fas fa-check-circle"></i> Guardado</span>
       </div>
       <div id="resultadoValidacion" style="display:none;margin-bottom:14px;padding:14px;border-radius:10px"></div>
       <div class="json-preview" id="jsonPreview"></div>
@@ -998,7 +1000,8 @@ function guardarRIPSHistorial(fac, ripsJson) {
     fechaGeneracion: ahora(),
     numUsuarios: ripsJson.usuarios.length,
     numServicios: ripsJson.usuarios.reduce((s,u) => s + (u.servicios.consultas||[]).length + (u.servicios.procedimientos||[]).length + (u.servicios.otrosServicios||[]).length, 0),
-    totalFactura: fac.total
+    totalFactura: fac.total,
+    ripsJson: ripsJson  // ← Guardar JSON completo para poder verlo/descargarlo después
   };
   if (idx >= 0) historial[idx] = registro; else historial.push(registro);
   guardar(K_RIPS, historial);
@@ -1018,11 +1021,16 @@ function renderHistorialRIPS() {
     const anulado = h.facturaAnulada === true;
     const fila = anulado ? 'style="opacity:0.6"' : '';
     const badge = anulado ? ' <span class="badge" style="background:#dc3545;color:#fff;font-size:9px;padding:2px 6px;border-radius:4px">ANULADA</span>' : '';
+    const savedBadge = h.ripsJson ? ' <span class="badge" style="background:#2ecc71;color:#fff;font-size:9px;padding:2px 6px;border-radius:4px"><i class="fas fa-save"></i> Guardado</span>' : '';
+    const btnVer = h.ripsJson ? '<button class="btn btn-secondary" style="padding:5px 12px;font-size:11px" onclick="verRIPSGuardado(\''+h.id+'\')"><i class="fas fa-eye"></i> Ver</button>' : '';
+    const btnDownJson = h.ripsJson ? '<button class="btn btn-success" style="padding:5px 12px;font-size:11px" onclick="descargarRIPSGuardado(\''+h.id+'\',\'json\')"><i class="fas fa-download"></i> JSON</button>' : '';
+    const btnDownXml = h.ripsJson ? '<button class="btn" style="padding:5px 12px;font-size:11px;background:linear-gradient(135deg,#6c3483,#a855f7);border-color:#a855f7;color:#fff" onclick="descargarRIPSGuardado(\''+h.id+'\',\'xml\')"><i class="fas fa-file-code"></i> XML</button>' : '';
     const btnRegen = anulado
       ? '<button class="btn btn-secondary" style="padding:5px 12px;font-size:11px;opacity:0.4;cursor:not-allowed" disabled><i class="fas fa-ban"></i> Anulada</button>'
       : '<button class="btn btn-secondary" style="padding:5px 12px;font-size:11px" onclick="regenerarRIPS(\''+h.facturaId+'\')"><i class="fas fa-redo"></i> Regenerar</button>';
+    const btnEliminar = '<button class="btn btn-danger" style="padding:5px 12px;font-size:11px" onclick="eliminarRIPSHistorial(\''+h.id+'\')"><i class="fas fa-trash"></i></button>';
     return '<tr '+fila+'>'
-      + '<td style="font-weight:600;color:#00b4d8">'+(h.numeroFactura||'—')+badge+'</td>'
+      + '<td style="font-weight:600;color:#00b4d8">'+(h.numeroFactura||'—')+badge+savedBadge+'</td>'
       + '<td>'+(h.eps||'—')+'</td>'
       + '<td>'+(h.paciente||'—')+'</td>'
       + '<td>'+(h.tipoDoc||'CC')+' '+(h.documento||'—')+'</td>'
@@ -1030,7 +1038,7 @@ function renderHistorialRIPS() {
       + '<td>'+(h.fechaGeneracion||'').slice(0,10)+'</td>'
       + '<td style="text-align:center">'+h.numUsuarios+'</td>'
       + '<td style="text-align:center">'+h.numServicios+'</td>'
-      + '<td>'+btnRegen+'</td>'
+      + '<td style="white-space:nowrap">'+btnVer+btnDownJson+btnDownXml+btnRegen+btnEliminar+'</td>'
       + '</tr>';
   }).join('');
 }
@@ -1057,13 +1065,80 @@ function regenerarRIPS(facturaId) {
   toast('Factura cargada para regenerar RIPS','info');
 }
 
+// ═══════════════════════════════════════════
+// Ver y descargar RIPS guardados en historial
+// ═══════════════════════════════════════════
+function verRIPSGuardado(ripsId) {
+  const historial = leer(K_RIPS) || [];
+  const reg = historial.find(h => h.id === ripsId);
+  if (!reg || !reg.ripsJson) { toast('RIPS no encontrado o sin datos JSON guardados','error'); return; }
+  ripsGenerado = reg.ripsJson;
+  // Buscar la factura para contexto
+  const facturas = leer(K_FACTURAS) || [];
+  facturaSeleccionada = facturas.find(f => f.id === reg.facturaId) || { numeroFactura: reg.numeroFactura };
+  cambiarTab('tabGenerar');
+  mostrarResultado(reg.ripsJson);
+  toast('RIPS cargado del historial','info');
+}
+
+function descargarRIPSGuardado(ripsId, formato) {
+  const historial = leer(K_RIPS) || [];
+  const reg = historial.find(h => h.id === ripsId);
+  if (!reg || !reg.ripsJson) { toast('RIPS no encontrado o sin datos guardados','error'); return; }
+  try {
+    if (formato === 'json') {
+      const jsonStr = JSON.stringify(reg.ripsJson, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'RIPS_' + (reg.numeroFactura||'sin-num') + '_' + (reg.fechaGeneracion||'').slice(0,10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast('✅ Archivo JSON descargado','success');
+    } else if (formato === 'xml') {
+      const xmlStr = generarRIPSXML(reg.ripsJson);
+      const blob = new Blob([xmlStr], { type: 'application/xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'RIPS_' + (reg.numeroFactura||'sin-num') + '_' + (reg.fechaGeneracion||'').slice(0,10) + '.xml';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast('✅ Archivo XML descargado','success');
+    }
+  } catch(e) {
+    toast('Error al descargar: ' + e.message,'error');
+  }
+}
+
 function volverPaso1() {
   facturaSeleccionada = null;
   ripsGenerado = null;
   document.getElementById('paso2RIPS').style.display = 'none';
   document.getElementById('paso3RIPS').style.display = 'none';
   document.getElementById('resultadoValidacion').style.display = 'none';
+  document.getElementById('guardadoIndicator').style.display = 'none';
   cargarFacturasDefinitivas();
+}
+
+// ═══════════════════════════════════════════
+// Guardar RIPS actual explícitamente
+// ═══════════════════════════════════════════
+function guardarRIPSActual() {
+  if (!ripsGenerado) { toast('No hay RIPS generado para guardar','error'); return; }
+  if (!facturaSeleccionada) { toast('No hay factura seleccionada','error'); return; }
+  guardarRIPSHistorial(facturaSeleccionada, ripsGenerado);
+  actualizarStats();
+  renderHistorialRIPS();
+  // Mostrar indicador visual
+  const ind = document.getElementById('guardadoIndicator');
+  if (ind) { ind.style.display = 'inline'; setTimeout(() => { ind.style.display = 'none'; }, 3000); }
+  toast('✅ RIPS guardado en el historial','success');
 }
 
 // ─── Purgar historial RIPS (eliminación permanente) ───
@@ -1149,7 +1224,13 @@ function generarRIPSMasivo(periodo) {
 
   ripsGenerado = ripsConsolidado;
   mostrarResultado(ripsConsolidado);
-  toast('✅ RIPS consolidado generado: ' + delPeriodo.length + ' facturas, ' + usuarios.length + ' pacientes','success');
+  // Guardar cada factura del período en el historial RIPS
+  delPeriodo.forEach(fac => {
+    guardarRIPSHistorial(fac, ripsConsolidado);
+  });
+  actualizarStats();
+  renderHistorialRIPS();
+  toast('✅ RIPS consolidado generado y guardado: ' + delPeriodo.length + ' facturas, ' + usuarios.length + ' pacientes','success');
 }
 
 // ═══════════════════════════════════════════
