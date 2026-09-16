@@ -166,7 +166,7 @@
 .sidebar-item:hover{color:#90e0ef;background:rgba(0,180,216,0.06)}
 .sidebar-item.active{color:#00b4d8;background:rgba(0,180,216,0.15);border-left-color:#00b4d8;font-weight:700}
 .sidebar-item i{width:18px;text-align:center;font-size:14px}
-.config-content{flex:1;background:rgba(13,33,55,0.4);border-radius:0;padding:25px;overflow-y:auto;max-height:none}
+.config-content{flex:1;min-width:0;background:rgba(13,33,55,0.4);border-radius:0;padding:25px;overflow-y:auto;max-height:none}
 .config-panel{display:none;animation:fadeInPanel .3s ease}
 .config-panel.active{display:block}
 @keyframes fadeInPanel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -666,5 +666,6 @@ function switchPanel(pid){
   if(!PANEL_INIT[pid]){PANEL_INIT[pid]=true;}
 }
 </script>
+</div>
 </body>
 </html>
