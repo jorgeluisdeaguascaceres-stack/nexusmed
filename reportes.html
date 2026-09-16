@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUSMED - Reportes</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #0a1628; color: #e0e0e0; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #0d2137, #1a3a5c); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00b4d8; box-shadow: 0 2px 15px rgba(0, 180, 216, 0.2); }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .brand-icon { width: 32px; height: 32px; }
+        .brand-icon svg { width: 100%; height: 100%; }
+        .brand-name { font-size: 24px; font-weight: 800; color: #00b4d8; letter-spacing: 3px; }
+        .brand-name span { color: #90e0ef; font-weight: 300; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-details { display:flex; flex-direction:column; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00b4d8, #0077b6); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; }
+        .user-name { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+        .user-role { font-size: 11px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; }
+
+        
+        .btn-cerrar-sesion {
+            background:transparent; color:#ff3860; border:1px solid #ff3860;
+            padding:8px 16px; border-radius:8px; cursor:pointer;
+            font-size:12px; font-weight:600; transition:all .3s;
+        }
+        .btn-cerrar-sesion:hover { background:#ff3860; color:#fff; }
+.nav-bar { background: #0d2137; padding: 8px 30px; display: flex; gap: 5px; border-bottom: 1px solid #1a3a5c; flex-wrap: wrap; }
+        .nav-item { padding: 8px 16px; border-radius: 6px; font-size: 13px; color: #5a7a9a; cursor: pointer; transition: all 0.3s; text-decoration: none; display: flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; }
+        .nav-item:hover { color: #00b4d8; background-color: rgba(0, 180, 216, 0.1); }
+        .nav-item.active { color: #00b4d8; background-color: rgba(0, 180, 216, 0.15); border: 1px solid rgba(0, 180, 216, 0.3); }
+        .container { max-width: 1200px; margin: 25px auto; padding: 0 20px; }
+        .titulo { font-size: 24px; font-weight: 700; color: #00b4d8; margin-bottom: 20px; }
+
+        /* Tarjetas resumen */
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .summary-card { background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 14px; padding: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
+        .summary-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 180, 216, 0.2); }
+        .summary-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+        .card-cyan::before { background: linear-gradient(90deg, #00b4d8, #0077b6); }
+        .card-green::before { background: linear-gradient(90deg, #48c78e, #38a06d); }
+        .card-yellow::before { background: linear-gradient(90deg, #ffb700, #ff8c00); }
+        .card-red::before { background: linear-gradient(90deg, #ff3860, #d4234a); }
+        .card-purple::before { background: linear-gradient(90deg, #b86bff, #8b5cf6); }
+        .card-blue::before { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
+        .summary-card .card-icon { font-size: 28px; margin-bottom: 8px; }
+        .summary-card .card-value { font-size: 36px; font-weight: 800; margin-bottom: 4px; }
+        .summary-card .card-value.cyan { color: #00b4d8; }
+        .summary-card .card-value.green { color: #48c78e; }
+        .summary-card .card-value.yellow { color: #ffb700; }
+        .summary-card .card-value.red { color: #ff3860; }
+        .summary-card .card-value.purple { color: #b86bff; }
+        .summary-card .card-value.blue { color: #3b82f6; }
+        .summary-card .card-label { font-size: 12px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
+
+        /* Sección de gráficos */
+        .charts-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .chart-card { background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 14px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+        .chart-title { font-size: 14px; color: #90e0ef; margin-bottom: 15px; font-weight: 600; border-bottom: 1px solid #1a3a5c; padding-bottom: 8px; }
+        .bar-chart { display: flex; flex-direction: column; gap: 8px; }
+        .bar-row { display: flex; align-items: center; gap: 10px; }
+        .bar-label { min-width: 100px; font-size: 12px; color: #5a7a9a; text-align: right; }
+        .bar-track { flex: 1; height: 22px; background-color: #0a1628; border-radius: 6px; position: relative; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 6px; transition: width 0.8s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
+        .bar-fill.cyan { background: linear-gradient(90deg, #0077b6, #00b4d8); }
+        .bar-fill.green { background: linear-gradient(90deg, #38a06d, #48c78e); }
+        .bar-fill.yellow { background: linear-gradient(90deg, #ff8c00, #ffb700); }
+        .bar-fill.red { background: linear-gradient(90deg, #d4234a, #ff3860); }
+        .bar-value { font-size: 11px; color: #fff; font-weight: 700; }
+
+        /* Donut */
+        .donut-container { display: flex; align-items: center; justify-content: center; gap: 20px; }
+        .donut { width: 140px; height: 140px; border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center; }
+        .donut-center { position: absolute; text-align: center; }
+        .donut-center .donut-number { font-size: 28px; font-weight: 800; color: #00b4d8; }
+        .donut-center .donut-text { font-size: 10px; color: #5a7a9a; text-transform: uppercase; }
+        .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .legend-text { font-size: 12px; color: #c0c0c0; }
+
+        /* Tabla resumen */
+        .data-section { background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); margin-bottom: 25px; }
+        .data-header { padding: 12px 18px; border-bottom: 1px solid #1a3a5c; display: flex; justify-content: space-between; align-items: center; }
+        .data-header h3 { color: #90e0ef; font-size: 15px; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background-color: #0a1628; }
+        thead th { padding: 10px 14px; text-align: left; font-size: 11px; color: #00b4d8; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #1a3a5c; font-weight: 700; }
+        tbody tr { border-bottom: 1px solid #0d2137; }
+        tbody tr:hover { background-color: #122a45; }
+        tbody td { padding: 10px 14px; font-size: 13px; color: #c0c0c0; }
+        .table-wrapper { overflow-x: auto; }
+
+        .empty-state { text-align: center; padding: 25px; color: #5a7a9a; }
+
+        /* Tarjetas clicables */
+        .summary-card.clickable { cursor: pointer; }
+        .summary-card.clickable:hover { border-color: #00b4d8; }
+        .summary-card .card-hint { margin-top: 8px; font-size: 10px; color: #00b4d8; opacity: 0; transition: opacity 0.25s; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .summary-card.clickable:hover .card-hint { opacity: 1; }
+
+        /* Modal de reporte */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(4, 12, 24, 0.85); backdrop-filter: blur(6px); display: none; align-items: flex-start; justify-content: center; z-index: 999; padding: 30px 15px; overflow-y: auto; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { width: 100%; max-width: 1080px; background: linear-gradient(160deg, #0d2137, #0a1a2c); border: 1px solid #1a3a5c; border-radius: 18px; box-shadow: 0 25px 70px rgba(0, 0, 0, 0.65); overflow: hidden; animation: popIn 0.28s ease; }
+        @keyframes popIn { from { opacity: 0; transform: translateY(-18px) scale(0.97); } to { opacity: 1; transform: none; } }
+        .modal-top { padding: 18px 24px; background: linear-gradient(120deg, #123a5c, #0a2540); border-bottom: 2px solid #00b4d8; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+        .modal-top h3 { color: #00b4d8; font-size: 18px; font-weight: 800; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        .modal-top p { color: #5a7a9a; font-size: 12px; margin-top: 4px; }
+        .modal-close { background: transparent; border: 1px solid #ff3860; color: #ff3860; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: 700; transition: all 0.25s; }
+        .modal-close:hover { background: #ff3860; color: #fff; }
+        .modal-body { padding: 22px 24px; }
+        .rango-box { background: #0a1628; border: 1px solid #1a3a5c; border-radius: 14px; padding: 18px; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+        .rango-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 170px; }
+        .rango-field label { font-size: 11px; color: #00b4d8; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; }
+        .rango-field input, .rango-field select { background: #0d2137; border: 1px solid #1a3a5c; border-radius: 8px; padding: 11px 12px; color: #e0e0e0; font-size: 14px; font-family: 'Inter', sans-serif; }
+        .rango-field input:focus, .rango-field select:focus { outline: none; border-color: #00b4d8; box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15); }
+        .btn-consultar { background: linear-gradient(120deg, #00b4d8, #0077b6); color: #041826; border: none; padding: 12px 26px; border-radius: 9px; font-size: 13px; font-weight: 800; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; transition: all 0.25s; font-family: 'Inter', sans-serif; }
+        .btn-consultar:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 180, 216, 0.35); }
+        .btn-excel { background: linear-gradient(120deg, #48c78e, #2f9c6b); color: #04241a; border: none; padding: 12px 26px; border-radius: 9px; font-size: 13px; font-weight: 800; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; transition: all 0.25s; font-family: 'Inter', sans-serif; }
+        .btn-excel:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(72, 199, 142, 0.35); }
+        .btn-excel:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+        .atajos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .chip { background: #0d2137; border: 1px solid #1a3a5c; color: #90e0ef; font-size: 11px; padding: 6px 12px; border-radius: 20px; cursor: pointer; transition: all 0.2s; font-weight: 600; font-family: inherit; }
+        .chip:hover { border-color: #00b4d8; color: #00b4d8; background: rgba(0, 180, 216, 0.1); }
+        .resumen-linea { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0 12px; }
+        .mini-stat { flex: 1; min-width: 120px; background: #0a1628; border: 1px solid #1a3a5c; border-left: 3px solid #00b4d8; border-radius: 10px; padding: 12px 14px; }
+        .mini-stat .ms-val { font-size: 22px; font-weight: 800; color: #00b4d8; }
+        .mini-stat .ms-lab { font-size: 10px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-top: 2px; }
+        .mini-stat.verde { border-left-color: #48c78e; } .mini-stat.verde .ms-val { color: #48c78e; }
+        .mini-stat.amarillo { border-left-color: #ffb700; } .mini-stat.amarillo .ms-val { color: #ffb700; }
+        .mini-stat.rojo { border-left-color: #ff3860; } .mini-stat.rojo .ms-val { color: #ff3860; }
+        .preview-wrap { border: 1px solid #1a3a5c; border-radius: 12px; overflow: auto; max-height: 330px; background: #0a1628; }
+        .preview-wrap table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        .preview-wrap thead th { position: sticky; top: 0; background: #123a5c; color: #90e0ef; font-size: 10px; padding: 10px 12px; text-align: left; text-transform: uppercase; letter-spacing: 0.8px; white-space: nowrap; }
+        .preview-wrap tbody td { padding: 9px 12px; font-size: 12px; color: #c9d6e2; border-bottom: 1px solid #122a45; white-space: nowrap; }
+        .preview-wrap tbody tr:hover { background: #10263d; }
+        .tag { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .tag-activo { background: rgba(0, 180, 216, 0.15); color: #00b4d8; border: 1px solid rgba(0, 180, 216, 0.4); }
+        .tag-egresado { background: rgba(72, 199, 142, 0.15); color: #48c78e; border: 1px solid rgba(72, 199, 142, 0.4); }
+        .tag-critico { background: rgba(255, 56, 96, 0.15); color: #ff3860; border: 1px solid rgba(255, 56, 96, 0.4); }
+        .tag-obs { background: rgba(255, 183, 0, 0.15); color: #ffb700; border: 1px solid rgba(255, 183, 0, 0.4); }
+        .modal-foot { padding: 16px 24px; border-top: 1px solid #1a3a5c; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: #0a1a2c; }
+        .foot-info { font-size: 12px; color: #5a7a9a; }
+        .toast { position: fixed; bottom: 25px; right: 25px; background: linear-gradient(120deg, #0d2137, #123a5c); border-left: 4px solid #00b4d8; color: #e0e0e0; padding: 14px 20px; border-radius: 10px; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 1200; display: none; }
+        .toast.show { display: block; animation: popIn 0.25s ease; }
+        .toast.ok { border-left-color: #48c78e; } .toast.err { border-left-color: #ff3860; }
+
+        @media (max-width: 768px) { .header { flex-direction: column; gap: 10px; } .charts-section { grid-template-columns: 1fr; } .rango-box { flex-direction: column; align-items: stretch;
+            .header-right { flex-wrap:wrap; justify-content:center; }
+        }
+        @media print { .header, .nav-bar, .modal-overlay { display: none !important; } }
+    </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="nexus_db.js"></script>
+    <script src="permisos.js"></script>
+</head>
+<body>
+        <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="brand-icon">
+                <svg viewBox="0 0 40 40" fill="none">
+                    <path d="M20 4 L20 36" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M20 10 L10 4" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M20 10 L30 4" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="20" cy="36" r="3" fill="#00b4d8"/>
+                </svg>
+            </div>
+            <div class="brand-name">NEXUS<span>MED</span></div>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <div class="user-details">
+                    <span class="user-name" id="userName">Administrador</span>
+                    <span class="user-role" id="userRole">ADMIN</span>
+                </div>
+            </div>
+            <button class="btn-cerrar-sesion" onclick="cerrarSesion()">🔒 Cerrar Sesión</button>
+        </div>
+    </div>
+
+        <!-- BARRA DE NAVEGACIÓN -->
+    <nav class="nav-bar">
+        <a class="nav-item" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
+        <a class="nav-item" href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+        <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+        <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresos</a>
+        <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
+        <a class="nav-item" href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
+        <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enf.</a>
+        <a class="nav-item" href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
+        <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
+        <a class="nav-item" href="facturacion.html"><i class="fas fa-file-invoice-dollar"></i> Facturación</a>
+        <a class="nav-item" href="rips.html"><i class="fas fa-file-code"></i> RIPS JSON</a>
+        <a class="nav-item" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Doc.</a>
+        <a class="nav-item" href="generador_evoluciones.html"><i class="fas fa-file-medical-alt"></i> Generador Evol.</a>
+        <a class="nav-item active" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
+        <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+    </nav>
+    <div class="container">
+        <h2 class="titulo">📊 Panel de Reportes y Estadísticas</h2>
+
+        <div class="cards-grid" id="summaryCards"></div>
+
+        <div class="charts-section">
+            <div class="chart-card">
+                <div class="chart-title">🏥 Pacientes por Servicio</div>
+                <div class="bar-chart" id="barServicios"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">📋 Distribución por Estado</div>
+                <div class="donut-container">
+                    <div class="donut" id="donutEstado">
+                        <div class="donut-center"><div class="donut-number" id="donutTotal">0</div><div class="donut-text">Pacientes</div></div>
+                    </div>
+                    <div class="donut-legend" id="donutLegend"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-card">
+                <div class="chart-title">📅 Citas por Estado</div>
+                <div class="bar-chart" id="barCitasEstado"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">👨‍⚕️ Citas por Médico</div>
+                <div class="bar-chart" id="barCitasMedico"></div>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <div class="data-header"><h3>📋 Resumen de Servicios</h3></div>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Servicio</th><th>Activos</th><th>Observación</th><th>Críticos</th><th>Egresados</th><th>Total</th></tr></thead>
+                    <tbody id="tablaServicios"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ MODAL REPORTE POR RANGO DE FECHAS ============ -->
+    <div class="modal-overlay" id="modalReporte">
+        <div class="modal-box">
+            <div class="modal-top">
+                <div>
+                    <h3><i class="fas fa-file-excel"></i> <span id="repTitulo">Reporte de Admisiones</span></h3>
+                    <p id="repSubtitulo">Seleccione el rango de fechas y genere el reporte en Excel</p>
+                </div>
+                <button class="modal-close" onclick="cerrarModalReporte()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="rango-box">
+                    <div class="rango-field">
+                        <label><i class="fas fa-calendar-day"></i> Fecha Inicio</label>
+                        <input type="date" id="repFechaInicio">
+                    </div>
+                    <div class="rango-field">
+                        <label><i class="fas fa-calendar-check"></i> Fecha Final</label>
+                        <input type="date" id="repFechaFinal">
+                    </div>
+                    <div class="rango-field">
+                        <label><i class="fas fa-filter"></i> Filtro</label>
+                        <select id="repFiltro">
+                            <option value="todos">Todos (Activos y Egresados)</option>
+                            <option value="activos">Solo Activos</option>
+                            <option value="egresados">Solo Egresados</option>
+                            <option value="criticos">Solo Críticos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button class="btn-consultar" onclick="consultarReporte()"><i class="fas fa-search"></i> Consultar</button>
+                    </div>
+                </div>
+                <div class="atajos">
+                    <span style="font-size:11px;color:#5a7a9a;align-self:center;margin-right:4px;">Atajos:</span>
+                    <div class="chip" onclick="atajoRango('hoy')">Hoy</div>
+                    <div class="chip" onclick="atajoRango('7')">Últimos 7 días</div>
+                    <div class="chip" onclick="atajoRango('30')">Últimos 30 días</div>
+                    <div class="chip" onclick="atajoRango('mes')">Mes actual</div>
+                    <div class="chip" onclick="atajoRango('anio')">Año actual</div>
+                    <div class="chip" onclick="atajoRango('todo')">Todo el histórico</div>
+                </div>
+
+                <div id="repResultado" style="display:none;">
+                    <div class="resumen-linea" id="repMiniStats"></div>
+                    <div class="preview-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Admisión</th><th>Fecha Ingreso</th><th>Fecha Egreso</th><th>Acción</th>
+                                    <th>Servicio</th><th>Documento</th><th>Nombre del Paciente</th><th>Edad</th><th>EPS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="repTabla"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="repVacio" class="empty-state" style="display:none;">
+                    <div style="font-size:34px;margin-bottom:8px;">📭</div>
+                    <p>No se encontraron admisiones en el rango de fechas seleccionado.</p>
+                    <p id="repVacioAyuda" style="font-size:12px;color:#5a7a9a;max-width:520px;margin:6px auto 0;line-height:1.6;"></p>
+                    <button class="chip" style="margin-top:14px;display:inline-block;" onclick="atajoRango('todo')"><i class="fas fa-clock-rotate-left"></i> Ver todo el histórico</button>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <div class="foot-info" id="repFootInfo">Defina un rango y presione Consultar.</div>
+                <div style="display:flex;gap:10px;">
+                    <button class="btn-excel" id="btnExcel" disabled onclick="exportarExcel()"><i class="fas fa-file-excel"></i> Descargar Excel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const PATIENTS_KEY = 'nexus_pacientes';
+        const CITAS_KEY = 'nexus_citas';
+        const sesion = JSON.parse(localStorage.getItem('nexus_sesion'));
+        if (!sesion || !sesion.logueado) window.location.href = 'index.html';
+        else {
+            document.getElementById('userName').textContent = sesion.nombre;
+            document.getElementById('userRole').textContent = sesion.rol.toUpperCase();
+            document.getElementById('userAvatar').textContent = sesion.nombre.charAt(0);
+        }
+
+        document.addEventListener('DOMContentLoaded', generarReportes);
+
+        function generarReportes() {
+            const pacientes = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
+            const citas = JSON.parse(localStorage.getItem(CITAS_KEY) || '[]');
+            const hoy = aISO(new Date());
+
+            // Tarjetas resumen
+            const activos = pacientes.filter(p => p.estado !== 'Egresado');
+            const criticos = pacientes.filter(p => p.estado === 'Crítico');
+            const egresados = pacientes.filter(p => p.estado === 'Egresado');
+            const hoyEgresos = egresados.filter(p => p.fechaSalida && p.fechaSalida.slice(0, 10) === hoy);
+            const hoyCitas = citas.filter(c => c.fecha === hoy);
+            const pendientes = citas.filter(c => c.estado === 'Pendiente');
+
+            const cards = [
+                { icon: '👥', value: pacientes.length, label: 'Total Pacientes', color: 'cyan', cls: 'card-cyan', tipo: 'todos' },
+                { icon: '🟢', value: activos.length, label: 'Pacientes Activos', color: 'green', cls: 'card-green', tipo: 'activos' },
+                { icon: '🔴', value: criticos.length, label: 'Pacientes Críticos', color: 'red', cls: 'card-red', tipo: 'criticos' },
+                { icon: '🏥', value: egresados.length, label: 'Total Egresados', color: 'yellow', cls: 'card-yellow', tipo: 'egresados' },
+                { icon: '📅', value: citas.length, label: 'Total Citas', color: 'purple', cls: 'card-purple', tipo: null },
+                { icon: '⏳', value: pendientes.length, label: 'Citas Pendientes', color: 'blue', cls: 'card-blue', tipo: null },
+            ];
+
+            const cardsContainer = document.getElementById('summaryCards');
+            cardsContainer.innerHTML = cards.map(c => `
+                <div class="summary-card ${c.cls} ${c.tipo ? 'clickable' : ''}" ${c.tipo ? `onclick="abrirModalReporte('${c.tipo}')"` : ''}>
+                    <div class="card-icon">${c.icon}</div>
+                    <div class="card-value ${c.color}">${c.value}</div>
+                    <div class="card-label">${c.label}</div>
+                    ${c.tipo ? '<div class="card-hint"><i class="fas fa-file-excel"></i> Generar reporte Excel</div>' : ''}
+                </div>
+            `).join('');
+
+            // Barras por servicio
+            const servicios = ['Emergencia','UCI','Cirugía','Medicina Interna','Pediatría','Obstetricia','Traumatología','Oncología'];
+            const serviciosData = servicios.map(s => ({ nombre: s, count: activos.filter(p => p.servicio === s).length }));
+            const maxServ = Math.max(...serviciosData.map(s => s.count), 1);
+            const barContainer = document.getElementById('barServicios');
+            barContainer.innerHTML = serviciosData.map(s => {
+                const pct = (s.count / maxServ * 100).toFixed(0);
+                const colors = ['cyan','green','yellow','red','cyan','green','yellow','red'];
+                return `<div class="bar-row"><span class="bar-label">${s.nombre}</span><div class="bar-track"><div class="bar-fill ${colors[servicios.indexOf(s.nombre) % 4]}" style="width:${pct}%"><span class="bar-value">${s.count}</span></div></div></div>`;
+            }).join('');
+
+            // Donut estado
+            const estados = [
+                { nombre: 'Activo', count: pacientes.filter(p => p.estado === 'Activo').length, color: '#00b4d8' },
+                { nombre: 'Observación', count: pacientes.filter(p => p.estado === 'Observación').length, color: '#ffb700' },
+                { nombre: 'Crítico', count: pacientes.filter(p => p.estado === 'Crítico').length, color: '#ff3860' },
+                { nombre: 'Egresado', count: egresados.length, color: '#48c78e' },
+            ];
+            const total = pacientes.length || 1;
+            document.getElementById('donutTotal').textContent = pacientes.length;
+            const grad = estados.map(e => `${e.color} ${((estados.slice(0, estados.indexOf(e)).reduce((a, b) => a + b.count, 0) / total) * 100).toFixed(1)}% ${((estados.slice(0, estados.indexOf(e) + 1).reduce((a, b) => a + b.count, 0) / total) * 100).toFixed(1)}%`).join(', ');
+            document.getElementById('donutEstado').style.background = `conic-gradient(${grad || '#1a3a5c 0% 100%'})`;
+            document.getElementById('donutEstado').style.cssText += `; --mask: radial-gradient(circle, transparent 35%, black 36%); -webkit-mask: var(--mask); mask: var(--mask);`;
+            document.getElementById('donutLegend').innerHTML = estados.map(e => `<div class="legend-item"><div class="legend-dot" style="background:${e.color}"></div><span class="legend-text">${e.nombre}: ${e.count}</span></div>`).join('');
+
+            // Citas por estado
+            const citasEstados = [
+                { nombre: 'Pendiente', count: citas.filter(c => c.estado === 'Pendiente').length, color: 'yellow' },
+                { nombre: 'Confirmada', count: citas.filter(c => c.estado === 'Confirmada').length, color: 'cyan' },
+                { nombre: 'Completada', count: citas.filter(c => c.estado === 'Completada').length, color: 'green' },
+                { nombre: 'Cancelada', count: citas.filter(c => c.estado === 'Cancelada').length, color: 'red' },
+            ];
+            const maxCita = Math.max(...citasEstados.map(c => c.count), 1);
+            document.getElementById('barCitasEstado').innerHTML = citasEstados.map(c => `<div class="bar-row"><span class="bar-label">${c.nombre}</span><div class="bar-track"><div class="bar-fill ${c.color}" style="width:${(c.count/maxCita*100).toFixed(0)}%"><span class="bar-value">${c.count}</span></div></div></div>`).join('');
+
+            // Citas por médico
+            const medicos = [...new Set(citas.map(c => c.medico))];
+            const medicoData = medicos.map(m => ({ nombre: m, count: citas.filter(c => c.medico === m).length }));
+            const maxMed = Math.max(...medicoData.map(m => m.count), 1);
+            const medColors = ['cyan','green','yellow','red','cyan','green'];
+            document.getElementById('barCitasMedico').innerHTML = medicoData.length ? medicoData.map((m, i) => `<div class="bar-row"><span class="bar-label">${m.nombre}</span><div class="bar-track"><div class="bar-fill ${medColors[i % medColors.length]}" style="width:${(m.count/maxMed*100).toFixed(0)}%"><span class="bar-value">${m.count}</span></div></div></div>`).join('') : '<div class="empty-state">Sin datos de médicos</div>';
+
+            // Tabla resumen
+            const tbody = document.getElementById('tablaServicios');
+            tbody.innerHTML = servicios.map(s => {
+                const act = pacientes.filter(p => p.servicio === s && p.estado === 'Activo').length;
+                const obs = pacientes.filter(p => p.servicio === s && p.estado === 'Observación').length;
+                const cri = pacientes.filter(p => p.servicio === s && p.estado === 'Crítico').length;
+                const egr = pacientes.filter(p => p.servicio === s && p.estado === 'Egresado').length;
+                const tot = act + obs + cri + egr;
+                return tot > 0 ? `<tr><td><strong>${s}</strong></td><td style="color:#00b4d8">${act}</td><td style="color:#ffb700">${obs}</td><td style="color:#ff3860">${cri}</td><td style="color:#48c78e">${egr}</td><td><strong>${tot}</strong></td></tr>` : '';
+            }).filter(Boolean).join('') || '<tr><td colspan="6" style="text-align:center;color:#5a7a9a">Sin datos</td></tr>';
+        }
+
+        function cerrarSesion() { localStorage.removeItem('nexus_sesion'); window.location.href = 'index.html'; }
+
+        /* ================= REPORTE POR RANGO DE FECHAS ================= */
+        let REP_TIPO = 'todos';
+        let REP_DATOS = [];
+
+        const TITULOS = {
+            todos:     { t: 'Reporte de Total de Pacientes / Admisiones', s: 'Todas las admisiones ingresadas en el rango de fechas' },
+            activos:   { t: 'Reporte de Pacientes Activos', s: 'Admisiones activas ingresadas en el rango de fechas' },
+            criticos:  { t: 'Reporte de Pacientes Críticos', s: 'Admisiones en estado crítico ingresadas en el rango de fechas' },
+            egresados: { t: 'Reporte de Pacientes Egresados', s: 'Admisiones egresadas ingresadas en el rango de fechas' }
+        };
+
+        function abrirModalReporte(tipo) {
+            REP_TIPO = tipo || 'todos';
+            const info = TITULOS[REP_TIPO] || TITULOS.todos;
+            document.getElementById('repTitulo').textContent = info.t;
+            document.getElementById('repSubtitulo').textContent = info.s;
+            document.getElementById('repFiltro').value = REP_TIPO;
+
+            // Rango por defecto: cubre todas las admisiones registradas
+            const hoy = new Date();
+            let pacRango = [];
+            try { pacRango = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]') || []; } catch (e) { pacRango = []; }
+            const fechasReg = (Array.isArray(pacRango) ? pacRango : []).map(claveFecha).filter(Boolean).sort();
+            const primero = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            let ini = fechasReg.length ? fechasReg[0] : aISO(primero);
+            let fin = aISO(hoy);
+            if (fechasReg.length && fechasReg[fechasReg.length - 1] > fin) fin = fechasReg[fechasReg.length - 1];
+            if (ini > fin) ini = fin;
+            document.getElementById('repFechaInicio').value = ini;
+            document.getElementById('repFechaFinal').value = fin;
+
+            document.getElementById('repResultado').style.display = 'none';
+            document.getElementById('repVacio').style.display = 'none';
+            document.getElementById('btnExcel').disabled = true;
+            document.getElementById('repFootInfo').textContent = 'Defina un rango y presione Consultar.';
+            REP_DATOS = [];
+
+            document.getElementById('modalReporte').classList.add('open');
+            document.body.style.overflow = 'hidden';
+
+            // Muestra el resultado de inmediato al abrir
+            consultarReporte();
+        }
+
+        function cerrarModalReporte() {
+            document.getElementById('modalReporte').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('modalReporte').addEventListener('click', function (e) {
+            if (e.target === this) cerrarModalReporte();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') cerrarModalReporte();
+        });
+
+        function aISO(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${dd}`;
+        }
+
+        function atajoRango(tipo) {
+            const hoy = new Date();
+            let ini = new Date(hoy), fin = new Date(hoy);
+            if (tipo === 'hoy') { /* mismo día */ }
+            else if (tipo === '7') { ini.setDate(hoy.getDate() - 6); }
+            else if (tipo === '30') { ini.setDate(hoy.getDate() - 29); }
+            else if (tipo === 'mes') { ini = new Date(hoy.getFullYear(), hoy.getMonth(), 1); }
+            else if (tipo === 'anio') { ini = new Date(hoy.getFullYear(), 0, 1); }
+            else if (tipo === 'todo') { ini = new Date(2000, 0, 1); }
+            document.getElementById('repFechaInicio').value = aISO(ini);
+            document.getElementById('repFechaFinal').value = aISO(fin);
+            consultarReporte();
+        }
+
+        /* Las fechas se leen tal cual fueron guardadas (sin conversión de zona horaria),
+           para que no aparezca el día anterior al registrado. */
+        function fechaCorta(valor) {
+            if (!valor) return '';
+            const s = String(valor);
+            const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+            const d = new Date(s);
+            if (isNaN(d)) return s.slice(0, 10);
+            return d.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+        function fechaHora(valor) {
+            if (!valor) return '';
+            const s = String(valor);
+            const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/);
+            if (m) return `${m[3]}/${m[2]}/${m[1]}` + (m[4] ? ` ${m[4]}:${m[5]}` : '');
+            const d = new Date(s);
+            if (isNaN(d)) return s.replace('T', ' ').slice(0, 16);
+            return d.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
+                   d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+
+        /* Fecha de referencia de una admisión: fecha de ingreso y, si falta, fecha de registro. */
+        function claveFecha(p) {
+            const v = p.fechaIngreso || p.fechaRegistro || p.fecha || '';
+            const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);
+            return m ? m[0] : '';
+        }
+
+        function consultarReporte() {
+            const iniStr = document.getElementById('repFechaInicio').value;
+            const finStr = document.getElementById('repFechaFinal').value;
+            const filtro = document.getElementById('repFiltro').value;
+            REP_TIPO = filtro;
+            const info = TITULOS[filtro] || TITULOS.todos;
+            document.getElementById('repTitulo').textContent = info.t;
+            document.getElementById('repSubtitulo').textContent = info.s;
+
+            if (!iniStr || !finStr) { toast('Seleccione la fecha de inicio y la fecha final', 'err'); return; }
+            if (iniStr > finStr) { toast('La fecha de inicio no puede ser mayor que la fecha final', 'err'); return; }
+
+            let pacientes = [];
+            try { pacientes = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]'); } catch (e) { pacientes = []; }
+            if (!Array.isArray(pacientes)) pacientes = [];
+
+            const conFecha = pacientes.filter(p => claveFecha(p));
+            const sinFecha = pacientes.length - conFecha.length;
+
+            const enRango = conFecha.filter(p => {
+                const fi = claveFecha(p);
+                return fi >= iniStr && fi <= finStr;
+            });
+
+            let filtrados = enRango;
+            if (filtro === 'activos') filtrados = enRango.filter(p => p.estado !== 'Egresado');
+            else if (filtro === 'egresados') filtrados = enRango.filter(p => p.estado === 'Egresado');
+            else if (filtro === 'criticos') filtrados = enRango.filter(p => p.estado === 'Crítico');
+
+            filtrados.sort((a, b) => claveFecha(a).localeCompare(claveFecha(b)));
+
+            REP_DATOS = filtrados.map(p => {
+                const egresado = p.estado === 'Egresado';
+                return {
+                    admision: p.numAdmision || '—',
+                    fechaIngreso: fechaHora(p.fechaIngreso || p.fechaRegistro),
+                    fechaEgreso: egresado ? (fechaHora(p.fechaSalida) || 'Sin registro') : '',
+                    accion: egresado ? 'EGRESADO' : 'ACTIVO',
+                    estadoReal: p.estado || '—',
+                    servicio: p.servicio || '—',
+                    documento: p.documento || '—',
+                    nombre: p.nombre || '—',
+                    edad: p.edad || '—',
+                    eps: p.eps || '—'
+                };
+                });
+
+            const cont = document.getElementById('repResultado');
+            const vacio = document.getElementById('repVacio');
+
+            if (!REP_DATOS.length) {
+                cont.style.display = 'none';
+                vacio.style.display = 'block';
+                document.getElementById('btnExcel').disabled = true;
+
+                // Explicación clara de por qué no salió nada
+                let ayuda;
+                if (!pacientes.length) {
+                    ayuda = 'Todavía no hay admisiones registradas en el sistema. Registre una admisión en el módulo Admisiones y vuelva a consultar.';
+                } else if (!enRango.length) {
+                    const fechas = conFecha.map(claveFecha).sort();
+                    if (fechas.length) {
+                        ayuda = `Hay ${pacientes.length} admisión(es) registrada(s), pero ninguna dentro de este rango. ` +
+                                `Las admisiones existentes van del ${fechaCorta(fechas[0])} al ${fechaCorta(fechas[fechas.length - 1])}. ` +
+                                `Use el atajo “Todo el histórico” para verlas todas.`;
+                    } else {
+                        ayuda = `Hay ${pacientes.length} admisión(es) registrada(s), pero ninguna tiene fecha de ingreso guardada, por eso no aparecen en el reporte.`;
+                    }
+                } else {
+                    const etiqueta = { activos: 'Activos', egresados: 'Egresados', criticos: 'Críticos' }[filtro] || 'seleccionado';
+                    ayuda = `Sí hay ${enRango.length} admisión(es) en este rango, pero ninguna corresponde al filtro “${etiqueta}”. Cambie el filtro a “Todos”.`;
+                }
+                if (sinFecha > 0) ayuda += ` (${sinFecha} registro(s) sin fecha de ingreso no se toman en cuenta.)`;
+                const ayudaEl = document.getElementById('repVacioAyuda');
+                if (ayudaEl) ayudaEl.textContent = ayuda;
+
+                document.getElementById('repFootInfo').textContent = `0 registros entre ${fechaCorta(iniStr)} y ${fechaCorta(finStr)}.`;
+                return;
+            }
+
+            vacio.style.display = 'none';
+            cont.style.display = 'block';
+
+            const totalAct = REP_DATOS.filter(r => r.accion === 'ACTIVO').length;
+            const totalEgr = REP_DATOS.filter(r => r.accion === 'EGRESADO').length;
+            const totalCri = REP_DATOS.filter(r => r.estadoReal === 'Crítico').length;
+            document.getElementById('repMiniStats').innerHTML = `
+                <div class="mini-stat"><div class="ms-val">${REP_DATOS.length}</div><div class="ms-lab">Admisiones</div></div>
+                <div class="mini-stat"><div class="ms-val">${totalAct}</div><div class="ms-lab">Activos</div></div>
+                <div class="mini-stat verde"><div class="ms-val">${totalEgr}</div><div class="ms-lab">Egresados</div></div>
+                <div class="mini-stat rojo"><div class="ms-val">${totalCri}</div><div class="ms-lab">Críticos</div></div>
+                <div class="mini-stat amarillo"><div class="ms-val">${new Set(REP_DATOS.map(r => r.eps)).size}</div><div class="ms-lab">EPS distintas</div></div>
+            `;
+
+            document.getElementById('repTabla').innerHTML = REP_DATOS.map(r => {
+                const cls = r.accion === 'EGRESADO' ? 'tag-egresado' : (r.estadoReal === 'Crítico' ? 'tag-critico' : (r.estadoReal === 'Observación' ? 'tag-obs' : 'tag-activo'));
+                return `<tr>
+                    <td><strong style="color:#00b4d8">${esc(r.admision)}</strong></td>
+                    <td>${esc(r.fechaIngreso)}</td>
+                    <td>${esc(r.fechaEgreso) || '<span style="color:#5a7a9a">—</span>'}</td>
+                    <td><span class="tag ${cls}">${esc(r.accion)}</span></td>
+                    <td>${esc(r.servicio)}</td>
+                    <td>${esc(r.documento)}</td>
+                    <td>${esc(r.nombre)}</td>
+                    <td>${esc(r.edad)}</td>
+                    <td>${esc(r.eps)}</td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('btnExcel').disabled = false;
+            document.getElementById('repFootInfo').innerHTML = `<strong style="color:#00b4d8">${REP_DATOS.length}</strong> registro(s) encontrados entre <strong>${fechaCorta(iniStr)}</strong> y <strong>${fechaCorta(finStr)}</strong>.`;
+            toast(`${REP_DATOS.length} registro(s) encontrados`, 'ok');
+        }
+
+        /* Fecha y hora local del equipo (no UTC), para el sello "Generado". */
+        function sellaAhora() {
+            const d = new Date();
+            const p = n => String(n).padStart(2, '0');
+            return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+        }
+
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        /* Datos de la IPS configurados en Configuración → Información de la IPS */
+        function obtenerDatosIPS() {
+            try {
+                const h = JSON.parse(localStorage.getItem('nexus_hospital') || '{}');
+                return h && typeof h === 'object' ? h : {};
+            } catch (e) { return {}; }
+        }
+
+        function exportarExcel() {
+            if (!REP_DATOS.length) { toast('Primero consulte el rango de fechas', 'err'); return; }
+            const IPS = obtenerDatosIPS();
+            const SEP = '  ·  ';
+            const lineaIPS = () => {
+                const p = [];
+                if (IPS.nit) p.push('NIT: ' + IPS.nit);
+                if (IPS.codigo) p.push('Cód. Habilitación: ' + IPS.codigo);
+                if (IPS.direccion) p.push(IPS.direccion);
+                if (IPS.telefono) p.push('Tel: ' + IPS.telefono);
+                if (IPS.email) p.push(IPS.email);
+                return p.join(SEP);
+            };
+            const iniStr = document.getElementById('repFechaInicio').value;
+            const finStr = document.getElementById('repFechaFinal').value;
+            const info = TITULOS[REP_TIPO] || TITULOS.todos;
+
+            const cols = ['ADMISIÓN', 'FECHA DE INGRESO', 'FECHA DE EGRESO', 'ACCIÓN', 'SERVICIO', 'DOCUMENTO', 'NOMBRE DEL PACIENTE', 'EDAD', 'EPS'];
+
+            let filas = '';
+            REP_DATOS.forEach((r, i) => {
+                const bg = i % 2 === 0 ? '#FFFFFF' : '#F2F8FC';
+                const colorAccion = r.accion === 'EGRESADO' ? '#1F7A50' : '#0A6E8A';
+                filas += `<tr>
+                    <td style="background:${bg};font-weight:bold;color:#0A4B6E;">${esc(r.admision)}</td>
+                    <td style="background:${bg};">${esc(r.fechaIngreso)}</td>
+                    <td style="background:${bg};">${esc(r.fechaEgreso)}</td>
+                    <td style="background:${bg};font-weight:bold;color:${colorAccion};">${esc(r.accion)}</td>
+                    <td style="background:${bg};">${esc(r.servicio)}</td>
+                    <td style="background:${bg};">${esc(r.documento)}</td>
+                    <td style="background:${bg};">${esc(r.nombre)}</td>
+                    <td style="background:${bg};">${esc(r.edad)}</td>
+                    <td style="background:${bg};">${esc(r.eps)}</td>
+                </tr>`;
+            });
+
+            const totalAct = REP_DATOS.filter(r => r.accion === 'ACTIVO').length;
+            const totalEgr = REP_DATOS.filter(r => r.accion === 'EGRESADO').length;
+
+            const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+<head><meta charset="UTF-8">
+<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+<x:Name>Reporte Admisiones</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+<style>
+  table { border-collapse: collapse; font-family: Calibri, Arial, sans-serif; font-size: 11pt; }
+  td, th { border: 0.5pt solid #B7C9D6; padding: 5px 8px; vertical-align: middle; }
+</style></head>
+<body>
+<table>
+  <tr><td colspan="9" style="background:#0A4B6E;color:#FFFFFF;font-size:16pt;font-weight:bold;height:34px;text-align:center;border:none;">${esc((IPS.nombre || 'NEXUSMED IPS Domiciliaria').toUpperCase())}</td></tr>
+  <tr><td colspan="9" style="background:#0A4B6E;color:#D6ECF7;font-size:9.5pt;text-align:center;border:none;">${esc(lineaIPS())}</td></tr>
+  <tr><td colspan="9" style="background:#0E6E96;color:#FFFFFF;font-size:12pt;font-weight:bold;text-align:center;border:none;">${esc(info.t.toUpperCase())}</td></tr>
+  <tr><td colspan="9" style="background:#E8F4FA;color:#0A4B6E;font-size:10pt;text-align:center;border:none;">Rango de fechas de ingreso: ${esc(fechaCorta(iniStr))} &nbsp;a&nbsp; ${esc(fechaCorta(finStr))} &nbsp;|&nbsp; Generado: ${esc(sellaAhora())}</td></tr>
+  <tr><td colspan="9" style="background:#E8F4FA;color:#0A4B6E;font-size:10pt;text-align:center;border:none;">Total registros: ${REP_DATOS.length} &nbsp;|&nbsp; Activos: ${totalAct} &nbsp;|&nbsp; Egresados: ${totalEgr}</td></tr>
+  <tr><td colspan="9" style="border:none;height:8px;"></td></tr>
+  <tr>${cols.map(c => `<th style="background:#0A4B6E;color:#FFFFFF;font-weight:bold;font-size:10pt;text-align:center;">${esc(c)}</th>`).join('')}</tr>
+  ${filas}
+  <tr><td colspan="9" style="border:none;height:10px;"></td></tr>
+  <tr><td colspan="9" style="background:#F2F8FC;color:#5A7A9A;font-size:9pt;text-align:center;border:none;">${esc(lineaIPS())}</td></tr>
+  <tr><td colspan="9" style="background:#F2F8FC;color:#5A7A9A;font-size:9pt;text-align:center;border:none;">Documento generado automáticamente por el sistema NEXUSMED — Uso interno / confidencial</td></tr>
+</table>
+</body></html>`;
+
+            const nombreArchivo = `NEXUSMED_Reporte_${REP_TIPO}_${iniStr}_a_${finStr}.xls`;
+            const blob = new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = nombreArchivo;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+            toast('Reporte Excel descargado correctamente', 'ok');
+        }
+
+        let toastTimer = null;
+        function toast(msg, tipo) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast show ' + (tipo || '');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
+        }
+    </script>
+
+    <!-- MATRIZ GLOBAL DE PERMISOS -->
+    <script>
+        (function () {
+            function aplicar() { if (window.NX) NX.filtrarMenu(); }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', aplicar);
+            } else { aplicar(); }
+        })();
+    </script>
+</body>
+</html>

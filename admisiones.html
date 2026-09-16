@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUSMED - Admisiones</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #0a1628; color: #e0e0e0; min-height: 100vh; }
+
+        /* HEADER */
+        .header { background: linear-gradient(135deg, #0d2137, #1a3a5c); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00b4d8; box-shadow: 0 2px 15px rgba(0, 180, 216, 0.2); }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .brand-icon { width: 32px; height: 32px; }
+        .brand-icon svg { width: 100%; height: 100%; }
+        .brand-name { font-size: 24px; font-weight: 800; color: #00b4d8; letter-spacing: 3px; }
+        .brand-name span { color: #90e0ef; font-weight: 300; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-details { display:flex; flex-direction:column; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00b4d8, #0077b6); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; }
+        .user-name { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+        .user-role { font-size: 11px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; }
+
+
+        /* NAV */
+        
+        .btn-cerrar-sesion {
+            background:transparent; color:#ff3860; border:1px solid #ff3860;
+            padding:8px 16px; border-radius:8px; cursor:pointer;
+            font-size:12px; font-weight:600; transition:all .3s;
+        }
+        .btn-cerrar-sesion:hover { background:#ff3860; color:#fff; }
+.nav-bar { background: #0d2137; padding: 8px 30px; display: flex; gap: 5px; border-bottom: 1px solid #1a3a5c; flex-wrap: wrap; }
+        .nav-item { padding: 8px 16px; border-radius: 6px; font-size: 13px; color: #5a7a9a; cursor: pointer; transition: all 0.3s; text-decoration: none; display: flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; }
+        .nav-item:hover { color: #00b4d8; background-color: rgba(0, 180, 216, 0.1); }
+        .nav-item.active { color: #00b4d8; background-color: rgba(0, 180, 216, 0.15); border: 1px solid rgba(0, 180, 216, 0.3); }
+
+        /* CONTENEDOR */
+        .container { max-width: 1300px; margin: 25px auto; padding: 0 20px; }
+        .titulo { font-size: 24px; font-weight: 700; color: #00b4d8; margin-bottom: 20px; }
+
+        /* FORMULARIO */
+        .form-section { background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 14px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+        .form-title { font-size: 16px; color: #90e0ef; margin-bottom: 15px; border-bottom: 1px solid #1a3a5c; padding-bottom: 8px; font-weight: 600; }
+        .form-subtitle { font-size: 13px; color: #5a7a9a; margin: 18px 0 10px; padding-top: 12px; border-top: 1px dashed #1a3a5c; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 8px; }
+        .form-subtitle i { color: #00b4d8; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 11px; color: #5a7a9a; margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
+        .form-group input, .form-group select, .form-group textarea { background-color: #0a1628; border: 1px solid #1a3a5c; color: #e0e0e0; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; transition: border-color 0.3s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #00b4d8; box-shadow: 0 0 8px rgba(0, 180, 216, 0.3); }
+        .form-group textarea { resize: vertical; min-height: 50px; }
+        .form-group input::placeholder { color: #3a5a7a; }
+        .form-group input[readonly] { opacity: 0.8; cursor: default; }
+        .form-actions { display: flex; gap: 10px; margin-top: 18px; justify-content: center; }
+        .btn-registrar { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; border: none; padding: 12px 35px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; transition: all 0.3s; letter-spacing: 1px; font-family: 'Inter', sans-serif; }
+        .btn-registrar:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4); }
+        .btn-limpiar { background-color: transparent; color: #90e0ef; border: 1px solid #1a3a5c; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.3s; font-family: 'Inter', sans-serif; }
+        .btn-limpiar:hover { border-color: #90e0ef; }
+        .btn-pdf { background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700; transition: all 0.3s; font-family: 'Inter', sans-serif; }
+        .btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); }
+        .btn-certi { background-color: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.4); }
+        .btn-certi:hover { background-color: #e74c3c; color: #fff; }
+
+        /* SEARCHABLE SELECT */
+        .searchable-select { position: relative; }
+        .searchable-select input { width: 100%; background-color: #0a1628; border: 1px solid #1a3a5c; color: #e0e0e0; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; transition: border-color 0.3s; }
+        .searchable-select input:focus { outline: none; border-color: #00b4d8; box-shadow: 0 0 8px rgba(0, 180, 216, 0.3); }
+        .searchable-select .dropdown-list { display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 220px; overflow-y: auto; background-color: #0d2137; border: 1px solid #00b4d8; border-radius: 0 0 8px 8px; z-index: 100; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); }
+        .searchable-select .dropdown-list.open { display: block; }
+        .searchable-select .dropdown-item { padding: 8px 12px; cursor: pointer; font-size: 13px; color: #c0c0c0; transition: all 0.15s; border-bottom: 1px solid #0a1628; }
+        .searchable-select .dropdown-item:hover { background-color: #122a45; color: #00b4d8; }
+        .searchable-select .dropdown-item .code { color: #00b4d8; font-weight: 700; margin-right: 6px; }
+        .searchable-select .dropdown-item .desc { color: #90e0ef; }
+        .searchable-select .no-results { padding: 12px; color: #5a7a9a; font-size: 13px; text-align: center; }
+
+        /* TOOLBAR */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+        .search-box { position: relative; flex: 1; max-width: 350px; }
+        .search-box input { width: 100%; background-color: #0a1628; border: 1px solid #1a3a5c; color: #e0e0e0; padding: 10px 12px 10px 36px; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; }
+        .search-box input:focus { outline: none; border-color: #00b4d8; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #5a7a9a; font-size: 14px; }
+        .stats { display: flex; gap: 12px; }
+        .stat-card { background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 10px; padding: 10px 16px; text-align: center; }
+        .stat-number { font-size: 22px; font-weight: 800; color: #00b4d8; }
+        .stat-label { font-size: 10px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* TABLA */
+        .table-section { background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+        .table-header { padding: 12px 18px; border-bottom: 1px solid #1a3a5c; display: flex; justify-content: space-between; align-items: center; }
+        .table-header h3 { color: #90e0ef; font-size: 15px; font-weight: 600; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background-color: #0a1628; }
+        thead th { padding: 10px 12px; text-align: left; font-size: 11px; color: #00b4d8; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #1a3a5c; font-weight: 700; white-space: nowrap; }
+        tbody tr { border-bottom: 1px solid #0d2137; transition: background-color 0.2s; }
+        tbody tr:hover { background-color: #122a45; }
+        tbody td { padding: 10px 12px; font-size: 12px; color: #c0c0c0; white-space: nowrap; }
+
+        /* BADGES */
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-activo { background-color: rgba(0, 180, 216, 0.2); color: #00b4d8; border: 1px solid #00b4d8; }
+        .badge-observacion { background-color: rgba(255, 183, 3, 0.2); color: #ffb700; border: 1px solid #ffb700; }
+        .badge-critico { background-color: rgba(255, 56, 96, 0.2); color: #ff3860; border: 1px solid #ff3860; }
+
+        /* BOTONES ACCIÓN */
+        .btn-action { padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; transition: all 0.2s; margin: 0 2px; font-family: 'Inter', sans-serif; }
+        .btn-editar { background-color: rgba(0, 180, 216, 0.2); color: #00b4d8; border: 1px solid rgba(0, 180, 216, 0.4); }
+        .btn-editar:hover { background-color: #00b4d8; color: #0a1628; }
+        .btn-egresar { background-color: rgba(72, 199, 142, 0.2); color: #48c78e; border: 1px solid rgba(72, 199, 142, 0.4); }
+        .btn-egresar:hover { background-color: #48c78e; color: #0a1628; }
+        .btn-eliminar { background-color: rgba(255, 56, 96, 0.2); color: #ff3860; border: 1px solid rgba(255, 56, 96, 0.4); }
+        .btn-eliminar:hover { background-color: #ff3860; color: #fff; }
+
+        /* VACÍO */
+        .empty-state { text-align: center; padding: 35px; color: #5a7a9a; }
+        .empty-state .icon { font-size: 45px; margin-bottom: 10px; }
+        .empty-state p { font-size: 14px; }
+
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: linear-gradient(135deg, #0d2137, #1a3a5c); border: 1px solid #00b4d8; border-radius: 14px; padding: 25px; width: 90%; max-width: 650px; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0, 180, 216, 0.3); }
+        .modal h3 { color: #00b4d8; margin-bottom: 15px; font-size: 18px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+        /* TOAST */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+        .toast { padding: 12px 20px; border-radius: 8px; font-size: 14px; animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
+        .toast-success { background: linear-gradient(135deg, #48c78e, #38a06d); color: #fff; }
+        .toast-error { background: linear-gradient(135deg, #ff3860, #d4234a); color: #fff; }
+        .toast-info { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 10px; }
+            .toolbar { flex-direction: column; }
+            .search-box { max-width: 100%;
+            .header-right { flex-wrap:wrap; justify-content:center; }
+            .nav-bar { padding:8px 10px; justify-content:center; }
+            .nav-item { padding:6px 10px; font-size:11px; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="nexus_db.js"></script>
+    <script src="permisos.js"></script>
+</head>
+<body>
+
+        <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="brand-icon">
+                <svg viewBox="0 0 40 40" fill="none">
+                    <path d="M20 4 L20 36" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M20 10 L10 4" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M20 10 L30 4" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="20" cy="36" r="3" fill="#00b4d8"/>
+                </svg>
+            </div>
+            <div class="brand-name">NEXUS<span>MED</span></div>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <div class="user-details">
+                    <span class="user-name" id="userName">Administrador</span>
+                    <span class="user-role" id="userRole">ADMIN</span>
+                </div>
+            </div>
+            <button class="btn-cerrar-sesion" onclick="cerrarSesion()">🔒 Cerrar Sesión</button>
+        </div>
+    </div>
+
+        <!-- BARRA DE NAVEGACIÓN -->
+    <nav class="nav-bar">
+        <a class="nav-item" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
+        <a class="nav-item" href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+        <a class="nav-item active" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+        <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresos</a>
+        <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
+        <a class="nav-item" href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
+        <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enf.</a>
+        <a class="nav-item" href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
+        <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
+        <a class="nav-item" href="facturacion.html"><i class="fas fa-file-invoice-dollar"></i> Facturación</a>
+        <a class="nav-item" href="rips.html"><i class="fas fa-file-code"></i> RIPS JSON</a>
+        <a class="nav-item" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Doc.</a>
+        <a class="nav-item" href="generador_evoluciones.html"><i class="fas fa-file-medical-alt"></i> Generador Evol.</a>
+        <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
+        <a class="nav-item" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+    </nav>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="container">
+        <h2 class="titulo">📋 Registro de Admisiones</h2>
+
+        <div class="form-section">
+            <div class="form-title">Nueva Admisión</div>
+            <form id="formAdmision" onsubmit="return false;">
+
+                <!-- ═══ DATOS DE ADMISIÓN ═══ -->
+                <div class="form-subtitle"><i class="fas fa-clipboard-list"></i> Datos de Admisión</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nº Admisión</label>
+                        <input type="text" id="numAdmision" placeholder="Auto" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha Ingreso</label>
+                        <input type="datetime-local" id="fechaIngreso" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Servicio</label>
+                        <select id="servicio" required>
+                            <option value="">...</option>
+                            <option value="Domiciliario">🏠 Domiciliario</option>
+                            <option value="Intramural">🏥 Intramural</option>
+                            <option value="Hospitalización en Casa">🏡 Hospitalización en Casa</option>
+                            <option value="Emergencia">🚨 Emergencia</option>
+                            <option value="UCI">🏥 UCI</option>
+                            <option value="Cirugía">🔪 Cirugía</option>
+                            <option value="Medicina Interna">💊 Medicina Interna</option>
+                            <option value="Pediatría">👶 Pediatría</option>
+                            <option value="Obstetricia">🤰 Obstetricia</option>
+                            <option value="Traumatología">🦴 Traumatología</option>
+                            <option value="Oncología">🎗 Oncología</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Médico Responsable</label>
+                        <select id="medico" required>
+                            <option value="">...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="estado" required>
+                            <option value="">...</option>
+                            <option value="Activo">🟢 Activo</option>
+                            <option value="Observación">🟡 Observación</option>
+                            <option value="Crítico">🔴 Crítico</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Habitación / Cama</label>
+                        <input type="text" id="habitacion" placeholder="Ej: 301-A">
+                    </div>
+                    <div class="form-group">
+                        <label>Observaciones</label>
+                        <textarea id="observaciones" placeholder="Notas adicionales..."></textarea>
+                    </div>
+                </div>
+
+                <!-- ═══ DATOS DEL PACIENTE ═══ -->
+                <div class="form-subtitle"><i class="fas fa-user"></i> Datos del Paciente</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tipo de Documento</label>
+                        <select id="tipoDoc" required>
+                            <option value="">...</option>
+                            <option value="CC">CC - Cédula de Ciudadanía</option>
+                            <option value="CE">CE - Cédula de Extranjería</option>
+                            <option value="TI">TI - Tarjeta de Identidad</option>
+                            <option value="RC">RC - Registro Civil</option>
+                            <option value="PA">PA - Pasaporte</option>
+                            <option value="AS">AS - Adulto Sin Identificación</option>
+                            <option value="MS">MS - Menor Sin Identificación</option>
+                            <option value="NI">NI - NIT</option>
+                            <option value="CD">CD - Carné Diplomático</option>
+                            <option value="CN">CN - Certificado de Nacido Vivo</option>
+                            <option value="SC">SC - Salvoconducto</option>
+                            <option value="PE">PE - Permiso Especial de Permanencia</option>
+                            <option value="PT">PT - Permiso por Protección Temporal</option>
+                            <option value="DE">DE - Documento de Extranjería</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Documento</label>
+                        <input type="text" id="documento" placeholder="Ej: 12345678" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre Completo</label>
+                        <input type="text" id="nombre" placeholder="Nombre del paciente" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Nacimiento</label>
+                        <input type="date" id="fechaNacimiento" required onchange="calcularEdad()" oninput="calcularEdad()">
+                    </div>
+                    <div class="form-group">
+                        <label>Edad</label>
+                        <input type="text" id="edad" placeholder="Se calcula automáticamente" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Género</label>
+                        <select id="genero" required>
+                            <option value="">...</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Diagnóstico (CIE-10)</label>
+                        <div class="searchable-select" id="cie10Container">
+                            <input type="text" id="diagnostico" placeholder="Buscar código o descripción..." required autocomplete="off" onfocus="abrirCIE10()" oninput="filtrarCIE10()">
+                            <input type="hidden" id="diagnosticoCodigo">
+                            <div class="dropdown-list" id="cie10Dropdown"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>EPS</label>
+                        <select id="eps" required>
+                            <option value="">...</option>
+                            <option value="COOSALUD EPS">COOSALUD EPS</option>
+                            <option value="SALUD TOTAL EPS">SALUD TOTAL EPS</option>
+                            <option value="NUEVA EPS">NUEVA EPS</option>
+                            <option value="FOMAG">FOMAG</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ═══ DIRECCIÓN DEL PACIENTE ═══ -->
+                <div class="form-subtitle"><i class="fas fa-map-marker-alt"></i> Dirección del Paciente</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Dirección</label>
+                        <input type="text" id="direccion" placeholder="Cra / Cll / Diagonal ...">
+                    </div>
+                    <div class="form-group">
+                        <label>Barrio</label>
+                        <input type="text" id="barrio" placeholder="Nombre del barrio">
+                    </div>
+                    <div class="form-group">
+                        <label>Departamento</label>
+                        <select id="departamento" required onchange="cargarMunicipios()">
+                            <option value="">...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Municipio</label>
+                        <select id="municipio" required>
+                            <option value="">Seleccione departamento primero</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="tel" id="telefono" placeholder="Ej: 3001234567">
+                    </div>
+                </div>
+
+                <!-- ═══ FAMILIAR RESPONSABLE ═══ -->
+                <div class="form-subtitle"><i class="fas fa-users"></i> Familiar Responsable</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre del Familiar</label>
+                        <input type="text" id="familiarNombre" placeholder="Nombre completo">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono del Familiar</label>
+                        <input type="tel" id="familiarTelefono" placeholder="Ej: 3001234567">
+                    </div>
+                    <div class="form-group">
+                        <label>Parentesco</label>
+                        <select id="familiarParentesco">
+                            <option value="">...</option>
+                            <option value="Padre">Padre</option>
+                            <option value="Madre">Madre</option>
+                            <option value="Hijo/a">Hijo/a</option>
+                            <option value="Esposo/a">Esposo/a</option>
+                            <option value="Hermano/a">Hermano/a</option>
+                            <option value="Tío/a">Tío/a</option>
+                            <option value="Abuelo/a">Abuelo/a</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-registrar" onclick="registrarAdmision()">✅ Registrar</button>
+                    <button type="button" class="btn-limpiar" onclick="limpiarFormulario()">🧹 Limpiar</button>
+                    <button type="button" class="btn-pdf" onclick="generarCertificadoPDF()">📄 Generar Certificado PDF</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="busqueda" placeholder="Buscar por nombre, documento, diagnóstico..." onkeyup="filtrarTabla()">
+            </div>
+            <div class="stats">
+                <div class="stat-card"><div class="stat-number" id="totalAdmisiones">0</div><div class="stat-label">Total</div></div>
+                <div class="stat-card"><div class="stat-number" id="totalActivos">0</div><div class="stat-label">Activos</div></div>
+                <div class="stat-card"><div class="stat-number" id="totalCriticos">0</div><div class="stat-label">Críticos</div></div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <div class="table-header"><h3>📋 Pacientes Admitidos</h3></div>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr>
+                        <th>Nº Adm.</th><th>Fecha</th><th>Tipo Doc.</th><th>Documento</th><th>Nombre</th><th>EPS</th><th>Edad</th><th>Servicio</th><th>Médico</th><th>Diagnóstico</th><th>Hab.</th><th>Estado</th><th>Acciones</th>
+                    </tr></thead>
+                    <tbody id="tablaAdmisiones"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="emptyState"><div class="icon">🏥</div><p>No hay admisiones registradas</p></div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL EDITAR ═══ -->
+    <div class="modal-overlay" id="modalEditar">
+        <div class="modal">
+            <h3>✏️ Editar Admisión</h3>
+            <div class="form-grid">
+                <div class="form-group"><label>Tipo Documento</label><select id="editTipoDoc"><option value="CC">CC</option><option value="CE">CE</option><option value="TI">TI</option><option value="RC">RC</option><option value="PA">PA</option><option value="AS">AS</option><option value="MS">MS</option><option value="NI">NI</option><option value="CD">CD</option><option value="CN">CN</option><option value="SC">SC</option><option value="PE">PE</option><option value="PT">PT</option><option value="DE">DE</option></select></div>
+                <div class="form-group"><label>Documento</label><input type="text" id="editDocumento"></div>
+                <div class="form-group"><label>Nombre</label><input type="text" id="editNombre"></div>
+                <div class="form-group"><label>Fecha Nacimiento</label><input type="date" id="editFechaNacimiento" onchange="calcularEdadEdicion()"></div>
+                <div class="form-group"><label>Edad</label><input type="text" id="editEdad" readonly></div>
+                <div class="form-group"><label>Género</label><select id="editGenero"><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option><option value="Otro">Otro</option></select></div>
+                <div class="form-group"><label>Servicio</label><select id="editServicio"><option value="Domiciliario">Domiciliario</option><option value="Intramural">Intramural</option><option value="Hospitalización en Casa">Hospitalización en Casa</option><option value="Emergencia">Emergencia</option><option value="UCI">UCI</option><option value="Cirugía">Cirugía</option><option value="Medicina Interna">Medicina Interna</option><option value="Pediatría">Pediatría</option><option value="Obstetricia">Obstetricia</option><option value="Traumatología">Traumatología</option><option value="Oncología">Oncología</option></select></div>
+                <div class="form-group"><label>Médico</label><select id="editMedico"><option value="">...</option></select></div>
+                <div class="form-group"><label>Diagnóstico</label><input type="text" id="editDiagnostico"></div>
+                <div class="form-group"><label>Estado</label><select id="editEstado"><option value="Activo">Activo</option><option value="Observación">Observación</option><option value="Crítico">Crítico</option></select></div>
+                <div class="form-group"><label>Habitación</label><input type="text" id="editHabitacion"></div>
+                <div class="form-group"><label>Dirección</label><input type="text" id="editDireccion"></div>
+                <div class="form-group"><label>Barrio</label><input type="text" id="editBarrio"></div>
+                <div class="form-group"><label>Departamento</label><select id="editDepartamento" onchange="cargarMunicipiosEdicion()"><option value="">...</option></select></div>
+                <div class="form-group"><label>Municipio</label><select id="editMunicipio"><option value="">...</option></select></div>
+                <div class="form-group"><label>Teléfono</label><input type="tel" id="editTelefono"></div>
+                <div class="form-group"><label>Familiar</label><input type="text" id="editFamiliarNombre"></div>
+                <div class="form-group"><label>Tel. Familiar</label><input type="tel" id="editFamiliarTelefono"></div>
+                <div class="form-group"><label>EPS</label><select id="editEps"><option value="">...</option><option value="COOSALUD EPS">COOSALUD EPS</option><option value="SALUD TOTAL EPS">SALUD TOTAL EPS</option><option value="NUEVA EPS">NUEVA EPS</option><option value="FOMAG">FOMAG</option></select></div>
+                <div class="form-group"><label>Parentesco</label><select id="editFamiliarParentesco"><option value="">...</option><option value="Padre">Padre</option><option value="Madre">Madre</option><option value="Hijo/a">Hijo/a</option><option value="Esposo/a">Esposo/a</option><option value="Hermano/a">Hermano/a</option><option value="Tío/a">Tío/a</option><option value="Abuelo/a">Abuelo/a</option><option value="Otro">Otro</option></select></div>
+                <div class="form-group"><label>Observaciones</label><textarea id="editObservaciones"></textarea></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-limpiar" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-registrar" onclick="guardarEdicion()">💾 Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ═══════════════════════════════════════════
+           CONSTANTES & DATOS
+           ═══════════════════════════════════════════ */
+        const STORAGE_KEY = 'nexus_pacientes';
+        const STORAGE_COUNTER = 'nexus_contador_admision';
+        const STORAGE_USUARIOS = 'nexus_usuarios';
+
+        // ─── CIE-10 Códigos más comunes ───
+        const CIE10 = [
+            { code: 'J18.9', desc: 'Neumonía, no especificada' },
+            { code: 'J06.9', desc: 'Infección aguda de vías respiratorias superiores' },
+            { code: 'J22', desc: 'Infección aguda de vías respiratorias inferiores' },
+            { code: 'J44.1', desc: 'EPOC con exacerbación aguda' },
+            { code: 'J44.0', desc: 'EPOC con infección respiratoria aguda' },
+            { code: 'J96.0', desc: 'Insuficiencia respiratoria aguda' },
+            { code: 'J96.1', desc: 'Insuficiencia respiratoria crónica' },
+            { code: 'J84.9', desc: 'Enfermedad pulmonar intersticial' },
+            { code: 'I10', desc: 'Hipertensión arterial esencial' },
+            { code: 'I11.9', desc: 'Enfermedad cardíaca hipertensiva sin insuficiencia cardíaca' },
+            { code: 'I50.9', desc: 'Insuficiencia cardíaca, no especificada' },
+            { code: 'I50.0', desc: 'Insuficiencia cardíaca congestiva' },
+            { code: 'I48', desc: 'Fibrilación y aleteo auricular' },
+            { code: 'I21.9', desc: 'Infarto agudo de miocardio, no especificado' },
+            { code: 'I25.1', desc: 'Enfermedad aterosclerótica del corazón' },
+            { code: 'I63.9', desc: 'Accidente cerebrovascular, no especificado' },
+            { code: 'I67.9', desc: 'Enfermedad cerebrovascular, no especificada' },
+            { code: 'I69.9', desc: 'Secuelas de enfermedad cerebrovascular' },
+            { code: 'E11.9', desc: 'Diabetes mellitus tipo 2 sin complicaciones' },
+            { code: 'E11.5', desc: 'Diabetes tipo 2 con trastornos circulatorios' },
+            { code: 'E11.6', desc: 'Diabetes tipo 2 con otras complicaciones' },
+            { code: 'E10.9', desc: 'Diabetes mellitus tipo 1 sin complicaciones' },
+            { code: 'E14.9', desc: 'Diabetes mellitus no especificada' },
+            { code: 'E78.5', desc: 'Dislipidemia, no especificada' },
+            { code: 'E87.5', desc: 'Hiperpotasemia' },
+            { code: 'E87.6', desc: 'Hipopotasemia' },
+            { code: 'E46', desc: 'Desnutrición proteico-calórica no especificada' },
+            { code: 'N18.9', desc: 'Enfermedad renal crónica, no especificada' },
+            { code: 'N17.9', desc: 'Insuficiencia renal aguda, no especificada' },
+            { code: 'N19', desc: 'Enfermedad renal, no especificada' },
+            { code: 'N39.0', desc: 'Infección de vías urinarias, sitio no especificado' },
+            { code: 'N40', desc: 'Hiperplasia prostática benigna' },
+            { code: 'K70.3', desc: 'Cirrosis hepática alcohólica' },
+            { code: 'K72.9', desc: 'Insuficiencia hepática, no especificada' },
+            { code: 'K74.6', desc: 'Cirrosis hepática, otra y no especificada' },
+            { code: 'K80.0', desc: 'Cálculo de la vesícula biliar con colecistitis aguda' },
+            { code: 'K80.1', desc: 'Cálculo de la vesícula biliar con otra colecistitis' },
+            { code: 'K92.2', desc: 'Hemorragia gastrointestinal, no especificada' },
+            { code: 'K35.9', desc: 'Apendicitis aguda, no especificada' },
+            { code: 'K56.6', desc: 'Obstrucción intestinal, no especificada' },
+            { code: 'K59.0', desc: 'Estreñimiento' },
+            { code: 'K21.0', desc: 'Reflujo gastroesofágico con esofagitis' },
+            { code: 'A09', desc: 'Gastroenteritis y colitis de presunto origen infeccioso' },
+            { code: 'A41.9', desc: 'Sepsis, no especificada' },
+            { code: 'A04.7', desc: 'Enterocolitis por Clostridium difficile' },
+            { code: 'B34.9', desc: 'Infección viral, no especificada' },
+            { code: 'B95.1', desc: 'Streptococcus, causa de enfermedades clasificadas en otros capítulos' },
+            { code: 'B96.2', desc: 'Escherichia coli, causa de enfermedades' },
+            { code: 'C34.9', desc: 'Neoplasia maligna de pulmón, no especificada' },
+            { code: 'C18.9', desc: 'Neoplasia maligna del colon, no especificada' },
+            { code: 'C50.9', desc: 'Neoplasia maligna de mama, no especificada' },
+            { code: 'C61', desc: 'Neoplasia maligna de la próstata' },
+            { code: 'C79.9', desc: 'Metástasis, no especificada' },
+            { code: 'C95.9', desc: 'Leucemia, no especificada' },
+            { code: 'D50.9', desc: 'Anemia por deficiencia de hierro, no especificada' },
+            { code: 'D46.9', desc: 'Síndrome mielodisplásico, no especificado' },
+            { code: 'D64.9', desc: 'Anemia, no especificada' },
+            { code: 'G40.9', desc: 'Epilepsia, no especificada' },
+            { code: 'G43.9', desc: 'Migraña, no especificada' },
+            { code: 'G47.3', desc: 'Apnea obstructiva del sueño' },
+            { code: 'G82.9', desc: 'Parálisis, no especificada' },
+            { code: 'G89.1', desc: 'Dolor crónico, no clasificado en otra parte' },
+            { code: 'F03', desc: 'Demencia, no especificada' },
+            { code: 'F10.1', desc: 'Trastorno por uso de alcohol – uso perjudicial' },
+            { code: 'F17.2', desc: 'Dependencia de tabaco' },
+            { code: 'F32.9', desc: 'Episodio depresivo, no especificado' },
+            { code: 'F41.1', desc: 'Trastorno de ansiedad generalizada' },
+            { code: 'F41.9', desc: 'Trastorno de ansiedad, no especificado' },
+            { code: 'M54.5', desc: 'Lumbalgia baja' },
+            { code: 'M54.1', desc: 'Radiculopatía' },
+            { code: 'M81.0', desc: 'Osteoporosis postmenopáusica' },
+            { code: 'M79.3', desc: 'Parestesia, no especificada' },
+            { code: 'M79.1', desc: 'Mialgia' },
+            { code: 'S22.0', desc: 'Fractura de vértebra torácica' },
+            { code: 'S72.0', desc: 'Fractura del cuello del fémur' },
+            { code: 'S82.8', desc: 'Fractura de la pierna' },
+            { code: 'S06.9', desc: 'Traumatismo intracraneal, no especificado' },
+            { code: 'S09.9', desc: 'Lesión de la cabeza, no especificada' },
+            { code: 'T14.0', desc: 'Herida superficial de región del cuerpo no especificada' },
+            { code: 'T88.9', desc: 'Complicación, no especificada' },
+            { code: 'R07.9', desc: 'Dolor torácico, no especificado' },
+            { code: 'R50.9', desc: 'Fiebre, no especificada' },
+            { code: 'R10.9', desc: 'Dolor abdominal y pélvico, no especificado' },
+            { code: 'R55', desc: 'Síncope y colapso' },
+            { code: 'R60.9', desc: 'Edema, no especificado' },
+            { code: 'R63.0', desc: 'Anorexia' },
+            { code: 'R65.9', desc: 'Síndrome de respuesta inflamatoria sistémica' },
+            { code: 'Z96.6', desc: 'Presencia de dispositivo de fijación ortopédica' },
+            { code: 'Z87.0', desc: 'Antecedente de enfermedades del sistema respiratorio' },
+            { code: 'Z95.1', desc: 'Presencia de bypass aortocoronario' },
+            { code: 'U07.1', desc: 'COVID-19, virus identificado' },
+            { code: 'U07.2', desc: 'COVID-19, virus no identificado' },
+            { code: 'B34.2', desc: 'Infección por coronavirus, no especificada' },
+        ];
+
+        // ─── Colombia: Departamentos y Municipios ───
+        const COLOMBIA = {
+            'AMAZONAS': ['Leticia', 'El Encanto', 'La Chorrera', 'La Pedrera', 'Mirití-Paraná', 'Puerto Alegría', 'Puerto Arica', 'Puerto Nariño', 'Puerto Santander', 'Tarapacá'],
+            'ANTIOQUIA': ['Medellín', 'Abejorral', 'Abriaquí', 'Alejandria', 'Amagá', 'Amalfi', 'Andes', 'Angelópolis', 'Angostura', 'Apartadó', 'Arboletes', 'Argelia', 'Barbosa', 'Bello', 'Belmira', 'Bolívar', 'Briceño', 'Buriticá', 'Cáceres', 'Caicedo', 'Caldas', 'Campamento', 'Caucasia', 'Chigorodó', 'Cisneros', 'Cocorná', 'Concepción', 'Copacabana', 'Dabeiba', 'Donmatías', 'Ebéjico', 'El Bagre', 'El Carmen de Viboral', 'El Peñol', 'El Retiro', 'El Santuario', 'Entrerríos', 'Envigado', 'Fredonia', 'Frontino', 'Girardota', 'Gómez Plata', 'Granada', 'Guadalupe', 'Guarne', 'Heliconia', 'Hispania', 'Itagüí', 'Ituango', 'Jardín', 'Jericó', 'La Ceja', 'La Estrella', 'La Pintada', 'La Unión', 'Liborina', 'Maceo', 'Marinilla', 'Montebello', 'Murindó', 'Mutatá', 'Nariño', 'Nechí', 'Necoclí', 'Olaya', 'Peque', 'Pueblorrico', 'Puerto Berrío', 'Puerto Nare', 'Puerto Triunfo', 'Remedios', 'Rionegro', 'Sabanalarga', 'Sabaneta', 'Salgar', 'San Andrés de Cuerquía', 'San Carlos', 'San Francisco', 'San Jerónimo', 'San José de la Montaña', 'San Juan de Urabá', 'San Luis', 'San Pedro', 'San Pedro de Urabá', 'San Rafael', 'San Roque', 'San Vicente Ferrer', 'Santa Bárbara', 'Santa Rosa de Osos', 'Santo Domingo', 'Sonsón', 'Sopetrán', 'Tarazá', 'Tarso', 'Titiribí', 'Toledo', 'Turbo', 'Uramita', 'Urrao', 'Valdivia', 'Valparaiso', 'Vegachí', 'Venecia', 'Vigía del Fuerte', 'Yalí', 'Yarumal', 'Zaragoza'],
+            'ARAUCA': ['Arauca', 'Arauquita', 'Cravo Norte', 'Fortul', 'Puerto Rondón', 'Saravena', 'Tame'],
+            'ATLÁNTICO': ['Barranquilla', 'Baranoa', 'Campo de la Cruz', 'Candelaria', 'Galapa', 'Juan de Acosta', 'Luruaco', 'Malambo', 'Manatí', 'Palmar de Varela', 'Piojó', 'Polonuevo', 'Ponedera', 'Puerto Colombia', 'Repelón', 'Sabanagrande', 'Sabanalarga', 'Santa Lucía', 'Santo Tomás', 'Soledad', 'Suan', 'Tubará', 'Usiacurí'],
+            'BOGOTÁ D.C.': ['Bogotá'],
+            'BOLÍVAR': ['Cartagena', 'Achí', 'Altos del Rosario', 'Arroyohondo', 'Barranco de Loba', 'Calamar', 'Cicuco', 'Clemencia', 'Córdoba', 'El Carmen de Bolívar', 'El Guamo', 'El Peñón', 'Hatillo de Loba', 'Magangué', 'Mahates', 'Marguarita', 'Montecristo', 'Mompós', 'Montes de María', 'Morales', 'Norosí', 'Pinillos', 'Regidor', 'Río Viejo', 'San Cristóbal', 'San Estanislao', 'San Fernando', 'San Jacinto', 'San Juan Nepomuceno', 'San Martín de Loba', 'San Pablo', 'San Pedro', 'Santa Catalina', 'Santa Rosa', 'Santa Rosa del Sur', 'Simití', 'Soplaviento', 'Talaigua Nuevo', 'Tiquisio', 'Turbaco', 'Turbana', 'Villanueva', 'Zambrano'],
+            'BOYACÁ': ['Tunja', 'Almeida', 'Aquitania', 'Arcabuco', 'Belén', 'Berbeo', 'Betéitiva', 'Boavita', 'Boyacá', 'Briceño', 'Buenavista', 'Busbanzá', 'Caldas', 'Campohermoso', 'Cerinza', 'Chinavita', 'Chiquinquirá', 'Chíquiza', 'Chiscas', 'Chita', 'Chitaraque', 'Chivatá', 'Ciénega', 'Cómbita', 'Coper', 'Corrales', 'Covarachía', 'Cubará', 'Cuitiva', 'Duitama', 'El Cocuy', 'El Espino', 'Firavitoba', 'Floresta', 'Gachantivá', 'Gameza', 'Garagoa', 'Guacamayas', 'Güicán', 'Iza', 'Jenesano', 'Jerico', 'La Capilla', 'La Uvita', 'Labranzagrande', 'Lengupá', 'Macanal', 'Miraflores', 'Mongua', 'Monguí', 'Moniquirá', 'Motavita', 'Muzo', 'Nobsa', 'Nuevo Colón', 'Oicatá', 'Otanche', 'Pachavita', 'Páez', 'Paipa', 'Pajarito', 'Panqueba', 'Paya', 'Pesca', 'Pisba', 'Puerto Boyacá', 'Quipama', 'Ramiriquí', 'Ráquira', 'Rondón', 'Saboyá', 'Sáchica', 'Samacá', 'San Eduardo', 'San José de Pare', 'San Luís de Gaceno', 'San Mateo', 'San Miguel de Sema', 'San Pablo de Borbur', 'Santa María', 'Santana', 'Santa Sofía', 'Sativanorte', 'Siachoque', 'Soatá', 'Socotá', 'Socha', 'Sogamoso', 'Somondoco', 'Sotaquirá', 'Sutamarchán', 'Susacón', 'Sutatenza', 'Tasco', 'Tenza', 'Tibasosa', 'Tinjacá', 'Tipacoque', 'Toca', 'Togüí', 'Tópaga', 'Tota', 'Tununguá', 'Turmequé', 'Tuta', 'Tutazá', 'Úmbita', 'Villa de Leyva', 'Viracachá', 'Zetaquira'],
+            'CALDAS': ['Manizales', 'Aguadas', 'Anserma', 'Aranzazu', 'Belalcázar', 'Chinchiná', 'Filadelfia', 'La Dorada', 'La Merced', 'Manzanares', 'Marmato', 'Marulanda', 'Neira', 'Norcasia', 'Pácora', 'Palestina', 'Pensilvania', 'Risaralda', 'Salamina', 'Samaná', 'San José', 'Supía', 'Victoria', 'Villamaría', 'Viterbo'],
+            'CAQUETÁ': ['Florencia', 'Albania', 'Belén de los Andaquíes', 'Cartagena del Chairá', 'Curillo', 'El Doncello', 'El Paujíl', 'La Montañita', 'Milán', 'Morelia', 'Puerto Rico', 'San José del Fragua', 'San Vicente del Caguán', 'Solano', 'Solita', 'Valparaíso'],
+            'CASANARE': ['Yopal', 'Aguazul', 'Chameza', 'Hato Corozal', 'La Salina', 'Maní', 'Monterrey', 'Nunchía', 'Orocué', 'Paz de Ariporo', 'Pore', 'Recetor', 'Sácama', 'San Luis de Palenque', 'Támara', 'Tauramena', 'Trinidad', 'Villanueva'],
+            'CAUCA': ['Popayán', 'Almaguer', 'Argelia', 'Balboa', 'Bolívar', 'Buenos Aires', 'Cajibío', 'Caldono', 'Caloto', 'Cerín', 'Caldono', 'Corinto', 'El Tambo', 'Florencia', 'Guachené', 'Guapí', 'Inzá', 'Jambaló', 'La Sierra', 'La Vega', 'López', 'Mercaderes', 'Miranda', 'Morales', 'Padilla', 'Páez', 'Patía', 'Piamonte', 'Puerto Tejada', 'Puracé', 'Rosas', 'San Sebastián', 'Santander de Quilichao', 'Santa Rosa', 'Silvia', 'Sotará', 'Suárez', 'Sucre', 'Timbío', 'Timbiquí', 'Toribío', 'Totoró', 'Villa Rica'],
+            'CESAR': ['Valledupar', 'Aguachica', 'Astrea', 'Bosconia', 'Chimichagua', 'Chiriguaná', 'Codazzi', 'Curumaní', 'El Copey', 'El Paso', 'Gamarra', 'González', 'La Gloria', 'La Jagua de Ibirico', 'Manaure', 'Pailitas', 'Pelaya', 'Pueblo Bello', 'Río de Oro', 'San Alberto', 'San Diego', 'San Martín', 'Tamalameque'],
+            'CHOCÓ': ['Quibdó', 'Atrato', 'Bagadó', 'Bahía Solano', 'Bajo Baudó', 'Bojayá', 'Carmen del Darién', 'Cértegui', 'Condoto', 'El Cantón del San Pablo', 'El Carmen de Atrato', 'El Litoral del San Juan', 'Istmina', 'Juradó', 'Litoral del Bajo San Juan', 'Nóvita', 'Nuquí', 'Río Iro', 'Río Quito', 'Riosucio', 'San José del Palmar', 'Sipí', 'Tadó', 'Unguía', 'Unión Panamericana'],
+            'CÓRDOBA': ['Montería', 'Ayapel', 'Buenavista', 'Canalete', 'Cereté', 'Chimá', 'Chinú', 'Ciénaga de Oro', 'Cotorra', 'La Apartada', 'Lorica', 'Los Córdobas', 'Momil', 'Moñitos', 'Montelíbano', 'Montería', 'Planeta Rica', 'Pueblo Nuevo', 'Puerto Escondido', 'Puerto Libertador', 'Purísima', 'Sahagún', 'San Andrés de Sotavento', 'San Antero', 'San Bernardo del Viento', 'San Carlos', 'San José de Uré', 'San Pelayo', 'San Sebastián', 'Tierralta', 'Tuchín', 'Valencia'],
+            'CUNDINAMARCA': ['Bogotá', 'Agua de Dios', 'Albán', 'Anapoima', 'Anolaima', 'Apulo', 'Arbeláez', 'Beltrán', 'Bituima', 'Bojacá', 'Briceño', 'Buenavista', 'Cabrera', 'Cachipay', 'Cajicá', 'Caparrapí', 'Cáqueque', 'Carmen de Carupa', 'Chaguaní', 'Chía', 'Chipaque', 'Choachí', 'Chocontá', 'Cogua', 'Cota', 'Cucunubá', 'El Colegio', 'El Peñón', 'Facatativá', 'Fómeque', 'Fosca', 'Fuquene', 'Fusagasugá', 'Gachalá', 'Gachetá', 'Gama', 'Girardot', 'Granada', 'Guachetá', 'Guaduas', 'Guasca', 'Guataquí', 'Guatavita', 'La Calera', 'La Mesa', 'La Palma', 'La Peña', 'La Vega', 'Lenguazaque', 'Machetá', 'Madrid', 'Manta', 'Medina', 'Mosquera', 'Nariño', 'Nemocón', 'Nilo', 'Nimaima', 'Nocaima', 'Pacho', 'Paime', 'Pandi', 'Paratebueno', 'Pasca', 'Puerto Salgar', 'Pulí', 'Quebradanegra', 'Quetame', 'Ricaurte', 'San Antonio del Tequendama', 'San Bernardo', 'San Cayetano', 'San Francisco', 'San Juan de Rioseco', 'Sasaima', 'Sesquilé', 'Sibaté', 'Silvania', 'Simijaca', 'Soacha', 'Sopó', 'Subachoque', 'Suesca', 'Supatá', 'Sutatausa', 'Tabio', 'Tausa', 'Tena', 'Tenjo', 'Tibacuy', 'Tibirita', 'Tocaima', 'Tocancipá', 'Topaipí', 'Ubalá', 'Ubaque', 'Villa de San Diego de Ubaté', 'Villapinzón', 'Villeta', 'Viotá', 'Yacopí', 'Zipacón', 'Zipaquirá'],
+            'GUAINÍA': ['Inírida', 'Barranco Minas', 'Mapiripana', 'San Felipe', 'Puerto Colombia', 'La Guadalupe'],
+            'GUAVIARE': ['San José del Guaviare', 'El Retorno', 'Calamar', 'Miraflores'],
+            'HUILA': ['Neiva', 'Acevedo', 'Agrado', 'Altamira', 'Baraya', 'Campoalegre', 'Colombia', 'Elías', 'Garzón', 'Gigante', 'Guadalupe', 'Hobo', 'Íquira', 'Isnos', 'La Argentina', 'La Plata', 'Nátaga', 'Oporapa', 'Paicol', 'Palermo', 'Pital', 'Pitalito', 'Rivera', 'Saladoblanco', 'San Agustín', 'Santa María', 'Suaza', 'Tarqui', 'Tello', 'Tesalia', 'Timaná', 'Villavieja', 'Yaguara'],
+            'LA GUAJIRA': ['Riohacha', 'Albania', 'Barrancas', 'Dibulla', 'Distracción', 'El Molino', 'Fonseca', 'Hatonuevo', 'Maicao', 'Manaure', 'San Juan del Cesar', 'Uribia', 'Urumita', 'Villanueva'],
+            'MAGDALENA': ['Santa Marta', 'Algarrobo', 'Aracataca', 'Ariguaní', 'Cerro de San Antonio', 'Chivolo', 'Ciénaga', 'Concordia', 'El Banco', 'El Piñón', 'El Retén', 'Fundación', 'Guamal', 'Nueva Granada', 'Pedraza', 'Pijiño del Carmen', 'Pivijay', 'Plato', 'Pueblo Viejo', 'Remolino', 'Sabanas de San Ángel', 'Salamina', 'San Sebastián de Buenavista', 'San Zenón', 'Santa Bárbara de Pinto', 'Sitionuevo', 'Tenerife', 'Zapayán', 'Zona Bananera'],
+            'META': ['Villavicencio', 'Acacías', 'Barranca de Upía', 'Cabuyaro', 'Castilla La Nueva', 'Cubarral', 'Cumaral', 'El Calvario', 'El Castillo', 'El Dorado', 'Fuente de Oro', 'Granada', 'Guamal', 'La Macarena', 'La Uribe', 'Lejanías', 'Mapiripán', 'Mesetas', 'Puerto Concordia', 'Puerto Gaitán', 'Puerto López', 'Puerto Lleras', 'Puerto Rico', 'Puerto Yuaco', 'Restrepo', 'San Carlos de Guaroa', 'San Juan de Arama', 'San Juanito', 'San Martín', 'Vistahermosa'],
+            'NARIÑO': ['Pasto', 'Albán', 'Aldana', 'Ancuyá', 'Arboleda', 'Barbacoas', 'Belén', 'Buesaco', 'Chachagüí', 'Colón', 'Consacá', 'Contadero', 'Córdoba', 'Cuaspud', 'Cumbal', 'Cumbitara', 'El Charco', 'El Peñol', 'El Rosario', 'El Tablón', 'El Tambo', 'Francisco Pizarro', 'Funes', 'Guachucal', 'Guaitarilla', 'Gualmatán', 'Iles', 'Imués', 'Ipiales', 'La Cruz', 'La Florida', 'La Llanada', 'La Tola', 'La Unión', 'Leiva', 'Linares', 'Los Andes', 'Magüí', 'Mallama', 'Mosquera', 'Mueses', 'Nariño', 'Olaya Herrera', 'Ospina', 'Policarpa', 'Potosí', 'Providencia', 'Puerres', 'Pupiales', 'Ricaurte', 'Samaniego', 'Sandoná', 'San Bernardo', 'San José de Albán', 'San Lorenzo', 'San Pablo', 'San Pedro de Cartago', 'Sapuyes', 'Taminango', 'Tangua', 'Tumaco', 'Túquerres', 'Yacuanquer'],
+            'NORTE DE SANTANDER': ['Cúcuta', 'Abrego', 'Arboledas', 'Bochalema', 'Bucarasica', 'Cáchira', 'Cágota', 'Chinácota', 'Chitagá', 'Convención', 'Cucutilla', 'Durania', 'El Carmen', 'El Tarra', 'El Zulia', 'Gramalote', 'Hacarí', 'Herrán', 'La Esperanza', 'La Playa', 'Labateca', 'Los Patios', 'Lourdes', 'Mutiscua', 'Ocaña', 'Pamplona', 'Pamplonita', 'Puerto Santander', 'Ragonvalia', 'Salazar', 'San Calixto', 'San Cayetano', 'Santiago', 'Sardinata', 'Silos', 'Teorama', 'Teófilo Forero', 'Toledo', 'Tibú', 'Toledo', 'Villa Caro', 'Villa del Rosario'],
+            'PUTUMAYO': ['Mocoa', 'Colón', 'Orito', 'Puerto Asís', 'Puerto Caicedo', 'Puerto Guzmán', 'Puerto Leguízamo', 'San Francisco', 'San Miguel', 'Santiago', 'Sibundoy', 'Valle del Guamuez', 'Villagarzón'],
+            'QUINDÍO': ['Armenia', 'Buenavista', 'Calarcá', 'Circasia', 'Filandia', 'Genova', 'La Tebaida', 'Montenegro', 'Pijao', 'Quimbaya', 'Salento'],
+            'RISARALDA': ['Pereira', 'Apía', 'Balboa', 'Belén de Umbría', 'Dosquebradas', 'Guática', 'Guática', 'La Celia', 'La Virginia', 'Marsella', 'Mistrató', 'Pereira', 'Pueblo Rico', 'Quinchía', 'Santa Rosa de Cabal', 'Santuario'],
+            'SAN ANDRÉS': ['San Andrés', 'Providencia', 'Santa Catalina'],
+            'SANTANDER': ['Bucaramanga', 'Aguada', 'Albania', 'Aratoca', 'Barbosa', 'Barichara', 'Barrancabermeja', 'Betulia', 'Bolívar', 'Cabrera', 'California', 'Capitanejo', 'Carcasí', 'Cepitá', 'Cerrito', 'Charalá', 'Charta', 'Chima', 'Chipatá', 'Cimitarra', 'Concepción', 'Confines', 'Contratación', 'Coromoro', 'Curití', 'El Carmen de Chucurí', 'El Guacamayo', 'El Peñón', 'El Playón', 'Encino', 'Enciso', 'Florián', 'Floridablanca', 'Galán', 'Gambita', 'Girón', 'Guaca', 'Guadalupe', 'Guapotá', 'Guavatá', 'Hato', 'Jesús María', 'Jordán', 'La Belleza', 'Landázuri', 'Lebrija', 'Los Santos', 'Macaravita', 'Málaga', 'Matanza', 'Mogotes', 'Molagavita', 'Ocamonte', 'Oiba', 'Onzaga', 'Palmas del Socorro', 'Páramo', 'Piedecuesta', 'Pinchote', 'Puente Nacional', 'Puerto Parra', 'Puerto Wilches', 'Rionegro', 'Sabana de Torres', 'San Andrés', 'San Benito', 'San Gil', 'San Joaquín', 'San José de Miranda', 'San Miguel', 'San Vicente de Chucurí', 'Santa Bárbara', 'Santa Helena del Opón', 'Simacota', 'Socorro', 'Suaita', 'Sucre', 'Suratá', 'Tona', 'Valle de San José', 'Vélez', 'Vetas', 'Villanueva', 'Zapatoca'],
+            'SUCRE': ['Sincelejo', 'Buenavista', 'Caimito', 'Chalán', 'Colomá', 'Corozal', 'Coveñas', 'El Roble', 'Galeras', 'Guaranda', 'La Unión', 'Los Palmitos', 'Majagual', 'Morroa', 'Ovejas', 'Palmitos', 'Sampués', 'San Benito Abad', 'San Juan de Betulia', 'San Luis de Since', 'San Marcos', 'San Onofre', 'San Pedro', 'Sincé', 'Sucre', 'Tolú', 'Tolú Viejo'],
+            'TOLIMA': ['Ibagué', 'Alpujarra', 'Alvarado', 'Ambalema', 'Anzoátegui', 'Armero', 'Ataco', 'Cajamarca', 'Carmen de Apicalá', 'Casabianca', 'Chaparral', 'Coello', 'Coyaima', 'Cunday', 'Dolores', 'Espinal', 'Falan', 'Flandes', 'Fresno', 'Guamo', 'Herveo', 'Honda', 'Icononzo', 'Líbano', 'Mariquita', 'Melgar', 'Murillo', 'Natagaima', 'Ortega', 'Palocabido', 'Piedras', 'Pierre', 'Planadas', 'Prado', 'Purificación', 'Rioblanco', 'Roncesvalles', 'Rovira', 'Saldaña', 'San Antonio', 'San Luis', 'Santa Isabel', 'Suárez', 'Valle de San Juan', 'Venadillo', 'Villahermosa', 'Villarrica'],
+            'VALLE DEL CAUCA': ['Cali', 'Alcalá', 'Andalucía', 'Ansermanuevo', 'Argelia', 'Bolívar', 'Buenaventura', 'Buga', 'Bugalagrande', 'Caicedonia', 'Calima', 'Candelaria', 'Cartago', 'Dagua', 'Darién', 'El Águila', 'El Cairo', 'El Cerrito', 'El Dovio', 'Florida', 'Guacarí', 'Ginebra', 'Jamundí', 'La Cumbre', 'La Unión', 'La Victoria', 'Obando', 'Palmira', 'Pradera', 'Restrepo', 'Riofrío', 'Roldanillo', 'San Pedro', 'Sevilla', 'Toro', 'Trujillo', 'Tuluá', 'Ulloa', 'Versalles', 'Vijes', 'Yotoco', 'Yumbo', 'Zarzal'],
+            'VAUPÉS': ['Mitú', 'Carurú', 'Pacoa', 'Taraira', 'Yavaraté'],
+            'VICHADA': ['Puerto Carreño', 'La Primavera', 'Santa Rosalía', 'Cumaribo'],
+        };
+
+        /* ═══════════════════════════════════════════
+           SESIÓN
+           ═══════════════════════════════════════════ */
+        const sesion = JSON.parse(localStorage.getItem('nexus_sesion'));
+        if (!sesion || !sesion.logueado) { window.location.href = 'index.html'; }
+        else {
+            document.getElementById('userName').textContent = sesion.nombre;
+            document.getElementById('userRole').textContent = sesion.rol.toUpperCase();
+            document.getElementById('userAvatar').textContent = sesion.nombre.charAt(0);
+        }
+
+        /* ═══════════════════════════════════════════
+           INICIALIZACIÓN
+           ═══════════════════════════════════════════ */
+        document.addEventListener('DOMContentLoaded', () => {
+            generarNumeroAdmision();
+            cargarMedicos();
+            cargarDepartamentos();
+            cargarTabla();
+            actualizarEstadisticas();
+            const ahora = new Date();
+            document.getElementById('fechaIngreso').value = ahora.toISOString().slice(0, 16);
+            // Calcular edad cuando cambie la fecha de ingreso también
+            document.getElementById('fechaIngreso').addEventListener('input', calcularEdad);
+            document.getElementById('fechaIngreso').addEventListener('change', calcularEdad);
+        });
+
+        /* ═══════════════════════════════════════════
+           NÚMERO DE ADMISIÓN
+           ═══════════════════════════════════════════ */
+        function generarNumeroAdmision() {
+            let contador = parseInt(localStorage.getItem(STORAGE_COUNTER)) || 0;
+            contador++;
+            const anio = new Date().getFullYear();
+            const num = String(contador).padStart(4, '0');
+            document.getElementById('numAdmision').value = `ADM-${anio}-${num}`;
+        }
+
+        /* ═══════════════════════════════════════════
+           CARGAR MÉDICOS DESDE CONFIGURACIÓN
+           ═══════════════════════════════════════════ */
+        function cargarMedicos() {
+            const medicos = window.NXROLES ? NXROLES.medicos() : [];
+            const selectForm = document.getElementById('medico');
+            const selectEdit = document.getElementById('editMedico');
+            // Limpiar opciones excepto la primera
+            selectForm.innerHTML = '<option value="">...</option>';
+            selectEdit.innerHTML = '<option value="">...</option>';
+            if (medicos.length === 0) {
+                selectForm.innerHTML += '<option value="" disabled>Sin médicos configurados</option>';
+                selectEdit.innerHTML += '<option value="" disabled>Sin médicos configurados</option>';
+            } else {
+                medicos.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.nombre || m.usuario || '';
+                    opt.textContent = NXROLES.etiquetaPersona(m);
+                    selectForm.appendChild(opt);
+                    selectEdit.appendChild(opt.cloneNode(true));
+                });
+            }
+        }
+
+        /* ═══════════════════════════════════════════
+           CARGAR DEPARTAMENTOS
+           ═══════════════════════════════════════════ */
+        function cargarDepartamentos() {
+            const deps = Object.keys(COLOMBIA).sort();
+            const selectForm = document.getElementById('departamento');
+            const selectEdit = document.getElementById('editDepartamento');
+            selectForm.innerHTML = '<option value="">...</option>';
+            selectEdit.innerHTML = '<option value="">...</option>';
+            deps.forEach(d => {
+                const opt = `<option value="${d}">${d}</option>`;
+                selectForm.innerHTML += opt;
+                selectEdit.innerHTML += opt;
+            });
+        }
+
+        /* ═══════════════════════════════════════════
+           CASCADA DEPARTAMENTO → MUNICIPIO
+           ═══════════════════════════════════════════ */
+        function cargarMunicipios() {
+            const depto = document.getElementById('departamento').value;
+            const selectMun = document.getElementById('municipio');
+            selectMun.innerHTML = '<option value="">...</option>';
+            if (depto && COLOMBIA[depto]) {
+                COLOMBIA[depto].sort().forEach(m => {
+                    selectMun.innerHTML += `<option value="${m}">${m}</option>`;
+                });
+            } else {
+                selectMun.innerHTML = '<option value="">Seleccione departamento primero</option>';
+            }
+        }
+
+        function cargarMunicipiosEdicion() {
+            const depto = document.getElementById('editDepartamento').value;
+            const selectMun = document.getElementById('editMunicipio');
+            selectMun.innerHTML = '<option value="">...</option>';
+            if (depto && COLOMBIA[depto]) {
+                COLOMBIA[depto].sort().forEach(m => {
+                    selectMun.innerHTML += `<option value="${m}">${m}</option>`;
+                });
+            }
+        }
+
+        /* ═══════════════════════════════════════════
+           CÁLCULO DE EDAD
+           (desde fecha nacimiento hasta fecha ingreso)
+           ═══════════════════════════════════════════ */
+        function calcularEdad() {
+            const fnStr = document.getElementById('fechaNacimiento').value;
+            const fiStr = document.getElementById('fechaIngreso').value;
+            if (!fnStr || !fiStr) {
+                document.getElementById('edad').value = '';
+                return;
+            }
+            const fn = new Date(fnStr);
+            const fi = new Date(fiStr);
+            if (isNaN(fn.getTime()) || isNaN(fi.getTime())) {
+                document.getElementById('edad').value = '';
+                return;
+            }
+            let years = fi.getFullYear() - fn.getFullYear();
+            const monthDiff = fi.getMonth() - fn.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && fi.getDate() < fn.getDate())) {
+                years--;
+            }
+            if (years < 0) years = 0;
+            const months = fi.getMonth() - fn.getMonth() + (fi.getDate() < fn.getDate() ? -1 : 0);
+            const mesesAjustados = months < 0 ? months + 12 : months;
+            if (years === 0 && mesesAjustados > 0) {
+                document.getElementById('edad').value = `${mesesAjustados} mes(es)`;
+            } else if (years === 0 && mesesAjustados === 0) {
+                const dias = Math.floor((fi - fn) / (1000 * 60 * 60 * 24));
+                document.getElementById('edad').value = `${dias} día(s)`;
+            } else {
+                document.getElementById('edad').value = `${years} año(s)`;
+            }
+        }
+
+        function calcularEdadEdicion() {
+            const fnStr = document.getElementById('editFechaNacimiento').value;
+            if (!fnStr) { document.getElementById('editEdad').value = ''; return; }
+            const fn = new Date(fnStr);
+            const hoy = new Date();
+            let years = hoy.getFullYear() - fn.getFullYear();
+            const monthDiff = hoy.getMonth() - fn.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && hoy.getDate() < fn.getDate())) years--;
+            if (years < 0) years = 0;
+            document.getElementById('editEdad').value = `${years} año(s)`;
+        }
+
+        /* ═══════════════════════════════════════════
+           CIE-10 SEARCHABLE DROPDOWN
+           ═══════════════════════════════════════════ */
+        function abrirCIE10() {
+            const dropdown = document.getElementById('cie10Dropdown');
+            renderCIE10List(CIE10);
+            dropdown.classList.add('open');
+        }
+
+        function filtrarCIE10() {
+            const term = document.getElementById('diagnostico').value.toLowerCase().trim();
+            const dropdown = document.getElementById('cie10Dropdown');
+            if (!term) { renderCIE10List(CIE10); dropdown.classList.add('open'); return; }
+            const filtered = CIE10.filter(c => c.code.toLowerCase().includes(term) || c.desc.toLowerCase().includes(term));
+            renderCIE10List(filtered);
+            dropdown.classList.add('open');
+        }
+
+        function renderCIE10List(lista) {
+            const dropdown = document.getElementById('cie10Dropdown');
+            if (lista.length === 0) {
+                dropdown.innerHTML = '<div class="no-results">Sin resultados</div>';
+                return;
+            }
+            dropdown.innerHTML = lista.map(c =>
+                `<div class="dropdown-item" onclick="seleccionarCIE10('${c.code}', '${c.desc.replace(/'/g, "\\'")}')">` +
+                `<span class="code">${c.code}</span><span class="desc">${c.desc}</span></div>`
+            ).join('');
+        }
+
+        function seleccionarCIE10(code, desc) {
+            document.getElementById('diagnostico').value = `${code} – ${desc}`;
+            document.getElementById('diagnosticoCodigo').value = code;
+            document.getElementById('cie10Dropdown').classList.remove('open');
+        }
+
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', e => {
+            const container = document.getElementById('cie10Container');
+            if (container && !container.contains(e.target)) {
+                document.getElementById('cie10Dropdown').classList.remove('open');
+            }
+        });
+
+        /* ═══════════════════════════════════════════
+           CRUD – PACIENTES / ADMISIONES
+           ═══════════════════════════════════════════ */
+        function obtenerPacientes() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+        function guardarPacientes(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+
+        function registrarAdmision() {
+            const numAdmision = document.getElementById('numAdmision').value.trim();
+            const fechaIngreso = document.getElementById('fechaIngreso').value;
+            const tipoDoc = document.getElementById('tipoDoc').value;
+            const documento = document.getElementById('documento').value.trim();
+            const nombre = document.getElementById('nombre').value.trim();
+            const fechaNacimiento = document.getElementById('fechaNacimiento').value;
+            const edad = document.getElementById('edad').value;
+            const genero = document.getElementById('genero').value;
+            const servicio = document.getElementById('servicio').value;
+            const medico = document.getElementById('medico').value;
+            const diagnostico = document.getElementById('diagnostico').value.trim();
+            const diagnosticoCodigo = document.getElementById('diagnosticoCodigo').value;
+            const estado = document.getElementById('estado').value;
+            const habitacion = document.getElementById('habitacion').value.trim();
+            const observaciones = document.getElementById('observaciones').value.trim();
+            // Dirección
+            const direccion = document.getElementById('direccion').value.trim();
+            const barrio = document.getElementById('barrio').value.trim();
+            const departamento = document.getElementById('departamento').value;
+            const municipio = document.getElementById('municipio').value;
+            const telefono = document.getElementById('telefono').value.trim();
+            // Familiar
+            const familiarNombre = document.getElementById('familiarNombre').value.trim();
+            const familiarTelefono = document.getElementById('familiarTelefono').value.trim();
+            const familiarParentesco = document.getElementById('familiarParentesco').value;
+            const eps = document.getElementById('eps').value;
+
+            // Validaciones
+            if (!fechaIngreso) { mostrarToast('Ingrese la fecha de ingreso', 'error'); return; }
+            if (!tipoDoc) { mostrarToast('Seleccione el tipo de documento', 'error'); return; }
+            if (!documento) { mostrarToast('Ingrese el documento', 'error'); return; }
+            if (!nombre) { mostrarToast('Ingrese el nombre', 'error'); return; }
+            if (!fechaNacimiento) { mostrarToast('Ingrese la fecha de nacimiento', 'error'); return; }
+            if (!genero) { mostrarToast('Seleccione el género', 'error'); return; }
+            if (!servicio) { mostrarToast('Seleccione el servicio', 'error'); return; }
+            if (!medico) { mostrarToast('Seleccione el médico responsable', 'error'); return; }
+            if (!diagnostico) { mostrarToast('Seleccione el diagnóstico', 'error'); return; }
+            if (!eps) { mostrarToast('Seleccione la EPS', 'error'); return; }
+            if (!estado) { mostrarToast('Seleccione el estado', 'error'); return; }
+            if (!departamento) { mostrarToast('Seleccione el departamento', 'error'); return; }
+            if (!municipio) { mostrarToast('Seleccione el municipio', 'error'); return; }
+
+            const pacientes = obtenerPacientes();
+            const duplicado = pacientes.find(p => p.documento === documento && p.estado !== 'Egresado');
+            if (duplicado) { mostrarToast('Ya existe un paciente activo con ese documento', 'error'); return; }
+
+            const nuevoPaciente = {
+                id: Date.now(), numAdmision, fechaIngreso, fechaSalida: '',
+                tipoDoc, documento, nombre, fechaNacimiento, edad, genero, servicio,
+                medico, diagnostico, diagnosticoCodigo, eps, estado, habitacion, observaciones,
+                direccion, barrio, departamento, municipio, telefono,
+                familiarNombre, familiarTelefono, familiarParentesco,
+                fechaRegistro: new Date().toISOString()
+            };
+
+            pacientes.push(nuevoPaciente);
+            guardarPacientes(pacientes);
+
+            let contador = parseInt(localStorage.getItem(STORAGE_COUNTER)) || 0;
+            contador++;
+            localStorage.setItem(STORAGE_COUNTER, contador);
+
+            mostrarToast(`Admisión ${numAdmision} registrada`, 'success');
+            cargarTabla();
+            actualizarEstadisticas();
+            limpiarFormulario();
+            generarNumeroAdmision();
+            document.getElementById('fechaIngreso').value = new Date().toISOString().slice(0, 16);
+        }
+
+        function cargarTabla(lista = null) {
+            const tbody = document.getElementById('tablaAdmisiones');
+            const emptyState = document.getElementById('emptyState');
+            const pacientes = lista || obtenerPacientes().filter(p => p.estado !== 'Egresado');
+            tbody.innerHTML = '';
+            if (pacientes.length === 0) { emptyState.style.display = 'block'; return; }
+            emptyState.style.display = 'none';
+            pacientes.forEach(p => {
+                const tr = document.createElement('tr');
+                const fecha = new Date(p.fechaIngreso).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                let badgeClass = 'badge-activo';
+                if (p.estado === 'Observación') badgeClass = 'badge-observacion';
+                if (p.estado === 'Crítico') badgeClass = 'badge-critico';
+                const edadDisplay = p.edad || '—';
+                const medicoDisplay = p.medico || '—';
+                const diagDisplay = p.diagnostico || '—';
+                const epsDisplay = p.eps || '—';
+                // Mostrar código corto si es muy largo
+                const diagCorto = diagDisplay.length > 25 ? diagDisplay.substring(0, 25) + '…' : diagDisplay;
+                tr.innerHTML = `<td><strong>${p.numAdmision}</strong></td><td>${fecha}</td><td>${p.tipoDoc||'CC'}</td><td>${p.documento}</td><td>${p.nombre}</td><td>${epsDisplay}</td><td>${edadDisplay}</td><td>${p.servicio}</td><td>${medicoDisplay}</td><td title="${diagDisplay}">${diagCorto}</td><td>${p.habitacion || '—'}</td><td><span class="badge ${badgeClass}">${p.estado}</span></td><td><button class="btn-action btn-editar" onclick="editarPaciente(${p.id})"><i class=\"fas fa-pen\"></i></button><button class="btn-action btn-egresar" onclick="egresarPaciente(${p.id})"><i class=\"fas fa-hospital\"></i></button><button class="btn-action btn-eliminar" onclick="eliminarPaciente(${p.id})"><i class=\"fas fa-trash\"></i></button><button class="btn-action btn-certi" onclick="generarCertificadoPDF(${p.id})" title="Certificado PDF"><i class=\"fas fa-file-pdf\"></i></button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filtrarTabla() {
+            const termino = document.getElementById('busqueda').value.toLowerCase().trim();
+            const pacientes = obtenerPacientes().filter(p => p.estado !== 'Egresado');
+            if (!termino) { cargarTabla(); return; }
+            const filtrados = pacientes.filter(p =>
+                (p.nombre && p.nombre.toLowerCase().includes(termino)) ||
+                (p.documento && p.documento.toLowerCase().includes(termino)) ||
+                (p.diagnostico && p.diagnostico.toLowerCase().includes(termino)) ||
+                (p.numAdmision && p.numAdmision.toLowerCase().includes(termino)) ||
+                (p.servicio && p.servicio.toLowerCase().includes(termino)) ||
+                (p.medico && p.medico.toLowerCase().includes(termino)) ||
+                (p.eps && p.eps.toLowerCase().includes(termino))
+            );
+            cargarTabla(filtrados);
+        }
+
+        function actualizarEstadisticas() {
+            const pacientes = obtenerPacientes().filter(p => p.estado !== 'Egresado');
+            document.getElementById('totalAdmisiones').textContent = pacientes.length;
+            document.getElementById('totalActivos').textContent = pacientes.filter(p => p.estado === 'Activo').length;
+            document.getElementById('totalCriticos').textContent = pacientes.filter(p => p.estado === 'Crítico').length;
+        }
+
+        /* ═══════════════════════════════════════════
+           EDITAR
+           ═══════════════════════════════════════════ */
+        let idEditando = null;
+
+        function editarPaciente(id) {
+            const p = obtenerPacientes().find(p => p.id === id);
+            if (!p) return;
+            idEditando = id;
+            document.getElementById('editTipoDoc').value = p.tipoDoc || 'CC';
+            document.getElementById('editDocumento').value = p.documento || '';
+            document.getElementById('editNombre').value = p.nombre || '';
+            document.getElementById('editFechaNacimiento').value = p.fechaNacimiento || '';
+            calcularEdadEdicion();
+            document.getElementById('editGenero').value = p.genero || 'Masculino';
+            document.getElementById('editServicio').value = p.servicio || '';
+            // Médico
+            cargarMedicos(); // refresh
+            setTimeout(() => { document.getElementById('editMedico').value = p.medico || ''; }, 50);
+            document.getElementById('editDiagnostico').value = p.diagnostico || '';
+            document.getElementById('editEstado').value = p.estado || 'Activo';
+            document.getElementById('editHabitacion').value = p.habitacion || '';
+            document.getElementById('editObservaciones').value = p.observaciones || '';
+            // Dirección
+            document.getElementById('editDireccion').value = p.direccion || '';
+            document.getElementById('editBarrio').value = p.barrio || '';
+            // Departamento → Municipio
+            document.getElementById('editDepartamento').value = p.departamento || '';
+            cargarMunicipiosEdicion();
+            setTimeout(() => { document.getElementById('editMunicipio').value = p.municipio || ''; }, 50);
+            document.getElementById('editTelefono').value = p.telefono || '';
+            // Familiar
+            document.getElementById('editFamiliarNombre').value = p.familiarNombre || '';
+            document.getElementById('editFamiliarTelefono').value = p.familiarTelefono || '';
+            document.getElementById('editFamiliarParentesco').value = p.familiarParentesco || '';
+            document.getElementById('editEps').value = p.eps || '';
+
+            document.getElementById('modalEditar').classList.add('active');
+        }
+
+        function guardarEdicion() {
+            const pacientes = obtenerPacientes();
+            const idx = pacientes.findIndex(p => p.id === idEditando);
+            if (idx === -1) return;
+            pacientes[idx].tipoDoc = document.getElementById('editTipoDoc').value;
+            pacientes[idx].documento = document.getElementById('editDocumento').value.trim();
+            pacientes[idx].nombre = document.getElementById('editNombre').value.trim();
+            pacientes[idx].fechaNacimiento = document.getElementById('editFechaNacimiento').value;
+            pacientes[idx].edad = document.getElementById('editEdad').value;
+            pacientes[idx].genero = document.getElementById('editGenero').value;
+            pacientes[idx].servicio = document.getElementById('editServicio').value;
+            pacientes[idx].medico = document.getElementById('editMedico').value;
+            pacientes[idx].diagnostico = document.getElementById('editDiagnostico').value.trim();
+            pacientes[idx].estado = document.getElementById('editEstado').value;
+            pacientes[idx].habitacion = document.getElementById('editHabitacion').value.trim();
+            pacientes[idx].observaciones = document.getElementById('editObservaciones').value.trim();
+            pacientes[idx].direccion = document.getElementById('editDireccion').value.trim();
+            pacientes[idx].barrio = document.getElementById('editBarrio').value.trim();
+            pacientes[idx].departamento = document.getElementById('editDepartamento').value;
+            pacientes[idx].municipio = document.getElementById('editMunicipio').value;
+            pacientes[idx].telefono = document.getElementById('editTelefono').value.trim();
+            pacientes[idx].familiarNombre = document.getElementById('editFamiliarNombre').value.trim();
+            pacientes[idx].familiarTelefono = document.getElementById('editFamiliarTelefono').value.trim();
+            pacientes[idx].familiarParentesco = document.getElementById('editFamiliarParentesco').value;
+            pacientes[idx].eps = document.getElementById('editEps').value;
+            guardarPacientes(pacientes);
+            cerrarModal();
+            cargarTabla();
+            actualizarEstadisticas();
+            mostrarToast('Admisión actualizada', 'success');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalEditar').classList.remove('active');
+            idEditando = null;
+        }
+
+        /* ═══════════════════════════════════════════
+           EGRESAR / ELIMINAR
+           ═══════════════════════════════════════════ */
+        function egresarPaciente(id) {
+            const pacientes = obtenerPacientes();
+            const idx = pacientes.findIndex(p => p.id === id);
+            if (idx === -1) return;
+            if (!confirm(`¿Dar de alta a ${pacientes[idx].nombre}?`)) return;
+            pacientes[idx].estado = 'Egresado';
+            pacientes[idx].fechaSalida = new Date().toISOString();
+            guardarPacientes(pacientes);
+            cargarTabla(); actualizarEstadisticas();
+            mostrarToast(`${pacientes[idx].nombre} dado de alta`, 'success');
+        }
+
+        function eliminarPaciente(id) {
+            const pacientes = obtenerPacientes();
+            const p = pacientes.find(p => p.id === id);
+            if (!p) return;
+            if (!confirm(`¿Eliminar a ${p.nombre}?`)) return;
+            guardarPacientes(pacientes.filter(p => p.id !== id));
+            cargarTabla(); actualizarEstadisticas();
+            mostrarToast('Registro eliminado', 'info');
+        }
+
+        /* ═══════════════════════════════════════════
+           LIMPIAR FORMULARIO
+           ═══════════════════════════════════════════ */
+        function limpiarFormulario() {
+            ['tipoDoc','documento','nombre','fechaNacimiento','edad','medico','diagnostico','diagnosticoCodigo','habitacion','observaciones','direccion','barrio','telefono','familiarNombre','familiarTelefono'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            ['genero','servicio','estado','departamento','municipio','familiarParentesco','eps'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            // Reset municipio
+            document.getElementById('municipio').innerHTML = '<option value="">Seleccione departamento primero</option>';
+        }
+
+        /* ═══════════════════════════════════════════
+           UTILIDADES
+           ═══════════════════════════════════════════ */
+        function cerrarSesion() { localStorage.removeItem('nexus_sesion'); window.location.href = 'index.html'; }
+
+        function mostrarToast(mensaje, tipo = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${tipo}`;
+            toast.textContent = mensaje;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
+        document.getElementById('modalEditar').addEventListener('click', e => { if (e.target === document.getElementById('modalEditar')) cerrarModal(); });
+
+        /* ═══════════════════════════════════════════
+           CERTIFICADO PDF DE ATENCIÓN
+           ═══════════════════════════════════════════ */
+        function generarCertificadoPDF(id) {
+            let p;
+            if (id) {
+                p = obtenerPacientes().find(p => p.id === id);
+                if (!p) { mostrarToast('Paciente no encontrado', 'error'); return; }
+            } else {
+                // Generar desde formulario actual
+                const documento = document.getElementById('documento').value.trim();
+                const nombre = document.getElementById('nombre').value.trim();
+                if (!documento || !nombre) { mostrarToast('Complete documento y nombre para generar el certificado', 'error'); return; }
+                p = {
+                    numAdmision: document.getElementById('numAdmision').value.trim(),
+                    fechaIngreso: document.getElementById('fechaIngreso').value,
+                    documento,
+                    nombre,
+                    fechaNacimiento: document.getElementById('fechaNacimiento').value,
+                    edad: document.getElementById('edad').value,
+                    genero: document.getElementById('genero').value,
+                    eps: document.getElementById('eps').value,
+                    servicio: document.getElementById('servicio').value,
+                    medico: document.getElementById('medico').value,
+                    diagnostico: document.getElementById('diagnostico').value.trim(),
+                    estado: document.getElementById('estado').value,
+                    habitacion: document.getElementById('habitacion').value.trim(),
+                    observaciones: document.getElementById('observaciones').value.trim(),
+                    direccion: document.getElementById('direccion').value.trim(),
+                    barrio: document.getElementById('barrio').value.trim(),
+                    departamento: document.getElementById('departamento').value,
+                    municipio: document.getElementById('municipio').value,
+                    telefono: document.getElementById('telefono').value.trim(),
+                    familiarNombre: document.getElementById('familiarNombre').value.trim(),
+                    familiarTelefono: document.getElementById('familiarTelefono').value.trim(),
+                    familiarParentesco: document.getElementById('familiarParentesco').value
+                };
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+            const w = doc.internal.pageSize.getWidth();
+            const margin = 20;
+            const contentW = w - margin * 2;
+            let y = 15;
+
+            // ── Header con datos de la IPS ──
+            y = encabezadoIpsPDF(doc, 'Certificado de Atención Domiciliaria');
+            doc.setTextColor(0, 60, 90);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('CERTIFICADO DE ATENCIÓN', w / 2, y, { align: 'center' });
+            y += 8;
+
+            // Línea decorativa
+            doc.setDrawColor(0, 180, 216);
+            doc.setLineWidth(1);
+            doc.line(margin, y, w - margin, y);
+            y += 10;
+
+            // ── Datos de Admisión ──
+            doc.setTextColor(0, 80, 120);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Datos de Admisión', margin, y);
+            y += 2;
+            doc.setDrawColor(0, 100, 148);
+            doc.setLineWidth(0.4);
+            doc.line(margin, y, w - margin, y);
+            y += 6;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(40, 40, 40);
+            doc.setFontSize(9.5);
+
+            const addRow = (label, value) => {
+                doc.setFont('helvetica', 'bold');
+                doc.text(label, margin + 2, y);
+                doc.setFont('helvetica', 'normal');
+                const val = value || '—';
+                const labelW = doc.getTextWidth(label) + 4;
+                doc.text(val, margin + 2 + labelW, y);
+                y += 6;
+            };
+
+            addRow('Nº Admisión:', p.numAdmision);
+            const fechaIng = p.fechaIngreso ? new Date(p.fechaIngreso).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+            addRow('Fecha de Ingreso:', fechaIng);
+            addRow('Servicio:', p.servicio);
+            addRow('EPS:', p.eps);
+            addRow('Estado:', p.estado);
+
+            y += 4;
+            doc.setTextColor(0, 80, 120);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Datos del Paciente', margin, y);
+            y += 2;
+            doc.line(margin, y, w - margin, y);
+            y += 6;
+
+            doc.setTextColor(40, 40, 40);
+            doc.setFontSize(9.5);
+            addRow('Documento:', (p.tipoDoc||'CC') + ' ' + p.documento);
+            addRow('Nombre:', p.nombre);
+            addRow('Fecha Nacimiento:', p.fechaNacimiento ? new Date(p.fechaNacimiento + 'T00:00:00').toLocaleDateString('es-ES') : '—');
+            addRow('Edad:', (p.edad ? p.edad + ' años' : '—'));
+            addRow('Género:', p.genero);
+
+            // Dirección completa
+            let dirCompleta = p.direccion || '—';
+            if (p.barrio) dirCompleta += ', Barrio ' + p.barrio;
+            if (p.municipio) dirCompleta += ', ' + p.municipio;
+            if (p.departamento) dirCompleta += ' (' + p.departamento + ')';
+            addRow('Dirección:', dirCompleta);
+            addRow('Teléfono:', p.telefono);
+
+            y += 4;
+            doc.setTextColor(0, 80, 120);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Información Médica', margin, y);
+            y += 2;
+            doc.line(margin, y, w - margin, y);
+            y += 6;
+
+            doc.setTextColor(40, 40, 40);
+            doc.setFontSize(9.5);
+            addRow('Médico Responsable:', p.medico);
+            addRow('Diagnóstico (CIE-10):', p.diagnostico);
+            if (p.observaciones) {
+                doc.setFont('helvetica', 'bold');
+                doc.text('Observaciones:', margin + 2, y);
+                doc.setFont('helvetica', 'normal');
+                const lines = doc.splitTextToSize(p.observaciones, contentW - 50);
+                doc.text(lines, margin + 52, y);
+                y += lines.length * 5;
+            }
+
+            // Familiar responsable
+            y += 4;
+            doc.setTextColor(0, 80, 120);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Familiar Responsable', margin, y);
+            y += 2;
+            doc.line(margin, y, w - margin, y);
+            y += 6;
+
+            doc.setTextColor(40, 40, 40);
+            doc.setFontSize(9.5);
+            addRow('Nombre:', p.familiarNombre);
+            addRow('Teléfono:', p.familiarTelefono);
+            addRow('Parentesco:', p.familiarParentesco);
+
+            // ── Firma del Paciente ──
+            y += 12;
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.5);
+            const signX = margin + 60;
+            const signW = contentW - 60;
+            doc.line(signX, y, signX + signW, y);
+            y += 5;
+            doc.setTextColor(80, 80, 80);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Firma del Paciente / Representante', signX + signW / 2, y, { align: 'center' });
+            y += 10;
+
+            // Línea de firma médico
+            doc.line(signX, y, signX + signW, y);
+            y += 5;
+            doc.text('Firma del Médico Responsable', signX + signW / 2, y, { align: 'center' });
+
+            // ── Footer ──
+            const pageH = doc.internal.pageSize.getHeight();
+            doc.setFillColor(0, 100, 148);
+            doc.rect(0, pageH - 18, w, 18, 'F');
+            doc.setTextColor(200, 220, 240);
+            doc.setFontSize(7);
+            const ipsFoot = obtenerDatosIPS();
+            const partesFoot = [];
+            partesFoot.push(ipsFoot.nombre || 'NEXUSMED IPS Domiciliaria');
+            if (ipsFoot.nit) partesFoot.push('NIT: ' + ipsFoot.nit);
+            if (ipsFoot.codigo) partesFoot.push('Cód. Habilitación: ' + ipsFoot.codigo);
+            if (ipsFoot.telefono) partesFoot.push('Tel: ' + ipsFoot.telefono);
+            doc.text(partesFoot.join('  ·  '), w / 2, pageH - 12, { align: 'center' });
+            const dirFoot = [];
+            if (ipsFoot.direccion) dirFoot.push(ipsFoot.direccion);
+            if (ipsFoot.email) dirFoot.push(ipsFoot.email);
+            doc.text((dirFoot.length ? dirFoot.join('  ·  ') + '  ·  ' : '') + 'Certificado generado el ' + new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }), w / 2, pageH - 7.5, { align: 'center' });
+            doc.text('Documento de carácter informativo. Válido con firma del paciente y médico responsable.', w / 2, pageH - 3, { align: 'center' });
+
+            doc.save(`Certificado_NEXUSMED_${p.numAdmision || 'ADM'}.pdf`);
+            mostrarToast('Certificado PDF generado', 'success');
+        }
+    </script>
+
+    <!-- MATRIZ GLOBAL DE PERMISOS -->
+    <script>
+        (function () {
+            function aplicar() {
+                if (!window.NX) return;
+                NX.iniciar('admisiones', { C: ['registrarAdmision'], E: ['editarPaciente', 'guardarEdicion', 'egresarPaciente'], B: ['eliminarPaciente'] });
+                NX.filtrarNavegacion();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', aplicar);
+            } else { aplicar(); }
+        })();
+    
+/* ════════════════════════════════════════════════════════════
+   ENCABEZADO / PIE DE LA IPS PARA PDF (jsPDF)
+   ════════════════════════════════════════════════════════════ */
+function obtenerDatosIPS() {
+  try {
+    var h = JSON.parse(localStorage.getItem('nexus_hospital') || '{}');
+    return h && typeof h === 'object' ? h : {};
+  } catch (e) { return {}; }
+}
+
+/* Dibuja la banda superior con logo y datos de la IPS. Devuelve la Y siguiente. */
+function encabezadoIpsPDF(doc, subtitulo) {
+  var h = obtenerDatosIPS();
+  var w = doc.internal.pageSize.getWidth();
+  var altura = 42;
+  var margin = 20;
+
+  doc.setFillColor(0, 100, 148);
+  doc.rect(0, 0, w, altura, 'F');
+
+  var xTexto = margin;
+  var centrado = true;
+
+  if (h.logo && String(h.logo).indexOf('data:image') === 0) {
+    try {
+      var props = doc.getImageProperties(h.logo);
+      var maxH = 22, maxW = 34;
+      var esc = Math.min(maxW / props.width, maxH / props.height);
+      var lw = props.width * esc, lh = props.height * esc;
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(margin - 4, (altura - lh) / 2 - 2, lw + 8, lh + 4, 2, 2, 'F');
+      doc.addImage(h.logo, 'JPEG', margin, (altura - lh) / 2, lw, lh);
+      xTexto = margin + lw + 10;
+      centrado = false;
+    } catch (e) { /* si el logo falla, se omite */ }
+  }
+
+  var nombre = h.nombre || 'NEXUSMED IPS Domiciliaria';
+  var lineas = [];
+  if (h.direccion) lineas.push(h.direccion);
+  var contacto = [];
+  if (h.telefono) contacto.push('Tel: ' + h.telefono);
+  if (h.email) contacto.push(h.email);
+  if (contacto.length) lineas.push(contacto.join('  ·  '));
+  var legal = [];
+  if (h.nit) legal.push('NIT: ' + h.nit);
+  if (h.codigo) legal.push('C\u00f3d. Habilitaci\u00f3n: ' + h.codigo);
+  if (legal.length) lineas.push(legal.join('  ·  '));
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(nombre.length > 42 ? 13 : 16);
+  var opt = centrado ? { align: 'center' } : {};
+  var xr = centrado ? w / 2 : xTexto;
+  var y = 13;
+  doc.text(nombre, xr, y, opt);
+  y += 5.5;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.8);
+  lineas.forEach(function (l) {
+    doc.text(doc.splitTextToSize(l, w - xTexto - margin)[0], xr, y, opt);
+    y += 4;
+  });
+  if (subtitulo) {
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text(subtitulo, xr, Math.min(y + 1.5, altura - 3), opt);
+  }
+  return altura + 10;
+}
+
+/* Pie de página con datos de la IPS */
+function pieIpsPDF(doc, yPos) {
+  var h = obtenerDatosIPS();
+  var w = doc.internal.pageSize.getWidth();
+  var partes = [];
+  if (h.nombre) partes.push(h.nombre);
+  if (h.nit) partes.push('NIT: ' + h.nit);
+  if (h.codigo) partes.push('C\u00f3d. Habilitaci\u00f3n: ' + h.codigo);
+  if (h.telefono) partes.push('Tel: ' + h.telefono);
+  if (!partes.length) partes.push('NEXUSMED IPS Domiciliaria');
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(120, 120, 120);
+  doc.text(doc.splitTextToSize(partes.join('  ·  '), w - 30), w / 2, yPos, { align: 'center' });
+}
+
+</script>
+</body>
+</html>
