@@ -43,7 +43,7 @@
         .sidebar-item:hover { color: #90e0ef; background: rgba(0,180,216,0.06); }
         .sidebar-item.active { color: #00b4d8; background: rgba(0,180,216,0.15); border-left-color: #00b4d8; font-weight: 700; }
         .sidebar-item i { width: 18px; text-align: center; font-size: 14px; }
-        .config-content { flex: 1; background: rgba(13,33,55,0.4); border-radius: 0; padding: 25px; overflow-y: auto; max-height: calc(100vh - 200px); }
+        .config-content { flex: 1; min-width: 0; background: rgba(13,33,55,0.4); border-radius: 0; padding: 25px; overflow-y: auto; overflow-x: auto; max-height: calc(100vh - 200px); }
         .config-panel { display: none; animation: fadeInPanel .3s ease; }
         .config-panel.active { display: block; }
         @keyframes fadeInPanel { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -256,8 +256,8 @@
                     <div class="form-group"><label><i class="fas fa-id-card"></i> Número de Documento</label><input type="text" id="newDocumento" placeholder="C.C. 1010101010" maxlength="20"></div>
                     <div class="form-group full"><label><i class="fas fa-user"></i> Nombre Completo del Profesional</label><input type="text" id="newNombre" placeholder="Nombre y apellidos"></div>
                     <div class="form-group"><label><i class="fas fa-lock"></i> Contraseña</label><input type="password" id="newPassword" placeholder="Contraseña"></div>
-                    <div class="form-group"><label><i class="fas fa-user-tag"></i> Rol</label><select id="newRol" onchange="mostrarResumenRol(); if(this.value){document.getElementById('newEspecialidad').focus();}"></select></div>
-                    <div class="form-group"><label><i class="fas fa-stethoscope"></i> Especialidad / Área</label><select id="newEspecialidad"><option value="">Seleccione especialidad...</option><option value="General">General</option><option value="Fisioterapeuta">Fisioterapeuta</option><option value="Fonoaudiólogo">Fonoaudiólogo</option><option value="Terapeuta Ocupacional">Terapeuta Ocupacional</option><option value="Terapeuta Respiratorio">Terapeuta Respiratorio</option><option value="Psicólogo">Psicólogo</option><option value="Medicina Interna">Medicina Interna</option><option value="Pediatría">Pediatría</option><option value="Ginecología">Ginecología</option><option value="Cirugía General">Cirugía General</option><option value="Ortopedia">Ortopedia</option><option value="Auxiliar de Enfermería">Auxiliar de Enfermería</option><option value="Enfermería Jefe">Enfermería Jefe</option></select></div>
+                    <div class="form-group"><label><i class="fas fa-user-tag"></i> Rol</label><select id="newRol" onchange="mostrarResumenRol()"></select></div>
+                    <div class="form-group"><label><i class="fas fa-stethoscope"></i> Especialidad / Área</label><input type="text" id="newEspecialidad" placeholder="Ej: Fisioterapia, Cardiología"></div>
                     <div class="form-group"><label><i class="fas fa-certificate"></i> Registro Profesional</label><input type="text" id="newRegistro" placeholder="Ej: RM-12345"></div>
 
                     <div class="firma-box" id="firmaBox">
@@ -286,7 +286,7 @@
                 </div>
             </div>
 
-            </div></div><!-- /panel-usuarios -->
+            </div><!-- /panel-usuarios -->
             <div class="config-panel" id="panel-ips">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-hospital"></i> Información de la IPS</div>
@@ -325,7 +325,7 @@
             </div>
 
             
-            </div></div><!-- /panel-ips -->
+            </div><!-- /panel-ips -->
             <div class="config-panel" id="panel-cups">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-clipboard-list"></i> Catálogo de Servicios (CUPS) <span class="hint">Código · Nombre · Tipo · Ámbito · Valor por EPS</span></div>
@@ -356,7 +356,7 @@
                 </div>
             </div>
 
-            </div></div><!-- /panel-cups -->
+            </div><!-- /panel-cups -->
             <div class="config-panel" id="panel-eps">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-hospital-alt"></i> Gestión de EPS / Entidades Pagadoras <span class="hint">Código · Nombre · Régimen · Contacto</span></div>
@@ -381,7 +381,7 @@
                 </div>
             </div>
 
-            </div></div><!-- /panel-eps -->
+            </div><!-- /panel-eps -->
             <div class="config-panel" id="panel-matriz">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-table-cells-large"></i> Matriz Global Definitiva de Permisos <span class="hint">Haga clic en cada letra para activar o desactivar el permiso</span></div>
@@ -410,7 +410,7 @@
                 </div>
             </div>
 
-            </div></div><!-- /panel-matriz -->
+            </div><!-- /panel-matriz -->
             <div class="config-panel" id="panel-prueba">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-flask"></i> Datos de Prueba</div>
@@ -420,7 +420,7 @@
                 </div>
             </div>
 
-            </div></div><!-- /panel-prueba -->
+            </div><!-- /panel-prueba -->
             <div class="config-panel" id="panel-mante">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-screwdriver-wrench"></i> Mantenimiento</div>
@@ -443,7 +443,7 @@
                 <div class="form-group full"><label>Nombre Completo</label><input type="text" id="editNombre"></div>
                 <div class="form-group"><label>Nueva Contraseña</label><input type="password" id="editPassword" placeholder="Dejar vacío si no cambia"></div>
                 <div class="form-group"><label>Rol</label><select id="editRol"></select></div>
-                <div class="form-group"><label>Especialidad / Área</label><select id="editEspecialidad"><option value="">Seleccione especialidad...</option><option value="General">General</option><option value="Fisioterapeuta">Fisioterapeuta</option><option value="Fonoaudiólogo">Fonoaudiólogo</option><option value="Terapeuta Ocupacional">Terapeuta Ocupacional</option><option value="Terapeuta Respiratorio">Terapeuta Respiratorio</option><option value="Psicólogo">Psicólogo</option><option value="Medicina Interna">Medicina Interna</option><option value="Pediatría">Pediatría</option><option value="Ginecología">Ginecología</option><option value="Cirugía General">Cirugía General</option><option value="Ortopedia">Ortopedia</option><option value="Auxiliar de Enfermería">Auxiliar de Enfermería</option><option value="Enfermería Jefe">Enfermería Jefe</option></select></div>
+                <div class="form-group"><label>Especialidad / Área</label><input type="text" id="editEspecialidad"></div>
                 <div class="form-group"><label>Registro Profesional</label><input type="text" id="editRegistro"></div>
                 <div class="firma-box">
                     <div class="firma-head">
@@ -803,17 +803,7 @@
             document.getElementById('editNombre').value = u.nombre || '';
             document.getElementById('editPassword').value = '';
             document.getElementById('editRol').value = normalizarRol(u.rol);
-            (function(){
-                const selEsp = document.getElementById('editEspecialidad');
-                const val = u.especialidad || '';
-                // Si la especialidad guardada no existe en la lista, se agrega para no perderla
-                if (val && ![].slice.call(selEsp.options).some(o => o.value === val)) {
-                    const opt = document.createElement('option');
-                    opt.value = val; opt.textContent = val + ' (personalizada)';
-                    selEsp.appendChild(opt);
-                }
-                selEsp.value = val;
-            })();
+            document.getElementById('editEspecialidad').value = u.especialidad || '';
             document.getElementById('editRegistro').value = u.registro || '';
             firmaEdicion = u.firma || '';
             pintarFirma('editFirmaPreview', firmaEdicion);
