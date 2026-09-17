@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUSMED - Configuración</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #0a1628; color: #e0e0e0; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #0d2137, #1a3a5c); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00b4d8; box-shadow: 0 2px 15px rgba(0, 180, 216, 0.2); }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .brand-icon { width: 32px; height: 32px; }
+        .brand-icon svg { width: 100%; height: 100%; }
+        .brand-name { font-size: 24px; font-weight: 800; color: #00b4d8; letter-spacing: 3px; }
+        .brand-name span { color: #90e0ef; font-weight: 300; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-details { display:flex; flex-direction:column; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00b4d8, #0077b6); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; }
+        .user-name { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+        .user-role { font-size: 11px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 1px; }
+
+        
+        .btn-cerrar-sesion {
+            background:transparent; color:#ff3860; border:1px solid #ff3860;
+            padding:8px 16px; border-radius:8px; cursor:pointer;
+            font-size:12px; font-weight:600; transition:all .3s;
+        }
+        .btn-cerrar-sesion:hover { background:#ff3860; color:#fff; }
+.nav-bar { background: #0d2137; padding: 8px 30px; display: flex; gap: 5px; border-bottom: 1px solid #1a3a5c; flex-wrap: wrap; }
+        .nav-item { padding: 8px 16px; border-radius: 6px; font-size: 13px; color: #5a7a9a; cursor: pointer; transition: all 0.3s; text-decoration: none; display: flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; }
+        .nav-item:hover { color: #00b4d8; background-color: rgba(0, 180, 216, 0.1); }
+        .nav-item.active { color: #00b4d8; background-color: rgba(0, 180, 216, 0.15); border: 1px solid rgba(0, 180, 216, 0.3); }
+        .container { max-width: 1500px; margin: 25px auto; padding: 0 20px; }
+        .titulo { font-size: 24px; font-weight: 700; color: #00b4d8; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+        .subtitulo { font-size: 13px; color: #5a7a9a; margin-bottom: 22px; }
+
+        /* ── Sidebar + Panel Layout v2.7 ── */
+        .config-layout { display: flex; gap: 0; min-height: calc(100vh - 200px); border-radius: 14px; overflow: hidden; border: 1px solid #1a3a5c; }
+        .config-sidebar { width: 230px; min-width: 230px; background: #0d1f33; border-right: 1px solid #1a3a5c; padding: 10px 0; border-radius: 0; }
+        .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 13px 20px; cursor: pointer; color: #5a7a9a; font-size: 13px; font-weight: 600; transition: all .25s; border-left: 3px solid transparent; border-bottom: 1px solid rgba(26,58,92,.4); }
+        .sidebar-item:hover { color: #90e0ef; background: rgba(0,180,216,0.06); }
+        .sidebar-item.active { color: #00b4d8; background: rgba(0,180,216,0.15); border-left-color: #00b4d8; font-weight: 700; }
+        .sidebar-item i { width: 18px; text-align: center; font-size: 14px; }
+        .config-content { flex: 1; background: rgba(13,33,55,0.4); border-radius: 0; padding: 25px; overflow-y: auto; max-height: calc(100vh - 200px); }
+        .config-panel { display: none; animation: fadeInPanel .3s ease; }
+        .config-panel.active { display: block; }
+        @keyframes fadeInPanel { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .section-card { margin-bottom: 20px; }
+        @media (max-width: 900px) { .config-layout { flex-direction: column; border-radius: 0; } .config-sidebar { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid #1a3a5c; border-radius: 0; display: flex; flex-wrap: wrap; } .sidebar-item { padding: 10px 14px; font-size: 12px; border-left: none; border-bottom: none; } .config-content { border-radius: 0; } }
+        @media(max-width:768px){.header{flex-direction:column;gap:10px}.header-right{flex-wrap:wrap;justify-content:center}.nav-bar{padding:8px 10px;justify-content:center}.nav-item{padding:6px 10px;font-size:11px}}
+
+        .section-card { background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid #1a3a5c; border-radius: 14px; padding: 25px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+        /* .section-card.wide removed — panels handle full width */
+        .section-title { font-size: 16px; color: #90e0ef; margin-bottom: 15px; border-bottom: 1px solid #1a3a5c; padding-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .section-title .hint { font-size: 11px; color: #5a7a9a; font-weight: 400; margin-left: auto; text-transform: none; letter-spacing: 0; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-group label { font-size: 11px; color: #5a7a9a; margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
+        .form-group input, .form-group select { background-color: #0a1628; border: 1px solid #1a3a5c; color: #e0e0e0; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; transition: border-color 0.3s; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #00b4d8; box-shadow: 0 0 8px rgba(0, 180, 216, 0.3); }
+        .form-group input::placeholder { color: #3a5a7a; }
+        .form-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+        .btn-registrar { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700; transition: all 0.3s; font-family: 'Inter', sans-serif; }
+        .btn-registrar:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4); }
+        .btn-limpiar { background-color: transparent; color: #90e0ef; border: 1px solid #1a3a5c; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.3s; font-family: 'Inter', sans-serif; }
+        .btn-limpiar:hover { border-color: #00b4d8; color: #00b4d8; }
+        .btn-peligro { background-color: rgba(255, 56, 96, 0.2); color: #ff3860; border: 1px solid rgba(255, 56, 96, 0.4); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.3s; font-family: 'Inter', sans-serif; }
+        .btn-peligro:hover { background-color: #ff3860; color: #fff; }
+
+        /* Firma digital */
+        .firma-box { grid-column: 1 / -1; border: 2px dashed #1a3a5c; border-radius: 12px; padding: 14px; background-color: rgba(10, 22, 40, 0.6); transition: all 0.3s; }
+        .firma-box.drag { border-color: #00b4d8; background-color: rgba(0, 180, 216, 0.08); }
+        .firma-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .firma-head .lbl { font-size: 11px; color: #5a7a9a; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 6px; }
+        .btn-firma { background-color: rgba(0, 180, 216, 0.15); color: #00b4d8; border: 1px solid rgba(0, 180, 216, 0.4); padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.3s; }
+        .btn-firma:hover { background-color: #00b4d8; color: #0a1628; }
+        .firma-preview { height: 96px; border-radius: 10px; background: repeating-linear-gradient(45deg, #0a1628, #0a1628 10px, #0c1b30 10px, #0c1b30 20px); display: flex; align-items: center; justify-content: center; border: 1px solid #1a3a5c; overflow: hidden; }
+        .firma-preview img { max-height: 88px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 0 6px rgba(0,180,216,0.35)); background: #fff; padding: 4px; border-radius: 6px; }
+        .firma-empty { font-size: 12px; color: #3a5a7a; text-align: center; }
+        .firma-mini { height: 34px; max-width: 110px; object-fit: contain; background: #fff; border-radius: 4px; padding: 2px; cursor: pointer; border: 1px solid #1a3a5c; }
+        .firma-none { font-size: 11px; color: #5a7a9a; font-style: italic; }
+
+        /* Tabla usuarios */
+        .table-wrap { overflow-x: auto; margin-top: 15px; }
+        .user-table { width: 100%; border-collapse: collapse; min-width: 720px; }
+        .user-table th { padding: 9px 12px; text-align: left; font-size: 11px; color: #00b4d8; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #1a3a5c; font-weight: 700; white-space: nowrap; }
+        .user-table td { padding: 9px 12px; font-size: 13px; color: #c0c0c0; border-bottom: 1px solid #0d2137; vertical-align: middle; }
+        .user-table tr:hover td { background-color: #122a45; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+        .badge-admin { background-color: rgba(0, 180, 216, 0.18); color: #00b4d8; border: 1px solid #00b4d8; }
+        .badge-recepcion { background-color: rgba(184, 107, 255, 0.18); color: #b86bff; border: 1px solid #b86bff; }
+        .badge-medico_general { background-color: rgba(72, 199, 142, 0.18); color: #48c78e; border: 1px solid #48c78e; }
+        .badge-enfermeria { background-color: rgba(255, 183, 3, 0.18); color: #ffb700; border: 1px solid #ffb700; }
+        .badge-terapia { background-color: rgba(255, 126, 71, 0.18); color: #ff7e47; border: 1px solid #ff7e47; }
+        .badge-especialista { background-color: rgba(0, 245, 212, 0.18); color: #00f5d4; border: 1px solid #00f5d4; }
+        .btn-action { padding: 6px 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; transition: all 0.2s; margin: 0 2px; font-family: 'Inter', sans-serif; }
+        .btn-editar { background-color: rgba(0, 180, 216, 0.2); color: #00b4d8; border: 1px solid rgba(0, 180, 216, 0.4); }
+        .btn-editar:hover { background-color: #00b4d8; color: #0a1628; }
+        .btn-eliminar { background-color: rgba(255, 56, 96, 0.2); color: #ff3860; border: 1px solid rgba(255, 56, 96, 0.4); }
+        .btn-eliminar:hover { background-color: #ff3860; color: #fff; }
+        .btn-ver { background-color: rgba(144, 224, 239, 0.15); color: #90e0ef; border: 1px solid rgba(144, 224, 239, 0.35); }
+        .btn-ver:hover { background-color: #90e0ef; color: #0a1628; }
+
+        /* Resumen del rol seleccionado */
+        .rol-resumen { grid-column: 1 / -1; background-color: rgba(0, 180, 216, 0.06); border: 1px solid rgba(0, 180, 216, 0.25); border-radius: 10px; padding: 12px 14px; }
+        .rol-resumen h4 { font-size: 12px; color: #00b4d8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .rol-resumen .lista { display: flex; flex-wrap: wrap; gap: 6px; }
+        .rp { font-size: 11px; padding: 4px 9px; border-radius: 6px; border: 1px solid #1a3a5c; background-color: #0a1628; color: #90e0ef; }
+        .rp b { color: #e0e0e0; font-weight: 600; }
+        .rp.total { border-color: rgba(0,180,216,0.5); color: #00b4d8; }
+        .rp.ver { border-color: rgba(255,183,3,0.4); color: #ffb700; }
+        .rp.block { border-color: rgba(255,56,96,0.4); color: #ff3860; }
+
+        /* Matriz de permisos */
+        .matriz-wrap { overflow-x: auto; border: 1px solid #1a3a5c; border-radius: 12px; }
+        .matriz { width: 100%; border-collapse: collapse; min-width: 1080px; }
+        .matriz th, .matriz td { border-bottom: 1px solid #14304d; border-right: 1px solid #14304d; padding: 10px 12px; }
+        .matriz thead th { background-color: #0a1c30; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #90e0ef; font-weight: 700; text-align: center; position: sticky; top: 0; }
+        .matriz thead th.mod-col { text-align: left; min-width: 190px; color: #00b4d8; }
+        .matriz thead th .rol-num { display: block; font-size: 9px; color: #5a7a9a; letter-spacing: 1px; margin-bottom: 3px; }
+        .matriz thead th i { display: block; font-size: 15px; margin-bottom: 5px; }
+        .matriz tbody td.mod-name { font-size: 13px; color: #e0e0e0; font-weight: 600; background-color: rgba(10, 28, 48, 0.6); white-space: nowrap; }
+        .matriz tbody td.mod-name i { color: #00b4d8; margin-right: 8px; width: 16px; text-align: center; }
+        .matriz tbody tr:hover td { background-color: rgba(0, 180, 216, 0.05); }
+        .matriz td.cell { text-align: center; }
+        .matriz td.cell.blocked { background-color: rgba(255, 56, 96, 0.07); }
+        .matriz td.cell.full { background-color: rgba(0, 180, 216, 0.07); }
+        .chips { display: flex; gap: 4px; justify-content: center; margin-bottom: 6px; }
+        .chip { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; border: 1px solid #1a3a5c; background-color: #0a1628; color: #33506e; cursor: pointer; transition: all 0.2s; user-select: none; }
+        .chip:hover { transform: translateY(-2px); border-color: #00b4d8; }
+        .chip.on[data-p="C"] { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; border-color: #00b4d8; box-shadow: 0 2px 8px rgba(0,180,216,0.35); }
+        .chip.on[data-p="V"] { background: linear-gradient(135deg, #48c78e, #2f9c6d); color: #fff; border-color: #48c78e; box-shadow: 0 2px 8px rgba(72,199,142,0.3); }
+        .chip.on[data-p="E"] { background: linear-gradient(135deg, #ffb700, #e09a00); color: #1a1a1a; border-color: #ffb700; box-shadow: 0 2px 8px rgba(255,183,3,0.3); }
+        .chip.on[data-p="B"] { background: linear-gradient(135deg, #ff3860, #c9203f); color: #fff; border-color: #ff3860; box-shadow: 0 2px 8px rgba(255,56,96,0.3); }
+        .estado-cell { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; }
+        .estado-total { color: #00b4d8; }
+        .estado-cve { color: #48c78e; }
+        .estado-ver { color: #ffb700; }
+        .estado-block { color: #ff3860; }
+        .leyenda { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; }
+        .ley-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #90e0ef; background-color: rgba(10, 22, 40, 0.7); border: 1px solid #1a3a5c; padding: 7px 12px; border-radius: 8px; }
+        .ley-chip { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #fff; }
+        .roles-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 12px; margin-bottom: 18px; }
+        .rol-card { background-color: rgba(10, 22, 40, 0.75); border: 1px solid #1a3a5c; border-left-width: 4px; border-radius: 10px; padding: 12px 14px; }
+        .rol-card h5 { font-size: 13px; color: #e0e0e0; margin-bottom: 4px; display: flex; align-items: center; gap: 7px; }
+        .rol-card p { font-size: 11px; color: #5a7a9a; line-height: 1.5; }
+        .rol-card .cnt { font-size: 10px; color: #90e0ef; margin-top: 7px; display: block; }
+
+        /* Info card */
+        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #0d2137; font-size: 13px; }
+        .info-label { color: #5a7a9a; }
+        .info-value { color: #e0e0e0; font-weight: 600; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: linear-gradient(135deg, #0d2137, #1a3a5c); border: 1px solid #00b4d8; border-radius: 14px; padding: 25px; width: 100%; max-width: 520px; box-shadow: 0 10px 40px rgba(0, 180, 216, 0.3); max-height: 92vh; overflow-y: auto; }
+        .modal h3 { color: #00b4d8; margin-bottom: 15px; font-size: 18px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+        .modal-firma-big { text-align: center; }
+        .modal-firma-big img { max-width: 100%; background: #fff; border-radius: 10px; padding: 10px; }
+
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+        .toast { padding: 12px 20px; border-radius: 8px; font-size: 14px; animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
+        .toast-success { background: linear-gradient(135deg, #48c78e, #38a06d); color: #fff; }
+        .toast-error { background: linear-gradient(135deg, #ff3860, #d4234a); color: #fff; }
+        .toast-info { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        .aviso-bloqueo { display: none; max-width: 560px; margin: 80px auto; text-align: center; background: linear-gradient(135deg, #0d2137, #122a45); border: 1px solid rgba(255,56,96,0.5); border-radius: 16px; padding: 40px; }
+        .aviso-bloqueo i { font-size: 46px; color: #ff3860; margin-bottom: 16px; }
+        .aviso-bloqueo h3 { color: #ff3860; margin-bottom: 10px; }
+        .aviso-bloqueo p { color: #90e0ef; font-size: 14px; margin-bottom: 20px; }
+    </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="nexus_db.js"></script>
+    <script src="permisos.js"></script>
+</head>
+<body>
+        <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="brand-icon">
+                <svg viewBox="0 0 40 40" fill="none">
+                    <path d="M20 4 L20 36" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M20 10 L10 4" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M20 10 L30 4" stroke="#00b4d8" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="20" cy="36" r="3" fill="#00b4d8"/>
+                </svg>
+            </div>
+            <div class="brand-name">NEXUS<span>MED</span></div>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <div class="user-details">
+                    <span class="user-name" id="userName">Administrador</span>
+                    <span class="user-role" id="userRole">ADMIN</span>
+                </div>
+            </div>
+            <button class="btn-cerrar-sesion" onclick="cerrarSesion()">🔒 Cerrar Sesión</button>
+        </div>
+    </div>
+
+        <!-- BARRA DE NAVEGACIÓN -->
+    <nav class="nav-bar">
+        <a class="nav-item" href="menu.html"><i class="fas fa-home"></i> Inicio</a>
+        <a class="nav-item" href="citas.html"><i class="fas fa-calendar-check"></i> Citas</a>
+        <a class="nav-item" href="admisiones.html"><i class="fas fa-door-open"></i> Admisiones</a>
+        <a class="nav-item" href="egresados.html"><i class="fas fa-door-closed"></i> Egresos</a>
+        <a class="nav-item" href="historias_clinicas.html"><i class="fas fa-file-medical"></i> Historias Clínicas</a>
+        <a class="nav-item" href="evolucion.html"><i class="fas fa-notes-medical"></i> Evolución</a>
+        <a class="nav-item" href="notas_enfermeria.html"><i class="fas fa-user-nurse"></i> Notas Enf.</a>
+        <a class="nav-item" href="terapias.html"><i class="fas fa-hand-holding-medical"></i> Terapias</a>
+        <a class="nav-item" href="epicrisis.html"><i class="fas fa-file-alt"></i> Epicrisis</a>
+        <a class="nav-item" href="facturacion.html"><i class="fas fa-file-invoice-dollar"></i> Facturación</a>
+        <a class="nav-item" href="rips.html"><i class="fas fa-file-code"></i> RIPS JSON</a>
+        <a class="nav-item" href="gestion_documental.html"><i class="fas fa-folder-open"></i> Gestión Doc.</a>
+        <a class="nav-item" href="generador_evoluciones.html"><i class="fas fa-file-medical-alt"></i> Generador Evol.</a>
+        <a class="nav-item" href="reportes.html"><i class="fas fa-chart-bar"></i> Reportes</a>
+        <a class="nav-item active" href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a>
+    </nav>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="aviso-bloqueo" id="avisoBloqueo">
+        <i class="fas fa-lock"></i>
+        <h3>Acceso Restringido</h3>
+        <p>El módulo de <b>Configuración</b> está reservado exclusivamente para el rol <b>Administrador</b>, según la Matriz Global de Permisos.</p>
+    </div>
+
+    <div class="container" id="contenidoConfig">
+        <h2 class="titulo"><i class="fas fa-cog"></i> Configuración del Sistema</h2>
+        <p class="subtitulo">Gestión de usuarios profesionales, firmas digitales, roles y matriz global de permisos.</p>
+
+        <div class="config-layout">
+        <div class="config-sidebar">
+            <div class="sidebar-item active" data-panel="panel-usuarios"><i class="fas fa-user-shield"></i> <span>Gestión de Usuarios</span></div>
+            <div class="sidebar-item " data-panel="panel-ips"><i class="fas fa-hospital"></i> <span>Información de la IPS</span></div>
+            <div class="sidebar-item " data-panel="panel-cups"><i class="fas fa-clipboard-list"></i> <span>Catálogo CUPS</span></div>
+            <div class="sidebar-item " data-panel="panel-eps"><i class="fas fa-hospital-alt"></i> <span>Gestión de EPS</span></div>
+            <div class="sidebar-item " data-panel="panel-matriz"><i class="fas fa-table-cells-large"></i> <span>Matriz Global de Permisos</span></div>
+            <div class="sidebar-item " data-panel="panel-prueba"><i class="fas fa-flask"></i> <span>Datos de Prueba</span></div>
+            <div class="sidebar-item " data-panel="panel-mante"><i class="fas fa-screwdriver-wrench"></i> <span>Mantenimiento</span></div>
+        </div>
+        <div class="config-content">
+            <div class="config-panel active" id="panel-usuarios">
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-user-shield"></i> Gestión de Usuarios <span class="hint">Documento · Firma digital · Rol</span></div>
+                <div class="form-grid">
+                    <div class="form-group"><label><i class="fas fa-at"></i> Usuario</label><input type="text" id="newUsuario" placeholder="nombre_usuario"></div>
+                    <div class="form-group"><label><i class="fas fa-id-card"></i> Número de Documento</label><input type="text" id="newDocumento" placeholder="C.C. 1010101010" maxlength="20"></div>
+                    <div class="form-group full"><label><i class="fas fa-user"></i> Nombre Completo del Profesional</label><input type="text" id="newNombre" placeholder="Nombre y apellidos"></div>
+                    <div class="form-group"><label><i class="fas fa-lock"></i> Contraseña</label><input type="password" id="newPassword" placeholder="Contraseña"></div>
+                    <div class="form-group"><label><i class="fas fa-user-tag"></i> Rol</label><select id="newRol" onchange="mostrarResumenRol(); if(this.value){document.getElementById('newEspecialidad').focus();}"></select></div>
+                    <div class="form-group"><label><i class="fas fa-stethoscope"></i> Especialidad / Área</label><select id="newEspecialidad"><option value="">Seleccione especialidad...</option><option value="General">General</option><option value="Fisioterapeuta">Fisioterapeuta</option><option value="Fonoaudiólogo">Fonoaudiólogo</option><option value="Terapeuta Ocupacional">Terapeuta Ocupacional</option><option value="Terapeuta Respiratorio">Terapeuta Respiratorio</option><option value="Psicólogo">Psicólogo</option><option value="Medicina Interna">Medicina Interna</option><option value="Pediatría">Pediatría</option><option value="Ginecología">Ginecología</option><option value="Cirugía General">Cirugía General</option><option value="Ortopedia">Ortopedia</option><option value="Auxiliar de Enfermería">Auxiliar de Enfermería</option><option value="Enfermería Jefe">Enfermería Jefe</option></select></div>
+                    <div class="form-group"><label><i class="fas fa-certificate"></i> Registro Profesional</label><input type="text" id="newRegistro" placeholder="Ej: RM-12345"></div>
+
+                    <div class="firma-box" id="firmaBox">
+                        <div class="firma-head">
+                            <span class="lbl"><i class="fas fa-file-signature"></i> Firma Digital del Profesional</span>
+                            <div style="display:flex; gap:8px;">
+                                <button type="button" class="btn-firma" onclick="document.getElementById('newFirmaFile').click()"><i class="fas fa-cloud-arrow-up"></i> Subir foto de firma</button>
+                                <button type="button" class="btn-firma" onclick="quitarFirmaNueva()"><i class="fas fa-trash"></i> Quitar</button>
+                            </div>
+                        </div>
+                        <input type="file" id="newFirmaFile" accept="image/png, image/jpeg, image/jpg, image/webp" style="display:none">
+                        <div class="firma-preview" id="newFirmaPreview"><span class="firma-empty"><i class="fas fa-image"></i><br>Arrastre aquí la imagen de la firma o haga clic en “Subir foto de firma”<br>(PNG / JPG · fondo blanco recomendado)</span></div>
+                    </div>
+
+                    <div class="rol-resumen" id="rolResumen"></div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-registrar" onclick="agregarUsuario()"><i class="fas fa-user-plus"></i> Agregar Usuario</button>
+                    <button class="btn-limpiar" onclick="limpiarFormUsuario()"><i class="fas fa-broom"></i> Limpiar</button>
+                </div>
+                <div class="table-wrap">
+                    <table class="user-table">
+                        <thead><tr><th>Usuario</th><th>Documento</th><th>Nombre</th><th>Rol</th><th>Firma Digital</th><th>Acciones</th></tr></thead>
+                        <tbody id="tablaUsuarios"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            </div></div><!-- /panel-usuarios -->
+            <div class="config-panel" id="panel-ips">
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-hospital"></i> Información de la IPS</div>
+                <div class="form-grid">
+                    <div class="form-group full"><label>Nombre de la IPS</label><input type="text" id="hospitalNombre" placeholder="NEXUSMED IPS Domiciliaria"></div>
+                    <div class="form-group full"><label>Dirección</label><input type="text" id="hospitalDireccion" placeholder="Av. Principal #123"></div>
+                    <div class="form-group"><label>Teléfono</label><input type="text" id="hospitalTelefono" placeholder="+57 300 000 0000"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="hospitalEmail" placeholder="info@nexusmed.com"></div>
+                    <div class="form-group"><label>NIT</label><input type="text" id="hospitalNit" placeholder="900.000.000-0"></div>
+                    <div class="form-group"><label>Código Habilitación</label><input type="text" id="hospitalCodigo" placeholder="0000000000"></div>
+                    <div class="firma-box" id="logoBox">
+                        <div class="firma-head">
+                            <span class="lbl"><i class="fas fa-image"></i> Logo de la IPS</span>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <button type="button" class="btn-firma" onclick="document.getElementById('hospitalLogoFile').click()"><i class="fas fa-cloud-arrow-up"></i> Subir logo</button>
+                                <button type="button" class="btn-firma" onclick="quitarLogoIps()"><i class="fas fa-trash"></i> Quitar</button>
+                            </div>
+                        </div>
+                        <input type="file" id="hospitalLogoFile" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none">
+                        <div class="firma-preview" id="hospitalLogoPreview"></div>
+                        <p style="font-size:11px; color:#5a7a9a; margin:8px 0 0;">El logo y los datos de la IPS aparecerán en el encabezado de todos los PDF e impresiones del sistema.</p>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-registrar" onclick="guardarHospital()"><i class="fas fa-floppy-disk"></i> Guardar</button>
+                </div>
+                <div style="margin-top: 18px;">
+                    <div class="section-title" style="border: none; padding: 0; margin-bottom: 10px;"><i class="fas fa-chart-pie"></i> Estado del Sistema</div>
+                    <div class="info-row"><span class="info-label">Pacientes registrados</span><span class="info-value" id="infoPacientes">0</span></div>
+                    <div class="info-row"><span class="info-label">Citas programadas</span><span class="info-value" id="infoCitas">0</span></div>
+                    <div class="info-row"><span class="info-label">Usuarios del sistema</span><span class="info-value" id="infoUsuarios">0</span></div>
+                    <div class="info-row"><span class="info-label">Firmas digitales registradas</span><span class="info-value" id="infoFirmas">0</span></div>
+                    <div class="info-row"><span class="info-label">Almacenamiento usado</span><span class="info-value" id="infoStorage">0 KB</span></div>
+                    <div class="info-row" style="border: none;"><span class="info-label">Versión</span><span class="info-value">2.0.0</span></div>
+                </div>
+            </div>
+
+            
+            </div></div><!-- /panel-ips -->
+            <div class="config-panel" id="panel-cups">
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-clipboard-list"></i> Catálogo de Servicios (CUPS) <span class="hint">Código · Nombre · Tipo · Ámbito · Valor por EPS</span></div>
+                <div class="form-grid">
+                    <div class="form-group"><label><i class="fas fa-barcode"></i> Código CUPS</label><input type="text" id="cupCodigo" placeholder="Ej: 931001" maxlength="10"></div>
+                    <div class="form-group full"><label><i class="fas fa-stethoscope"></i> Nombre del Servicio</label><input type="text" id="cupNombre" placeholder="Ej: Fisioterapia Domiciliaria"></div>
+                    <div class="form-group"><label>Tipo RIPS</label><select id="cupTipo"><option value="consulta">Consulta</option><option value="procedimiento">Procedimiento</option><option value="otroServicio">Otro Servicio</option></select></div>
+                    <div class="form-group"><label>Ambito</label><select id="cupAmbito"><option value="domiciliario">Domiciliario</option><option value="intramural">Intramural</option><option value="hospitalario">Hospitalario</option></select></div>
+
+                    <div class="form-group"><label>Finalidad Tecnología</label><select id="cupFinalidad"><option value="01">01 - Diagnóstico</option><option value="02">02 - Terapéutico</option><option value="03">03 - Protección</option><option value="04" selected>04 - Rehabilitación</option><option value="05">05 - Prevención</option></select></div>
+                    <div class="form-group"><label>Grupo Servicios</label><select id="cupGrupo"><option value="01">01 - Promoción</option><option value="02">02 - Prevención</option><option value="03" selected>03 - Atención enfermedad</option></select></div>
+                    <div class="form-group"><label>Causa/Motivo Atención</label><select id="cupCausa"><option value="01">01 - Enfermedad general</option><option value="02" selected>02 - Otra</option><option value="03">03 - Accidente</option><option value="04">04 - Secuela</option><option value="13">13 - Enfermedad laboral</option></select></div>
+                </div>
+                <div id="cupValoresEps" style="margin-top:12px">
+                    <div class="section-title" style="border:none;padding:0;margin-bottom:8px;font-size:13px"><i class="fas fa-building"></i> Valores por EPS <span style="color:#ff3860;font-size:11px">• Obligatorio</span></div>
+                    <div class="form-grid" id="cupEpsGrid"></div>
+                    <p style="font-size:11px;color:#5a7a9a;margin-top:6px">Cada servicio DEBE tener un valor por EPS. Este es el valor del contrato con cada EPS y se usa al facturar. Si un EPS no aparece, agréguelo en <b>Gestión de EPS</b> debajo.</p>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-registrar" onclick="guardarServicioCups()"><i class="fas fa-save"></i> Guardar Servicio</button>
+                    <button class="btn-limpiar" onclick="limpiarFormCups()"><i class="fas fa-eraser"></i> Limpiar</button>
+                </div>
+                <div class="table-wrap" style="margin-top:16px">
+                    <table class="user-table" style="width:100%">
+                        <thead><tr><th>CUPS</th><th>Nombre</th><th>Tipo</th><th>Ambito</th><th>Valores por EPS</th><th>Activo</th><th>Acciones</th></tr></thead>
+                        <tbody id="tablaCups"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            </div></div><!-- /panel-cups -->
+            <div class="config-panel" id="panel-eps">
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-hospital-alt"></i> Gestión de EPS / Entidades Pagadoras <span class="hint">Código · Nombre · Régimen · Contacto</span></div>
+                <div class="form-grid">
+                    <div class="form-group"><label><i class="fas fa-hashtag"></i> Código EPS</label><input type="text" id="epsCodigo" placeholder="Ej: EPS017" maxlength="10"></div>
+                    <div class="form-group full"><label><i class="fas fa-building"></i> Nombre de la EPS</label><input type="text" id="epsNombre" placeholder="Ej: FOMAG EPS"></div>
+                    <div class="form-group"><label>Régimen</label><select id="epsRegimen"><option value="subsidiado">Subsidiado</option><option value="contributivo">Contributivo</option><option value="mixto">Mixto</option></select></div>
+                    <div class="form-group"><label><i class="fas fa-id-card"></i> NIT</label><input type="text" id="epsNit" placeholder="Ej: 900.123.456-7"></div>
+                    <div class="form-group"><label><i class="fas fa-phone"></i> Teléfono</label><input type="text" id="epsTelefono" placeholder="+57 300 000 0000"></div>
+                    <div class="form-group"><label><i class="fas fa-envelope"></i> Email</label><input type="email" id="epsEmail" placeholder="radicacion@eps.com"></div>
+                    <div class="form-group full"><label>Observaciones</label><input type="text" id="epsNotas" placeholder="Convenio, condiciones especiales..."></div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-registrar" onclick="guardarEps()"><i class="fas fa-save"></i> Guardar EPS</button>
+                    <button class="btn-limpiar" onclick="limpiarFormEps()"><i class="fas fa-eraser"></i> Limpiar</button>
+                </div>
+                <div class="table-wrap" style="margin-top:16px">
+                    <table class="user-table" style="width:100%">
+                        <thead><tr><th>Código</th><th>Nombre EPS</th><th>Régimen</th><th>NIT</th><th>Teléfono</th><th>Email</th><th>Activo</th><th>Acciones</th></tr></thead>
+                        <tbody id="tablaEps"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            </div></div><!-- /panel-eps -->
+            <div class="config-panel" id="panel-matriz">
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-table-cells-large"></i> Matriz Global Definitiva de Permisos <span class="hint">Haga clic en cada letra para activar o desactivar el permiso</span></div>
+
+                <div class="roles-cards" id="rolesCards"></div>
+
+                <div class="matriz-wrap">
+                    <table class="matriz">
+                        <thead><tr id="matrizHead"></tr></thead>
+                        <tbody id="matrizBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="leyenda">
+                    <div class="ley-item"><span class="ley-chip" style="background:linear-gradient(135deg,#00b4d8,#0077b6)">C</span> Crear / Hacer</div>
+                    <div class="ley-item"><span class="ley-chip" style="background:linear-gradient(135deg,#48c78e,#2f9c6d)">V</span> Ver / Leer</div>
+                    <div class="ley-item"><span class="ley-chip" style="background:linear-gradient(135deg,#ffb700,#e09a00);color:#1a1a1a">E</span> Editar / Modificar</div>
+                    <div class="ley-item"><span class="ley-chip" style="background:linear-gradient(135deg,#ff3860,#c9203f)">B</span> Borrar / Eliminar</div>
+                    <div class="ley-item"><i class="fas fa-ban" style="color:#ff3860"></i> Sin letras activas = Bloqueado</div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn-registrar" onclick="guardarMatriz()"><i class="fas fa-floppy-disk"></i> Guardar Matriz de Permisos</button>
+                    <button class="btn-limpiar" onclick="restaurarMatriz()"><i class="fas fa-rotate-left"></i> Restaurar Matriz Oficial</button>
+                    <button class="btn-limpiar" onclick="exportarMatriz()"><i class="fas fa-file-export"></i> Exportar a Excel</button>
+                </div>
+            </div>
+
+            </div></div><!-- /panel-matriz -->
+            <div class="config-panel" id="panel-prueba">
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-flask"></i> Datos de Prueba</div>
+                <p style="font-size: 13px; color: #5a7a9a; margin-bottom: 15px;">Carga datos de ejemplo para probar el sistema. Esto agregará pacientes y citas ficticios.</p>
+                <div class="form-actions">
+                    <button class="btn-registrar" onclick="cargarDatosPrueba()"><i class="fas fa-flask-vial"></i> Cargar Datos</button>
+                </div>
+            </div>
+
+            </div></div><!-- /panel-prueba -->
+            <div class="config-panel" id="panel-mante">
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-screwdriver-wrench"></i> Mantenimiento</div>
+                <p style="font-size: 13px; color: #5a7a9a; margin-bottom: 15px;">Elimina todos los datos clínicos del sistema. Esta acción es irreversible (los usuarios y la matriz de permisos se conservan).</p>
+                <div class="form-actions">
+                    <button class="btn-peligro" onclick="limpiarTodoDatos()"><i class="fas fa-trash-can"></i> Eliminar Todo</button>
+                </div>
+            </div></div><!-- /panel-mante -->
+        </div><!-- /config-content -->
+        </div><!-- /config-layout -->
+    </div>
+
+    <!-- Modal Editar Usuario -->
+    <div class="modal-overlay" id="modalEditar">
+        <div class="modal">
+            <h3><i class="fas fa-user-pen"></i> Editar Usuario</h3>
+            <div class="form-grid">
+                <div class="form-group"><label>Usuario</label><input type="text" id="editUsuario" readonly style="opacity:0.6"></div>
+                <div class="form-group"><label>Número de Documento</label><input type="text" id="editDocumento" maxlength="20"></div>
+                <div class="form-group full"><label>Nombre Completo</label><input type="text" id="editNombre"></div>
+                <div class="form-group"><label>Nueva Contraseña</label><input type="password" id="editPassword" placeholder="Dejar vacío si no cambia"></div>
+                <div class="form-group"><label>Rol</label><select id="editRol"></select></div>
+                <div class="form-group"><label>Especialidad / Área</label><select id="editEspecialidad"><option value="">Seleccione especialidad...</option><option value="General">General</option><option value="Fisioterapeuta">Fisioterapeuta</option><option value="Fonoaudiólogo">Fonoaudiólogo</option><option value="Terapeuta Ocupacional">Terapeuta Ocupacional</option><option value="Terapeuta Respiratorio">Terapeuta Respiratorio</option><option value="Psicólogo">Psicólogo</option><option value="Medicina Interna">Medicina Interna</option><option value="Pediatría">Pediatría</option><option value="Ginecología">Ginecología</option><option value="Cirugía General">Cirugía General</option><option value="Ortopedia">Ortopedia</option><option value="Auxiliar de Enfermería">Auxiliar de Enfermería</option><option value="Enfermería Jefe">Enfermería Jefe</option></select></div>
+                <div class="form-group"><label>Registro Profesional</label><input type="text" id="editRegistro"></div>
+                <div class="firma-box">
+                    <div class="firma-head">
+                        <span class="lbl"><i class="fas fa-file-signature"></i> Firma Digital</span>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn-firma" onclick="document.getElementById('editFirmaFile').click()"><i class="fas fa-cloud-arrow-up"></i> Cambiar</button>
+                            <button type="button" class="btn-firma" onclick="quitarFirmaEdicion()"><i class="fas fa-trash"></i> Quitar</button>
+                        </div>
+                    </div>
+                    <input type="file" id="editFirmaFile" accept="image/png, image/jpeg, image/jpg, image/webp" style="display:none">
+                    <div class="firma-preview" id="editFirmaPreview"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-limpiar" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-registrar" onclick="guardarEdicionUsuario()"><i class="fas fa-floppy-disk"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Firma / Ficha -->
+    <div class="modal-overlay" id="modalFicha">
+        <div class="modal">
+            <h3><i class="fas fa-id-badge"></i> Ficha del Profesional</h3>
+            <div id="fichaContenido"></div>
+            <div class="modal-actions">
+                <button class="btn-limpiar" onclick="cerrarModalFicha()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ================== CLAVES ================== */
+        const USERS_KEY = 'nexus_usuarios';
+        const HOSPITAL_KEY = 'nexus_hospital';
+        const PATIENTS_KEY = 'nexus_pacientes';
+        const CITAS_KEY = 'nexus_citas';
+        const PERMISOS_KEY = 'nexus_permisos';
+
+        /* ================== 7 ROLES DEFINITIVOS ================== */
+        const ROLES = [
+            { id: 'admin',          num: 1, nombre: 'Administrador',   icono: 'fa-user-shield',   color: '#00b4d8', desc: 'Control total del sistema. Único rol con permiso de Borrar y acceso a Configuración.' },
+            { id: 'recepcion',      num: 2, nombre: 'Recepcionista',   icono: 'fa-headset',       color: '#b86bff', desc: 'Gestiona admisiones, citas y egresos. Solo lectura en documentos clínicos.' },
+            { id: 'medico_general', num: 3, nombre: 'Médico General',  icono: 'fa-user-doctor',   color: '#48c78e', desc: 'Crea y edita historia clínica, evoluciones y epicrisis. No elimina registros.' },
+            { id: 'enfermeria',     num: 4, nombre: 'Enfermería',      icono: 'fa-user-nurse',    color: '#ffb700', desc: 'Responsable de notas de enfermería. Bloqueado en Terapia y en Admisiones.' },
+            { id: 'terapia',        num: 5, nombre: 'Terapia',         icono: 'fa-hands',         color: '#ff7e47', desc: 'Registra sesiones de terapia. Solo lectura en el resto de documentos clínicos.' },
+            { id: 'especialista',   num: 6, nombre: 'Especialista',    icono: 'fa-user-md',       color: '#00f5d4', desc: 'Igual alcance clínico que Médico General, orientado a su especialidad.' },
+            { id: 'facturador',     num: 7, nombre: 'Facturador',      icono: 'fa-file-invoice-dollar', color: '#ff6b9d', desc: 'Gestiona facturación y RIPS JSON. Solo lectura en el resto de módulos.' }
+        ];
+        const ROL_MAP = {};
+        ROLES.forEach(r => { ROL_MAP[r.id] = r; });
+
+        /* ================== MÓDULOS ================== */
+        const MODULOS = [
+            { id: 'admisiones',      nombre: 'Admisiones',        icono: 'fa-door-open' },
+            { id: 'configuracion',   nombre: 'Configuración',     icono: 'fa-cog' },
+            { id: 'historia_clinica',nombre: 'Historia Clínica',  icono: 'fa-file-medical' },
+            { id: 'evoluciones',     nombre: 'Evoluciones',       icono: 'fa-notes-medical' },
+            { id: 'notas_enfermeria',nombre: 'Notas Enfermería',  icono: 'fa-user-nurse' },
+            { id: 'terapia',         nombre: 'Terapia',           icono: 'fa-hand-holding-medical' },
+            { id: 'epicrisis',       nombre: 'Epicrisis',         icono: 'fa-file-alt' },
+            { id: 'citas',           nombre: 'Citas',             icono: 'fa-calendar-check' },
+            { id: 'egresados',       nombre: 'Egresados',         icono: 'fa-door-closed' },
+            { id: 'facturacion',      nombre: 'Facturación',      icono: 'fa-file-invoice-dollar' },
+            { id: 'rips',            nombre: 'RIPS JSON',        icono: 'fa-file-code' },
+            { id: 'gestion_documental', nombre: 'Gestión Documental', icono: 'fa-folder-open' }
+        ];
+        const LETRAS = ['C', 'V', 'E', 'B'];
+
+        /* ====== MATRIZ GLOBAL DEFINITIVA (valores oficiales) ====== */
+        const T = ['C','V','E','B'];   // Total
+        const CVE = ['C','V','E'];     // Crear, Ver, Editar (sin eliminar)
+        const SV = ['V'];              // Solo Ver
+        const NO = [];                 // Bloqueado
+
+        function matrizOficial() {
+            return {
+                admisiones:       { admin: T, recepcion: CVE, medico_general: NO,  enfermeria: NO,  terapia: NO,  especialista: NO,  facturador: SV },
+                configuracion:    { admin: T, recepcion: NO,  medico_general: NO,  enfermeria: NO,  terapia: NO,  especialista: NO,  facturador: NO },
+                historia_clinica: { admin: T, recepcion: SV,  medico_general: CVE, enfermeria: SV,  terapia: SV,  especialista: CVE, facturador: SV },
+                evoluciones:      { admin: T, recepcion: SV,  medico_general: CVE, enfermeria: SV,  terapia: SV,  especialista: CVE, facturador: SV },
+                notas_enfermeria: { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: CVE, terapia: SV,  especialista: SV,  facturador: SV },
+                terapia:          { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: NO,  terapia: CVE, especialista: SV,  facturador: SV },
+                epicrisis:        { admin: T, recepcion: SV,  medico_general: CVE, enfermeria: SV,  terapia: SV,  especialista: CVE, facturador: SV },
+                citas:            { admin: T, recepcion: CVE, medico_general: CVE, enfermeria: CVE, terapia: CVE, especialista: CVE, facturador: SV },
+                egresados:        { admin: T, recepcion: CVE, medico_general: CVE, enfermeria: CVE, terapia: CVE, especialista: CVE, facturador: SV },
+                facturacion:      { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: NO,  terapia: SV,  especialista: SV,  facturador: CVE },
+                rips:             { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: NO,  terapia: SV,  especialista: SV,  facturador: CVE },
+                gestion_documental: { admin: T, recepcion: SV,  medico_general: SV,  enfermeria: SV,  terapia: SV,  especialista: SV,  facturador: SV }
+            };
+        }
+
+        let MATRIZ = {};
+
+        function cargarMatriz() {
+            const guardada = localStorage.getItem(PERMISOS_KEY);
+            const base = matrizOficial();
+            if (guardada) {
+                try {
+                    const p = JSON.parse(guardada);
+                    MODULOS.forEach(m => {
+                        if (!p[m.id]) p[m.id] = base[m.id];
+                        ROLES.forEach(r => { if (!Array.isArray(p[m.id][r.id])) p[m.id][r.id] = base[m.id][r.id]; });
+                    });
+                    MATRIZ = p;
+                    return;
+                } catch (e) { /* datos corruptos: usar oficial */ }
+            }
+            MATRIZ = base;
+            localStorage.setItem(PERMISOS_KEY, JSON.stringify(MATRIZ));
+        }
+
+        /* ================== SESIÓN + CONTROL DE ACCESO ================== */
+        const sesion = JSON.parse(localStorage.getItem('nexus_sesion') || 'null');
+        if (!sesion || !sesion.logueado) window.location.href = 'index.html';
+
+        function normalizarRol(rol) {
+            if (!rol) return 'recepcion';
+            const r = String(rol).toLowerCase();
+            if (r === 'medico') return 'medico_general';
+            if (r === 'enfermera') return 'enfermeria';
+            if (r === 'terapista' || r === 'terapeuta') return 'terapia';
+            if (ROL_MAP[r]) return r;
+            return 'recepcion';
+        }
+
+        function nombreRol(rol) { const r = ROL_MAP[normalizarRol(rol)]; return r ? r.nombre : String(rol || '').toUpperCase(); }
+
+        if (sesion && sesion.logueado) {
+            document.getElementById('userName').textContent = sesion.nombre || sesion.usuario;
+            document.getElementById('userRole').textContent = nombreRol(sesion.rol);
+            document.getElementById('userAvatar').textContent = (sesion.nombre || 'U').charAt(0).toUpperCase();
+        }
+
+        function esAdministrador() { return sesion && normalizarRol(sesion.rol) === 'admin'; }
+
+        /* ================== USUARIOS ==================
+           Las contrasenas se guardan cifradas (hash) mediante NXAUTH.
+           No hay usuarios ni contrasenas escritos en el codigo.        */
+        function obtenerUsuarios() { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); }
+        function guardarUsuarios(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+
+        function inicializarUsuarios() {
+            let usuarios = obtenerUsuarios();
+            if (!usuarios.length) return;
+            // Migrar registros antiguos: roles viejos, documento, firma y contrasenas en texto plano
+            let cambio = false;
+            usuarios = usuarios.map(u => {
+                const rolNuevo = normalizarRol(u.rol);
+                if (rolNuevo !== u.rol) { u.rol = rolNuevo; cambio = true; }
+                if (u.documento === undefined) { u.documento = ''; cambio = true; }
+                if (u.firma === undefined) { u.firma = ''; cambio = true; }
+                if (u.especialidad === undefined) { u.especialidad = ''; cambio = true; }
+                if (u.registro === undefined) { u.registro = ''; cambio = true; }
+                if (!u.clave && (u.password || u.contrasena) && window.NXAUTH) {
+                    u.clave = NXAUTH.resumen(u.usuario, u.password || u.contrasena);
+                    cambio = true;
+                }
+                if (u.password !== undefined) { delete u.password; cambio = true; }
+                if (u.contrasena !== undefined) { delete u.contrasena; cambio = true; }
+                return u;
+            });
+            if (cambio) guardarUsuarios(usuarios);
+        }
+
+        /* ================== ARRANQUE ================== */
+        /* ── Lazy-init v2.7: solo se inicializa el panel activo al cargar ── */
+        const PANEL_INIT = {
+            'panel-usuarios': false,
+            'panel-ips': false,
+            'panel-cups': false,
+            'panel-eps': false,
+            'panel-matriz': false,
+            'panel-prueba': false,
+            'panel-mante': false
+        };
+        function initPanel(pid) {
+            if (PANEL_INIT[pid]) return;
+            PANEL_INIT[pid] = true;
+            switch(pid) {
+                case 'panel-usuarios':
+                    inicializarUsuarios(); llenarSelectsRol(); cargarUsuarios(); mostrarResumenRol(); configurarSubidaFirmas(); break;
+                case 'panel-ips':
+                    cargarHospital(); actualizarInfoSistema(); configurarSubidaLogo(); break;
+                case 'panel-cups':
+                    initCups(); cargarTablaCups(); generarCamposEpsCups(); break;
+                case 'panel-eps':
+                    initEps(); cargarTablaEps(); generarCamposEpsCups(); break;
+                case 'panel-matriz':
+                    construirMatriz(); construirTarjetasRoles(); break;
+            }
+        }
+
+        function switchPanel(pid) {
+            document.querySelectorAll('.config-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+            var panel = document.getElementById(pid);
+            if (panel) panel.classList.add('active');
+            var item = document.querySelector('.sidebar-item[data-panel="'+pid+'"]');
+            if (item) item.classList.add('active');
+            initPanel(pid);
+        }
+
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', () => switchPanel(item.dataset.panel));
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarMatriz();
+            if (!esAdministrador()) {
+                document.getElementById('contenidoConfig').style.display = 'none';
+                document.getElementById('avisoBloqueo').style.display = 'block';
+                return;
+            }
+            initPanel('panel-usuarios');
+        });
+
+        function llenarSelectsRol() {
+            const html = ROLES.map(r => `<option value="${r.id}">${r.num}. ${r.nombre}</option>`).join('');
+            document.getElementById('newRol').innerHTML = html;
+            document.getElementById('editRol').innerHTML = html;
+        }
+
+        /* ================== FIRMA DIGITAL ================== */
+        let firmaNueva = '';
+        let firmaEdicion = '';
+        const MAX_FIRMA_KB = 400;
+
+        function configurarSubidaFirmas() {
+            document.getElementById('newFirmaFile').addEventListener('change', e => leerFirma(e.target.files[0], 'nueva'));
+            document.getElementById('editFirmaFile').addEventListener('change', e => leerFirma(e.target.files[0], 'edicion'));
+            const box = document.getElementById('firmaBox');
+            ['dragenter','dragover'].forEach(ev => box.addEventListener(ev, e => { e.preventDefault(); box.classList.add('drag'); }));
+            ['dragleave','drop'].forEach(ev => box.addEventListener(ev, e => { e.preventDefault(); box.classList.remove('drag'); }));
+            box.addEventListener('drop', e => { if (e.dataTransfer.files && e.dataTransfer.files[0]) leerFirma(e.dataTransfer.files[0], 'nueva'); });
+        }
+
+        function leerFirma(file, destino) {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { mostrarToast('El archivo debe ser una imagen (PNG o JPG)', 'error'); return; }
+            if (file.size > MAX_FIRMA_KB * 1024) { mostrarToast(`La imagen supera ${MAX_FIRMA_KB} KB. Use una imagen más liviana.`, 'error'); return; }
+            const reader = new FileReader();
+            reader.onload = ev => {
+                comprimirFirma(ev.target.result, base64 => {
+                    if (destino === 'nueva') { firmaNueva = base64; pintarFirma('newFirmaPreview', base64); }
+                    else { firmaEdicion = base64; pintarFirma('editFirmaPreview', base64); }
+                    mostrarToast('Firma digital cargada', 'success');
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function comprimirFirma(dataUrl, callback) {
+            const img = new Image();
+            img.onload = () => {
+                const maxW = 420, maxH = 180;
+                let w = img.width, h = img.height;
+                const escala = Math.min(1, maxW / w, maxH / h);
+                w = Math.round(w * escala); h = Math.round(h * escala);
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, w, h);
+                ctx.drawImage(img, 0, 0, w, h);
+                try { callback(canvas.toDataURL('image/jpeg', 0.85)); }
+                catch (e) { callback(dataUrl); }
+            };
+            img.onerror = () => callback(dataUrl);
+            img.src = dataUrl;
+        }
+
+        function pintarFirma(contenedorId, base64) {
+            const cont = document.getElementById(contenedorId);
+            if (base64) {
+                cont.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = base64;
+                img.alt = 'Firma digital del profesional';
+                cont.appendChild(img);
+            } else {
+                cont.innerHTML = '<span class="firma-empty"><i class="fas fa-image"></i><br>Arrastre aquí la imagen de la firma o haga clic en “Subir foto de firma”<br>(PNG / JPG · fondo blanco recomendado)</span>';
+            }
+        }
+
+        function quitarFirmaNueva() { firmaNueva = ''; document.getElementById('newFirmaFile').value = ''; pintarFirma('newFirmaPreview', ''); }
+        function quitarFirmaEdicion() { firmaEdicion = ''; document.getElementById('editFirmaFile').value = ''; pintarFirma('editFirmaPreview', ''); }
+
+        /* ================== TABLA DE USUARIOS ================== */
+        function cargarUsuarios() {
+            const usuarios = obtenerUsuarios();
+            const tbody = document.getElementById('tablaUsuarios');
+            tbody.innerHTML = '';
+            if (!usuarios.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#5a7a9a;padding:20px">Sin usuarios registrados</td></tr>';
+                return;
+            }
+            usuarios.forEach(u => {
+                const rol = normalizarRol(u.rol);
+                const tr = document.createElement('tr');
+                const firmaCell = u.firma
+                    ? `<img src="${u.firma}" class="firma-mini" alt="Firma de ${escapar(u.nombre)}" title="Ver ficha" onclick="verFicha('${escapar(u.usuario)}')">`
+                    : '<span class="firma-none"><i class="fas fa-triangle-exclamation"></i> Sin firma</span>';
+                tr.innerHTML = `
+                    <td><b>${escapar(u.usuario)}</b></td>
+                    <td>${escapar(u.documento || '—')}</td>
+                    <td>${escapar(u.nombre)}</td>
+                    <td><span class="badge badge-${rol}">${ROL_MAP[rol].nombre}</span></td>
+                    <td>${firmaCell}</td>
+                    <td style="white-space:nowrap">
+                        <button class="btn-action btn-ver" title="Ver ficha" onclick="verFicha('${escapar(u.usuario)}')"><i class="fas fa-eye"></i></button>
+                        <button class="btn-action btn-editar" title="Editar" onclick="editarUsuario('${escapar(u.usuario)}')"><i class="fas fa-pen"></i></button>
+                        <button class="btn-action btn-eliminar" title="Eliminar" onclick="eliminarUsuario('${escapar(u.usuario)}')"><i class="fas fa-trash"></i></button>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function escapar(t) { return String(t === undefined || t === null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+        function agregarUsuario() {
+            const usuario = document.getElementById('newUsuario').value.trim().toLowerCase();
+            const documento = document.getElementById('newDocumento').value.trim();
+            const nombre = document.getElementById('newNombre').value.trim();
+            const password = document.getElementById('newPassword').value;
+            const rol = document.getElementById('newRol').value;
+            const especialidad = document.getElementById('newEspecialidad').value.trim();
+            const registro = document.getElementById('newRegistro').value.trim();
+
+            if (!usuario) { mostrarToast('Ingrese el nombre de usuario', 'error'); return; }
+            if (!documento) { mostrarToast('Ingrese el número de documento', 'error'); return; }
+            if (!/^[0-9A-Za-z.\-]{5,20}$/.test(documento)) { mostrarToast('El número de documento no es válido', 'error'); return; }
+            if (!nombre) { mostrarToast('Ingrese el nombre completo', 'error'); return; }
+            if (!password || password.length < 5) { mostrarToast('La contraseña debe tener al menos 5 caracteres', 'error'); return; }
+
+            const usuarios = obtenerUsuarios();
+            if (usuarios.some(u => u.usuario === usuario)) { mostrarToast('El usuario ya existe', 'error'); return; }
+            if (usuarios.some(u => (u.documento || '') === documento)) { mostrarToast('Ya existe un usuario con ese documento', 'error'); return; }
+
+            const clave = window.NXAUTH ? NXAUTH.resumen(usuario, password) : '';
+            usuarios.push({ usuario, documento, nombre, clave, rol, especialidad, registro, firma: firmaNueva, fechaRegistro: new Date().toISOString() });
+            try { guardarUsuarios(usuarios); }
+            catch (e) { mostrarToast('Almacenamiento lleno: use una firma más liviana', 'error'); return; }
+            cargarUsuarios(); actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups(); limpiarFormUsuario();
+            mostrarToast(`Usuario ${usuario} creado como ${ROL_MAP[rol].nombre}`, 'success');
+        }
+
+        let usuarioEditando = null;
+        function editarUsuario(usuario) {
+            const u = obtenerUsuarios().find(x => x.usuario === usuario);
+            if (!u) return;
+            usuarioEditando = usuario;
+            document.getElementById('editUsuario').value = u.usuario;
+            document.getElementById('editDocumento').value = u.documento || '';
+            document.getElementById('editNombre').value = u.nombre || '';
+            document.getElementById('editPassword').value = '';
+            document.getElementById('editRol').value = normalizarRol(u.rol);
+            (function(){
+                const selEsp = document.getElementById('editEspecialidad');
+                const val = u.especialidad || '';
+                // Si la especialidad guardada no existe en la lista, se agrega para no perderla
+                if (val && ![].slice.call(selEsp.options).some(o => o.value === val)) {
+                    const opt = document.createElement('option');
+                    opt.value = val; opt.textContent = val + ' (personalizada)';
+                    selEsp.appendChild(opt);
+                }
+                selEsp.value = val;
+            })();
+            document.getElementById('editRegistro').value = u.registro || '';
+            firmaEdicion = u.firma || '';
+            pintarFirma('editFirmaPreview', firmaEdicion);
+            document.getElementById('modalEditar').classList.add('active');
+        }
+
+        function guardarEdicionUsuario() {
+            const usuarios = obtenerUsuarios();
+            const idx = usuarios.findIndex(u => u.usuario === usuarioEditando);
+            if (idx === -1) return;
+            const documento = document.getElementById('editDocumento').value.trim();
+            const nombre = document.getElementById('editNombre').value.trim();
+            if (!documento) { mostrarToast('Ingrese el número de documento', 'error'); return; }
+            if (!nombre) { mostrarToast('Ingrese el nombre completo', 'error'); return; }
+            if (usuarios.some((u, i) => i !== idx && (u.documento || '') === documento)) { mostrarToast('Ya existe otro usuario con ese documento', 'error'); return; }
+            const nuevoRol = document.getElementById('editRol').value;
+            if (usuarios[idx].usuario === 'admin' && nuevoRol !== 'admin') { mostrarToast('El usuario admin debe conservar el rol Administrador', 'error'); return; }
+
+            usuarios[idx].documento = documento;
+            usuarios[idx].nombre = nombre;
+            usuarios[idx].rol = nuevoRol;
+            usuarios[idx].especialidad = document.getElementById('editEspecialidad').value.trim();
+            usuarios[idx].registro = document.getElementById('editRegistro').value.trim();
+            usuarios[idx].firma = firmaEdicion;
+            const newPass = document.getElementById('editPassword').value;
+            if (newPass) {
+                if (newPass.length < 5) { mostrarToast('La contrase\u00f1a debe tener al menos 5 caracteres', 'error'); return; }
+                usuarios[idx].clave = window.NXAUTH ? NXAUTH.resumen(usuarios[idx].usuario, newPass) : '';
+                delete usuarios[idx].password;
+                delete usuarios[idx].contrasena;
+                usuarios[idx].fechaCambioClave = new Date().toISOString();
+            }
+            try { guardarUsuarios(usuarios); }
+            catch (e) { mostrarToast('Almacenamiento lleno: use una firma más liviana', 'error'); return; }
+            cerrarModal(); cargarUsuarios(); actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups();
+            mostrarToast('Usuario actualizado', 'success');
+        }
+
+        function eliminarUsuario(usuario) {
+            if (usuario === 'admin') { mostrarToast('No se puede eliminar al administrador principal', 'error'); return; }
+            if (sesion && usuario === sesion.usuario) { mostrarToast('No puede eliminar su propio usuario en sesión', 'error'); return; }
+            if (!confirm(`¿Eliminar al usuario ${usuario}? Se borrará también su firma digital.`)) return;
+            guardarUsuarios(obtenerUsuarios().filter(u => u.usuario !== usuario));
+            cargarUsuarios(); actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups();
+            mostrarToast('Usuario eliminado', 'info');
+        }
+
+        function limpiarFormUsuario() {
+            ['newUsuario','newDocumento','newNombre','newPassword','newEspecialidad','newRegistro'].forEach(id => document.getElementById(id).value = '');
+            quitarFirmaNueva();
+            mostrarResumenRol();
+        }
+
+        /* ================== FICHA DEL PROFESIONAL ================== */
+        function verFicha(usuario) {
+            const u = obtenerUsuarios().find(x => x.usuario === usuario);
+            if (!u) return;
+            const rol = normalizarRol(u.rol);
+            const permisos = MODULOS.map(m => {
+                const p = (MATRIZ[m.id] && MATRIZ[m.id][rol]) || [];
+                let clase = 'rp', texto;
+                if (!p.length) { clase += ' block'; texto = 'Bloqueado'; }
+                else if (p.length === 4) { clase += ' total'; texto = 'C V E B'; }
+                else if (p.length === 1 && p[0] === 'V') { clase += ' ver'; texto = 'Solo Ver'; }
+                else texto = p.join(' ');
+                return `<span class="${clase}"><b>${m.nombre}:</b> ${texto}</span>`;
+            }).join('');
+            document.getElementById('fichaContenido').innerHTML = `
+                <div class="info-row"><span class="info-label">Usuario</span><span class="info-value">${escapar(u.usuario)}</span></div>
+                <div class="info-row"><span class="info-label">Número de documento</span><span class="info-value">${escapar(u.documento || '—')}</span></div>
+                <div class="info-row"><span class="info-label">Nombre completo</span><span class="info-value">${escapar(u.nombre)}</span></div>
+                <div class="info-row"><span class="info-label">Rol</span><span class="info-value"><span class="badge badge-${rol}">${ROL_MAP[rol].nombre}</span></span></div>
+                <div class="info-row"><span class="info-label">Especialidad / área</span><span class="info-value">${escapar(u.especialidad || '—')}</span></div>
+                <div class="info-row" style="border:none"><span class="info-label">Registro profesional</span><span class="info-value">${escapar(u.registro || '—')}</span></div>
+                <div style="margin-top:14px">
+                    <div class="section-title" style="border:none;padding:0;margin-bottom:8px"><i class="fas fa-file-signature"></i> Firma digital</div>
+                    <div class="modal-firma-big">${u.firma ? `<img src="${u.firma}" alt="Firma digital de ${escapar(u.nombre)}">` : '<span class="firma-none">Este profesional no tiene firma digital registrada</span>'}</div>
+                </div>
+                <div class="rol-resumen" style="margin-top:14px">
+                    <h4><i class="fas fa-shield-halved"></i> Permisos vigentes</h4>
+                    <div class="lista">${permisos}</div>
+                </div>`;
+            document.getElementById('modalFicha').classList.add('active');
+        }
+
+        /* ================== RESUMEN DEL ROL EN EL FORMULARIO ================== */
+        function mostrarResumenRol() {
+            const rol = document.getElementById('newRol').value;
+            if (!ROL_MAP[rol]) return;
+            const r = ROL_MAP[rol];
+            const items = MODULOS.map(m => {
+                const p = (MATRIZ[m.id] && MATRIZ[m.id][rol]) || [];
+                let clase = 'rp', texto;
+                if (!p.length) { clase += ' block'; texto = '❌ Bloqueado'; }
+                else if (p.length === 4) { clase += ' total'; texto = 'C V E B'; }
+                else if (p.length === 1 && p[0] === 'V') { clase += ' ver'; texto = '👁️ Solo Ver'; }
+                else texto = p.join(' ');
+                return `<span class="${clase}"><b>${m.nombre}:</b> ${texto}</span>`;
+            }).join('');
+            document.getElementById('rolResumen').innerHTML = `
+                <h4><i class="fas ${r.icono}"></i> ${r.num}. ${r.nombre} — alcance del rol</h4>
+                <p style="font-size:11px;color:#5a7a9a;margin-bottom:8px">${r.desc}</p>
+                <div class="lista">${items}</div>`;
+        }
+
+        
+        /* ═══════════════════════════════════════════════════════════
+           CATÁLOGO DE SERVICIOS CUPS
+           Clave: nexus_servicios_facturacion (compartida via nexus_db)
+           ═══════════════════════════════════════════════════════════ */
+        const K_CUPS = 'nexus_servicios_facturacion';
+
+        const CUPS_DEFAULT = [
+            { id:'sf_01', codigoCUPS:'',       nombre:'CAMA DOMICILIARIA',           tipoServicio:'otroServicio', ambito:'domiciliario',
+              valores:{ FOMAG:{valorUnitario:250000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_02', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA DOMICILIARIA',   tipoServicio:'consulta', ambito:'domiciliario',
+              valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_03', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA INTRAMURAL',    tipoServicio:'consulta', ambito:'intramural',
+              valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_04', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL DOMICILIARIA', tipoServicio:'consulta', ambito:'domiciliario',
+              valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_05', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL INTRAMURAL',  tipoServicio:'consulta', ambito:'intramural',
+              valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_06', codigoCUPS:'931001', nombre:'FISIOTERAPIA DOMICILIARIA',      tipoServicio:'consulta', ambito:'domiciliario',
+              valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_07', codigoCUPS:'931001', nombre:'FISIOTERAPIA INTRAMURAL',       tipoServicio:'consulta', ambito:'intramural',
+              valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_08', codigoCUPS:'943102', nombre:'PSICOLOGÍA DOMICILIARIA',       tipoServicio:'consulta', ambito:'domiciliario',
+              valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_09', codigoCUPS:'943102', nombre:'PSICOLOGÍA INTRAMURAL',         tipoServicio:'consulta', ambito:'intramural',
+              valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_10', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA DOMICILIARIA', tipoServicio:'procedimiento', ambito:'domiciliario',
+              valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_11', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA INTRAMURAL',  tipoServicio:'procedimiento', ambito:'intramural',
+              valores:{ FOMAG:{valorUnitario:23345,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_12', codigoCUPS:'',       nombre:'ENFERMERÍA 24H DOMICILIARIA',  tipoServicio:'otroServicio', ambito:'domiciliario',
+              valores:{ FOMAG:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:150000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_13', codigoCUPS:'',       nombre:'ENFERMERÍA 12H DOMICILIARIA',  tipoServicio:'otroServicio', ambito:'domiciliario',
+              valores:{ FOMAG:{valorUnitario:100000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:80000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_14', codigoCUPS:'',       nombre:'ENFERMERÍA 8H DOMICILIARIA',   tipoServicio:'otroServicio', ambito:'domiciliario',
+              valores:{ FOMAG:{valorUnitario:95000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:75000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_15', codigoCUPS:'',       nombre:'LIMPIEZA TRAQUEOSTOMÍA DOM.',  tipoServicio:'otroServicio', ambito:'domiciliario',
+              valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_16', codigoCUPS:'',       nombre:'CAMA HOSP. EN CASA',            tipoServicio:'otroServicio', ambito:'hospitalario',
+              valores:{ FOMAG:{valorUnitario:250000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_17', codigoCUPS:'937000', nombre:'FONOAUDIOLOGÍA HOSP. EN CASA',   tipoServicio:'consulta', ambito:'hospitalario',
+              valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_18', codigoCUPS:'938303', nombre:'TERAPIA OCUPACIONAL HOSP. EN CASA', tipoServicio:'consulta', ambito:'hospitalario',
+              valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_19', codigoCUPS:'931001', nombre:'FISIOTERAPIA HOSP. EN CASA',      tipoServicio:'consulta', ambito:'hospitalario',
+              valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_20', codigoCUPS:'943102', nombre:'PSICOLOGÍA HOSP. EN CASA',       tipoServicio:'consulta', ambito:'hospitalario',
+              valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_21', codigoCUPS:'934600', nombre:'TERAPIA RESPIRATORIA HOSP. EN CASA', tipoServicio:'procedimiento', ambito:'hospitalario',
+              valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_22', codigoCUPS:'',       nombre:'ENFERMERÍA 24H HOSP. EN CASA',  tipoServicio:'otroServicio', ambito:'hospitalario',
+              valores:{ FOMAG:{valorUnitario:200000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:150000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_23', codigoCUPS:'',       nombre:'ENFERMERÍA 12H HOSP. EN CASA',  tipoServicio:'otroServicio', ambito:'hospitalario',
+              valores:{ FOMAG:{valorUnitario:100000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:80000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_24', codigoCUPS:'',       nombre:'ENFERMERÍA 8H HOSP. EN CASA',   tipoServicio:'otroServicio', ambito:'hospitalario',
+              valores:{ FOMAG:{valorUnitario:95000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:75000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'03', grupoServicios:'03', causaMotivoAtencion:'02', activo:true },
+            { id:'sf_25', codigoCUPS:'',       nombre:'LIMPIEZA TRAQUEOSTOMÍA HOSP. EN CASA', tipoServicio:'otroServicio', ambito:'hospitalario',
+              valores:{ FOMAG:{valorUnitario:42769,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0}, COOSALUD:{valorUnitario:10000,conceptoRecaudo:'04',vrCopago:0,vrDescuento:0} }, finalidadTecnologiaSalud:'04', grupoServicios:'03', causaMotivoAtencion:'02', activo:true }
+        ];
+
+        function leerCups() { try { return JSON.parse(localStorage.getItem(K_CUPS)||'null'); } catch(e){ return null; } }
+        function guardarCups(arr) { localStorage.setItem(K_CUPS, JSON.stringify(arr)); }
+
+        const CUPS_VERSION = 3; // bumped when default catalog structure changes
+        function initCups() {
+            let cat = leerCups();
+            const savedVer = parseInt(localStorage.getItem(K_CUPS + '_ver') || '0');
+            if (!cat || !Array.isArray(cat) || (!cat.length && savedVer < CUPS_VERSION)) {
+                guardarCups(CUPS_DEFAULT);
+                localStorage.setItem(K_CUPS + '_ver', String(CUPS_VERSION));
+            } else if (cat.length && savedVer < CUPS_VERSION) {
+                // Merge: add new default services not already present, update existing with EPS values
+                const existingIds = new Set(cat.map(s => s.id));
+                CUPS_DEFAULT.forEach(def => {
+                    if (!existingIds.has(def.id)) {
+                        cat.push({...def});
+                    } else {
+                        // Update valores on existing if missing
+                        const idx = cat.findIndex(s => s.id === def.id);
+                        if (idx !== -1 && (!cat[idx].valores || !Object.keys(cat[idx].valores || {}).length)) {
+                            cat[idx].valores = def.valores;
+                            delete cat[idx].valorGeneral;
+                        }
+                    }
+                });
+                guardarCups(cat);
+                localStorage.setItem(K_CUPS + '_ver', String(CUPS_VERSION));
+            }
+        }
+
+        function cargarTablaCups() {
+            const arr = leerCups() || [];
+            const tbody = document.getElementById('tablaCups');
+            if (!arr.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#5a7a9a;padding:16px">Sin servicios configurados. Agregue el primero arriba.</td></tr>'; return; }
+            tbody.innerHTML = arr.map(s => {
+                const tipo = {consulta:'Consulta',procedimiento:'Procedimiento',otroServicio:'Otro Servicio'}[s.tipoServicio]||s.tipoServicio;
+                const ambito = {domiciliario:'🏠 Domiciliario',intramural:'🏥 Intramural',hospitalario:'🏨 Hospitalario'}[s.ambito]||s.ambito;
+                const valor = s.valores && typeof s.valores === 'object' && Object.keys(s.valores).length
+                    ? Object.keys(s.valores).map(k => {
+                        const epsName = (leerEps()||[]).find(e=>e.codigo===k);
+                        const label = epsName ? epsName.nombre : k;
+                        return `<span style="color:#90e0ef;font-size:11px;display:block">${label}: ${fmtCups$(s.valores[k].valorUnitario)}</span>`;
+                      }).join('')
+                    : `<span style="color:#ff3860;font-size:11px">⚠ Sin valores EPS</span>`;
+                return `<tr>
+                    <td style="color:#00b4d8;font-family:monospace">${escapar(s.codigoCUPS||'—')}</td>
+                    <td>${escapar(s.nombre)}</td>
+                    <td>${tipo}</td>
+                    <td>${ambito}</td>
+                    <td>${valor}</td>
+                    <td><span class="badge badge-${s.activo?'admin':'enfermeria'}" style="cursor:pointer" onclick="toggleCupsActivo('${s.id}')">${s.activo?'✅ Activo':'⛔ Inactivo'}</span></td>
+                    <td style="white-space:nowrap">
+                        <button class="btn-action btn-editar" title="Editar" onclick="editarCups('${s.id}')"><i class="fas fa-pen"></i></button>
+                        <button class="btn-action btn-eliminar" title="Eliminar" onclick="eliminarCups('${s.id}')"><i class="fas fa-trash"></i></button>
+                    </td></tr>`;
+            }).join('');
+        }
+
+        function fmtCups$(n) { return '$' + Number(n||0).toLocaleString('es-CO'); }
+
+        let cupsEditando = null;
+
+        function guardarServicioCups() {
+            const codigo = document.getElementById('cupCodigo').value.trim();
+            const nombre = document.getElementById('cupNombre').value.trim();
+            const tipo = document.getElementById('cupTipo').value;
+            const ambito = document.getElementById('cupAmbito').value;
+            const finalidad = document.getElementById('cupFinalidad').value;
+            const grupo = document.getElementById('cupGrupo').value;
+            const causa = document.getElementById('cupCausa').value;
+
+            if (!nombre) { mostrarToast('Ingrese el nombre del servicio', 'error'); return; }
+
+            // Collect per-EPS values (REQUIRED — at least one EPS must have a value)
+            const epsArr = leerEps() || [];
+            const valores = {};
+            epsArr.forEach(e => {
+                const input = document.getElementById('cupEpsVal_' + e.codigo);
+                if (input && input.value) {
+                    valores[e.codigo] = { valorUnitario: parseInt(input.value)||0, conceptoRecaudo:'04', vrCopago:0, vrDescuento:0 };
+                }
+            });
+
+            if (!Object.keys(valores).length) {
+                mostrarToast('Ingrese al menos un valor por EPS', 'error'); return;
+            }
+
+            let arr = leerCups() || [];
+
+            if (cupsEditando) {
+                const idx = arr.findIndex(s => s.id === cupsEditando);
+                if (idx !== -1) {
+                    arr[idx] = { ...arr[idx], codigoCUPS:codigo, nombre, tipoServicio:tipo, ambito, valores, finalidadTecnologiaSalud:finalidad, grupoServicios:grupo, causaMotivoAtencion:causa };
+                    delete arr[idx].valorGeneral;
+                }
+                cupsEditando = null;
+            } else {
+                const id = 'sf_' + Date.now();
+                arr.push({ id, codigoCUPS:codigo, nombre, tipoServicio:tipo, ambito, valores, finalidadTecnologiaSalud:finalidad, grupoServicios:grupo, causaMotivoAtencion:causa, activo:true });
+            }
+
+            guardarCups(arr);
+            cargarTablaCups();
+            generarCamposEpsCups();
+            limpiarFormCups();
+            mostrarToast('Servicio guardado', 'success');
+        }
+
+        function editarCups(id) {
+            const s = (leerCups()||[]).find(x => x.id === id);
+            if (!s) return;
+            cupsEditando = id;
+            document.getElementById('cupCodigo').value = s.codigoCUPS || '';
+            document.getElementById('cupNombre').value = s.nombre || '';
+            document.getElementById('cupTipo').value = s.tipoServicio || 'consulta';
+            document.getElementById('cupAmbito').value = s.ambito || 'domiciliario';
+            // valorGeneral removed — values are per-EPS only
+            document.getElementById('cupFinalidad').value = s.finalidadTecnologiaSalud || '04';
+            document.getElementById('cupGrupo').value = s.grupoServicios || '03';
+            document.getElementById('cupCausa').value = s.causaMotivoAtencion || '02';
+            // Fill per-EPS values
+            setTimeout(() => {
+                if (s.valores && typeof s.valores === 'object') {
+                    Object.keys(s.valores).forEach(k => {
+                        const inp = document.getElementById('cupEpsVal_' + k);
+                        if (inp) inp.value = s.valores[k].valorUnitario || '';
+                    });
+                }
+            }, 200);
+            mostrarToast('Editando servicio: ' + s.nombre, 'info');
+        }
+
+        function eliminarCups(id) {
+            const s = (leerCups()||[]).find(x => x.id === id);
+            if (!s) return;
+            if (!confirm('¿Eliminar el servicio "' + s.nombre + '"?')) return;
+            guardarCups((leerCups()||[]).filter(x => x.id !== id));
+            cargarTablaCups();
+            generarCamposEpsCups();
+            mostrarToast('Servicio eliminado', 'info');
+        }
+
+        function toggleCupsActivo(id) {
+            let arr = leerCups() || [];
+            const idx = arr.findIndex(x => x.id === id);
+            if (idx !== -1) { arr[idx].activo = !arr[idx].activo; guardarCups(arr); cargarTablaCups(); }
+        }
+
+        function limpiarFormCups() {
+            ['cupCodigo','cupNombre'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('cupTipo').value = 'consulta';
+            document.getElementById('cupAmbito').value = 'domiciliario';
+            cupsEditando = null;
+        }
+
+        function generarCamposEpsCups() {
+            const epsArr = (leerEps() || []).filter(e => e.activo);
+            const grid = document.getElementById('cupEpsGrid');
+            if (!grid) return;
+            grid.innerHTML = epsArr.map(e =>
+                `<div class="form-group"><label>${escapar(e.nombre)}</label><input type="number" id="cupEpsVal_${e.codigo}" placeholder="${fmtCups$(0)}" min="0"></div>`
+            ).join('');
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           GESTIÓN DE EPS / ENTIDADES PAGADORAS
+           Clave: nexus_entidades_pagadoras (compartida via nexus_db)
+           ═══════════════════════════════════════════════════════════ */
+        const K_EPS = 'nexus_entidades_pagadoras';
+
+        const EPS_DEFAULT = [
+            { id:'eps_01', codigo:'FOMAG',    nombre:'FOMAG EPS',       regimen:'subsidiado',  nit:'', telefono:'', email:'', notas:'', activo:true },
+            { id:'eps_02', codigo:'COOSALUD', nombre:'COOSALUD EPS',   regimen:'subsidiado',  nit:'', telefono:'', email:'', notas:'', activo:true }
+        ];
+
+        function leerEps() { try { return JSON.parse(localStorage.getItem(K_EPS)||'null'); } catch(e){ return null; } }
+        function guardarEpsArr(arr) { localStorage.setItem(K_EPS, JSON.stringify(arr)); }
+
+        function initEps() {
+            let arr = leerEps();
+            if (!arr || !Array.isArray(arr) || !arr.length) guardarEpsArr(EPS_DEFAULT);
+        }
+
+        function cargarTablaEps() {
+            const arr = leerEps() || [];
+            const tbody = document.getElementById('tablaEps');
+            if (!arr.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#5a7a9a;padding:16px">Sin EPS registradas. Agregue la primera arriba.</td></tr>'; return; }
+            tbody.innerHTML = arr.map(e => {
+                const reg = {subsidiado:'Subsidiado',contributivo:'Contributivo',mixto:'Mixto'}[e.regimen]||e.regimen;
+                return `<tr>
+                    <td style="color:#00b4d8;font-family:monospace">${escapar(e.codigo)}</td>
+                    <td>${escapar(e.nombre)}</td>
+                    <td>${reg}</td>
+                    <td>${escapar(e.nit||'—')}</td>
+                    <td>${escapar(e.telefono||'—')}</td>
+                    <td>${escapar(e.email||'—')}</td>
+                    <td><span class="badge badge-${e.activo?'admin':'enfermeria'}" style="cursor:pointer" onclick="toggleEpsActivo('${e.id}')">${e.activo?'✅ Activo':'⛔ Inactivo'}</span></td>
+                    <td style="white-space:nowrap">
+                        <button class="btn-action btn-editar" title="Editar" onclick="editarEps('${e.id}')"><i class="fas fa-pen"></i></button>
+                        <button class="btn-action btn-eliminar" title="Eliminar" onclick="eliminarEps('${e.id}')"><i class="fas fa-trash"></i></button>
+                    </td></tr>`;
+            }).join('');
+        }
+
+        let epsEditando = null;
+
+        function guardarEps() {
+            const codigo = document.getElementById('epsCodigo').value.trim().toUpperCase();
+            const nombre = document.getElementById('epsNombre').value.trim();
+            const regimen = document.getElementById('epsRegimen').value;
+            const nit = document.getElementById('epsNit').value.trim();
+            const telefono = document.getElementById('epsTelefono').value.trim();
+            const email = document.getElementById('epsEmail').value.trim();
+            const notas = document.getElementById('epsNotas').value.trim();
+
+            if (!codigo) { mostrarToast('Ingrese el código de la EPS', 'error'); return; }
+            if (!nombre) { mostrarToast('Ingrese el nombre de la EPS', 'error'); return; }
+
+            let arr = leerEps() || [];
+
+            if (epsEditando) {
+                const idx = arr.findIndex(e => e.id === epsEditando);
+                if (idx !== -1) {
+                    const oldCodigo = arr[idx].codigo;
+                    arr[idx] = { ...arr[idx], codigo, nombre, regimen, nit, telefono, email, notas };
+                    // If code changed, update references in CUPS
+                    if (oldCodigo !== codigo) {
+                        let cups = leerCups() || [];
+                        cups = cups.map(s => {
+                            if (s.valores && s.valores[oldCodigo]) {
+                                s.valores[codigo] = s.valores[oldCodigo];
+                                delete s.valores[oldCodigo];
+                            }
+                            return s;
+                        });
+                        guardarCups(cups);
+                    }
+                }
+                epsEditando = null;
+            } else {
+                if (arr.some(e => e.codigo === codigo)) { mostrarToast('Ya existe una EPS con ese código', 'error'); return; }
+                const id = 'eps_' + Date.now();
+                arr.push({ id, codigo, nombre, regimen, nit, telefono, email, notas, activo:true });
+            }
+
+            guardarEpsArr(arr);
+            cargarTablaEps();
+            generarCamposEpsCups();
+            limpiarFormEps();
+            mostrarToast('EPS guardada', 'success');
+        }
+
+        function editarEps(id) {
+            const e = (leerEps()||[]).find(x => x.id === id);
+            if (!e) return;
+            epsEditando = id;
+            document.getElementById('epsCodigo').value = e.codigo || '';
+            document.getElementById('epsNombre').value = e.nombre || '';
+            document.getElementById('epsRegimen').value = e.regimen || 'subsidiado';
+            document.getElementById('epsNit').value = e.nit || '';
+            document.getElementById('epsTelefono').value = e.telefono || '';
+            document.getElementById('epsEmail').value = e.email || '';
+            document.getElementById('epsNotas').value = e.notas || '';
+            mostrarToast('Editando EPS: ' + e.nombre, 'info');
+        }
+
+        function eliminarEps(id) {
+            const e = (leerEps()||[]).find(x => x.id === id);
+            if (!e) return;
+            if (!confirm('¿Eliminar la EPS "' + e.nombre + '"?')) return;
+            let arr = leerEps() || [];
+            arr = arr.filter(x => x.id !== id);
+            guardarEpsArr(arr);
+            cargarTablaEps();
+            generarCamposEpsCups();
+            mostrarToast('EPS eliminada', 'info');
+        }
+
+        function toggleEpsActivo(id) {
+            let arr = leerEps() || [];
+            const idx = arr.findIndex(x => x.id === id);
+            if (idx !== -1) { arr[idx].activo = !arr[idx].activo; guardarEpsArr(arr); cargarTablaEps(); generarCamposEpsCups(); }
+        }
+
+        function limpiarFormEps() {
+            ['epsCodigo','epsNombre','epsNit','epsTelefono','epsEmail','epsNotas'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('epsRegimen').value = 'subsidiado';
+            epsEditando = null;
+        }
+
+
+        /* ================== MATRIZ VISUAL ================== */
+        function construirMatriz() {
+            const head = document.getElementById('matrizHead');
+            head.innerHTML = '<th class="mod-col">Módulo / Sección</th>' + ROLES.map(r =>
+                `<th style="color:${r.color}"><i class="fas ${r.icono}"></i><span class="rol-num">ROL ${r.num}</span>${r.nombre}</th>`).join('');
+
+            const body = document.getElementById('matrizBody');
+            body.innerHTML = MODULOS.map(m => {
+                const celdas = ROLES.map(r => {
+                    const chips = LETRAS.map(l => `<span class="chip" data-p="${l}" data-mod="${m.id}" data-rol="${r.id}" onclick="alternarPermiso('${m.id}','${r.id}','${l}')" title="${nombrePermiso(l)}">${l}</span>`).join('');
+                    return `<td class="cell" id="cell-${m.id}-${r.id}"><div class="chips">${chips}</div><div class="estado-cell" id="estado-${m.id}-${r.id}"></div></td>`;
+                }).join('');
+                return `<tr><td class="mod-name"><i class="fas ${m.icono}"></i>${m.nombre}</td>${celdas}</tr>`;
+            }).join('');
+
+            refrescarMatriz();
+        }
+
+        function nombrePermiso(l) { return { C: 'Crear / Hacer', V: 'Ver / Leer', E: 'Editar / Modificar', B: 'Borrar / Eliminar' }[l]; }
+
+        function refrescarMatriz() {
+            MODULOS.forEach(m => {
+                ROLES.forEach(r => {
+                    const p = (MATRIZ[m.id] && MATRIZ[m.id][r.id]) || [];
+                    LETRAS.forEach(l => {
+                        const chip = document.querySelector(`.chip[data-mod="${m.id}"][data-rol="${r.id}"][data-p="${l}"]`);
+                        if (chip) chip.classList.toggle('on', p.indexOf(l) !== -1);
+                    });
+                    const celda = document.getElementById(`cell-${m.id}-${r.id}`);
+                    const estado = document.getElementById(`estado-${m.id}-${r.id}`);
+                    celda.classList.remove('blocked', 'full');
+                    if (!p.length) { celda.classList.add('blocked'); estado.className = 'estado-cell estado-block'; estado.innerHTML = '❌ Bloqueado'; }
+                    else if (p.length === 4) { celda.classList.add('full'); estado.className = 'estado-cell estado-total'; estado.textContent = 'Control total'; }
+                    else if (p.length === 1 && p[0] === 'V') { estado.className = 'estado-cell estado-ver'; estado.innerHTML = '👁️ Solo ver'; }
+                    else if (p.length === 3 && p.indexOf('B') === -1) { estado.className = 'estado-cell estado-cve'; estado.textContent = 'Sin eliminar'; }
+                    else { estado.className = 'estado-cell estado-cve'; estado.textContent = p.join(' '); }
+                });
+            });
+            construirTarjetasRoles();
+            mostrarResumenRol();
+        }
+
+        function alternarPermiso(modId, rolId, letra) {
+            const actual = (MATRIZ[modId][rolId] || []).slice();
+            const i = actual.indexOf(letra);
+            if (i === -1) { actual.push(letra); actual.sort((a, b) => LETRAS.indexOf(a) - LETRAS.indexOf(b)); }
+            else actual.splice(i, 1);
+            // Coherencia: crear, editar o borrar exige poder ver
+            if (actual.length && actual.indexOf('V') === -1) { actual.push('V'); actual.sort((a, b) => LETRAS.indexOf(a) - LETRAS.indexOf(b)); }
+            MATRIZ[modId][rolId] = actual;
+            refrescarMatriz();
+        }
+
+        function construirTarjetasRoles() {
+            const cont = document.getElementById('rolesCards');
+            const usuarios = obtenerUsuarios();
+            cont.innerHTML = ROLES.map(r => {
+                const cuenta = usuarios.filter(u => normalizarRol(u.rol) === r.id).length;
+                let totales = 0, soloVer = 0, bloqueados = 0;
+                MODULOS.forEach(m => {
+                    const p = (MATRIZ[m.id] && MATRIZ[m.id][r.id]) || [];
+                    if (!p.length) bloqueados++;
+                    else if (p.length === 1 && p[0] === 'V') soloVer++;
+                    else totales++;
+                });
+                return `<div class="rol-card" style="border-left-color:${r.color}">
+                    <h5><i class="fas ${r.icono}" style="color:${r.color}"></i> ${r.num}. ${r.nombre}</h5>
+                    <p>${r.desc}</p>
+                    <span class="cnt"><i class="fas fa-users"></i> ${cuenta} usuario(s) · ${totales} con edición · ${soloVer} solo ver · ${bloqueados} bloqueado(s)</span>
+                </div>`;
+            }).join('');
+        }
+
+        function guardarMatriz() {
+            if (!MATRIZ.configuracion.admin.length) { mostrarToast('El Administrador no puede quedar sin acceso a Configuración', 'error'); MATRIZ.configuracion.admin = ['C','V','E','B']; refrescarMatriz(); return; }
+            localStorage.setItem(PERMISOS_KEY, JSON.stringify(MATRIZ));
+            mostrarToast('Matriz de permisos guardada y aplicada al sistema', 'success');
+            actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups();
+        }
+
+        function restaurarMatriz() {
+            if (!confirm('¿Restaurar la Matriz Global Definitiva de Permisos con los valores oficiales?')) return;
+            MATRIZ = matrizOficial();
+            localStorage.setItem(PERMISOS_KEY, JSON.stringify(MATRIZ));
+            refrescarMatriz();
+            mostrarToast('Matriz oficial restaurada', 'info');
+        }
+
+        function exportarMatriz() {
+            let html = '<html><head><meta charset="UTF-8"></head><body><table border="1"><tr><th>Módulo / Sección</th>';
+            ROLES.forEach(r => { html += `<th>${r.num}. ${r.nombre}</th>`; });
+            html += '</tr>';
+            MODULOS.forEach(m => {
+                html += `<tr><td><b>${m.nombre}</b></td>`;
+                ROLES.forEach(r => {
+                    const p = (MATRIZ[m.id] && MATRIZ[m.id][r.id]) || [];
+                    let texto;
+                    if (!p.length) texto = 'BLOQUEADO';
+                    else if (p.length === 4) texto = 'C V E B';
+                    else if (p.length === 1 && p[0] === 'V') texto = 'SOLO VER';
+                    else texto = p.join(' ');
+                    html += `<td>${texto}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '<tr><td colspan="7">Leyenda: C = Crear/Hacer | V = Ver/Leer | E = Editar/Modificar | B = Borrar/Eliminar</td></tr>';
+            html += '</table></body></html>';
+            const blob = new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Matriz_Permisos_NEXUSMED_${new Date().toISOString().slice(0,10)}.xls`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            mostrarToast('Matriz exportada a Excel', 'success');
+        }
+
+        /* ================== IPS / HOSPITAL ================== */
+        let logoIps = '';
+        const MAX_LOGO_KB = 800;
+
+        function configurarSubidaLogo() {
+            const input = document.getElementById('hospitalLogoFile');
+            if (!input) return;
+            input.addEventListener('change', e => leerLogoIps(e.target.files[0]));
+            const box = document.getElementById('logoBox');
+            ['dragenter', 'dragover'].forEach(ev => box.addEventListener(ev, e => { e.preventDefault(); box.classList.add('drag'); }));
+            ['dragleave', 'drop'].forEach(ev => box.addEventListener(ev, e => { e.preventDefault(); box.classList.remove('drag'); }));
+            box.addEventListener('drop', e => { if (e.dataTransfer.files && e.dataTransfer.files[0]) leerLogoIps(e.dataTransfer.files[0]); });
+        }
+
+        function leerLogoIps(file) {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { mostrarToast('El archivo debe ser una imagen (PNG o JPG)', 'error'); return; }
+            if (file.size > MAX_LOGO_KB * 1024) { mostrarToast('La imagen supera ' + MAX_LOGO_KB + ' KB. Use una imagen más liviana.', 'error'); return; }
+            const reader = new FileReader();
+            reader.onload = ev => {
+                comprimirLogo(ev.target.result, base64 => {
+                    logoIps = base64;
+                    pintarLogoIps(base64);
+                    mostrarToast('Logo cargado. Recuerde presionar Guardar.', 'success');
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function comprimirLogo(dataUrl, callback) {
+            const img = new Image();
+            img.onload = () => {
+                const maxW = 480, maxH = 260;
+                let w = img.width, h = img.height;
+                const escala = Math.min(1, maxW / w, maxH / h);
+                w = Math.round(w * escala); h = Math.round(h * escala);
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, w, h);
+                ctx.drawImage(img, 0, 0, w, h);
+                try { callback(canvas.toDataURL('image/jpeg', 0.9)); }
+                catch (e) { callback(dataUrl); }
+            };
+            img.onerror = () => callback(dataUrl);
+            img.src = dataUrl;
+        }
+
+        function pintarLogoIps(base64) {
+            const cont = document.getElementById('hospitalLogoPreview');
+            if (!cont) return;
+            if (base64) {
+                cont.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = base64;
+                img.alt = 'Logo de la IPS';
+                cont.appendChild(img);
+            } else {
+                cont.innerHTML = '<span class="firma-empty"><i class="fas fa-image"></i><br>Arrastre aquí el logo o haga clic en “Subir logo”<br>(PNG / JPG · fondo blanco recomendado)</span>';
+            }
+        }
+
+        function quitarLogoIps() {
+            logoIps = '';
+            const input = document.getElementById('hospitalLogoFile');
+            if (input) input.value = '';
+            pintarLogoIps('');
+        }
+
+        function cargarHospital() {
+            const h = JSON.parse(localStorage.getItem(HOSPITAL_KEY) || '{}');
+            document.getElementById('hospitalNombre').value = h.nombre || '';
+            document.getElementById('hospitalDireccion').value = h.direccion || '';
+            document.getElementById('hospitalTelefono').value = h.telefono || '';
+            document.getElementById('hospitalEmail').value = h.email || '';
+            document.getElementById('hospitalNit').value = h.nit || '';
+            document.getElementById('hospitalCodigo').value = h.codigo || '';
+            logoIps = h.logo || '';
+            pintarLogoIps(logoIps);
+        }
+
+        function guardarHospital() {
+            const h = {
+                nombre: document.getElementById('hospitalNombre').value.trim(),
+                direccion: document.getElementById('hospitalDireccion').value.trim(),
+                telefono: document.getElementById('hospitalTelefono').value.trim(),
+                email: document.getElementById('hospitalEmail').value.trim(),
+                nit: document.getElementById('hospitalNit').value.trim(),
+                codigo: document.getElementById('hospitalCodigo').value.trim(),
+                logo: logoIps || ''
+            };
+            try {
+                localStorage.setItem(HOSPITAL_KEY, JSON.stringify(h));
+            } catch (err) {
+                mostrarToast('No hay espacio suficiente para guardar el logo. Use una imagen más liviana.', 'error');
+                return;
+            }
+            mostrarToast('Datos de la IPS guardados. Se aplicarán en todos los PDF.', 'success');
+        }
+
+        function actualizarInfoSistema() {
+            const usuarios = obtenerUsuarios();
+            document.getElementById('infoPacientes').textContent = (JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]')).length;
+            document.getElementById('infoCitas').textContent = (JSON.parse(localStorage.getItem(CITAS_KEY) || '[]')).length;
+            document.getElementById('infoUsuarios').textContent = usuarios.length;
+            document.getElementById('infoFirmas').textContent = usuarios.filter(u => u.firma).length + ' / ' + usuarios.length;
+            let totalBytes = 0;
+            for (let key in localStorage) { if (localStorage.hasOwnProperty(key) && key.indexOf('nexus_') === 0) { totalBytes += localStorage.getItem(key).length * 2; } }
+            document.getElementById('infoStorage').textContent = (totalBytes / 1024).toFixed(1) + ' KB';
+        }
+
+        /* ================== DATOS DE PRUEBA ================== */
+        function cargarDatosPrueba() {
+            if (!confirm('¿Cargar datos de prueba? Se agregarán pacientes y citas ficticios.')) return;
+            const pacientes = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
+            const contador = parseInt(localStorage.getItem('nexus_contador_admision')) || 0;
+            const datosPrueba = [
+                { doc: '12345678', nombre: 'María González', edad: 45, genero: 'Femenino', servicio: 'Medicina Interna', medico: 'Dr. García', diag: 'Neumonía', estado: 'Activo', hab: '201-A', eps: 'NUEVA EPS' },
+                { doc: '23456789', nombre: 'Carlos Pérez', edad: 62, genero: 'Masculino', servicio: 'UCI', medico: 'Dr. López', diag: 'Infarto agudo', estado: 'Crítico', hab: 'UCI-03', eps: 'SURA' },
+                { doc: '34567890', nombre: 'Ana Martínez', edad: 28, genero: 'Femenino', servicio: 'Obstetricia', medico: 'Dra. Martínez', diag: 'Embarazo de alto riesgo', estado: 'Observación', hab: '305-B', eps: 'SANITAS' },
+                { doc: '45678901', nombre: 'Luis Rodríguez', edad: 55, genero: 'Masculino', servicio: 'Cirugía', medico: 'Dr. Rodríguez', diag: 'Apendicitis', estado: 'Activo', hab: '401-C', eps: 'COMPENSAR' },
+                { doc: '56789012', nombre: 'Rosa Sánchez', edad: 8, genero: 'Femenino', servicio: 'Pediatría', medico: 'Dra. Sánchez', diag: 'Amigdalitis', estado: 'Activo', hab: '502-A', eps: 'SALUD TOTAL' },
+                { doc: '67890123', nombre: 'Pedro Fernández', edad: 70, genero: 'Masculino', servicio: 'Oncología', medico: 'Dr. Fernández', diag: 'Cáncer de pulmón', estado: 'Observación', hab: '603-B', eps: 'NUEVA EPS' },
+                { doc: '78901234', nombre: 'Laura Torres', edad: 35, genero: 'Femenino', servicio: 'Emergencia', medico: 'Dr. García', diag: 'Fractura de fémur', estado: 'Activo', hab: 'ER-02', eps: 'FAMISANAR' },
+                { doc: '89012345', nombre: 'Miguel Ángel Ruiz', edad: 48, genero: 'Masculino', servicio: 'Traumatología', medico: 'Dr. Rodríguez', diag: 'Lesión vertebral', estado: 'Crítico', hab: '704-A', eps: 'SURA' }
+            ];
+
+            let baseCont = contador;
+            datosPrueba.forEach((d, i) => {
+                baseCont++;
+                const numAdm = `ADM-${new Date().getFullYear()}-${String(baseCont).padStart(4, '0')}`;
+                const fechaIng = new Date(Date.now() - Math.random() * 7 * 86400000).toISOString();
+                pacientes.push({
+                    id: Date.now() + i * 1000, numAdmision: numAdm, fechaIngreso: fechaIng, fechaSalida: '',
+                    documento: d.doc, nombre: d.nombre, edad: d.edad, genero: d.genero, servicio: d.servicio, eps: d.eps,
+                    medico: d.medico, diagnostico: d.diag, estado: d.estado, habitacion: d.hab, observaciones: '',
+                    fechaRegistro: new Date().toISOString()
+                });
+            });
+            localStorage.setItem(PATIENTS_KEY, JSON.stringify(pacientes));
+            localStorage.setItem('nexus_contador_admision', baseCont);
+
+            const citas = JSON.parse(localStorage.getItem(CITAS_KEY) || '[]');
+            const hoy = new Date().toISOString().slice(0, 10);
+            const citasPrueba = [
+                { paciente: 'María González', medico: 'Dr. García', especialidad: 'Medicina Interna', fecha: hoy, hora: '09:00', motivo: 'Control', consultorio: '201', estado: 'Confirmada' },
+                { paciente: 'Carlos Pérez', medico: 'Dr. López', especialidad: 'Cardiología', fecha: hoy, hora: '10:30', motivo: 'Evaluación post-infarto', consultorio: '302', estado: 'Pendiente' },
+                { paciente: 'Ana Martínez', medico: 'Dra. Martínez', especialidad: 'Ginecología', fecha: hoy, hora: '11:00', motivo: 'Control prenatal', consultorio: '305', estado: 'Confirmada' },
+                { paciente: 'Rosa Sánchez', medico: 'Dra. Sánchez', especialidad: 'Pediatría', fecha: hoy, hora: '14:00', motivo: 'Seguimiento', consultorio: '502', estado: 'Pendiente' },
+                { paciente: 'Pedro Fernández', medico: 'Dr. Fernández', especialidad: 'Oncología', fecha: new Date(Date.now() + 86400000).toISOString().slice(0, 10), hora: '09:30', motivo: 'Quimioterapia', consultorio: '603', estado: 'Confirmada' }
+            ];
+            citasPrueba.forEach((c, i) => { citas.push({ id: 'CITA-' + (Date.now() + i * 500 + 1), paciente: c.paciente, medico: c.medico, especialidad: c.especialidad, fecha: c.fecha, hora: c.hora, motivo: c.motivo, consultorio: c.consultorio, estado: c.estado, fechaRegistro: new Date().toISOString() }); });
+            localStorage.setItem(CITAS_KEY, JSON.stringify(citas));
+
+            actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups();
+            mostrarToast('Datos de prueba cargados', 'success');
+        }
+
+        function limpiarTodoDatos() {
+            if (!confirm('⚠️ ¿Eliminar TODOS los datos clínicos? Esta acción es irreversible.')) return;
+            if (!confirm('¿Está completamente seguro? Se perderán pacientes, citas, historias, evoluciones y notas.')) return;
+            const conservar = [USERS_KEY, PERMISOS_KEY, HOSPITAL_KEY, K_CUPS, K_EPS, 'nexus_sesion'];
+            const keysToRemove = [];
+            for (let key in localStorage) { if (key.indexOf('nexus_') === 0 && conservar.indexOf(key) === -1) keysToRemove.push(key); }
+            keysToRemove.forEach(k => localStorage.removeItem(k));
+            actualizarInfoSistema();
+            initCups(); initEps();
+            cargarTablaCups(); cargarTablaEps(); generarCamposEpsCups(); cargarUsuarios(); cargarHospital();
+            mostrarToast('Datos clínicos eliminados (usuarios, permisos y datos de la IPS conservados)', 'info');
+        }
+
+        /* ================== UTILIDADES ================== */
+        function cerrarModal() { document.getElementById('modalEditar').classList.remove('active'); usuarioEditando = null; firmaEdicion = ''; }
+        function cerrarModalFicha() { document.getElementById('modalFicha').classList.remove('active'); }
+        function cerrarSesion() { localStorage.removeItem('nexus_sesion'); window.location.href = 'index.html'; }
+        function mostrarToast(msg, tipo) { const c = document.getElementById('toastContainer'); const t = document.createElement('div'); t.className = 'toast toast-' + (tipo || 'info'); t.textContent = msg; c.appendChild(t); setTimeout(() => t.remove(), 3000); }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarModal(); cerrarModalFicha(); } });
+        document.getElementById('modalEditar').addEventListener('click', e => { if (e.target === document.getElementById('modalEditar')) cerrarModal(); });
+        document.getElementById('modalFicha').addEventListener('click', e => { if (e.target === document.getElementById('modalFicha')) cerrarModalFicha(); });
+    </script>
+
+    <!-- MATRIZ GLOBAL DE PERMISOS -->
+    <script>
+        (function () {
+            function aplicar() { if (window.NX) NX.filtrarMenu(); }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', aplicar);
+            } else { aplicar(); }
+        })();
+    </script>
+</body>
+</html>
