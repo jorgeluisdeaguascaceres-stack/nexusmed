@@ -742,6 +742,26 @@ function cerrarSesion() { localStorage.removeItem('nexus_sesion'); window.locati
 // ═══════════════════════════════════════════
 function getTerapias() { return JSON.parse(localStorage.getItem('nexus_terapias') || '[]'); }
 function saveTerapias(t) { localStorage.setItem('nexus_terapias', JSON.stringify(t)); }
+// Citas agendadas (creadas en el módulo Citas)
+function getCitas() { return JSON.parse(localStorage.getItem('nexus_citas') || '[]'); }
+function saveCitas(c) { localStorage.setItem('nexus_citas', JSON.stringify(c)); }
+// Servicio de la cita -> tipo de terapia
+const SERVICIO_TIPO = { 'Terapia Física':'Física', 'Terapia Respiratoria':'Respiratoria', 'Fonoaudiología':'Lenguaje', 'Terapia Ocupacional':'Ocupacional', 'Psicología':'Psicología' };
+function turnoDeHora(h) { const hh = parseInt((h||'').split(':')[0],10); if (hh>=6 && hh<14) return 'Mañana'; if (hh>=14 && hh<22) return 'Tarde'; return 'Noche'; }
+// Convierte una cita agendada en una fila estilo terapia (pendiente de evolución)
+function citaComoTerapia(c) {
+    return {
+        id: c.id, origen: 'cita', citaId: c.id,
+        numeroTerapia: 'AGENDADA',
+        nombrePaciente: c.paciente || '', documentoPaciente: c.pacienteDoc || '',
+        numAdmision: c.numAdmision || '',
+        tipoTerapia: SERVICIO_TIPO[c.servicio] || c.servicio || '',
+        estadoTerapia: 'Programada',
+        terapeuta: c.medico || '',
+        fecha: c.fecha || '', hora: c.hora || '', turno: turnoDeHora(c.hora),
+        servicio: c.servicio || ''
+    };
+}
 function getPacientes() { return JSON.parse(localStorage.getItem('nexus_pacientes') || '[]'); }
 function getUsuarios() { return JSON.parse(localStorage.getItem('nexus_usuarios') || '[]'); }
 function getContador() { return parseInt(localStorage.getItem('nexus_contador_te') || '0'); }
@@ -1073,12 +1093,27 @@ function showToast(msg, type='info', clearPrevious=false) {
 // ═══════════════════════════════════════════
 function renderTabla() {
     const terapias = getTerapias();
+    // Citas ya evolucionadas (tienen una terapia enlazada) para no duplicarlas
+    const citasHechas = {};
+    terapias.forEach(t => { if (t.citaId) citasHechas[String(t.citaId)] = true; });
+    // Citas agendadas pendientes -> se muestran como filas "Programada"
+    const citasPendientes = getCitas()
+        .filter(c => c && c.id && !citasHechas[String(c.id)] && (c.estado !== 'Cancelada' && c.estado !== 'Atendida'))
+        .map(citaComoTerapia);
+    // Lista combinada: terapias reales + citas agendadas
+    const combinada = terapias.concat(citasPendientes);
+
     const search = document.getElementById('searchInput').value.toLowerCase();
     const filterTipo = document.getElementById('filterTipo').value;
     const filterEstado = document.getElementById('filterEstado').value;
     const filterTurno = document.getElementById('filterTurno').value;
 
-    let filtered = terapias.filter(t => {
+    // PASO 4: solo admisiones ACTIVAS + privacidad por profesional logueado
+    const _docsActivos = admisionesActivasDocs();
+    const _miNombre = nombreUsuarioActual();
+    const baseList = combinada.filter(t => _docsActivos[String(t.documentoPaciente)] && (ES_ADMIN || (t.terapeuta || '') === _miNombre));
+
+    let filtered = baseList.filter(t => {
         const matchSearch = !search ||
             (t.numeroTerapia||'').toLowerCase().includes(search) ||
             (t.nombrePaciente||'').toLowerCase().includes(search) ||
@@ -1092,16 +1127,11 @@ function renderTabla() {
         return matchSearch && matchTipo && matchEstado && matchTurno;
     });
 
-    // PASO 4: solo admisiones ACTIVAS + privacidad por profesional logueado
-    const _docsActivos = admisionesActivasDocs();
-    const _miNombre = nombreUsuarioActual();
-    filtered = filtered.filter(t => _docsActivos[String(t.documentoPaciente)] && (ES_ADMIN || (t.terapeuta || '') === _miNombre));
-
     filtered.sort((a,b) => new Date(b.fecha + 'T' + (b.hora||'00:00')) - new Date(a.fecha + 'T' + (a.hora||'00:00')));
 
     const tbody = document.getElementById('tablaTerapias');
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="8"><i class="fas fa-hand-holding-medical"></i> No se encontraron terapias</td></tr>';
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="8"><i class="fas fa-hand-holding-medical"></i> No hay terapias ni citas agendadas para mostrar</td></tr>';
     } else {
         tbody.innerHTML = filtered.map(t => {
             let turnoBadge = '';
@@ -1128,18 +1158,32 @@ function renderTabla() {
                 ? `<span class="badge ${estadoBadgeClass}">${t.estadoTerapia}</span>`
                 : `<span style="color:#5a7a9a">—</span>`;
 
-            // PASO 5: botonera de acciones directas (5 acciones)
-            const editable = terapiaEditable(t);
-            const btnEditar = editable
-                ? `<button class="btn-action btn-edit" onclick="editarTerapia('${t.id}')" title="Editar evolución"><i class="fas fa-edit"></i> Editar</button>`
-                : `<button class="btn-action btn-edit" disabled title="Bloqueado: transcurrieron más de 24h del registro (norma legal)" style="opacity:.45;cursor:not-allowed"><i class="fas fa-lock"></i> Editar</button>`;
-            const btnEliminar = ES_ADMIN
-                ? `<button class="btn-action btn-delete" onclick="eliminarTerapia('${t.id}')" title="Eliminar sesión (solo ADMIN)"><i class="fas fa-trash"></i> Eliminar</button>`
-                : '';
+            // PASO 5: botonera de acciones (distinta si es una cita agendada o una terapia real)
+            let acciones;
+            let numCol;
+            if (t.origen === 'cita') {
+                // Cita agendada pendiente de evolución
+                numCol = `<span class="badge badge-programada"><i class="fas fa-calendar-check" style="font-size:.55rem;margin-right:3px"></i>Agendada</span>`;
+                acciones = `<button class="btn-action" onclick="hacerEvolucionDesdeCita('${t.citaId}')" title="Registrar la evolución de esta cita agendada" style="background:rgba(72,199,142,.15);color:#48c78e;border:1px solid rgba(72,199,142,.4)"><i class="fas fa-notes-medical"></i> Hacer Evolución</button>`;
+                if (ES_ADMIN) acciones += `<button class="btn-action btn-delete" onclick="cancelarCitaAgendada('${t.citaId}')" title="Cancelar la cita (solo ADMIN)"><i class="fas fa-trash"></i> Cancelar</button>`;
+            } else {
+                numCol = `<strong style="color:#00b4d8">${t.numeroTerapia||''}</strong>`;
+                const editable = terapiaEditable(t);
+                const btnEditar = editable
+                    ? `<button class="btn-action btn-edit" onclick="editarTerapia('${t.id}')" title="Editar evolución"><i class="fas fa-edit"></i> Editar</button>`
+                    : `<button class="btn-action btn-edit" disabled title="Bloqueado: transcurrieron más de 24h del registro (norma legal)" style="opacity:.45;cursor:not-allowed"><i class="fas fa-lock"></i> Editar</button>`;
+                const btnEliminar = ES_ADMIN
+                    ? `<button class="btn-action btn-delete" onclick="eliminarTerapia('${t.id}')" title="Eliminar sesión (solo ADMIN)"><i class="fas fa-trash"></i> Eliminar</button>`
+                    : '';
+                acciones = `<button class="btn-action" onclick="hacerEvolucion('${t.id}')" title="Hacer evolución de la sesión" style="background:rgba(72,199,142,.15);color:#48c78e;border:1px solid rgba(72,199,142,.4)"><i class="fas fa-notes-medical"></i> Evolución</button>`
+                    + `<button class="btn-action btn-pdf" onclick="generarPDFTerapia('${t.id}')" title="Descargar PDF"><i class="fas fa-file-pdf"></i> PDF</button>`
+                    + btnEditar + btnEliminar
+                    + `<button class="btn-action btn-view" onclick="verDetalle('${t.id}')" title="Ver histórico (solo lectura)"><i class="fas fa-eye"></i> Ver</button>`;
+            }
 
             return `
             <tr>
-                <td><strong style="color:#00b4d8">${t.numeroTerapia||''}</strong></td>
+                <td>${numCol}</td>
                 <td>${t.nombrePaciente||'—'}</td>
                 <td>${t.documentoPaciente||'—'}</td>
                 <td>${tipoBadge}</td>
@@ -1148,22 +1192,18 @@ function renderTabla() {
                 <td>${t.fecha||'—'} ${turnoBadge}</td>
                 <td>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-                        <button class="btn-action" onclick="hacerEvolucion('${t.id}')" title="Hacer evolución de la sesión" style="background:rgba(72,199,142,.15);color:#48c78e;border:1px solid rgba(72,199,142,.4)"><i class="fas fa-notes-medical"></i> Evolución</button>
-                        <button class="btn-action btn-pdf" onclick="generarPDFTerapia('${t.id}')" title="Descargar PDF"><i class="fas fa-file-pdf"></i> PDF</button>
-                        ${btnEditar}
-                        ${btnEliminar}
-                        <button class="btn-action btn-view" onclick="verDetalle('${t.id}')" title="Ver histórico (solo lectura)"><i class="fas fa-eye"></i> Ver</button>
+                        ${acciones}
                     </div>
                 </td>
             </tr>`;
         }).join('');
     }
 
-    // Stats
-    document.getElementById('statTotal').textContent = terapias.length;
-    document.getElementById('statHoy').textContent = terapias.filter(t => t.fecha === today).length;
-    document.getElementById('statEnCurso').textContent = terapias.filter(t => t.estadoTerapia === 'En Curso').length;
-    document.getElementById('statCompletadas').textContent = terapias.filter(t => t.estadoTerapia === 'Completada').length;
+    // Stats (sobre la lista visible fusionada: terapias reales + citas agendadas)
+    document.getElementById('statTotal').textContent = baseList.length;
+    document.getElementById('statHoy').textContent = baseList.filter(t => t.fecha === today).length;
+    document.getElementById('statEnCurso').textContent = baseList.filter(t => t.estadoTerapia === 'En Curso').length;
+    document.getElementById('statCompletadas').textContent = baseList.filter(t => t.estadoTerapia === 'Completada').length;
 }
 
 // ═══════════════════════════════════════════
@@ -1202,6 +1242,7 @@ function abrirModalCrear() {
     else document.getElementById('turnoTerapia').value = 'Noche';
 
     document.getElementById('modalForm').dataset.editId = '';
+    document.getElementById('modalForm').dataset.citaId = '';
     document.getElementById('modalForm').classList.add('active');
 }
 
@@ -1270,6 +1311,7 @@ function editarTerapia(id) {
     document.getElementById('planProximaSesion').value = t.planProximaSesion || '';
 
     document.getElementById('modalForm').dataset.editId = id;
+    document.getElementById('modalForm').dataset.citaId = '';
     document.getElementById('modalForm').classList.add('active');
 }
 
@@ -1315,6 +1357,7 @@ function guardarTerapia() {
 
     const terapias = getTerapias();
     const editId = document.getElementById('modalForm').dataset.editId;
+    const citaId = document.getElementById('modalForm').dataset.citaId || '';
 
     const data = {
         pacienteId,
@@ -1335,6 +1378,7 @@ function guardarTerapia() {
         planProximaSesion: document.getElementById('planProximaSesion').value.trim(),
         admisionData: admData
     };
+    if (citaId) data.citaId = citaId;
 
     if (editId) {
         const idx = terapias.findIndex(t => t.id === editId);
@@ -1353,9 +1397,94 @@ function guardarTerapia() {
         showToast('Terapia creada exitosamente', 'success');
     }
 
+    // Si esta terapia nace de una cita agendada, marcar la cita como Atendida
+    if (!editId && citaId) {
+        const citas = getCitas();
+        const ci = citas.findIndex(c => String(c.id) === String(citaId));
+        if (ci > -1) { citas[ci].estado = 'Atendida'; saveCitas(citas); }
+    }
+    document.getElementById('modalForm').dataset.citaId = '';
+
     saveTerapias(terapias);
     cerrarModal('modalForm');
     renderTabla();
+}
+
+// ═══════════════════════════════════════════
+// Hacer Evolución desde una cita agendada
+// ═══════════════════════════════════════════
+function hacerEvolucionDesdeCita(citaId) {
+    const cita = getCitas().find(c => String(c.id) === String(citaId));
+    if (!cita) { showToast('La cita ya no existe', 'error'); return; }
+
+    // Abrir el modal en blanco y luego rellenar con los datos de la cita
+    abrirModalCrear();
+    document.getElementById('modalTitulo').textContent = 'Hacer Evolución — Cita Agendada';
+
+    // Buscar el paciente por documento
+    const paciente = getPacientes().find(p => String(p.documento) === String(cita.pacienteDoc));
+    if (paciente) {
+        document.getElementById('pacienteBuscar').value = paciente.documento;
+        document.getElementById('pacienteId').value = String(paciente.id);
+        const infoDiv = document.getElementById('pacienteInfo');
+        infoDiv.className = 'patient-info-inline found';
+        infoDiv.style.display = '';
+        let ingresoStr = 'N/A';
+        if (paciente.fechaIngreso) {
+            const d = new Date(paciente.fechaIngreso);
+            ingresoStr = d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+        }
+        let admStr = paciente.numAdmision ? 'Adm: ' + paciente.numAdmision + ' — ' : '';
+        infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${paciente.nombre}</strong> — ${admStr}Doc: ${paciente.documento} — EPS: ${paciente.eps||'N/A'} — Ingreso: ${ingresoStr}`;
+        llenarCamposAdmision(paciente);
+    } else {
+        document.getElementById('pacienteBuscar').value = cita.pacienteDoc || '';
+        const infoDiv = document.getElementById('pacienteInfo');
+        infoDiv.className = 'patient-info-inline found';
+        infoDiv.style.display = '';
+        infoDiv.innerHTML = `<i class="fas fa-check-circle"></i> <strong>${cita.paciente || '—'}</strong> — Doc: ${cita.pacienteDoc||'N/A'}`;
+        var _idN = document.getElementById('admNombreCompleto');
+        var _idD = document.getElementById('admDocumento');
+        if (_idN) _idN.value = cita.paciente || '';
+        if (_idD) _idD.value = cita.pacienteDoc || '';
+    }
+
+    // Fecha / hora / turno tomados de la cita
+    document.getElementById('fechaTerapia').value = cita.fecha || document.getElementById('fechaTerapia').value;
+    document.getElementById('horaTerapia').value = cita.hora || document.getElementById('horaTerapia').value;
+    document.getElementById('turnoTerapia').value = turnoDeHora(cita.hora);
+
+    // Tipo de terapia según el servicio de la cita
+    setTipoSeleccionado(SERVICIO_TIPO[cita.servicio] || cita.servicio || '');
+    // Estado inicial sugerido
+    setEstadoTerapiaSeleccionado('Completada');
+    // Terapeuta = médico de la cita
+    loadTerapeutasSelect(cita.medico || '');
+
+    // Marcar el vínculo con la cita
+    document.getElementById('modalForm').dataset.editId = '';
+    document.getElementById('modalForm').dataset.citaId = String(citaId);
+
+    const desc = document.getElementById('descripcionSesion');
+    if (desc) desc.focus();
+}
+
+// ═══════════════════════════════════════════
+// Cancelar una cita agendada (solo ADMIN)
+// ═══════════════════════════════════════════
+function cancelarCitaAgendada(citaId) {
+    if (!ES_ADMIN) { showToast('Solo un administrador puede cancelar citas', 'error'); return; }
+    if (!confirm('¿Cancelar esta cita agendada? El paciente dejará de aparecer en el listado de terapias.')) return;
+    const citas = getCitas();
+    const idx = citas.findIndex(c => String(c.id) === String(citaId));
+    if (idx > -1) {
+        citas[idx].estado = 'Cancelada';
+        saveCitas(citas);
+        showToast('Cita cancelada', 'success');
+        renderTabla();
+    } else {
+        showToast('La cita ya no existe', 'error');
+    }
 }
 
 // ═══════════════════════════════════════════
