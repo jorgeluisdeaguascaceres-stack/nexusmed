@@ -214,6 +214,11 @@
                             <option value="">Seleccionar médico primero...</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>Cantidad de citas autorizadas (límite)</label>
+                        <input type="number" id="citaCantidad" min="1" step="1" placeholder="Ej: 12" oninput="onCantidadChange()">
+                        <div id="citaCantidadInfo" style="font-size:11px;color:#90e0ef;margin-top:6px;min-height:14px;">Escriba cuántas sesiones autorizó la EPS: el calendario no dejará elegir más de esa cantidad.</div>
+                    </div>
                     <div class="form-group" style="grid-column:1/-1;position:relative;">
                         <label>Fechas de las citas (elige uno o varios días del mes)</label>
                         <input type="text" id="citaFechasDisplay" readonly placeholder="Clic aquí para abrir el calendario y elegir los días..." onclick="toggleCalendario(event)" style="cursor:pointer;">
@@ -319,8 +324,9 @@
         // ════════════════════════════════════════════
         let calFecha = new Date();          // mes visible
         let fechasSel = [];                 // 'YYYY-MM-DD' seleccionadas
+        let calMinDate = new Date().toISOString().slice(0, 10); // día mínimo seleccionable (fecha de admisión)
         const MESES_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-        function initCalendario() { calFecha = new Date(); calFecha.setDate(1); renderCalendario(); }
+        function initCalendario() { calMinDate = new Date().toISOString().slice(0, 10); calFecha = new Date(); calFecha.setDate(1); renderCalendario(); }
         function calMes(delta) { calFecha.setMonth(calFecha.getMonth() + delta); renderCalendario(); }
         function calLimpiarSel() { fechasSel = []; renderCalendario(); actualizarDisplayFechas(); }
         function toggleCalendario(ev) {
@@ -336,23 +342,36 @@
             let offset = primero.getDay() - 1; if (offset < 0) offset = 6; // Lun=0
             const diasMes = new Date(y, m + 1, 0).getDate();
             const hoyStr = new Date().toISOString().slice(0, 10);
+            const minStr = calMinDate || hoyStr;
             let html = '';
             for (let i = 0; i < offset; i++) html += '<span class="cal-day empty"></span>';
             for (let d = 1; d <= diasMes; d++) {
                 const iso = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
                 let cls = 'cal-day';
-                if (iso < hoyStr) cls += ' past';
+                if (iso < minStr) cls += ' past';
                 if (iso === hoyStr) cls += ' today';
                 if (fechasSel.indexOf(iso) > -1) cls += ' sel';
-                const onclick = iso < hoyStr ? '' : ` onclick="calToggleDia('${iso}')"`;
+                const onclick = iso < minStr ? '' : ` onclick="calToggleDia('${iso}')"`;
                 html += `<span class="${cls}"${onclick}>${d}</span>`;
             }
             document.getElementById('calDias').innerHTML = html;
-            document.getElementById('calResumen').textContent = fechasSel.length + (fechasSel.length === 1 ? ' día seleccionado' : ' días seleccionados');
+            const lim = parseInt((document.getElementById('citaCantidad')||{}).value, 10);
+            let txt = fechasSel.length + (fechasSel.length === 1 ? ' día seleccionado' : ' días seleccionados');
+            if (lim > 0) txt += ' / ' + lim + ' autorizadas';
+            document.getElementById('calResumen').textContent = txt;
         }
         function calToggleDia(iso) {
             const i = fechasSel.indexOf(iso);
-            if (i > -1) fechasSel.splice(i, 1); else fechasSel.push(iso);
+            if (i > -1) {
+                fechasSel.splice(i, 1);
+            } else {
+                const lim = parseInt(document.getElementById('citaCantidad').value, 10);
+                if (lim > 0 && fechasSel.length >= lim) {
+                    mostrarToast('Ya alcanzó el límite de ' + lim + ' citas autorizadas', 'error');
+                    return;
+                }
+                fechasSel.push(iso);
+            }
             fechasSel.sort();
             renderCalendario();
             actualizarDisplayFechas();
@@ -417,6 +436,18 @@
                 document.getElementById('citaPacienteDoc').value = p.documento;
                 info.style.color = '#48c78e';
                 info.textContent = `✓ ${p.nombre} · ${p.tipoDoc||'CC'} ${p.documento} · Edad: ${p.edad||'—'} · EPS: ${p.eps||'—'} · Adm: ${p.numAdmision||'—'} · Estado: ${p.estado||'—'}`;
+                // El calendario se abre en el mes de la ADMISIÓN y no deja elegir días previos a ella
+                const fi = p.fechaIngreso || p.fechaAdmision || '';
+                if (fi) {
+                    const iso = String(fi).slice(0, 10);
+                    calMinDate = iso;
+                    const d = new Date(iso + 'T00:00:00');
+                    if (!isNaN(d)) { calFecha = d; calFecha.setDate(1); }
+                    info.textContent += ` · Ingreso: ${iso.split('-').reverse().join('/')}`;
+                } else {
+                    calMinDate = new Date().toISOString().slice(0, 10);
+                }
+                renderCalendario();
             } else {
                 pacienteSel = null;
                 document.getElementById('citaPacienteDoc').value = '';
@@ -425,11 +456,63 @@
             }
         }
 
-        /* ===== PASO 2: Servicio -> CUPS ===== */
+        /* ===== PASO 2: Servicio -> CUPS + filtra los profesionales de esa especialidad ===== */
+        // Palabras clave por servicio para encontrar a los profesionales guardados
+        const SERVICIO_ESP = {
+            'Terapia Física': ['fisio', 'fisica', 'física'],
+            'Terapia Respiratoria': ['respirator'],
+            'Fonoaudiología': ['fono', 'lenguaje'],
+            'Terapia Ocupacional': ['ocupacional'],
+            'Psicología': ['psicolog', 'psicólog']
+        };
+        function _norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+        function profesionalCoincide(u, servicio){
+            const claves = (SERVICIO_ESP[servicio] || []).map(_norm);
+            if (!claves.length) return true;
+            const campo = _norm((u.especialidad || '') + ' ' + (u.rol || ''));
+            return claves.some(k => campo.indexOf(k) !== -1);
+        }
         function onServicioChange() {
             const s = document.getElementById('citaServicio').value;
             const info = document.getElementById('citaCupsInfo');
             info.textContent = s ? ('Código CUPS asociado: ' + (CUPS_MAP[s] || '—')) : '';
+            cargarMedicosPorServicio(s);
+        }
+        /* Llena el select de médico solo con quienes tengan esa especialidad */
+        function cargarMedicosPorServicio(servicio) {
+            const sel = document.getElementById('citaMedico');
+            if (!sel) return;
+            const todos = window.NXROLES ? NXROLES.clinicos() : [];
+            const lista = servicio ? todos.filter(u => profesionalCoincide(u, servicio)) : todos;
+            sel.innerHTML = '<option value="">Seleccionar médico...</option>';
+            if (lista.length === 0) {
+                const aviso = document.createElement('option');
+                aviso.value = ''; aviso.disabled = true;
+                aviso.textContent = servicio ? ('Sin profesionales de ' + servicio) : 'Sin médicos configurados';
+                sel.appendChild(aviso);
+            }
+            lista.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.nombre || m.usuario || '';
+                opt.textContent = NXROLES.etiquetaPersona(m);
+                sel.appendChild(opt);
+            });
+            // Reinicia la especialidad al cambiar el filtro
+            const selEsp = document.getElementById('citaEspecialidad');
+            selEsp.disabled = false; selEsp.style.opacity = '1'; selEsp.style.cursor = 'auto';
+            selEsp.innerHTML = '<option value="">Seleccionar médico primero...</option>';
+        }
+        /* Cantidad autorizada: no permitir programar de más */
+        function onCantidadChange() {
+            const n = parseInt(document.getElementById('citaCantidad').value, 10);
+            const info = document.getElementById('citaCantidadInfo');
+            if (n > 0 && fechasSel.length > n) {
+                fechasSel = fechasSel.slice(0, n);
+                renderCalendario(); actualizarDisplayFechas();
+            }
+            info.textContent = n > 0
+                ? ('Límite: ' + n + ' citas · seleccionadas: ' + fechasSel.length)
+                : 'Escriba cuántas sesiones autorizó la EPS: el calendario no dejará elegir más de esa cantidad.';
         }
 
         /* ===== PASO 3: Medico -> Especialidad automatica y bloqueada ===== */
@@ -635,7 +718,10 @@
             document.getElementById('citaMotivo').value = '';
             document.getElementById('citaConsultorio').value = '';
             document.getElementById('citaHora').value = '';
+            const cant = document.getElementById('citaCantidad'); if (cant) cant.value = '';
+            const cantInfo = document.getElementById('citaCantidadInfo'); if (cantInfo) cantInfo.textContent = 'Escriba cuántas sesiones autorizó la EPS: el calendario no dejará elegir más de esa cantidad.';
             fechasSel = [];
+            calMinDate = new Date().toISOString().slice(0, 10);
             actualizarDisplayFechas();
             const pop = document.getElementById('calendarioFlotante');
             if (pop) pop.style.display = 'none';
