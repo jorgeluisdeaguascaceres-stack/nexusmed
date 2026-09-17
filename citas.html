@@ -278,7 +278,7 @@
             <div class="table-header"><h3>📅 Citas Programadas</h3></div>
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>ID</th><th>Paciente</th><th>Médico</th><th>Especialidad</th><th>Servicio (CUPS)</th><th>Fecha</th><th>Hora</th><th>Motivo</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Nombre</th><th>Médico</th><th>Especialidad</th><th>Cantidad</th><th>Estado</th><th>Acciones</th></tr></thead>
                     <tbody id="tablaCitas"></tbody>
                 </table>
             </div>
@@ -302,6 +302,17 @@
             <div class="modal-actions">
                 <button class="btn-limpiar" onclick="cerrarModal()">Cancelar</button>
                 <button class="btn-registrar" onclick="guardarEdicion()">💾 Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalle del Bloque (citas de una admisión/servicio) -->
+    <div class="modal-overlay" id="modalBloque">
+        <div class="modal" style="max-width:760px;width:94%">
+            <h3 id="bloqueTitulo">🗓️ Citas del bloque</h3>
+            <div id="bloqueContenido" style="max-height:60vh;overflow:auto"></div>
+            <div class="modal-actions">
+                <button class="btn-limpiar" onclick="cerrarBloque()">Cerrar</button>
             </div>
         </div>
     </div>
@@ -616,24 +627,66 @@
         function cargarTabla(lista = null) {
             const tbody = document.getElementById('tablaCitas');
             const emptyState = document.getElementById('emptyState');
-            const citas = lista || obtenerCitas().sort((a, b) => a.fecha.localeCompare(b.fecha) || a.hora.localeCompare(b.hora));
+            const citas = lista || obtenerCitas();
             tbody.innerHTML = '';
             if (citas.length === 0) { emptyState.style.display = 'block'; return; }
             emptyState.style.display = 'none';
-            citas.forEach(c => {
+
+            // Agrupar las citas por admisión + servicio + médico (un bloque = una autorización)
+            const bloques = agruparEnBloques(citas);
+            bloques.forEach(b => {
                 const tr = document.createElement('tr');
-                const fecha = new Date(c.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                let badgeClass = 'badge-pendiente';
-                if (c.estado === 'Confirmada') badgeClass = 'badge-confirmada';
-                if (c.estado === 'Completada') badgeClass = 'badge-completada';
-                if (c.estado === 'Cancelada') badgeClass = 'badge-cancelada';
-                let acciones = '';
-                if (c.estado === 'Pendiente') acciones = `<button class="btn-action btn-confirmar" onclick="cambiarEstado('${c.id}','Confirmada')">✅</button><button class="btn-action btn-cancelar" onclick="cambiarEstado('${c.id}','Cancelada')">❌</button><button class="btn-action btn-editar" onclick="editarCita('${c.id}')">✏️</button><button class="btn-action btn-eliminar" onclick="eliminarCita('${c.id}')">🗑️</button>`;
-                else if (c.estado === 'Confirmada') acciones = `<button class="btn-action btn-completar" onclick="cambiarEstado('${c.id}','Completada')">✔️</button><button class="btn-action btn-cancelar" onclick="cambiarEstado('${c.id}','Cancelada')">❌</button>`;
-                else acciones = `<button class="btn-action btn-eliminar" onclick="eliminarCita('${c.id}')">🗑️</button>`;
-                tr.innerHTML = `<td><strong>${c.id.slice(-6)}</strong></td><td>${c.paciente}</td><td>${c.medico}</td><td>${c.especialidad}</td><td>${c.servicio ? c.servicio + (c.cups ? ' <span style="color:#5a7a9a">('+c.cups+')</span>' : '') : '—'}</td><td>${fecha}</td><td>${c.hora}</td><td>${c.motivo || '—'}</td><td><span class="badge ${badgeClass}">${c.estado}</span></td><td>${acciones}</td>`;
+                const idTxt = b.numAdmision || ('CITA-' + b.citas[0].id.slice(-4));
+                const servSub = b.servicio ? `<div style="font-size:11px;color:#5a7a9a;margin-top:2px">${b.servicio}${b.cups ? ' · CUPS ' + b.cups : ''}</div>` : '';
+                const acciones =
+                    `<button class="btn-action btn-editar" title="Ver y editar las citas de este bloque" onclick="abrirBloque('${b.key.replace(/'/g,"\\'")}')">✏️ Editar</button>` +
+                    `<button class="btn-action btn-eliminar" title="Eliminar todas las citas del bloque" onclick="eliminarBloque('${b.key.replace(/'/g,"\\'")}')">🗑️ Eliminar</button>` +
+                    `<button class="btn-action btn-confirmar" title="Descargar PDF de firmas y agenda" onclick="pdfBloque('${b.key.replace(/'/g,"\\'")}')">📄 PDF</button>`;
+                tr.innerHTML = `<td><strong>${idTxt}</strong></td>`+
+                    `<td>${b.paciente}</td>`+
+                    `<td>${b.medico || '—'}</td>`+
+                    `<td>${b.especialidad || '—'}${servSub}</td>`+
+                    `<td style="text-align:center"><strong>${b.citas.length}</strong></td>`+
+                    `<td>${resumenEstado(b.citas)}</td>`+
+                    `<td>${acciones}</td>`;
                 tbody.appendChild(tr);
             });
+
+            // Si el modal de detalle está abierto, refrescarlo
+            const mb = document.getElementById('modalBloque');
+            if (bloqueActivoKey && mb && mb.classList.contains('active')) renderBloqueModal(bloqueActivoKey);
+        }
+
+        // Devuelve el arreglo de bloques agrupados y ordenados
+        function claveBloque(c) {
+            return [c.numAdmision || c.pacienteDoc || c.paciente, c.servicio || '', c.cups || '', c.medico || '', c.especialidad || ''].join('||');
+        }
+        function agruparEnBloques(citas) {
+            const mapa = {};
+            citas.forEach(c => {
+                const k = claveBloque(c);
+                if (!mapa[k]) mapa[k] = { key: k, paciente: c.paciente, pacienteDoc: c.pacienteDoc, numAdmision: c.numAdmision, servicio: c.servicio, cups: c.cups, medico: c.medico, especialidad: c.especialidad, citas: [] };
+                mapa[k].citas.push(c);
+            });
+            const arr = Object.values(mapa);
+            arr.forEach(b => b.citas.sort((a, z) => (a.fecha + a.hora).localeCompare(z.fecha + z.hora)));
+            arr.sort((a, z) => (a.paciente || '').localeCompare(z.paciente || '') || (a.servicio || '').localeCompare(z.servicio || ''));
+            return arr;
+        }
+        function badgeClaseEstado(estado) {
+            if (estado === 'Confirmada') return 'badge-confirmada';
+            if (estado === 'Completada' || estado === 'Atendida') return 'badge-completada';
+            if (estado === 'Cancelada') return 'badge-cancelada';
+            return 'badge-pendiente';
+        }
+        // Resumen compacto de estados dentro del bloque
+        function resumenEstado(citas) {
+            const orden = ['Pendiente', 'Confirmada', 'Atendida', 'Completada', 'Cancelada'];
+            const conteo = {};
+            citas.forEach(c => { conteo[c.estado] = (conteo[c.estado] || 0) + 1; });
+            return orden.filter(e => conteo[e]).map(e =>
+                `<span class="badge ${badgeClaseEstado(e)}" style="margin:1px 2px">${conteo[e]} ${e}</span>`
+            ).join('') || '—';
         }
 
         function filtrarTabla() {
@@ -704,6 +757,55 @@
         }
 
         function cerrarModal() { document.getElementById('modalEditar').classList.remove('active'); idEditando = null; }
+
+        /* ===== Bloques: ver / editar / eliminar / PDF ===== */
+        let bloqueActivoKey = null;
+        function citasDelBloque(key) { return obtenerCitas().filter(c => claveBloque(c) === key); }
+
+        function abrirBloque(key) {
+            bloqueActivoKey = key;
+            document.getElementById('modalBloque').classList.add('active');
+            renderBloqueModal(key);
+        }
+        function cerrarBloque() { document.getElementById('modalBloque').classList.remove('active'); bloqueActivoKey = null; }
+
+        function renderBloqueModal(key) {
+            const citas = citasDelBloque(key).sort((a, z) => (a.fecha + a.hora).localeCompare(z.fecha + z.hora));
+            if (citas.length === 0) { cerrarBloque(); return; }
+            const c0 = citas[0];
+            document.getElementById('bloqueTitulo').innerHTML =
+                `🗓️ ${c0.paciente} — ${c0.servicio || ''}${c0.cups ? ' (CUPS ' + c0.cups + ')' : ''}` +
+                `<div style="font-size:12px;color:#5a7a9a;font-weight:400;margin-top:3px">${c0.medico || ''} · ${c0.especialidad || ''} · Adm: ${c0.numAdmision || 'S/A'} · ${citas.length} cita(s)</div>`;
+            const filas = citas.map(c => {
+                const fecha = new Date(c.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                let acc = '';
+                if (c.estado === 'Pendiente') acc = `<button class="btn-action btn-confirmar" title="Confirmar" onclick="cambiarEstado('${c.id}','Confirmada')">✅</button><button class="btn-action btn-cancelar" title="Cancelar" onclick="cambiarEstado('${c.id}','Cancelada')">❌</button><button class="btn-action btn-editar" title="Editar" onclick="editarCita('${c.id}')">✏️</button><button class="btn-action btn-eliminar" title="Eliminar" onclick="eliminarCita('${c.id}')">🗑️</button>`;
+                else if (c.estado === 'Confirmada') acc = `<button class="btn-action btn-completar" title="Completar" onclick="cambiarEstado('${c.id}','Completada')">✔️</button><button class="btn-action btn-cancelar" title="Cancelar" onclick="cambiarEstado('${c.id}','Cancelada')">❌</button><button class="btn-action btn-eliminar" title="Eliminar" onclick="eliminarCita('${c.id}')">🗑️</button>`;
+                else acc = `<button class="btn-action btn-eliminar" title="Eliminar" onclick="eliminarCita('${c.id}')">🗑️</button>`;
+                return `<tr><td style="padding:6px 8px">${fecha}</td><td style="padding:6px 8px">${c.hora || '—'}</td><td style="padding:6px 8px"><span class="badge ${badgeClaseEstado(c.estado)}">${c.estado}</span></td><td style="padding:6px 8px;white-space:nowrap">${acc}</td></tr>`;
+            }).join('');
+            document.getElementById('bloqueContenido').innerHTML =
+                `<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="text-align:left;color:#5a7a9a"><th style="padding:6px 8px">Fecha</th><th style="padding:6px 8px">Hora</th><th style="padding:6px 8px">Estado</th><th style="padding:6px 8px">Acciones</th></tr></thead><tbody>${filas}</tbody></table>`;
+        }
+
+        function eliminarBloque(key) {
+            const citas = citasDelBloque(key);
+            if (!citas.length) return;
+            if (!confirm(`¿Eliminar TODAS las ${citas.length} cita(s) de este bloque? Esta acción no se puede deshacer.`)) return;
+            const restantes = obtenerCitas().filter(c => claveBloque(c) !== key);
+            guardarCitas(restantes);
+            if (bloqueActivoKey === key) cerrarBloque();
+            cargarTabla(); actualizarEstadisticas();
+            mostrarToast('Bloque de citas eliminado', 'info');
+        }
+
+        function pdfBloque(key) {
+            const citas = citasDelBloque(key).sort((a, z) => (a.fecha + a.hora).localeCompare(z.fecha + z.hora));
+            if (!citas.length) { mostrarToast('No hay citas en este bloque', 'error'); return; }
+            const c0 = citas[0];
+            const p = { nombre: c0.paciente, tipoDoc: c0.pacienteTipoDoc || 'CC', documento: c0.pacienteDoc, eps: c0.pacienteEps || '', numAdmision: c0.numAdmision || '' };
+            generarPDFCitas(p, c0.medico, c0.especialidad, c0.servicio, c0.cups, citas);
+        }
         function limpiarFormulario() {
             document.getElementById('citaPacienteBuscar').value = '';
             document.getElementById('citaPacienteDoc').value = '';
@@ -781,8 +883,9 @@
         }
         function cerrarSesion() { localStorage.removeItem('nexus_sesion'); window.location.href = 'index.html'; }
         function mostrarToast(msg, tipo = 'info') { const c = document.getElementById('toastContainer'); const t = document.createElement('div'); t.className = `toast toast-${tipo}`; t.textContent = msg; c.appendChild(t); setTimeout(() => t.remove(), 3000); }
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarModal(); cerrarBloque(); } });
         document.getElementById('modalEditar').addEventListener('click', e => { if (e.target === document.getElementById('modalEditar')) cerrarModal(); });
+        document.getElementById('modalBloque').addEventListener('click', e => { if (e.target === document.getElementById('modalBloque')) cerrarBloque(); });
     </script>
 
     <!-- MATRIZ GLOBAL DE PERMISOS -->
