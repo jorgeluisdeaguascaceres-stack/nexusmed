@@ -362,7 +362,7 @@
                 if (iso < minStr) cls += ' past';
                 if (iso === hoyStr) cls += ' today';
                 if (fechasSel.indexOf(iso) > -1) cls += ' sel';
-                const onclick = iso < minStr ? '' : ` onclick="calToggleDia('${iso}')"`;
+                const onclick = iso < minStr ? '' : ` onclick="calToggleDia('${iso}', event)"`;
                 html += `<span class="${cls}"${onclick}>${d}</span>`;
             }
             document.getElementById('calDias').innerHTML = html;
@@ -371,7 +371,8 @@
             if (lim > 0) txt += ' / ' + lim + ' autorizadas';
             document.getElementById('calResumen').textContent = txt;
         }
-        function calToggleDia(iso) {
+        function calToggleDia(iso, ev) {
+            if (ev) ev.stopPropagation();
             const i = fechasSel.indexOf(iso);
             if (i > -1) {
                 fechasSel.splice(i, 1);
@@ -405,6 +406,8 @@
         function obtenerCitas() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
         function guardarCitas(c) { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); }
         function obtenerPacientes() { return JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]'); }
+        /* Solo pacientes ACTIVOS (excluye egresados) para agendar citas */
+        function obtenerPacientesActivos() { return obtenerPacientes().filter(p => (p.estado || 'Activo') !== 'Egresado'); }
         function obtenerUsuarios() { return JSON.parse(localStorage.getItem('nexus_usuarios') || '[]'); }
 
         /* Codigos CUPS de los 5 servicios terapeuticos */
@@ -423,7 +426,7 @@
         function pacLabel(p){ return `${p.nombre} — ${p.tipoDoc||'CC'} ${p.documento} — ${p.numAdmision||'S/A'}`; }
 
         function cargarPacientesEnSelect() {
-            const pacientes = obtenerPacientes();
+            const pacientes = obtenerPacientesActivos();
             const dl = document.getElementById('listaPacientes');
             PAC_MAP = {};
             dl.innerHTML = '';
@@ -438,7 +441,7 @@
             let p = PAC_MAP[val];
             if (!p && val) {
                 const t = val.toLowerCase();
-                const pacientes = obtenerPacientes();
+                const pacientes = obtenerPacientesActivos();
                 const coincid = pacientes.filter(x => (x.nombre||'').toLowerCase().includes(t) || (x.documento||'').toLowerCase().includes(t) || (x.numAdmision||'').toLowerCase().includes(t));
                 if (coincid.length === 1) p = coincid[0];
             }
