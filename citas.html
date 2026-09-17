@@ -104,6 +104,23 @@
         .toast-info { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        /* Calendario flotante para elegir días del mes */
+        .cal-pop { position:absolute; z-index:1500; top:calc(100% + 6px); left:0; width:320px; max-width:92vw; background:#0e2136; border:1px solid rgba(0,180,216,.35); border-radius:12px; padding:14px; box-shadow:0 12px 40px rgba(0,0,0,.55); }
+        .cal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+        .cal-title { font-size:14px; font-weight:700; color:#e6f4ff; text-transform:capitalize; }
+        .cal-nav { background:rgba(0,180,216,.15); color:#00b4d8; border:1px solid rgba(0,180,216,.4); border-radius:8px; width:30px; height:30px; font-size:18px; cursor:pointer; line-height:1; }
+        .cal-nav:hover { background:rgba(0,180,216,.3); }
+        .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+        .cal-dow span { text-align:center; font-size:11px; color:#5a7a9a; font-weight:600; padding:2px 0; }
+        .cal-day { text-align:center; padding:8px 0; font-size:13px; color:#c0c0c0; border-radius:8px; cursor:pointer; border:1px solid transparent; user-select:none; }
+        .cal-day:hover { background:rgba(0,180,216,.15); }
+        .cal-day.empty { cursor:default; }
+        .cal-day.past { color:#3d5266; cursor:not-allowed; opacity:.5; }
+        .cal-day.today { border-color:rgba(0,180,216,.5); }
+        .cal-day.sel { background:linear-gradient(135deg,#00b4d8,#0077b6); color:#fff; font-weight:700; border-color:#00b4d8; }
+        .cal-foot { display:flex; align-items:center; justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,.08); }
+        .cal-clear { background:transparent; color:#ff6b8a; border:1px solid rgba(255,56,96,.4); border-radius:8px; padding:5px 12px; font-size:12px; cursor:pointer; }
+        .cal-ok { background:linear-gradient(135deg,#48c78e,#38a06d); color:#fff; border:none; border-radius:8px; padding:5px 14px; font-size:12px; cursor:pointer; font-weight:600; }
         @media (max-width: 768px) { .header { flex-direction: column; gap: 10px; } .toolbar { flex-direction: column;
             .header-right { flex-wrap:wrap; justify-content:center; }
             .nav-bar { padding:8px 10px; justify-content:center; }
@@ -197,26 +214,28 @@
                             <option value="">Seleccionar médico primero...</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Fecha Desde</label>
-                        <input type="date" id="citaFechaDesde" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Fecha Hasta (opcional · lote)</label>
-                        <input type="date" id="citaFechaHasta">
-                    </div>
-                    <div class="form-group" style="grid-column:1/-1">
-                        <label>Días de la semana (agendamiento masivo en el rango)</label>
-                        <div id="diasSemana" style="display:flex;gap:14px;flex-wrap:wrap;padding-top:4px;">
-                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="1" style="width:auto;"> Lun</label>
-                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="2" style="width:auto;"> Mar</label>
-                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="3" style="width:auto;"> Mié</label>
-                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="4" style="width:auto;"> Jue</label>
-                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="5" style="width:auto;"> Vie</label>
-                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="6" style="width:auto;"> Sáb</label>
-                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="0" style="width:auto;"> Dom</label>
+                    <div class="form-group" style="grid-column:1/-1;position:relative;">
+                        <label>Fechas de las citas (elige uno o varios días del mes)</label>
+                        <input type="text" id="citaFechasDisplay" readonly placeholder="Clic aquí para abrir el calendario y elegir los días..." onclick="toggleCalendario(event)" style="cursor:pointer;">
+                        <div id="calendarioFlotante" class="cal-pop" style="display:none;">
+                            <div class="cal-head">
+                                <button type="button" class="cal-nav" onclick="calMes(-1)">‹</button>
+                                <span id="calTitulo" class="cal-title"></span>
+                                <button type="button" class="cal-nav" onclick="calMes(1)">›</button>
+                            </div>
+                            <div class="cal-grid cal-dow">
+                                <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+                            </div>
+                            <div id="calDias" class="cal-grid"></div>
+                            <div class="cal-foot">
+                                <span id="calResumen">0 días seleccionados</span>
+                                <div style="display:flex;gap:8px;">
+                                    <button type="button" class="cal-clear" onclick="calLimpiarSel()">Limpiar</button>
+                                    <button type="button" class="cal-ok" onclick="toggleCalendario()">Listo</button>
+                                </div>
+                            </div>
                         </div>
-                        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;">Deje "Fecha Hasta" vacío para agendar un solo día. Con un rango y días marcados se crean todas las citas del lote en un clic.</div>
+                        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;">Haz clic en cada día que quieras agendar (puedes elegir varios días del mes, e incluso cambiar de mes con las flechas). Se crea una cita por cada día seleccionado.</div>
                     </div>
                     <div class="form-group">
                         <label>Hora</label>
@@ -293,7 +312,65 @@
             document.getElementById('userAvatar').textContent = sesion.nombre.charAt(0);
         }
 
-        document.addEventListener('DOMContentLoaded', () => { cargarPacientesEnSelect(); cargarMedicosEnSelect(); cargarTabla(); actualizarEstadisticas(); const hoy = new Date().toISOString().slice(0, 10); document.getElementById('citaFechaDesde').value = hoy; });
+        document.addEventListener('DOMContentLoaded', () => { cargarPacientesEnSelect(); cargarMedicosEnSelect(); cargarTabla(); actualizarEstadisticas(); initCalendario(); });
+
+        // ════════════════════════════════════════════
+        // Calendario flotante: elegir varios días del mes
+        // ════════════════════════════════════════════
+        let calFecha = new Date();          // mes visible
+        let fechasSel = [];                 // 'YYYY-MM-DD' seleccionadas
+        const MESES_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+        function initCalendario() { calFecha = new Date(); calFecha.setDate(1); renderCalendario(); }
+        function calMes(delta) { calFecha.setMonth(calFecha.getMonth() + delta); renderCalendario(); }
+        function calLimpiarSel() { fechasSel = []; renderCalendario(); actualizarDisplayFechas(); }
+        function toggleCalendario(ev) {
+            if (ev) ev.stopPropagation();
+            const pop = document.getElementById('calendarioFlotante');
+            pop.style.display = pop.style.display === 'none' ? 'block' : 'none';
+            if (pop.style.display === 'block') renderCalendario();
+        }
+        function renderCalendario() {
+            const y = calFecha.getFullYear(), m = calFecha.getMonth();
+            document.getElementById('calTitulo').textContent = MESES_ES[m] + ' ' + y;
+            const primero = new Date(y, m, 1);
+            let offset = primero.getDay() - 1; if (offset < 0) offset = 6; // Lun=0
+            const diasMes = new Date(y, m + 1, 0).getDate();
+            const hoyStr = new Date().toISOString().slice(0, 10);
+            let html = '';
+            for (let i = 0; i < offset; i++) html += '<span class="cal-day empty"></span>';
+            for (let d = 1; d <= diasMes; d++) {
+                const iso = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+                let cls = 'cal-day';
+                if (iso < hoyStr) cls += ' past';
+                if (iso === hoyStr) cls += ' today';
+                if (fechasSel.indexOf(iso) > -1) cls += ' sel';
+                const onclick = iso < hoyStr ? '' : ` onclick="calToggleDia('${iso}')"`;
+                html += `<span class="${cls}"${onclick}>${d}</span>`;
+            }
+            document.getElementById('calDias').innerHTML = html;
+            document.getElementById('calResumen').textContent = fechasSel.length + (fechasSel.length === 1 ? ' día seleccionado' : ' días seleccionados');
+        }
+        function calToggleDia(iso) {
+            const i = fechasSel.indexOf(iso);
+            if (i > -1) fechasSel.splice(i, 1); else fechasSel.push(iso);
+            fechasSel.sort();
+            renderCalendario();
+            actualizarDisplayFechas();
+        }
+        function actualizarDisplayFechas() {
+            const inp = document.getElementById('citaFechasDisplay');
+            if (!fechasSel.length) { inp.value = ''; return; }
+            const fmt = fechasSel.map(f => { const p = f.split('-'); return p[2] + '/' + p[1]; });
+            inp.value = fechasSel.length === 1
+                ? fechasSel[0].split('-').reverse().join('/')
+                : fechasSel.length + ' citas: ' + fmt.join(', ');
+        }
+        // Cerrar el calendario al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            const pop = document.getElementById('calendarioFlotante');
+            const inp = document.getElementById('citaFechasDisplay');
+            if (pop && pop.style.display === 'block' && !pop.contains(e.target) && e.target !== inp) pop.style.display = 'none';
+        });
 
         function obtenerCitas() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
         function guardarCitas(c) { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); }
@@ -400,19 +477,9 @@
             }
         }
 
-        /* Calcula la lista de fechas segun rango + dias de la semana (agendamiento masivo) */
-        function calcularFechas(desde, hasta) {
-            if (!desde) return [];
-            if (!hasta || hasta === desde) return [desde];
-            const dias = Array.prototype.slice.call(document.querySelectorAll('.diaChk:checked')).map(c => parseInt(c.value, 10));
-            const start = new Date(desde + 'T00:00:00');
-            const end = new Date(hasta + 'T00:00:00');
-            if (end < start) return [];
-            const out = [];
-            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                if (dias.length === 0 || dias.indexOf(d.getDay()) !== -1) out.push(d.toISOString().slice(0, 10));
-            }
-            return out;
+        /* Fechas de las citas = días elegidos en el calendario flotante */
+        function calcularFechas() {
+            return fechasSel.slice().sort();
         }
 
         function registrarCita() {
@@ -422,19 +489,17 @@
             const servicio = document.getElementById('citaServicio').value;
             const cups = CUPS_MAP[servicio] || '';
             const hora = document.getElementById('citaHora').value;
-            const desde = document.getElementById('citaFechaDesde').value;
-            const hasta = document.getElementById('citaFechaHasta').value;
             const motivo = document.getElementById('citaMotivo').value.trim();
             const consultorio = document.getElementById('citaConsultorio').value.trim();
 
             if (!medico) { mostrarToast('Seleccione un médico', 'error'); return; }
             if (!especialidad) { mostrarToast('Seleccione una especialidad', 'error'); return; }
             if (!servicio) { mostrarToast('Seleccione el servicio terapéutico', 'error'); return; }
-            if (!desde) { mostrarToast('Ingrese la fecha (Desde)', 'error'); return; }
+            if (fechasSel.length === 0) { mostrarToast('Abra el calendario y elija al menos un día', 'error'); return; }
             if (!hora) { mostrarToast('Ingrese la hora', 'error'); return; }
 
-            const fechas = calcularFechas(desde, hasta);
-            if (fechas.length === 0) { mostrarToast('No hay fechas válidas para el rango/días seleccionados', 'error'); return; }
+            const fechas = calcularFechas();
+            if (fechas.length === 0) { mostrarToast('No hay días seleccionados en el calendario', 'error'); return; }
 
             const citas = obtenerCitas();
             const loteId = 'LOTE-' + Date.now();
@@ -570,9 +635,11 @@
             document.getElementById('citaMotivo').value = '';
             document.getElementById('citaConsultorio').value = '';
             document.getElementById('citaHora').value = '';
-            document.getElementById('citaFechaHasta').value = '';
-            document.querySelectorAll('.diaChk').forEach(c => c.checked = false);
-            document.getElementById('citaFechaDesde').value = new Date().toISOString().slice(0, 10);
+            fechasSel = [];
+            actualizarDisplayFechas();
+            const pop = document.getElementById('calendarioFlotante');
+            if (pop) pop.style.display = 'none';
+            calFecha = new Date(); calFecha.setDate(1); renderCalendario();
         }
 
         /* ===== PASO 3: PDF FORMATO DE ASISTENCIA con las sesiones agendadas ===== */
