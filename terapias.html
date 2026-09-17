@@ -750,6 +750,29 @@ function incrementContador() { const c = getContador() + 1; localStorage.setItem
 const today = new Date().toISOString().split('T')[0];
 
 // ═══════════════════════════════════════════
+// PASO 4: control de acceso (admin / privacidad del profesional)
+// ═══════════════════════════════════════════
+const ROL_ACTUAL = (sesion && sesion.rol ? String(sesion.rol) : '').toLowerCase();
+const ES_ADMIN = ROL_ACTUAL === 'admin' || ROL_ACTUAL === 'administrador';
+function nombreUsuarioActual() {
+    const us = getUsuarios();
+    const u = us.find(x => (sesion && x.usuario && x.usuario === sesion.usuario) || (sesion && x.nombre && x.nombre === sesion.nombre));
+    return (u && u.nombre) || (sesion && (sesion.nombre || sesion.usuario)) || '';
+}
+// Documentos de pacientes cuya admisión sigue ACTIVA (no egresados)
+function admisionesActivasDocs() {
+    const set = {};
+    getPacientes().forEach(p => { if ((p.estado || '') !== 'Egresado') set[String(p.documento)] = true; });
+    return set;
+}
+// Regla legal: la evolución solo se puede editar dentro de las 24h del registro
+function terapiaEditable(t) {
+    const base = t.timestampRegistro || (t.fechaRegistro ? t.fechaRegistro + 'T00:00:00' : null);
+    if (!base) return true;
+    return (Date.now() - new Date(base).getTime()) <= 24 * 60 * 60 * 1000;
+}
+
+// ═══════════════════════════════════════════
 // Admisión field IDs for auto-populate
 // ═══════════════════════════════════════════
 const ADM_FIELDS = [
@@ -1069,6 +1092,11 @@ function renderTabla() {
         return matchSearch && matchTipo && matchEstado && matchTurno;
     });
 
+    // PASO 4: solo admisiones ACTIVAS + privacidad por profesional logueado
+    const _docsActivos = admisionesActivasDocs();
+    const _miNombre = nombreUsuarioActual();
+    filtered = filtered.filter(t => _docsActivos[String(t.documentoPaciente)] && (ES_ADMIN || (t.terapeuta || '') === _miNombre));
+
     filtered.sort((a,b) => new Date(b.fecha + 'T' + (b.hora||'00:00')) - new Date(a.fecha + 'T' + (a.hora||'00:00')));
 
     const tbody = document.getElementById('tablaTerapias');
@@ -1100,6 +1128,15 @@ function renderTabla() {
                 ? `<span class="badge ${estadoBadgeClass}">${t.estadoTerapia}</span>`
                 : `<span style="color:#5a7a9a">—</span>`;
 
+            // PASO 5: botonera de acciones directas (5 acciones)
+            const editable = terapiaEditable(t);
+            const btnEditar = editable
+                ? `<button class="btn-action btn-edit" onclick="editarTerapia('${t.id}')" title="Editar evolución"><i class="fas fa-edit"></i> Editar</button>`
+                : `<button class="btn-action btn-edit" disabled title="Bloqueado: transcurrieron más de 24h del registro (norma legal)" style="opacity:.45;cursor:not-allowed"><i class="fas fa-lock"></i> Editar</button>`;
+            const btnEliminar = ES_ADMIN
+                ? `<button class="btn-action btn-delete" onclick="eliminarTerapia('${t.id}')" title="Eliminar sesión (solo ADMIN)"><i class="fas fa-trash"></i> Eliminar</button>`
+                : '';
+
             return `
             <tr>
                 <td><strong style="color:#00b4d8">${t.numeroTerapia||''}</strong></td>
@@ -1111,10 +1148,11 @@ function renderTabla() {
                 <td>${t.fecha||'—'} ${turnoBadge}</td>
                 <td>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                        <button class="btn-action" onclick="hacerEvolucion('${t.id}')" title="Hacer evolución de la sesión" style="background:rgba(72,199,142,.15);color:#48c78e;border:1px solid rgba(72,199,142,.4)"><i class="fas fa-notes-medical"></i> Evolución</button>
                         <button class="btn-action btn-pdf" onclick="generarPDFTerapia('${t.id}')" title="Descargar PDF"><i class="fas fa-file-pdf"></i> PDF</button>
-                        <button class="btn-action btn-edit" onclick="editarTerapia('${t.id}')" title="Editar terapia"><i class="fas fa-edit"></i> Editar</button>
-                        <button class="btn-action btn-view" onclick="verDetalle('${t.id}')" title="Ver detalle"><i class="fas fa-eye"></i></button>
-                        <button class="btn-action btn-delete" onclick="eliminarTerapia('${t.id}')" title="Eliminar terapia"><i class="fas fa-trash"></i> Eliminar</button>
+                        ${btnEditar}
+                        ${btnEliminar}
+                        <button class="btn-action btn-view" onclick="verDetalle('${t.id}')" title="Ver histórico (solo lectura)"><i class="fas fa-eye"></i> Ver</button>
                     </div>
                 </td>
             </tr>`;
@@ -1309,6 +1347,7 @@ function guardarTerapia() {
             id: 'te_' + Date.now(),
             numeroTerapia: 'TE-' + year + '-' + String(num).padStart(4, '0'),
             fechaRegistro: today,
+            timestampRegistro: new Date().toISOString(),
             ...data
         });
         showToast('Terapia creada exitosamente', 'success');
@@ -1518,7 +1557,22 @@ function generarPDFTerapia(id) {
 // ═══════════════════════════════════════════
 // Delete terapia
 // ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// PASO 5: "Hacer Evolución" — abre el formulario enfocado en la nota clínica
+// ═══════════════════════════════════════════
+function hacerEvolucion(id) {
+    editarTerapia(id);
+    const titulo = document.getElementById('modalTitulo');
+    if (titulo) titulo.textContent = 'Hacer Evolución de la Sesión';
+    setTimeout(() => {
+        const el = document.getElementById('descripcionSesion');
+        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); }
+    }, 250);
+}
+
+// ═══════════════════════════════════════════
 function eliminarTerapia(id) {
+    if (!ES_ADMIN) { showToast('Solo el rol ADMIN puede eliminar terapias', 'error'); return; }
     if (!confirm('¿Eliminar esta terapia? Esta acción no se puede deshacer.')) return;
     const terapias = getTerapias().filter(t => t.id !== id);
     saveTerapias(terapias);

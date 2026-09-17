@@ -166,33 +166,57 @@
             <div class="form-title">Nueva Cita</div>
             <form id="formCita" onsubmit="return false;">
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label>Paciente</label>
-                        <select id="citaPaciente" required><option value="">Seleccionar paciente...</option></select>
+                    <div class="form-group" style="grid-column:1/-1">
+                        <label>Paciente (buscar por nombre, cédula o N° admisión)</label>
+                        <input type="text" id="citaPacienteBuscar" list="listaPacientes" placeholder="Escriba nombre, cédula o número de admisión..." autocomplete="off" oninput="onSelectPaciente()">
+                        <datalist id="listaPacientes"></datalist>
+                        <input type="hidden" id="citaPacienteDoc">
+                        <div id="citaPacienteInfo" style="font-size:11px;color:#48c78e;margin-top:6px;min-height:14px;"></div>
                     </div>
                     <div class="form-group">
-                        <label>Médico</label>
-                        <select id="citaMedico" required>
+                        <label>Servicio Terapéutico (CUPS)</label>
+                        <select id="citaServicio" onchange="onServicioChange()">
+                            <option value="">Seleccionar servicio...</option>
+                            <option value="Terapia Física">Terapia Física</option>
+                            <option value="Terapia Respiratoria">Terapia Respiratoria</option>
+                            <option value="Fonoaudiología">Fonoaudiología (Lenguaje)</option>
+                            <option value="Terapia Ocupacional">Terapia Ocupacional</option>
+                            <option value="Psicología">Psicología</option>
+                        </select>
+                        <div id="citaCupsInfo" style="font-size:11px;color:#90e0ef;margin-top:6px;min-height:14px;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Médico / Terapeuta</label>
+                        <select id="citaMedico" required onchange="onMedicoChange()">
                             <option value="">Seleccionar médico...</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Especialidad</label>
+                        <label>Especialidad (automática)</label>
                         <select id="citaEspecialidad" required>
-                            <option value="">Seleccionar...</option>
-                            <option value="Medicina General">Medicina General</option>
-                            <option value="Cardiología">Cardiología</option>
-                            <option value="Neurología">Neurología</option>
-                            <option value="Traumatología">Traumatología</option>
-                            <option value="Pediatría">Pediatría</option>
-                            <option value="Ginecología">Ginecología</option>
-                            <option value="Dermatología">Dermatología</option>
-                            <option value="Oftalmología">Oftalmología</option>
+                            <option value="">Seleccionar médico primero...</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Fecha</label>
-                        <input type="date" id="citaFecha" required>
+                        <label>Fecha Desde</label>
+                        <input type="date" id="citaFechaDesde" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha Hasta (opcional · lote)</label>
+                        <input type="date" id="citaFechaHasta">
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1">
+                        <label>Días de la semana (agendamiento masivo en el rango)</label>
+                        <div id="diasSemana" style="display:flex;gap:14px;flex-wrap:wrap;padding-top:4px;">
+                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="1" style="width:auto;"> Lun</label>
+                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="2" style="width:auto;"> Mar</label>
+                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="3" style="width:auto;"> Mié</label>
+                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="4" style="width:auto;"> Jue</label>
+                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="5" style="width:auto;"> Vie</label>
+                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="6" style="width:auto;"> Sáb</label>
+                            <label style="display:flex;align-items:center;gap:5px;font-size:13px;color:#c0c0c0;text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;"><input type="checkbox" class="diaChk" value="0" style="width:auto;"> Dom</label>
+                        </div>
+                        <div style="font-size:11px;color:#5a7a9a;margin-top:6px;">Deje "Fecha Hasta" vacío para agendar un solo día. Con un rango y días marcados se crean todas las citas del lote en un clic.</div>
                     </div>
                     <div class="form-group">
                         <label>Hora</label>
@@ -230,7 +254,7 @@
             <div class="table-header"><h3>📅 Citas Programadas</h3></div>
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>ID</th><th>Paciente</th><th>Médico</th><th>Especialidad</th><th>Fecha</th><th>Hora</th><th>Motivo</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Paciente</th><th>Médico</th><th>Especialidad</th><th>Servicio (CUPS)</th><th>Fecha</th><th>Hora</th><th>Motivo</th><th>Estado</th><th>Acciones</th></tr></thead>
                     <tbody id="tablaCitas"></tbody>
                 </table>
             </div>
@@ -269,19 +293,80 @@
             document.getElementById('userAvatar').textContent = sesion.nombre.charAt(0);
         }
 
-        document.addEventListener('DOMContentLoaded', () => { cargarPacientesEnSelect(); cargarMedicosEnSelect(); cargarTabla(); actualizarEstadisticas(); const hoy = new Date().toISOString().slice(0, 10); document.getElementById('citaFecha').value = hoy; });
+        document.addEventListener('DOMContentLoaded', () => { cargarPacientesEnSelect(); cargarMedicosEnSelect(); cargarTabla(); actualizarEstadisticas(); const hoy = new Date().toISOString().slice(0, 10); document.getElementById('citaFechaDesde').value = hoy; });
 
         function obtenerCitas() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
         function guardarCitas(c) { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); }
+        function obtenerPacientes() { return JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]'); }
+        function obtenerUsuarios() { return JSON.parse(localStorage.getItem('nexus_usuarios') || '[]'); }
+
+        /* Codigos CUPS de los 5 servicios terapeuticos */
+        const CUPS_MAP = {
+            'Terapia Física': '931001',
+            'Terapia Respiratoria': '934600',
+            'Fonoaudiología': '937000',
+            'Terapia Ocupacional': '938303',
+            'Psicología': '943102'
+        };
+        const ESPECIALIDADES = ['General','Fisioterapeuta','Fonoaudiólogo','Terapeuta Ocupacional','Terapeuta Respiratorio','Psicólogo','Medicina Interna','Pediatría','Ginecología','Cirugía General','Ortopedia','Auxiliar de Enfermería','Enfermería Jefe'];
+
+        /* ===== PASO 1: Buscador de paciente + carga automatica de datos ===== */
+        let PAC_MAP = {};
+        let pacienteSel = null;
+        function pacLabel(p){ return `${p.nombre} — ${p.tipoDoc||'CC'} ${p.documento} — ${p.numAdmision||'S/A'}`; }
 
         function cargarPacientesEnSelect() {
-            const pacientes = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
-            const sel = document.getElementById('citaPaciente');
+            const pacientes = obtenerPacientes();
+            const dl = document.getElementById('listaPacientes');
+            PAC_MAP = {};
+            dl.innerHTML = '';
+            pacientes.forEach(p => { const lbl = pacLabel(p); PAC_MAP[lbl] = p; const opt = document.createElement('option'); opt.value = lbl; dl.appendChild(opt); });
             const selEdit = document.getElementById('editPaciente');
-            [sel, selEdit].forEach(s => {
-                s.innerHTML = '<option value="">Seleccionar paciente...</option>';
-                pacientes.forEach(p => { const opt = document.createElement('option'); opt.value = p.nombre; opt.textContent = `${p.nombre} (${p.documento})`; s.appendChild(opt); });
-            });
+            if (selEdit) { selEdit.innerHTML = '<option value="">Seleccionar paciente...</option>'; pacientes.forEach(p => { const o = document.createElement('option'); o.value = p.nombre; o.textContent = `${p.nombre} (${p.documento})`; selEdit.appendChild(o); }); }
+        }
+
+        function onSelectPaciente() {
+            const val = document.getElementById('citaPacienteBuscar').value.trim();
+            const info = document.getElementById('citaPacienteInfo');
+            let p = PAC_MAP[val];
+            if (!p && val) {
+                const t = val.toLowerCase();
+                const pacientes = obtenerPacientes();
+                const coincid = pacientes.filter(x => (x.nombre||'').toLowerCase().includes(t) || (x.documento||'').toLowerCase().includes(t) || (x.numAdmision||'').toLowerCase().includes(t));
+                if (coincid.length === 1) p = coincid[0];
+            }
+            if (p) {
+                pacienteSel = p;
+                document.getElementById('citaPacienteDoc').value = p.documento;
+                info.style.color = '#48c78e';
+                info.textContent = `✓ ${p.nombre} · ${p.tipoDoc||'CC'} ${p.documento} · Edad: ${p.edad||'—'} · EPS: ${p.eps||'—'} · Adm: ${p.numAdmision||'—'} · Estado: ${p.estado||'—'}`;
+            } else {
+                pacienteSel = null;
+                document.getElementById('citaPacienteDoc').value = '';
+                info.style.color = '#ff3860';
+                info.textContent = val ? 'Paciente no encontrado — seleccione uno de la lista' : '';
+            }
+        }
+
+        /* ===== PASO 2: Servicio -> CUPS ===== */
+        function onServicioChange() {
+            const s = document.getElementById('citaServicio').value;
+            const info = document.getElementById('citaCupsInfo');
+            info.textContent = s ? ('Código CUPS asociado: ' + (CUPS_MAP[s] || '—')) : '';
+        }
+
+        /* ===== PASO 3: Medico -> Especialidad automatica y bloqueada ===== */
+        function onMedicoChange() {
+            const medico = document.getElementById('citaMedico').value;
+            const sel = document.getElementById('citaEspecialidad');
+            const u = obtenerUsuarios().find(x => (x.nombre || '') === medico);
+            if (u && u.especialidad) {
+                sel.innerHTML = `<option value="${u.especialidad}">${u.especialidad}</option>`;
+                sel.value = u.especialidad; sel.disabled = true; sel.style.opacity = '0.75'; sel.style.cursor = 'not-allowed';
+            } else {
+                sel.disabled = false; sel.style.opacity = '1'; sel.style.cursor = 'auto';
+                sel.innerHTML = '<option value="">Seleccionar...</option>' + ESPECIALIDADES.map(e => `<option value="${e}">${e}</option>`).join('');
+            }
         }
 
         /* Los medicos salen de los usuarios creados en Configuracion */
@@ -315,30 +400,69 @@
             }
         }
 
+        /* Calcula la lista de fechas segun rango + dias de la semana (agendamiento masivo) */
+        function calcularFechas(desde, hasta) {
+            if (!desde) return [];
+            if (!hasta || hasta === desde) return [desde];
+            const dias = Array.prototype.slice.call(document.querySelectorAll('.diaChk:checked')).map(c => parseInt(c.value, 10));
+            const start = new Date(desde + 'T00:00:00');
+            const end = new Date(hasta + 'T00:00:00');
+            if (end < start) return [];
+            const out = [];
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                if (dias.length === 0 || dias.indexOf(d.getDay()) !== -1) out.push(d.toISOString().slice(0, 10));
+            }
+            return out;
+        }
+
         function registrarCita() {
-            const paciente = document.getElementById('citaPaciente').value;
+            if (!pacienteSel) { mostrarToast('Seleccione un paciente válido de la lista', 'error'); return; }
             const medico = document.getElementById('citaMedico').value;
             const especialidad = document.getElementById('citaEspecialidad').value;
-            const fecha = document.getElementById('citaFecha').value;
+            const servicio = document.getElementById('citaServicio').value;
+            const cups = CUPS_MAP[servicio] || '';
             const hora = document.getElementById('citaHora').value;
+            const desde = document.getElementById('citaFechaDesde').value;
+            const hasta = document.getElementById('citaFechaHasta').value;
             const motivo = document.getElementById('citaMotivo').value.trim();
             const consultorio = document.getElementById('citaConsultorio').value.trim();
 
-            if (!paciente) { mostrarToast('Seleccione un paciente', 'error'); return; }
             if (!medico) { mostrarToast('Seleccione un médico', 'error'); return; }
             if (!especialidad) { mostrarToast('Seleccione una especialidad', 'error'); return; }
-            if (!fecha) { mostrarToast('Ingrese la fecha', 'error'); return; }
+            if (!servicio) { mostrarToast('Seleccione el servicio terapéutico', 'error'); return; }
+            if (!desde) { mostrarToast('Ingrese la fecha (Desde)', 'error'); return; }
             if (!hora) { mostrarToast('Ingrese la hora', 'error'); return; }
 
-            const citas = obtenerCitas();
-            const conflicto = citas.find(c => c.medico === medico && c.fecha === fecha && c.hora === hora && (c.estado === 'Pendiente' || c.estado === 'Confirmada'));
-            if (conflicto) { mostrarToast('El médico ya tiene una cita en ese horario', 'error'); return; }
+            const fechas = calcularFechas(desde, hasta);
+            if (fechas.length === 0) { mostrarToast('No hay fechas válidas para el rango/días seleccionados', 'error'); return; }
 
-            const idCita = 'CITA-' + Date.now();
-            citas.push({ id: idCita, paciente, medico, especialidad, fecha, hora, motivo, consultorio, estado: 'Pendiente', fechaRegistro: new Date().toISOString() });
+            const citas = obtenerCitas();
+            const loteId = 'LOTE-' + Date.now();
+            const nuevas = [];
+            let conflictos = 0;
+            fechas.forEach((f, i) => {
+                const conflicto = citas.find(c => c.medico === medico && c.fecha === f && c.hora === hora && (c.estado === 'Pendiente' || c.estado === 'Confirmada'));
+                if (conflicto) { conflictos++; return; }
+                const cita = {
+                    id: 'CITA-' + Date.now() + '-' + i,
+                    loteId,
+                    paciente: pacienteSel.nombre,
+                    pacienteDoc: pacienteSel.documento,
+                    pacienteTipoDoc: pacienteSel.tipoDoc || 'CC',
+                    pacienteEdad: pacienteSel.edad || '',
+                    pacienteEps: pacienteSel.eps || '',
+                    numAdmision: pacienteSel.numAdmision || '',
+                    medico, especialidad, servicio, cups,
+                    fecha: f, hora, motivo, consultorio,
+                    estado: 'Pendiente', fechaRegistro: new Date().toISOString()
+                };
+                citas.push(cita); nuevas.push(cita);
+            });
             guardarCitas(citas);
-            mostrarToast(`Cita programada para ${paciente}`, 'success');
-            cargarTabla(); actualizarEstadisticas(); limpiarFormulario();
+            mostrarToast(`${nuevas.length} cita(s) programada(s)` + (conflictos ? `, ${conflictos} omitida(s) por conflicto de horario` : ''), nuevas.length ? 'success' : 'error');
+            cargarTabla(); actualizarEstadisticas();
+            if (nuevas.length) generarPDFCitas(pacienteSel, medico, especialidad, servicio, cups, nuevas);
+            limpiarFormulario();
         }
 
         function cargarTabla(lista = null) {
@@ -359,7 +483,7 @@
                 if (c.estado === 'Pendiente') acciones = `<button class="btn-action btn-confirmar" onclick="cambiarEstado('${c.id}','Confirmada')">✅</button><button class="btn-action btn-cancelar" onclick="cambiarEstado('${c.id}','Cancelada')">❌</button><button class="btn-action btn-editar" onclick="editarCita('${c.id}')">✏️</button><button class="btn-action btn-eliminar" onclick="eliminarCita('${c.id}')">🗑️</button>`;
                 else if (c.estado === 'Confirmada') acciones = `<button class="btn-action btn-completar" onclick="cambiarEstado('${c.id}','Completada')">✔️</button><button class="btn-action btn-cancelar" onclick="cambiarEstado('${c.id}','Cancelada')">❌</button>`;
                 else acciones = `<button class="btn-action btn-eliminar" onclick="eliminarCita('${c.id}')">🗑️</button>`;
-                tr.innerHTML = `<td><strong>${c.id.slice(-6)}</strong></td><td>${c.paciente}</td><td>${c.medico}</td><td>${c.especialidad}</td><td>${fecha}</td><td>${c.hora}</td><td>${c.motivo || '—'}</td><td><span class="badge ${badgeClass}">${c.estado}</span></td><td>${acciones}</td>`;
+                tr.innerHTML = `<td><strong>${c.id.slice(-6)}</strong></td><td>${c.paciente}</td><td>${c.medico}</td><td>${c.especialidad}</td><td>${c.servicio ? c.servicio + (c.cups ? ' <span style="color:#5a7a9a">('+c.cups+')</span>' : '') : '—'}</td><td>${fecha}</td><td>${c.hora}</td><td>${c.motivo || '—'}</td><td><span class="badge ${badgeClass}">${c.estado}</span></td><td>${acciones}</td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -368,7 +492,8 @@
             const termino = document.getElementById('busqueda').value.toLowerCase().trim();
             const citas = obtenerCitas();
             if (!termino) { cargarTabla(); return; }
-            cargarTabla(citas.filter(c => c.paciente.toLowerCase().includes(termino) || c.medico.toLowerCase().includes(termino) || c.especialidad.toLowerCase().includes(termino) || c.motivo.toLowerCase().includes(termino)));
+            const inc = (v) => (v || '').toString().toLowerCase().includes(termino);
+            cargarTabla(citas.filter(c => inc(c.paciente) || inc(c.pacienteDoc) || inc(c.medico) || inc(c.especialidad) || inc(c.servicio) || inc(c.cups) || inc(c.motivo)));
         }
 
         function actualizarEstadisticas() {
@@ -431,7 +556,76 @@
         }
 
         function cerrarModal() { document.getElementById('modalEditar').classList.remove('active'); idEditando = null; }
-        function limpiarFormulario() { ['citaPaciente','citaMedico','citaEspecialidad','citaMotivo','citaConsultorio'].forEach(id => document.getElementById(id).value = ''); document.getElementById('citaHora').value = ''; document.getElementById('citaFecha').value = new Date().toISOString().slice(0, 10); }
+        function limpiarFormulario() {
+            document.getElementById('citaPacienteBuscar').value = '';
+            document.getElementById('citaPacienteDoc').value = '';
+            document.getElementById('citaPacienteInfo').textContent = '';
+            pacienteSel = null;
+            document.getElementById('citaMedico').value = '';
+            const selEsp = document.getElementById('citaEspecialidad');
+            selEsp.disabled = false; selEsp.style.opacity = '1'; selEsp.style.cursor = 'auto';
+            selEsp.innerHTML = '<option value="">Seleccionar médico primero...</option>';
+            document.getElementById('citaServicio').value = '';
+            document.getElementById('citaCupsInfo').textContent = '';
+            document.getElementById('citaMotivo').value = '';
+            document.getElementById('citaConsultorio').value = '';
+            document.getElementById('citaHora').value = '';
+            document.getElementById('citaFechaHasta').value = '';
+            document.querySelectorAll('.diaChk').forEach(c => c.checked = false);
+            document.getElementById('citaFechaDesde').value = new Date().toISOString().slice(0, 10);
+        }
+
+        /* ===== PASO 3: PDF FORMATO DE ASISTENCIA con las sesiones agendadas ===== */
+        function obtenerDatosIPS() { try { const h = JSON.parse(localStorage.getItem('nexus_hospital') || '{}'); return h && typeof h === 'object' ? h : {}; } catch (e) { return {}; } }
+        function escaparIPS(t) { return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+        function fmtHora12(h) { if (!h) return ''; const p = h.split(':'); let hh = parseInt(p[0],10); const mm = p[1]||'00'; const ap = hh >= 12 ? 'pm' : 'am'; hh = hh % 12; if (hh === 0) hh = 12; return hh + ':' + mm + ' ' + ap; }
+
+        function generarPDFCitas(p, medico, especialidad, servicio, cups, citas) {
+            const h = obtenerDatosIPS();
+            const nombreIPS = escaparIPS(h.nombre || 'NEXUSMED IPS Domiciliaria');
+            const logo = (h.logo && String(h.logo).indexOf('data:image') === 0) ? `<img src="${escaparIPS(h.logo)}" style="max-width:120px;max-height:70px;object-fit:contain">` : '';
+            const contactoPie = [];
+            if (h.telefono) contactoPie.push('Tel: ' + escaparIPS(h.telefono));
+            if (h.email) contactoPie.push(escaparIPS(h.email));
+            if (h.direccion) contactoPie.push(escaparIPS(h.direccion));
+            if (h.nit) contactoPie.push('NIT: ' + escaparIPS(h.nit));
+
+            const filas = citas.slice().sort((a,b) => (a.fecha+ a.hora).localeCompare(b.fecha+b.hora)).map(c => {
+                const f = new Date(c.fecha + 'T00:00:00');
+                const fddmm = String(f.getDate()).padStart(2,'0') + '/' + String(f.getMonth()+1).padStart(2,'0') + '/' + f.getFullYear();
+                return `<tr><td style="border:1px solid #333;padding:7px 8px;text-align:center;font-size:12px">${fddmm}</td><td style="border:1px solid #333;padding:7px 8px;text-align:center;font-size:12px">${escaparIPS(fmtHora12(c.hora))}</td><td style="border:1px solid #333;padding:7px 8px;height:34px"></td><td style="border:1px solid #333;padding:7px 8px"></td></tr>`;
+            }).join('');
+
+            const cupsTxt = cups ? (servicio + ' — CUPS ' + cups) : servicio;
+            const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Formato de Asistencia</title>
+            <style>@page{size:A4;margin:14mm}body{font-family:Arial,Helvetica,sans-serif;color:#222;margin:0;font-size:12px}
+            .top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #14375a;padding-bottom:8px;margin-bottom:10px}
+            .top .ips{font-size:15px;font-weight:700;color:#14375a}
+            .top .sub{font-size:10px;color:#555;margin-top:2px}
+            h1{text-align:center;font-size:17px;color:#14375a;letter-spacing:1px;margin:6px 0 14px}
+            table.idg{width:100%;border-collapse:collapse;margin-bottom:14px}
+            table.idg td{border:1px solid #333;padding:6px 9px;font-size:12px}
+            table.idg .lbl{background:#fdece0;font-weight:700;color:#7a3b12;width:130px}
+            table.ses{width:100%;border-collapse:collapse}
+            table.ses th{background:#fbcfa8;border:1px solid #333;padding:8px;font-size:11px;color:#5a2d0c;text-transform:uppercase;letter-spacing:.5px}
+            .footer{margin-top:18px;border-top:1px solid #ccc;padding-top:8px;font-size:10px;color:#666;text-align:center;line-height:1.6}</style></head><body>
+            <div class="top"><div><div class="ips">${nombreIPS}</div><div class="sub">Código: AU-NM-041 &nbsp;·&nbsp; Versión: 002 &nbsp;·&nbsp; Página 1</div></div><div>${logo}</div></div>
+            <h1>FORMATO DE ASISTENCIA</h1>
+            <table class="idg">
+              <tr><td class="lbl">NOMBRE</td><td>${escaparIPS(p.nombre||'')}</td><td class="lbl">IDENTIFICACIÓN</td><td>${escaparIPS((p.tipoDoc||'CC')+' '+(p.documento||''))}</td></tr>
+              <tr><td class="lbl">ÁREA / SERVICIO</td><td>${escaparIPS(cupsTxt)}</td><td class="lbl">EMPRESA / EPS</td><td>${escaparIPS(p.eps||'')}</td></tr>
+              <tr><td class="lbl">PROFESIONAL</td><td>${escaparIPS(medico||'')}</td><td class="lbl">ESPECIALIDAD</td><td>${escaparIPS(especialidad||'')}</td></tr>
+              <tr><td class="lbl">N° ADMISIÓN</td><td>${escaparIPS(p.numAdmision||'')}</td><td class="lbl">TOTAL SESIONES</td><td>${citas.length}</td></tr>
+            </table>
+            <table class="ses"><thead><tr><th style="width:70px">FECHA</th><th style="width:80px">HORA</th><th>FIRMA USUARIO / RESPONSABLE</th><th style="width:150px">OBSERVACIONES</th></tr></thead><tbody>${filas}</tbody></table>
+            <div class="footer"><strong>${nombreIPS}</strong>${contactoPie.length ? '<br>' + contactoPie.join(' &nbsp;·&nbsp; ') : ''}<br>Documento generado el ${new Date().toLocaleDateString('es-ES')} por NEXUSMED</div>
+            </body></html>`;
+
+            const w = window.open('', '_blank', 'width=900,height=700');
+            if (!w) { mostrarToast('Permita las ventanas emergentes para descargar el PDF', 'error'); return; }
+            w.document.write(html); w.document.close(); w.focus();
+            setTimeout(() => { w.print(); }, 400);
+        }
         function cerrarSesion() { localStorage.removeItem('nexus_sesion'); window.location.href = 'index.html'; }
         function mostrarToast(msg, tipo = 'info') { const c = document.getElementById('toastContainer'); const t = document.createElement('div'); t.className = `toast toast-${tipo}`; t.textContent = msg; c.appendChild(t); setTimeout(() => t.remove(), 3000); }
         document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
