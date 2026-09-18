@@ -1564,6 +1564,20 @@ function pintarCajas(){
     zone.ondrop=function(e){e.preventDefault();zone.classList.remove('dragover');tomarDrop(doc.s,e);};
     div.appendChild(zone);
 
+    /* --- Botón de verificación automática del CRC (solo casilla CRC) --- */
+    if(doc.s==='CRC'){
+      var na0=numAdmisionDeLote(loteActivoObj());
+      var eps0=epsDeAdmision(na0);
+      if(eps0&&(esEpsAutomatizable(eps0.codigo)||esEpsAutomatizable(eps0.nombre))){
+        var btnCrc=document.createElement('button');
+        btnCrc.className='nx-btn mini';
+        btnCrc.style.cssText='background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;align-self:flex-start';
+        btnCrc.innerHTML='<i class="fas fa-robot"></i> Verificar CRC ('+String(eps0.codigo||eps0.nombre)+')';
+        btnCrc.onclick=function(){verificarCRC(loteActivoObj());};
+        div.appendChild(btnCrc);
+      }
+    }
+
     /* --- Nombre del archivo destino --- */
     if(carpeta&&nit){
       var tgt=document.createElement('div');
@@ -2250,6 +2264,108 @@ function numAdmisionDeLote(l){
     }
   }catch(err){}
   return String(l.nombre||'').trim();
+}
+
+/* ===== Verificación automática del CRC (Derechos) ===== */
+// Objeto del lote actualmente cargado en pantalla.
+function loteActivoObj(){return {id:idLote,nombre:carpeta||'',nit:nit||''};}
+
+// Normaliza texto de EPS para comparar.
+function _normEps(s){return String(s||'').trim().toUpperCase();}
+
+// Devuelve la ficha de EPS (de configuración) que corresponde a la admisión.
+function epsDeAdmision(na){
+  if(!na)return null;
+  var pac=_byAdm('nexus_pacientes',na)[0]||{};
+  var epsPac=_normEps(pac.eps);
+  if(!epsPac)return null;
+  var arr=[];try{arr=JSON.parse(localStorage.getItem('nexus_entidades_pagadoras')||'[]');}catch(e){arr=[];}
+  if(!Array.isArray(arr))arr=[];
+  // Empareja por código o por nombre (contiene).
+  var ficha=arr.find(function(e){
+    return _normEps(e.codigo)===epsPac||_normEps(e.nombre)===epsPac||
+           epsPac.indexOf(_normEps(e.codigo))>=0||_normEps(e.nombre).indexOf(epsPac)>=0;
+  });
+  if(ficha)return {codigo:ficha.codigo||'',nombre:ficha.nombre||epsPac,url:ficha.urlVerificacion||'',doc:pac};
+  // Sin ficha en config: usa el texto del paciente igual.
+  return {codigo:epsPac,nombre:epsPac,url:'',doc:pac};
+}
+
+// ¿Esta EPS tiene automatización de CRC? (COOSALUD / FOMAG)
+function esEpsAutomatizable(x){
+  var s=_normEps(x);
+  return s.indexOf('COOSALUD')>=0||s.indexOf('FOMAG')>=0||s.indexOf('HORUS')>=0;
+}
+
+// URL del microservicio Puppeteer (configurable). El navegador NO puede
+// hacer scraping de portales externos; por eso se delega en un backend.
+function crcServiceUrl(){
+  try{return (localStorage.getItem('nexus_crc_service')||'').trim();}catch(e){return '';}
+}
+
+// Guarda un PDF (Blob) en la casilla CRC del lote y refresca la vista.
+async function _guardarCrcEnCasilla(l,blob,nombre){
+  var wrap={name:nombre,size:blob.size,saved:true,blob:blob,
+    arrayBuffer:function(){return this.blob.arrayBuffer();}};
+  cola['CRC']=[wrap];
+  try{
+    await IDB.put('files',{lid_sigla:l.id+'_CRC',blob:blob,nombre:nombre,sigla:'CRC',lid:l.id});
+    var lote=await IDB.get('lotes',l.id);
+    if(lote){if(!lote.siglas)lote.siglas=[];if(lote.siglas.indexOf('CRC')<0)lote.siglas.push('CRC');
+      lote.total=lote.siglas.length;await IDB.put('lotes',lote);}
+  }catch(e){}
+  try{pintarCajas();}catch(e){}
+}
+
+// Orquesta la verificación: llama al backend Puppeteer o hace fallback manual.
+async function verificarCRC(l){
+  var na=numAdmisionDeLote(l);
+  var eps=epsDeAdmision(na);
+  if(!eps){toast('No se encontró la EPS del paciente de esta admisión','warn');return;}
+  if(!esEpsAutomatizable(eps.codigo)&&!esEpsAutomatizable(eps.nombre)){
+    toast('La verificación automática solo aplica a COOSALUD y FOMAG','info');return;
+  }
+  var pac=eps.doc||{};
+  var tipoDoc=pac.tipoDoc||'CC';
+  var numDoc=String(pac.documento||'').trim();
+  if(!numDoc){toast('El paciente no tiene número de documento registrado','warn');return;}
+  var portal=(eps.url||'').trim();
+  var backend=crcServiceUrl();
+
+  // Sin backend configurado: fallback manual (abrir portal en pestaña nueva).
+  if(!backend){
+    if(portal){
+      try{window.open(portal,'_blank');}catch(e){}
+      toast('Sin servidor de automatización. Abrí el portal de '+(eps.codigo||eps.nombre)+' para consultar '+tipoDoc+' '+numDoc+' y luego arrastrá el PDF a la casilla CRC.','warn');
+    }else{
+      toast('Configurá la URL de verificación de esta EPS en Configuración → Gestión de EPS.','warn');
+    }
+    return;
+  }
+
+  // Con backend: solicitar la descarga automatizada del CRC.
+  toast('Consultando derechos de '+tipoDoc+' '+numDoc+' en '+(eps.codigo||eps.nombre)+'…','info');
+  try{
+    var resp=await fetch(backend.replace(/\/$/,'')+'/crc',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({eps:(eps.codigo||eps.nombre),url:portal,tipoDoc:tipoDoc,documento:numDoc,numAdmision:na})
+    });
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    var data=await resp.json();
+    if(!data||!data.pdfBase64)throw new Error(data&&data.error?data.error:'Respuesta sin PDF');
+    // base64 → Blob
+    var bin=atob(data.pdfBase64.replace(/^data:[^,]+,/,''));
+    var bytes=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    var blob=new Blob([bytes],{type:'application/pdf'});
+    var nombre='CRC'+(l&&l.sep||'_')+(nit||'')+(l&&l.sep||'_')+na+'.pdf';
+    await _guardarCrcEnCasilla(l,blob,nombre);
+    toast('CRC verificado y guardado automáticamente para '+tipoDoc+' '+numDoc,'success');
+  }catch(err){
+    if(portal){try{window.open(portal,'_blank');}catch(e){}}
+    toast('No se pudo consultar el CRC automáticamente ('+err.message+'). Se abrió el portal para verificación manual.','error');
+  }
 }
 
 function _byAdm(key,na){
