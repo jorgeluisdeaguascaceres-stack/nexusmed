@@ -126,6 +126,7 @@
             .nav-bar { padding:8px 10px; justify-content:center; }
             .nav-item { padding:6px 10px; font-size:11px; }
         }
+@keyframes nxCfIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
     </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="nexus_db.js"></script>
@@ -491,6 +492,52 @@
             const info = document.getElementById('citaCupsInfo');
             info.textContent = s ? ('Código CUPS asociado: ' + (CUPS_MAP[s] || '—')) : '';
             cargarMedicosPorServicio(s);
+
+            // Al seleccionar un servicio, verificar si esta admisión ya lo tiene programado
+            if (s && pacienteSel) {
+                const admActual = (pacienteSel.numAdmision || '').trim();
+                const doc = (pacienteSel.documento || '');
+                const yaExiste = obtenerCitas().some(c =>
+                    (c.servicio || '') === s &&
+                    ((admActual && (c.numAdmision || '').trim() === admActual) ||
+                     (!admActual && (c.pacienteDoc || '') === doc))
+                );
+                if (yaExiste) {
+                    mostrarConfirmServicio(function(seguir) {
+                        if (!seguir) {
+                            // El usuario elige NO: limpiar la selección del servicio
+                            document.getElementById('citaServicio').value = '';
+                            info.textContent = '';
+                            cargarMedicosPorServicio('');
+                        }
+                    });
+                }
+            }
+        }
+
+        /* Cuadro flotante de confirmación SÍ / NO para servicio repetido */
+        function mostrarConfirmServicio(callback) {
+            let ov = document.getElementById('nxConfirmServicio');
+            if (ov) ov.remove();
+            ov = document.createElement('div');
+            ov.id = 'nxConfirmServicio';
+            ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+            const box = document.createElement('div');
+            box.style.cssText = 'background:linear-gradient(135deg,#0d2137,#122a45);border:1px solid #00b4d8;border-radius:14px;max-width:420px;width:100%;padding:26px 24px;box-shadow:0 10px 40px rgba(0,0,0,.5);text-align:center;font-family:Inter,sans-serif;animation:nxCfIn .25s';
+            box.innerHTML =
+                '<div style="width:54px;height:54px;border-radius:50%;background:rgba(255,209,102,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 14px">' +
+                '<i class="fas fa-triangle-exclamation" style="color:#ffd166;font-size:24px"></i></div>' +
+                '<div style="color:#90e0ef;font-size:1rem;font-weight:600;line-height:1.5;margin-bottom:22px">La admisión ya cuenta con este servicio. ¿Desea agregar más?</div>' +
+                '<div style="display:flex;gap:12px;justify-content:center">' +
+                '<button id="nxCfNo" style="flex:1;max-width:150px;background:transparent;border:1px solid #ff3860;color:#ff3860;padding:11px 0;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:700;font-family:Inter,sans-serif">NO</button>' +
+                '<button id="nxCfSi" style="flex:1;max-width:150px;background:linear-gradient(135deg,#0077b6,#00b4d8);border:none;color:#fff;padding:11px 0;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:700;font-family:Inter,sans-serif">SÍ</button>' +
+                '</div>';
+            ov.appendChild(box);
+            document.body.appendChild(ov);
+            function cerrar(r) { ov.remove(); if (typeof callback === 'function') callback(r); }
+            document.getElementById('nxCfSi').onclick = function(){ cerrar(true); };
+            document.getElementById('nxCfNo').onclick = function(){ cerrar(false); };
+            ov.addEventListener('click', function(e){ if (e.target === ov) cerrar(false); });
         }
         /* Llena el select de médico solo con quienes tengan esa especialidad */
         function cargarMedicosPorServicio(servicio) {
@@ -599,19 +646,6 @@
             if (fechas.length === 0) { mostrarToast('No hay días seleccionados en el calendario', 'error'); return; }
 
             const citas = obtenerCitas();
-
-            // Verificar si esta admisión ya tiene programado el servicio seleccionado
-            const admActual = (pacienteSel.numAdmision || '').trim();
-            const yaExisteServicio = citas.some(c =>
-                (c.servicio || '') === servicio &&
-                (((admActual && (c.numAdmision || '').trim() === admActual)) ||
-                 (!admActual && (c.pacienteDoc || '') === (pacienteSel.documento || '')))
-            );
-            if (yaExisteServicio) {
-                const seguir = confirm('La admisión ya cuenta con este servicio. ¿Desea agregar más?');
-                if (!seguir) return;
-            }
-
             const loteId = 'LOTE-' + Date.now();
             const nuevas = [];
             let conflictos = 0;
