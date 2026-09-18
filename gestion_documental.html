@@ -270,6 +270,12 @@ body.noscroll{overflow:hidden}
     <div class="active-lote" id="activo"></div>
 
     <div class="card">
+      <h2>Carpetas de admisiones / facturas · automáticas</h2>
+      <div class="hint" style="margin:0 0 10px">Cada admisión crea aquí su carpeta con el N° de admisión. Al facturar, la carpeta pasa a llamarse con el N° de factura. Haz clic en una para cargarle sus documentos.</div>
+      <div id="carpetasAuto" class="boxes"></div>
+    </div>
+
+    <div class="card">
       <h2>Sección 2 · Zona de carga (6 documentos)</h2>
       <div class="boxes" id="boxes"></div>
       <div class="hint">Puedes soltar varios PDF en una misma casilla: se unirán en un único archivo, en el orden que indiques, y se guardarán con la nomenclatura estricta. El nombre original de cada PDF se ignora por completo.</div>
@@ -1355,13 +1361,21 @@ var IDB={
 
 /* ===== Inicializaci\u00f3n ===== */
 async function init(){
-  try{await IDB.abrir();}catch(e){}
+  try{await IDB.abrir();}catch(e){console.error('[GD] IDB.abrir',e);toast('No se pudo abrir el almacén local','err');}
   document.getElementById('dot').classList.add('on');
   document.getElementById('modeTxt').textContent='Almacenamiento local (IndexedDB)';
   autollenarNit();
-  try{await sincronizarCarpetas();}catch(e){}
-  try{await cargarTabla();}catch(e){}
+  var nCarp=0;
+  try{nCarp=await sincronizarCarpetas();}catch(e){console.error('[GD] sincronizarCarpetas',e);toast('Error al sincronizar carpetas: '+(e&&e.message||e),'err');}
+  try{await cargarTabla();}catch(e){console.error('[GD] cargarTabla',e);}
   pintarCajas();
+  // Aviso de diagnóstico: cuántas carpetas se derivaron de admisiones/facturas
+  try{
+    var np=JSON.parse(localStorage.getItem('nexus_pacientes')||'[]').length;
+    var tot=(lotesGuardados||[]).length;
+    if(tot>0){toast(tot+' carpeta(s) sincronizada(s) · '+np+' admisión(es) en el sistema','ok');}
+    else if(np>0){toast('Hay '+np+' admisión(es) pero no se crearon carpetas — revisa la consola','err');}
+  }catch(e){}
 }
 
 /* ===== NIT autollenado desde Configuración (empresa/IPS) ===== */
@@ -1445,6 +1459,7 @@ async function sincronizarCarpetas(){
     }
   }
   if(cambiado){try{localStorage.setItem('nexus_gd_carpetas',JSON.stringify(reg));}catch(e){}}
+  return reg.length;
 }
 
 /* ===== Tabs (compat con sidebar v2.8) ===== */
@@ -2044,6 +2059,32 @@ async function zipVarios(ids){
 async function cargarTabla(){
   try{lotesGuardados=await IDB.getAll('lotes');}catch(e){lotesGuardados=[];}
   pintarTabla();
+  renderCarpetasAuto();
+}
+
+/* Lista visible de carpetas (lotes) en el panel Documentos */
+function renderCarpetasAuto(){
+  var cont=document.getElementById('carpetasAuto');
+  if(!cont)return;
+  cont.innerHTML='';
+  var lista=(lotesGuardados||[]).slice().sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha);});
+  if(!lista.length){
+    cont.innerHTML='<div class="empty">Aún no hay carpetas. Registra una admisión y aparecerá aquí automáticamente.</div>';
+    return;
+  }
+  lista.forEach(function(l){
+    var n=(l.siglas?l.siglas.length:0);
+    var div=document.createElement('div');
+    div.className='box'+(n>=6?' done':'');
+    div.style.cursor='pointer';
+    div.innerHTML='<div class="bhead"><div class="ico">'+(n>=6?'OK':'DIR')+'</div>'+
+      '<div><div class="sigla" style="font-size:15px">'+l.nombre+'</div>'+
+      '<div class="desc">NIT '+(l.nit||'—')+' · '+n+'/6 documentos</div></div></div>'+
+      '<div class="brow"><span class="state'+(n>=6?' ok':'')+'">'+(n>=6?'Completa':'Pendiente de carga')+'</span>'+
+      '<span class="nx-btn mini">Cargar documentos</span></div>';
+    div.onclick=function(){continuarCarga(l);};
+    cont.appendChild(div);
+  });
 }
 
 function pintarTabla(){
@@ -2296,7 +2337,7 @@ document.getElementById('chAll').onchange=function(){
 
 document.getElementById('q').oninput=pintarTabla;
 document.getElementById('filtro').onchange=pintarTabla;
-document.getElementById('btnRef').onclick=cargarTabla;
+document.getElementById('btnRef').onclick=resyncGD;
 document.getElementById('btnZipSel').onclick=function(){var ids=marcados();if(ids.length)zipVarios(ids);};
 document.getElementById('btnLimpiaSel').onclick=function(){document.querySelectorAll('#tb .chk:checked').forEach(function(c){c.checked=false;});refrescarBarraSel();};
 document.getElementById('btnElimSel').onclick=eliminarLoteSel;
@@ -2333,6 +2374,37 @@ document.head.appendChild(sty);
 /* ===== Iniciar ===== */
 init();
 
+/* ===== Auto-refresco: crea/renombra carpetas aunque la pestaña ya esté abierta =====
+   Detecta admisiones/facturas creadas en OTRAS pestañas y actualiza el gestor. */
+async function refrescarGD(){
+  try{await sincronizarCarpetas();}catch(e){}
+  try{await cargarTabla();}catch(e){}
+}
+// Cambios de localStorage desde otra pestaña del mismo navegador
+window.addEventListener('storage',function(ev){
+  if(!ev)return;
+  if(ev.key==='nexus_pacientes'||ev.key==='nexus_facturas'||ev.key==='nexus_gd_carpetas'||ev.key===null){
+    refrescarGD();
+  }
+});
+// Al volver a esta pestaña / ventana
+document.addEventListener('visibilitychange',function(){if(!document.hidden)refrescarGD();});
+window.addEventListener('focus',refrescarGD);
+
+/* ===== Re-sincronización en vivo =====
+   Si el usuario crea una admisión o factura en otra pestaña, o vuelve a
+   esta pestaña, recreamos/renombramos las carpetas automáticamente. */
+async function resyncGD(){
+  try{await sincronizarCarpetas();}catch(e){}
+  try{await cargarTabla();}catch(e){}
+  try{pintarCajas();}catch(e){}
+}
+window.addEventListener('storage',function(ev){
+  if(!ev||!ev.key||ev.key==='nexus_pacientes'||ev.key==='nexus_facturas'||ev.key==='nexus_gd_carpetas'||ev.key==='nexus_hospital'){resyncGD();}
+});
+document.addEventListener('visibilitychange',function(){if(!document.hidden)resyncGD();});
+window.addEventListener('focus',resyncGD);
+
 </script>
 <script>
 /* ── Sidebar panel switching v2.8 ── */
@@ -2345,7 +2417,7 @@ function switchPanel(pid){
   const item=document.querySelector('[data-panel="'+pid+'"]');
   if(item)item.classList.add('active');
   if(!PANEL_INIT[pid]){PANEL_INIT[pid]=true;}
-  if(pid==='busqueda'&&typeof cargarTabla==='function'){try{cargarTabla();}catch(e){}}
+  if(pid==='busqueda'&&typeof refrescarGD==='function'){try{refrescarGD();}catch(e){}}
 }
 </script>
 </body>

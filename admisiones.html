@@ -638,6 +638,75 @@
             { code: 'Q90.9', desc: 'Síndrome de Down, no especificado' },
             { code: 'H90.3', desc: 'Hipoacusia neurosensorial bilateral' },
             { code: 'H54.0', desc: 'Ceguera de ambos ojos' },
+            // ─── Infecciosas / tropicales frecuentes en Colombia ───
+            { code: 'A90', desc: 'Fiebre del dengue (dengue clásico)' },
+            { code: 'A91', desc: 'Fiebre hemorrágica por dengue' },
+            { code: 'A97.0', desc: 'Dengue sin signos de alarma' },
+            { code: 'A92.0', desc: 'Fiebre de Chikungunya' },
+            { code: 'A92.5', desc: 'Enfermedad por virus del Zika' },
+            { code: 'B54', desc: 'Paludismo (malaria), no especificado' },
+            { code: 'B51.9', desc: 'Paludismo por Plasmodium vivax' },
+            { code: 'A01.0', desc: 'Fiebre tifoidea' },
+            { code: 'A15.0', desc: 'Tuberculosis pulmonar' },
+            { code: 'B20', desc: 'Enfermedad por VIH' },
+            { code: 'B24', desc: 'Enfermedad por VIH, no especificada' },
+            { code: 'A53.9', desc: 'Sífilis, no especificada' },
+            { code: 'B18.2', desc: 'Hepatitis viral crónica tipo C' },
+            { code: 'B01.9', desc: 'Varicela sin complicaciones' },
+            { code: 'B26.9', desc: 'Parotiditis sin complicaciones' },
+            // ─── Obstetricia / ginecología ───
+            { code: 'O80', desc: 'Parto único espontáneo' },
+            { code: 'O82', desc: 'Parto único por cesárea' },
+            { code: 'O14.9', desc: 'Preeclampsia, no especificada' },
+            { code: 'O15.9', desc: 'Eclampsia, no especificada' },
+            { code: 'O03.9', desc: 'Aborto espontáneo, completo o no especificado' },
+            { code: 'O21.0', desc: 'Hiperémesis gravídica leve' },
+            { code: 'O24.4', desc: 'Diabetes mellitus gestacional' },
+            { code: 'Z34.9', desc: 'Supervisión de embarazo normal' },
+            { code: 'N93.9', desc: 'Hemorragia uterina anormal' },
+            { code: 'N95.1', desc: 'Estados menopaúsicos' },
+            // ─── Pediatría frecuente ───
+            { code: 'P07.1', desc: 'Recién nacido de bajo peso al nacer' },
+            { code: 'P59.9', desc: 'Ictericia neonatal, no especificada' },
+            { code: 'J21.9', desc: 'Bronquiolitis aguda, no especificada' },
+            { code: 'J20.9', desc: 'Bronquitis aguda, no especificada' },
+            { code: 'A08.0', desc: 'Enteritis debida a rotavirus' },
+            { code: 'E86', desc: 'Deshidratación' },
+            // ─── Endocrino / metabólico ───
+            { code: 'E03.9', desc: 'Hipotiroidismo, no especificado' },
+            { code: 'E05.9', desc: 'Hipertiroidismo (tirotoxicosis), no especificado' },
+            { code: 'E04.9', desc: 'Bocio no tóxico, no especificado' },
+            { code: 'E55.9', desc: 'Deficiencia de vitamina D' },
+            { code: 'E63.9', desc: 'Deficiencia nutricional, no especificada' },
+            // ─── Genitourinario ───
+            { code: 'N20.0', desc: 'Cálculo del riñón (nefrolitiasis)' },
+            { code: 'N30.0', desc: 'Cistitis aguda' },
+            { code: 'N10', desc: 'Nefritis túbulo-intersticial aguda (pielonefritis)' },
+            { code: 'N18.5', desc: 'Enfermedad renal crónica, estadio 5' },
+            // ─── Piel / ORL / oftalmología ───
+            { code: 'L03.9', desc: 'Celulitis, no especificada' },
+            { code: 'L30.9', desc: 'Dermatitis, no especificada' },
+            { code: 'L40.9', desc: 'Psoriasis, no especificada' },
+            { code: 'H66.9', desc: 'Otitis media, no especificada' },
+            { code: 'H10.9', desc: 'Conjuntivitis, no especificada' },
+            { code: 'H25.9', desc: 'Catarata senil, no especificada' },
+            { code: 'H40.9', desc: 'Glaucoma, no especificado' },
+            { code: 'J32.9', desc: 'Sinusitis crónica, no especificada' },
+            { code: 'J35.0', desc: 'Amigdalitis crónica' },
+            // ─── Síntomas / signos y causas externas ───
+            { code: 'R51', desc: 'Cefalea' },
+            { code: 'R11', desc: 'Náusea y vómito' },
+            { code: 'R42', desc: 'Mareo y desvanecimiento (vértigo)' },
+            { code: 'R05', desc: 'Tos' },
+            { code: 'R06.0', desc: 'Disnea' },
+            { code: 'R73.9', desc: 'Hiperglucemia, no especificada' },
+            { code: 'E16.2', desc: 'Hipoglucemia, no especificada' },
+            { code: 'T78.4', desc: 'Alergia, no especificada' },
+            { code: 'W19', desc: 'Caída no especificada' },
+            { code: 'V89.2', desc: 'Accidente de tránsito, vehículo de motor' },
+            { code: 'X59', desc: 'Exposición a factor no especificado' },
+            { code: 'Z00.0', desc: 'Examen médico general' },
+            { code: 'Z76.0', desc: 'Emisión de receta repetida' },
         ];
 
         // ─── Colombia: Departamentos y Municipios ───
@@ -839,24 +908,45 @@
         }
 
         function filtrarCIE10() {
-            const term = document.getElementById('diagnostico').value.toLowerCase().trim();
+            const raw = document.getElementById('diagnostico').value.trim();
+            const term = raw.toLowerCase();
             const dropdown = document.getElementById('cie10Dropdown');
             if (!term) { renderCIE10List(CIE10); dropdown.classList.add('open'); return; }
             const filtered = CIE10.filter(c => c.code.toLowerCase().includes(term) || c.desc.toLowerCase().includes(term));
-            renderCIE10List(filtered);
+            renderCIE10List(filtered, raw);
             dropdown.classList.add('open');
         }
 
-        function renderCIE10List(lista) {
+        function renderCIE10List(lista, term) {
             const dropdown = document.getElementById('cie10Dropdown');
+            let html = '';
             if (lista.length === 0) {
-                dropdown.innerHTML = '<div class="no-results">Sin resultados</div>';
-                return;
+                html = '<div class="no-results">Sin coincidencias en la lista rápida</div>';
+            } else {
+                html = lista.map(c =>
+                    `<div class="dropdown-item" onclick="seleccionarCIE10('${c.code}', '${c.desc.replace(/'/g, "\\'")}')">` +
+                    `<span class="code">${c.code}</span><span class="desc">${c.desc}</span></div>`
+                ).join('');
             }
-            dropdown.innerHTML = lista.map(c =>
-                `<div class="dropdown-item" onclick="seleccionarCIE10('${c.code}', '${c.desc.replace(/'/g, "\\'")}')">` +
-                `<span class="code">${c.code}</span><span class="desc">${c.desc}</span></div>`
-            ).join('');
+            // Opción para usar CUALQUIER código CIE-10 escrito por el usuario
+            if (term && term.length >= 2) {
+                const safe = term.replace(/'/g, "\\'").replace(/</g, '&lt;');
+                html += `<div class="dropdown-item" style="border-top:1px solid #1a3a5c" onclick="seleccionarCIE10Manual('${safe}')">` +
+                    `<span class="code"><i class="fas fa-plus"></i></span>` +
+                    `<span class="desc">Usar “${term}” como diagnóstico</span></div>`;
+            }
+            dropdown.innerHTML = html;
+        }
+
+        // Acepta cualquier código CIE-10 escrito manualmente (formato "CODIGO Descripción")
+        function seleccionarCIE10Manual(texto) {
+            const t = String(texto).trim();
+            const m = t.match(/^([A-Za-z]\d{1,2}(?:\.[0-9A-Za-z]{1,3})?)[\s\-–:]*(.*)$/);
+            let code = '', desc = t;
+            if (m) { code = m[1].toUpperCase(); desc = (m[2] || '').trim() || code; }
+            document.getElementById('diagnostico').value = code && desc !== code ? `${code} – ${desc}` : t;
+            document.getElementById('diagnosticoCodigo').value = code || t.split(/\s|–|-/)[0].toUpperCase();
+            document.getElementById('cie10Dropdown').classList.remove('open');
         }
 
         function seleccionarCIE10(code, desc) {
