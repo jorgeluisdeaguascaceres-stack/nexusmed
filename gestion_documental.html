@@ -1374,18 +1374,50 @@ function autollenarNit(){
 }
 
 /* ===== Sincroniza carpetas creadas por Admisiones/Facturación =====
-   Registro compartido en localStorage 'nexus_gd_carpetas':
-   [{numAdmision, nombre, nit, facturaNum, estado, loteId}]
-   - Admisiones crea la entrada con nombre = N° admisión.
-   - Facturación renombra (nombre = N° factura).
-   Aquí creamos/renombramos el lote en IndexedDB automáticamente. */
+   Deriva las carpetas DIRECTAMENTE de los datos guardados, de modo que
+   funcione aunque otras páginas no se hayan actualizado todavía:
+   - Cada paciente admitido (nexus_pacientes) genera una carpeta con
+     nombre = N° de admisión.
+   - Si existe factura definitiva (nexus_facturas) para esa admisión,
+     la carpeta se renombra al N° de factura.
+   El registro 'nexus_gd_carpetas' guarda el enlace admisión→lote(IDB). */
 async function sincronizarCarpetas(){
   var reg;
   try{reg=JSON.parse(localStorage.getItem('nexus_gd_carpetas')||'[]');}catch(e){reg=[];}
-  if(!Array.isArray(reg)||!reg.length)return;
+  if(!Array.isArray(reg))reg=[];
   var hnit='';
   try{hnit=String((JSON.parse(localStorage.getItem('nexus_hospital')||'{}').nit)||'').trim();}catch(e){}
   var cambiado=false;
+
+  // 1) Asegurar una entrada por cada paciente admitido
+  var pacientes=[];
+  try{pacientes=JSON.parse(localStorage.getItem('nexus_pacientes')||'[]');}catch(e){pacientes=[];}
+  if(Array.isArray(pacientes)){
+    pacientes.forEach(function(p){
+      if(!p||!p.numAdmision)return;
+      var na=String(p.numAdmision).trim();
+      if(!na)return;
+      if(!reg.some(function(x){return x&&x.numAdmision===na;})){
+        reg.push({numAdmision:na,nombre:na,nit:hnit,documento:p.documento||'',facturaNum:'',estado:'admitido',loteId:null});
+        cambiado=true;
+      }
+    });
+  }
+
+  // 2) Aplicar renombrado por facturas definitivas
+  var facturas=[];
+  try{facturas=JSON.parse(localStorage.getItem('nexus_facturas')||'[]');}catch(e){facturas=[];}
+  if(Array.isArray(facturas)){
+    facturas.forEach(function(f){
+      if(!f||f.estado!=='definitiva'||!f.numAdmision||!f.numeroFactura)return;
+      var na=String(f.numAdmision).trim();
+      var nf=String(f.numeroFactura).trim();
+      var e=reg.find(function(x){return x&&x.numAdmision===na;});
+      if(e&&e.nombre!==nf){e.nombre=nf;e.facturaNum=nf;e.estado='facturado';cambiado=true;}
+    });
+  }
+
+  // 3) Crear / renombrar el lote en IndexedDB
   for(var i=0;i<reg.length;i++){
     var e=reg[i];
     if(!e||!e.nombre)continue;
@@ -1400,10 +1432,8 @@ async function sincronizarCarpetas(){
         await IDB.put('lotes',{id:e.loteId,nombre:e.nombre,nit:nit,fecha:new Date().toISOString(),total:0,siglas:[],separador:'_'});
         cambiado=true;
       }else if(lote.nombre!==e.nombre||lote.nit!==nit){
-        var viejo=lote.nombre;
         lote.nombre=e.nombre;lote.nit=nit;
         await IDB.put('lotes',lote);
-        // renombrar archivos guardados del lote
         for(var k=0;k<SIGLAS.length;k++){
           var s=SIGLAS[k];
           try{
