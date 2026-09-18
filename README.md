@@ -17,7 +17,7 @@ NexusMed. NexusMed lo guarda solo en la casilla **CRC** de esa admisión.
 ```bash
 npm install
 node crc_service.js
-# queda escuchando en http://127.0.0.1:8080
+# queda escuchando en http://localhost:10000 (o el puerto que asigne Render)
 ```
 Para ver el navegador mientras trabaja (útil al ajustar los selectores):
 ```bash

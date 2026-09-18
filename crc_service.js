@@ -32,7 +32,7 @@ const app = express();
 app.use(cors());                       // permite llamadas desde NexusMed
 app.use(express.json({ limit: '2mb' }));
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 10000;
 const HEADLESS = process.env.HEADLESS !== 'false';   // HEADLESS=false para ver el navegador
 
 /* ---- Salud ---- */
@@ -146,7 +146,7 @@ function mapTipoDocHorus(t) {
 //   return fs.readFileSync(path.join(dir, file));
 // }
 
-// Enlaza SOLO a loopback por seguridad.
-app.listen(PORT, '127.0.0.1', () => {
-  console.log('[crc-service] escuchando en http://127.0.0.1:' + PORT);
+// En Render (y otros PaaS) hay que escuchar en 0.0.0.0 y usar process.env.PORT.
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('[crc-service] escuchando en el puerto ' + PORT);
 });
