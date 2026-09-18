@@ -1573,7 +1573,7 @@ function pintarCajas(){
         btnCrc.className='nx-btn mini';
         btnCrc.style.cssText='background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;align-self:flex-start';
         btnCrc.innerHTML='<i class="fas fa-robot"></i> Verificar CRC ('+String(eps0.codigo||eps0.nombre)+')';
-        btnCrc.onclick=function(){verificarCRC(loteActivoObj());};
+        btnCrc.onclick=function(){verificarCRC(loteActivoObj(),btnCrc);};
         div.appendChild(btnCrc);
       }
     }
@@ -2318,7 +2318,7 @@ async function _guardarCrcEnCasilla(l,blob,nombre){
 }
 
 // Orquesta la verificación: llama al backend Puppeteer o hace fallback manual.
-async function verificarCRC(l){
+async function verificarCRC(l,btn){
   var na=numAdmisionDeLote(l);
   var eps=epsDeAdmision(na);
   if(!eps){toast('No se encontró la EPS del paciente de esta admisión','warn');return;}
@@ -2343,6 +2343,10 @@ async function verificarCRC(l){
     return;
   }
 
+  // Estado de carga en el botón (feedback visual).
+  var _txt=null;
+  if(btn){_txt=btn.innerHTML;btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Consultando CRC…';}
+
   // Con backend: solicitar la descarga automatizada del CRC.
   toast('Consultando derechos de '+tipoDoc+' '+numDoc+' en '+(eps.codigo||eps.nombre)+'…','info');
   try{
@@ -2359,10 +2363,14 @@ async function verificarCRC(l){
     var bytes=new Uint8Array(bin.length);
     for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
     var blob=new Blob([bytes],{type:'application/pdf'});
-    var nombre='CRC'+(l&&l.sep||'_')+(nit||'')+(l&&l.sep||'_')+na+'.pdf';
+    var _sep=(typeof sep!=='undefined'&&sep)?sep:'_';
+    var nombre='CRC'+_sep+(nit||'')+_sep+na+'.pdf';
     await _guardarCrcEnCasilla(l,blob,nombre);
     toast('CRC verificado y guardado automáticamente para '+tipoDoc+' '+numDoc,'success');
+    // La casilla CRC ya se repinta en _guardarCrcEnCasilla → pintarCajas().
+    return;
   }catch(err){
+    if(btn){btn.disabled=false;btn.innerHTML=_txt;}
     if(portal){try{window.open(portal,'_blank');}catch(e){}}
     toast('No se pudo consultar el CRC automáticamente ('+err.message+'). Se abrió el portal para verificación manual.','error');
   }
