@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEXUSMED – Gestión Documental</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -1403,6 +1404,11 @@ async function sincronizarCarpetas(){
   try{hnit=String((JSON.parse(localStorage.getItem('nexus_hospital')||'{}').nit)||'').trim();}catch(e){}
   var cambiado=false;
 
+  // Lista de admisiones eliminadas manualmente (para que no reaparezcan al sincronizar)
+  var ignoradas=[];
+  try{ignoradas=JSON.parse(localStorage.getItem('nexus_gd_eliminadas')||'[]');}catch(e){ignoradas=[];}
+  if(!Array.isArray(ignoradas))ignoradas=[];
+
   // 1) Asegurar una entrada por cada paciente admitido
   var pacientes=[];
   try{pacientes=JSON.parse(localStorage.getItem('nexus_pacientes')||'[]');}catch(e){pacientes=[];}
@@ -1411,6 +1417,7 @@ async function sincronizarCarpetas(){
       if(!p||!p.numAdmision)return;
       var na=String(p.numAdmision).trim();
       if(!na)return;
+      if(ignoradas.indexOf(na)>=0)return;
       if(!reg.some(function(x){return x&&x.numAdmision===na;})){
         reg.push({numAdmision:na,nombre:na,nit:hnit,documento:p.documento||'',facturaNum:'',estado:'admitido',loteId:null});
         cambiado=true;
@@ -2233,6 +2240,116 @@ function pintarTabla(){
 
 function nombreOficialLote(l,sigla){return sigla+(l.separador||'_')+l.nit+(l.separador||'_')+l.nombre+'.pdf';}
 
+/* ===== HEV automática: buscar N° de admisión de un lote ===== */
+function numAdmisionDeLote(l){
+  try{
+    var reg=JSON.parse(localStorage.getItem('nexus_gd_carpetas')||'[]');
+    if(Array.isArray(reg)){
+      var e=reg.find(function(x){return x&&x.loteId===l.id;});
+      if(e&&e.numAdmision)return String(e.numAdmision).trim();
+    }
+  }catch(err){}
+  return String(l.nombre||'').trim();
+}
+
+function _byAdm(key,na){
+  var arr=[];try{arr=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){arr=[];}
+  if(!Array.isArray(arr))return [];
+  var t=String(na).toLowerCase();
+  return arr.filter(function(r){return r&&String(r.numAdmision||'').toLowerCase()===t;});
+}
+
+// ¿Hay algo de HC/evoluciones/notas/terapias para esta admisión?
+function _hevTieneDatos(na){
+  if(!na)return false;
+  return _byAdm('nexus_historias_clinicas',na).length>0||
+         _byAdm('nexus_evoluciones',na).length>0||
+         _byAdm('nexus_notas_enfermeria',na).length>0||
+         _byAdm('nexus_terapias',na).length>0;
+}
+
+// Genera un PDF con HC + evoluciones + notas + terapias de una admisión
+function generarHEVPdfBlob(na,nit,nombreLote){
+  var JS=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+  if(!JS)throw new Error('jsPDF no disponible');
+  var doc=new JS({orientation:'portrait',unit:'mm',format:'letter'});
+  var PW=doc.internal.pageSize.getWidth(), PH=doc.internal.pageSize.getHeight();
+  var M=15, y=M, LW=PW-2*M;
+  var hosp={};try{hosp=JSON.parse(localStorage.getItem('nexus_hospital')||'{}');}catch(e){}
+  var pac=_byAdm('nexus_pacientes',na)[0]||{};
+
+  function nl(h){h=h||6; if(y+h>PH-M){doc.addPage();y=M;} }
+  function line(){doc.setDrawColor(200);doc.line(M,y,PW-M,y);y+=4;}
+  function h1(t){nl(12);doc.setFillColor(11,58,92);doc.rect(M,y-4,LW,9,'F');doc.setTextColor(255);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text(t,M+2,y+2);y+=10;doc.setTextColor(20);}
+  function h2(t){nl(9);doc.setFont('helvetica','bold');doc.setFontSize(10.5);doc.setTextColor(11,58,92);doc.text(t,M,y+1);y+=6;doc.setTextColor(20);}
+  function field(k,v){if(v===undefined||v===null||v==='')return;var s=k+': '+v;doc.setFont('helvetica','normal');doc.setFontSize(9.5);var ls=doc.splitTextToSize(s,LW);nl(ls.length*5+1);doc.text(ls,M,y);y+=ls.length*5+1;}
+  function para(k,v){if(!v)return;h2(k);doc.setFont('helvetica','normal');doc.setFontSize(9.5);var ls=doc.splitTextToSize(String(v),LW);for(var i=0;i<ls.length;i++){nl(5);doc.text(ls[i],M,y);y+=5;}y+=1;}
+  function fdate(x){return x||'—';}
+
+  // Encabezado
+  doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(11,58,92);
+  doc.text('HISTORIA CLÍNICA ELECTRÓNICA (HEV)',PW/2,y+2,{align:'center'});y+=8;
+  doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(20);
+  if(hosp.nombre){doc.text(String(hosp.nombre),PW/2,y,{align:'center'});y+=5;}
+  doc.text('NIT: '+(nit||hosp.nit||'—')+'   ·   Admisión: '+na+'   ·   Carpeta: '+(nombreLote||na),PW/2,y,{align:'center'});y+=4;
+  doc.text('Generado: '+new Date().toLocaleString('es-CO'),PW/2,y,{align:'center'});y+=6;line();
+
+  // Datos del paciente
+  h1('DATOS DEL PACIENTE');
+  field('Nombre',pac.nombre);
+  field('Tipo/Documento',(pac.tipoDoc||'CC')+' '+(pac.documento||''));
+  field('EPS',pac.eps); field('Servicio',pac.servicio);
+  field('Fecha de ingreso',pac.fechaIngreso); field('Médico',pac.medico);
+  field('Diagnóstico',pac.diagnosticoCodigo?(pac.diagnosticoCodigo+' – '+(pac.diagnostico||'')):(pac.diagnostico||''));
+  y+=2;
+
+  // Historias clínicas
+  var HCs=_byAdm('nexus_historias_clinicas',na);
+  HCs.forEach(function(h){
+    h1('HISTORIA CLÍNICA · '+(h.numeroHistoria||''));
+    field('Fecha',fdate(h.fecha)+' '+(h.hora||'')); field('Médico tratante',h.medicoTratante);
+    field('Especialidad',h.especialidad); field('Tipo de atención',h.tipoAtencion);
+    field('Diagnóstico principal',h.diagnosticoPrincipal); field('Diagnósticos secundarios',h.diagnosticosSecundarios);
+    para('Motivo de consulta',h.motivoConsulta); para('Enfermedad actual',h.enfermedadActual);
+    para('Antecedentes personales',h.antecedentesPersonales); para('Antecedentes familiares',h.antecedentesFamiliares);
+    para('Antecedentes quirúrgicos',h.antecedentesQuirurgicos); para('Alergias',h.alergias);
+    para('Examen físico',h.examenFisico); para('Plan de tratamiento',h.planTratamiento);
+    para('Observaciones',h.observaciones); y+=2;
+  });
+
+  // Evoluciones
+  var EVs=_byAdm('nexus_evoluciones',na).sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
+  if(EVs.length){h1('NOTAS DE EVOLUCIÓN ('+EVs.length+')');
+    EVs.forEach(function(e){h2((e.numeroEvolucion||'EVO')+' · '+fdate(e.fecha)+' '+(e.hora||'')+' · '+(e.profesional||''));
+      para('Subjetivo (S)',e.subjetivo); para('Objetivo (O)',e.objetivo);
+      para('Análisis (A)',e.analisis); para('Plan (P)',e.plan); y+=1;});
+  }
+
+  // Notas de enfermería
+  var NEs=_byAdm('nexus_notas_enfermeria',na).sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
+  if(NEs.length){h1('NOTAS DE ENFERMERÍA ('+NEs.length+')');
+    NEs.forEach(function(n){h2((n.numeroNota||'NE')+' · '+fdate(n.fecha)+' '+(n.hora||'')+' · '+(n.turno||'')+' · '+(n.enfermera||''));
+      field('Estado del paciente',n.estadoPaciente); field('Signos vitales',n.signosVitales);
+      field('Procedimientos',n.procedimientos); para('Descripción',n.descripcionProcedimientos); y+=1;});
+  }
+
+  // Terapias
+  var TEs=_byAdm('nexus_terapias',na).sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
+  if(TEs.length){h1('TERAPIAS ('+TEs.length+')');
+    TEs.forEach(function(t){h2((t.numeroTerapia||'TE')+' · '+(t.tipoTerapia||'')+' · '+fdate(t.fecha)+' '+(t.hora||'')+' · '+(t.terapeuta||''));
+      field('Estado',t.estadoTerapia); field('Sesión',(t.sesionNumero||'')+(t.totalSesiones?(' de '+t.totalSesiones):''));
+      field('Frecuencia',t.frecuencia); field('Indicación diagnóstica',t.indicacionDiagnostica);
+      para('Objetivos',t.objetivosTratamiento); para('Descripción de la sesión',t.descripcionSesion);
+      para('Observaciones',t.observaciones); para('Plan próxima sesión',t.planProximaSesion); y+=1;});
+  }
+
+  // Pie con paginación
+  var np=doc.internal.getNumberOfPages();
+  for(var p=1;p<=np;p++){doc.setPage(p);doc.setFontSize(8);doc.setTextColor(120);
+    doc.text('HEV '+na+' — Página '+p+' de '+np,PW/2,PH-8,{align:'center'});}
+  return doc.output('blob');
+}
+
 /* ===== Continuar carga ===== */
 async function continuarCarga(l){
   document.getElementById('carpeta').value=l.nombre;
@@ -2260,12 +2377,32 @@ async function continuarCarga(l){
   }
   actualizarVista();
   switchPanel('documentos');
+  // === Auto-HEV: si la casilla HEV está vacía y hay datos clínicos, generarla ===
+  try{await autoGenerarHEV(l);}catch(e){console.error('[GD] autoGenerarHEV',e);}
   var el=document.getElementById('activo');
   el.classList.add('on');
   var guardados=SIGLAS.filter(function(s){return cola[s]&&cola[s].length;}).length;
   el.innerHTML='<b>Continuando lote:</b> '+l.nombre+' ('+guardados+' de '+SIGLAS.length+' documentos ya guardados)';
   toast('Se recargaron '+guardados+' documentos guardados del lote '+l.nombre,'info');
   pintarCajas();
+}
+
+/* ===== Auto-generación de la HEV en su casilla ===== */
+async function autoGenerarHEV(l){
+  if(cola['HEV']&&cola['HEV'].length)return;      // ya existe, no sobrescribir
+  var na=numAdmisionDeLote(l);
+  if(!_hevTieneDatos(na))return;                  // sin datos clínicos
+  var nitL=String(l.nit||'').trim();
+  var blob=generarHEVPdfBlob(na,nitL,l.nombre);
+  var nombre='HEV'+(l.separador||'_')+nitL+(l.separador||'_')+na+'.pdf';
+  await IDB.put('files',{lid_sigla:l.id+'_HEV',blob:blob,nombre:nombre,sigla:'HEV',lid:l.id});
+  // Registrar en la lista de siglas del lote
+  var lote=await IDB.get('lotes',l.id);
+  if(lote){if(!lote.siglas)lote.siglas=[];if(lote.siglas.indexOf('HEV')<0){lote.siglas.push('HEV');}
+    lote.total=lote.siglas.length;await IDB.put('lotes',lote);
+    l.siglas=lote.siglas;}
+  cola['HEV']=[{name:nombre,size:blob.size,saved:true,blob:blob,arrayBuffer:function(){return this.blob.arrayBuffer();}}];
+  toast('HEV generada automáticamente: '+nombre,'success');
 }
 
 /* ===== ZIP un lote ===== */
@@ -2289,13 +2426,34 @@ async function zipUnLote(lid){
 }
 
 /* ===== Eliminar lote ===== */
+// Quita del registro derivado y marca la admisi\u00f3n como eliminada para
+// que NO vuelva a crearse en la pr\u00f3xima sincronizaci\u00f3n.
+function _purgarCarpetaDerivada(lid){
+  try{
+    var reg=JSON.parse(localStorage.getItem('nexus_gd_carpetas')||'[]');
+    if(!Array.isArray(reg))reg=[];
+    var elim=JSON.parse(localStorage.getItem('nexus_gd_eliminadas')||'[]');
+    if(!Array.isArray(elim))elim=[];
+    var nuevos=[];
+    reg.forEach(function(e){
+      if(e&&e.loteId===lid){
+        if(e.numAdmision&&elim.indexOf(e.numAdmision)<0)elim.push(e.numAdmision);
+      }else{nuevos.push(e);}
+    });
+    localStorage.setItem('nexus_gd_carpetas',JSON.stringify(nuevos));
+    localStorage.setItem('nexus_gd_eliminadas',JSON.stringify(elim));
+  }catch(e){}
+}
+
 async function eliminarLote(lid){
-  if(!confirm('\u00bfEliminar este lote y todos sus documentos?'))return;
+  if(!confirm('\u00bfEliminar este lote y todos sus documentos? Esta acci\u00f3n no se puede deshacer.'))return;
   await IDB.del('lotes',lid);
   for(var j=0;j<SIGLAS.length;j++){try{await IDB.del('files',lid+'_'+SIGLAS[j]);}catch(e){}}
+  _purgarCarpetaDerivada(lid);
   lotesGuardados=await IDB.getAll('lotes');
   pintarTabla();
-  toast('Lote eliminado','success');
+  try{renderCarpetasAuto();}catch(e){}
+  toast('Lote eliminado por completo','success');
 }
 
 /* ===== Eliminar selecci\u00f3n ===== */
@@ -2306,9 +2464,11 @@ async function eliminarLoteSel(){
   for(var k=0;k<ids.length;k++){
     await IDB.del('lotes',ids[k]);
     for(var j=0;j<SIGLAS.length;j++){try{await IDB.del('files',ids[k]+'_'+SIGLAS[j]);}catch(e){}}
+    _purgarCarpetaDerivada(ids[k]);
   }
   lotesGuardados=await IDB.getAll('lotes');
   pintarTabla();
+  try{renderCarpetasAuto();}catch(e){}
   toast(ids.length+' lote'+(ids.length>1?'s':'')+' eliminado'+(ids.length>1?'s':''),'success');
 }
 
