@@ -599,6 +599,19 @@
             if (fechas.length === 0) { mostrarToast('No hay días seleccionados en el calendario', 'error'); return; }
 
             const citas = obtenerCitas();
+
+            // Verificar si esta admisión ya tiene programado el servicio seleccionado
+            const admActual = (pacienteSel.numAdmision || '').trim();
+            const yaExisteServicio = citas.some(c =>
+                (c.servicio || '') === servicio &&
+                (((admActual && (c.numAdmision || '').trim() === admActual)) ||
+                 (!admActual && (c.pacienteDoc || '') === (pacienteSel.documento || '')))
+            );
+            if (yaExisteServicio) {
+                const seguir = confirm('La admisión ya cuenta con este servicio. ¿Desea agregar más?');
+                if (!seguir) return;
+            }
+
             const loteId = 'LOTE-' + Date.now();
             const nuevas = [];
             let conflictos = 0;
