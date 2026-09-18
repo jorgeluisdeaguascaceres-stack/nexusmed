@@ -2387,13 +2387,25 @@ async function continuarCarga(l){
   pintarCajas();
 }
 
-/* ===== Auto-generación de la HEV en su casilla ===== */
+/* ===== Auto-generación / actualización de la HEV en su casilla =====
+   Se regenera SIEMPRE con los datos clínicos actuales al abrir el lote,
+   para reflejar cualquier modificación hecha en Historias, Evolución,
+   Notas de Enfermería o Terapias. Si ya no hay datos clínicos, se elimina. */
 async function autoGenerarHEV(l){
-  if(cola['HEV']&&cola['HEV'].length)return;      // ya existe, no sobrescribir
   var na=numAdmisionDeLote(l);
-  if(!_hevTieneDatos(na))return;                  // sin datos clínicos
+  if(!na)return;
+  var teniaHEV=!!(cola['HEV']&&cola['HEV'].length);
+  if(!_hevTieneDatos(na)){                        // sin datos clínicos → quitar HEV
+    if(teniaHEV){
+      try{await IDB.del('files',l.id+'_HEV');}catch(e){}
+      var lt=await IDB.get('lotes',l.id);
+      if(lt&&lt.siglas){var ix=lt.siglas.indexOf('HEV');if(ix>=0){lt.siglas.splice(ix,1);lt.total=lt.siglas.length;await IDB.put('lotes',lt);l.siglas=lt.siglas;}}
+      delete cola['HEV'];
+    }
+    return;
+  }
   var nitL=String(l.nit||'').trim();
-  var blob=generarHEVPdfBlob(na,nitL,l.nombre);
+  var blob=generarHEVPdfBlob(na,nitL,l.nombre);   // regenera con datos actuales
   var nombre='HEV'+(l.separador||'_')+nitL+(l.separador||'_')+na+'.pdf';
   await IDB.put('files',{lid_sigla:l.id+'_HEV',blob:blob,nombre:nombre,sigla:'HEV',lid:l.id});
   // Registrar en la lista de siglas del lote
@@ -2402,7 +2414,7 @@ async function autoGenerarHEV(l){
     lote.total=lote.siglas.length;await IDB.put('lotes',lote);
     l.siglas=lote.siglas;}
   cola['HEV']=[{name:nombre,size:blob.size,saved:true,blob:blob,arrayBuffer:function(){return this.blob.arrayBuffer();}}];
-  toast('HEV generada automáticamente: '+nombre,'success');
+  toast(teniaHEV?('HEV actualizada: '+nombre):('HEV generada automáticamente: '+nombre),'success');
 }
 
 /* ===== ZIP un lote ===== */
