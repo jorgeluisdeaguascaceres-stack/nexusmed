@@ -458,6 +458,26 @@ const K_CONTADOR   = 'nexus_contador_facturas';
 
 function leer(k)   { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch(e) { return null; } }
 function guardar(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+
+/* Renombra la carpeta de Gestión Documental (N° admisión → N° factura) */
+function renombrarCarpetaGD(numAdmision, numFactura) {
+  if (!numAdmision || !numFactura) return;
+  try {
+    var reg = JSON.parse(localStorage.getItem('nexus_gd_carpetas') || '[]');
+    if (!Array.isArray(reg)) return;
+    var e = reg.find(function (x) { return x && x.numAdmision === numAdmision; });
+    if (e) {
+      e.nombre = String(numFactura);
+      e.facturaNum = String(numFactura);
+      e.estado = 'facturado';
+    } else {
+      var nit = '';
+      try { nit = String((JSON.parse(localStorage.getItem('nexus_hospital') || '{}').nit) || '').trim(); } catch (er) {}
+      reg.push({ numAdmision: numAdmision, nombre: String(numFactura), nit: nit, facturaNum: String(numFactura), estado: 'facturado', loteId: null });
+    }
+    localStorage.setItem('nexus_gd_carpetas', JSON.stringify(reg));
+  } catch (er) {}
+}
 function hoy()     { return new Date().toISOString().split('T')[0]; }
 function ahora()   { return new Date().toISOString().replace('Z',''); }
 function fmt$(n)   { return '$' + Number(n||0).toLocaleString('es-CO'); }
@@ -1245,6 +1265,7 @@ function emitirFacturaDefinitiva() {
   }
 
   guardar(K_FACTURAS, facturas);
+  renombrarCarpetaGD(numAdm, fac.numeroFactura);
   toast('✅ Factura definitiva emitida: ' + fac.numeroFactura, 'success');
   actualizarStats();
   resetFacturaActual();

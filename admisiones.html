@@ -793,6 +793,20 @@
         function obtenerPacientes() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
         function guardarPacientes(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
 
+        /* Crea la carpeta/lote de Gestión Documental con nombre = N° admisión */
+        function registrarCarpetaGD(numAdmision, documento) {
+            if (!numAdmision) return;
+            try {
+                var reg = JSON.parse(localStorage.getItem('nexus_gd_carpetas') || '[]');
+                if (!Array.isArray(reg)) reg = [];
+                if (reg.some(function (e) { return e && e.numAdmision === numAdmision; })) return;
+                var nit = '';
+                try { nit = String((JSON.parse(localStorage.getItem('nexus_hospital') || '{}').nit) || '').trim(); } catch (e) {}
+                reg.push({ numAdmision: numAdmision, nombre: numAdmision, nit: nit, documento: documento || '', facturaNum: '', estado: 'admitido', loteId: null });
+                localStorage.setItem('nexus_gd_carpetas', JSON.stringify(reg));
+            } catch (e) {}
+        }
+
         /* ═══════════════════════════════════════════
            AUTOCOMPLETAR PACIENTE POR DOCUMENTO
            Si el paciente ya tiene un registro anterior,
@@ -907,6 +921,7 @@
 
             pacientes.push(nuevoPaciente);
             guardarPacientes(pacientes);
+            registrarCarpetaGD(numAdmision, documento);
 
             let contador = parseInt(localStorage.getItem(STORAGE_COUNTER)) || 0;
             contador++;

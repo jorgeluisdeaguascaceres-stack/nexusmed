@@ -1358,17 +1358,72 @@ async function init(){
   try{await IDB.abrir();}catch(e){}
   document.getElementById('dot').classList.add('on');
   document.getElementById('modeTxt').textContent='Almacenamiento local (IndexedDB)';
+  autollenarNit();
+  try{await sincronizarCarpetas();}catch(e){}
   try{await cargarTabla();}catch(e){}
   pintarCajas();
 }
 
-/* ===== Tabs ===== */
+/* ===== NIT autollenado desde Configuración (empresa/IPS) ===== */
+function autollenarNit(){
+  try{
+    var h=JSON.parse(localStorage.getItem('nexus_hospital')||'{}');
+    var inp=document.getElementById('nit');
+    if(inp&&!inp.value&&h&&h.nit){inp.value=String(h.nit).trim();}
+  }catch(e){}
+}
+
+/* ===== Sincroniza carpetas creadas por Admisiones/Facturación =====
+   Registro compartido en localStorage 'nexus_gd_carpetas':
+   [{numAdmision, nombre, nit, facturaNum, estado, loteId}]
+   - Admisiones crea la entrada con nombre = N° admisión.
+   - Facturación renombra (nombre = N° factura).
+   Aquí creamos/renombramos el lote en IndexedDB automáticamente. */
+async function sincronizarCarpetas(){
+  var reg;
+  try{reg=JSON.parse(localStorage.getItem('nexus_gd_carpetas')||'[]');}catch(e){reg=[];}
+  if(!Array.isArray(reg)||!reg.length)return;
+  var hnit='';
+  try{hnit=String((JSON.parse(localStorage.getItem('nexus_hospital')||'{}').nit)||'').trim();}catch(e){}
+  var cambiado=false;
+  for(var i=0;i<reg.length;i++){
+    var e=reg[i];
+    if(!e||!e.nombre)continue;
+    var nit=String(e.nit||hnit||'').trim();
+    if(!e.loteId){
+      var nid=Date.now()+i;
+      await IDB.put('lotes',{id:nid,nombre:e.nombre,nit:nit,fecha:new Date().toISOString(),total:0,siglas:[],separador:'_'});
+      e.loteId=nid;e.nit=nit;cambiado=true;
+    }else{
+      var lote=null;try{lote=await IDB.get('lotes',e.loteId);}catch(err){}
+      if(!lote){
+        await IDB.put('lotes',{id:e.loteId,nombre:e.nombre,nit:nit,fecha:new Date().toISOString(),total:0,siglas:[],separador:'_'});
+        cambiado=true;
+      }else if(lote.nombre!==e.nombre||lote.nit!==nit){
+        var viejo=lote.nombre;
+        lote.nombre=e.nombre;lote.nit=nit;
+        await IDB.put('lotes',lote);
+        // renombrar archivos guardados del lote
+        for(var k=0;k<SIGLAS.length;k++){
+          var s=SIGLAS[k];
+          try{
+            var rec=await IDB.get('files',e.loteId+'_'+s);
+            if(rec){rec.nombre=s+'_'+nit+'_'+e.nombre+'.pdf';await IDB.put('files',rec);}
+          }catch(err){}
+        }
+      }
+    }
+  }
+  if(cambiado){try{localStorage.setItem('nexus_gd_carpetas',JSON.stringify(reg));}catch(e){}}
+}
+
+/* ===== Tabs (compat con sidebar v2.8) ===== */
 var tabA=document.getElementById('tabA'),
     tabB=document.getElementById('tabB'),
     scrA=document.getElementById('scrA'),
     scrB=document.getElementById('scrB');
-tabA.onclick=function(){tabA.classList.add('sel');tabB.classList.remove('sel');scrA.classList.add('sel');scrB.classList.remove('sel');};
-tabB.onclick=function(){tabB.classList.add('sel');tabA.classList.remove('sel');scrB.classList.add('sel');scrA.classList.remove('sel');cargarTabla();};
+if(tabA){tabA.onclick=function(){tabA.classList.add('sel');if(tabB)tabB.classList.remove('sel');if(scrA)scrA.classList.add('sel');if(scrB)scrB.classList.remove('sel');};}
+if(tabB){tabB.onclick=function(){tabB.classList.add('sel');if(tabA)tabA.classList.remove('sel');if(scrB)scrB.classList.add('sel');if(scrA)scrA.classList.remove('sel');cargarTabla();};}
 
 /* ===== Config ===== */
 document.getElementById('sep').onchange=actualizarVista;
@@ -2133,7 +2188,7 @@ async function continuarCarga(l){
     }catch(e){}
   }
   actualizarVista();
-  tabA.click();
+  switchPanel('documentos');
   var el=document.getElementById('activo');
   el.classList.add('on');
   var guardados=SIGLAS.filter(function(s){return cola[s]&&cola[s].length;}).length;
@@ -2260,6 +2315,7 @@ function switchPanel(pid){
   const item=document.querySelector('[data-panel="'+pid+'"]');
   if(item)item.classList.add('active');
   if(!PANEL_INIT[pid]){PANEL_INIT[pid]=true;}
+  if(pid==='busqueda'&&typeof cargarTabla==='function'){try{cargarTabla();}catch(e){}}
 }
 </script>
 </body>
