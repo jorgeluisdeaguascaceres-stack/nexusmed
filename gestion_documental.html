@@ -2332,14 +2332,10 @@ async function verificarCRC(l,btn){
   var portal=(eps.url||'').trim();
   var backend=crcServiceUrl();
 
-  // Sin backend configurado: fallback manual (abrir portal en pestaña nueva).
+  // Sin backend configurado: NO abrimos el portal automáticamente (eso confunde).
+  // Avisamos claramente que falta configurar el servidor de automatización.
   if(!backend){
-    if(portal){
-      try{window.open(portal,'_blank');}catch(e){}
-      toast('Sin servidor de automatización. Abrí el portal de '+(eps.codigo||eps.nombre)+' para consultar '+tipoDoc+' '+numDoc+' y luego arrastrá el PDF a la casilla CRC.','warn');
-    }else{
-      toast('Configurá la URL de verificación de esta EPS en Configuración → Gestión de EPS.','warn');
-    }
+    toast('⚠️ No has configurado el SERVIDOR de automatización. Ve a Configuración → Gestión de EPS → Automatización de CRC y pega la URL de tu servicio de Render (termina en .onrender.com). Sin eso, el CRC no se puede descargar solo.','error');
     return;
   }
 
@@ -2371,8 +2367,11 @@ async function verificarCRC(l,btn){
     return;
   }catch(err){
     if(btn){btn.disabled=false;btn.innerHTML=_txt;}
-    if(portal){try{window.open(portal,'_blank');}catch(e){}}
-    toast('No se pudo consultar el CRC automáticamente ('+err.message+'). Se abrió el portal para verificación manual.','error');
+    // NO abrimos el portal solos: mostramos el error real para poder diagnosticar.
+    toast('❌ El servidor de CRC respondió con error: '+err.message+'. Revisa que el servicio de Render esté “Live” y que tenga Chrome instalado (Build Command con "npx puppeteer browsers install chrome" + variable PUPPETEER_CACHE_DIR). Puedes abrir el portal manualmente con el botón de abajo.','error');
+    // Ofrecemos abrir el portal solo si el usuario lo decide.
+    if(portal&&confirm('No se pudo obtener el CRC automáticamente.\n\n¿Quieres abrir el portal de '+(eps.codigo||eps.nombre)+' para consultarlo a mano?'))
+      {try{window.open(portal,'_blank');}catch(e){}}
   }
 }
 

@@ -1,11 +1,12 @@
 {
   "name": "nexusmed-crc-service",
   "version": "1.0.0",
-  "description": "Microservicio Puppeteer para verificar y descargar el CRC (certificado de derechos) de COOSALUD / FOMAG y devolverlo a NexusMed.",
+  "description": "Microservicio Puppeteer para verificar y descargar el CRC de COOSALUD / FOMAG y devolverlo a NexusMed.",
   "main": "crc_service.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node crc_service.js"
+    "start": "node crc_service.js",
+    "postinstall": "node node_modules/puppeteer/install.mjs || npx puppeteer browsers install chrome || true"
   },
   "engines": {
     "node": ">=18"

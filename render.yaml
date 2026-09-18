@@ -1,0 +1,13 @@
+# Configuración opcional para Render (Node runtime, sin Docker).
+# Puedes usarla como referencia de los ajustes que hay que poner a mano.
+services:
+  - type: web
+    name: nexusmed-crc-service
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx puppeteer browsers install chrome
+    startCommand: node crc_service.js
+    envVars:
+      # Guarda Chrome DENTRO del proyecto para que persista del build al runtime.
+      - key: PUPPETEER_CACHE_DIR
+        value: /opt/render/project/src/.cache/puppeteer
