@@ -147,9 +147,6 @@ function mapTipoDocHorus(t) {
 // }
 
 // En Render (y otros PaaS) hay que escuchar en 0.0.0.0 y usar process.env.PORT.
-const serverPort = process.env.PORT || 10000;
-app.listen(serverPort, '0.0.0.0', () => {
-  console.log('[crc-service] escuchando de forma publica en el puerto ' + serverPort);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('[crc-service] escuchando en el puerto ' + PORT);
 });
-
-
