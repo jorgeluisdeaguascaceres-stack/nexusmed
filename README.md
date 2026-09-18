@@ -1,63 +1,84 @@
 # NexusMed · Servicio de verificación de CRC (COOSALUD / FOMAG)
 
 ## ¿Por qué hace falta este servicio?
-NexusMed es una app **100% de navegador** (HTML + localStorage). Por seguridad,
-el navegador **no puede** entrar a un portal de otra página web (COOSALUD, Horus
-Health de FOMAG), llenar formularios y descargar un PDF de ese sitio. Eso lo
-bloquean las reglas de CORS y el sandbox del navegador.
+NexusMed corre 100% en el navegador (HTML + localStorage). Por seguridad, el
+navegador **no puede** entrar a un portal de otra web (Coosalud, Horus/FOMAG),
+llenar el formulario y descargar un PDF de ese sitio. Este microservicio
+(Node.js + Puppeteer) sí puede: abre el portal, escribe el tipo y número de
+documento, pulsa “Enviar”, espera el resultado y lo devuelve como PDF. NexusMed
+lo guarda solo en la casilla **CRC** de esa admisión.
 
-La solución es este **microservicio aparte** (Node.js + Puppeteer): un pequeño
-programa que sí puede abrir el portal como si fuera una persona, escribir el
-tipo y número de documento, pulsar “Buscar”, descargar el PDF y devolvérselo a
-NexusMed. NexusMed lo guarda solo en la casilla **CRC** de esa admisión.
+---
 
-## Cómo usarlo
+## ⚠️ Si tus despliegues en Render aparecen como “Failed”
+El error casi siempre es: **Chromium no se instala** en el entorno Node normal
+de Render. La solución es desplegar con **Docker** usando la imagen oficial de
+Puppeteer (ya incluida en este proyecto con el `Dockerfile`).
 
-### 1) Probar en tu computador
+### Qué hacer ahora (paso a paso)
+
+1. **Sube estos archivos al repo** (raíz o una subcarpeta): `Dockerfile`,
+   `crc_service.js`, `package.json`, `.dockerignore`.
+
+2. En **Render → tu servicio `nexusmed-crc-service` → Settings**:
+   - **Runtime / Language:** cambia a **Docker** (si dice “Node”, elimínalo y crea
+     el servicio de nuevo eligiendo *“Docker”*; Render detecta el `Dockerfile`).
+   - Si pusiste los archivos en una subcarpeta, pon esa ruta en **Root Directory**.
+   - **Deja vacíos** los campos *Build Command* y *Start Command* (los define el
+     Dockerfile).
+   - No necesitas configurar `PORT` a mano; Render lo inyecta y el server ya lo lee.
+
+3. Pulsa **Manual Deploy → Deploy latest commit** y espera a que quede **Live**.
+
+4. Prueba que responde abriendo en el navegador:
+   `https://nexusmed-crc-service.onrender.com/`  → debe mostrar
+   `{"ok":true,"service":"nexusmed-crc-service"}`.
+
+5. En **NexusMed → Configuración → Gestión de EPS → Automatización de CRC**
+   pega: `https://nexusmed-crc-service.onrender.com` y guarda.
+
+6. En **Gestión de EPS**, en cada EPS (Coosalud, FOMAG) pon la **URL de
+   verificación** de su portal (ej. Coosalud: `https://coosalud.com/estado-de-afiliacion/`).
+
+7. Listo: en **Gestión Documental**, al abrir un lote de un paciente de Coosalud
+   o FOMAG, el botón morado **“Verificar CRC”** consulta el portal y guarda el
+   PDF automáticamente en la casilla CRC.
+
+> **Nota del plan gratuito:** el servicio se “duerme” por inactividad, así que la
+> primera consulta después de un rato puede tardar ~50 s en despertar. Es normal.
+
+---
+
+## Cómo funciona el llenado automático
+El servicio usa un autocompletado **genérico** que sirve para la mayoría de
+portales públicos:
+1. Elige el tipo de documento en el primer `<select>` del formulario.
+2. Escribe el número en el primer campo de texto visible.
+3. Pulsa el botón cuyo texto sea Enviar / Buscar / Consultar / Verificar.
+4. Espera el resultado y lo guarda como PDF.
+
+Esto funciona para el portal público de Coosalud (estado de afiliación) y para
+Horus/FOMAG sin tocar código. Si algún portal usa una estructura muy distinta y
+no rellena bien, hay que ajustar los selectores dentro de `autoConsultar()` en
+`crc_service.js`.
+
+---
+
+## Probar en tu computador
 ```bash
 npm install
 node crc_service.js
-# queda escuchando en http://localhost:10000 (o el puerto que asigne Render)
+# queda escuchando en http://localhost:10000
 ```
-Para ver el navegador mientras trabaja (útil al ajustar los selectores):
+Para ver el navegador mientras trabaja:
 ```bash
 HEADLESS=false node crc_service.js
 ```
 
-### 2) Ajustar los selectores de cada portal (IMPORTANTE)
-Los campos de cada portal cambian, así que en `crc_service.js` los selectores
-vienen como **placeholders** marcados con `// TODO`. Debes:
-1. Abrir el portal real (COOSALUD y Horus/FOMAG).
-2. Pulsar F12 → Inspeccionar sobre el campo de tipo de documento, el de número
-   y el botón Buscar.
-3. Copiar sus selectores (id, name o clase) y reemplazar los `// TODO`.
-4. Ajustar también `mapTipoDocCoosalud` / `mapTipoDocHorus` con los valores
-   reales de cada `<option>`.
-
-Si el portal entrega el PDF con un botón “Descargar”, activa la función
-`descargarPDF()` (al final del archivo) en vez de `page.pdf()`.
-
-### 3) Desplegarlo (para usarlo desde cualquier lugar)
-Puedes subirlo a Render como **otro** Web Service (aparte de NexusMed):
-- Runtime: Node
-- Build command: `npm install`
-- Start command: `node crc_service.js`
-- Necesita Puppeteer con Chromium; en Render usa un plan que permita el buildpack
-  de Puppeteer o una imagen Docker con Chromium instalado.
-
-### 4) Conectarlo con NexusMed
-En NexusMed abre **Configuración → Gestión de EPS → Automatización de CRC** y
-pega la dirección del servicio (por ej. `https://mi-crc-service.onrender.com`).
-Guarda. Luego, en **Gestión Documental**, al abrir un lote de un paciente de
-COOSALUD o FOMAG aparecerá el botón **“Verificar CRC”** en la casilla CRC.
-
-> Si dejas el servidor en blanco, “Verificar CRC” solo **abre el portal** de la
-> EPS en una pestaña nueva para que hagas la consulta a mano y arrastres el PDF.
-
 ## Endpoint
 `POST /crc`
 ```json
-{ "eps": "COOSALUD", "url": "https://portal...", "tipoDoc": "CC", "documento": "123", "numAdmision": "A-001" }
+{ "eps": "COOSALUD", "url": "https://coosalud.com/estado-de-afiliacion/", "tipoDoc": "CC", "documento": "123", "numAdmision": "A-001" }
 ```
 Respuesta:
 ```json
