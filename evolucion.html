@@ -237,6 +237,8 @@ tr:hover td{background:rgba(0,180,216,.03)}
 </style>
     <script src="nexus_db.js"></script>
     <script src="permisos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="nexus_hev.js"></script>
 </head>
 <body>
 
@@ -1171,6 +1173,7 @@ function guardarEvolucion() {
   }
 
   saveEvoluciones(evoluciones);
+  try{ if(window.NexusHEV) NexusHEV.sync(data.numAdmision); }catch(e){}
   cerrarModal('modalForm');
   renderTabla();
 }
@@ -1347,8 +1350,10 @@ function generarPDFEvolucion(id) {
    ═══════════════════════════════════════════ */
 function eliminarEvolucion(id) {
   if (!confirm('¿Eliminar esta nota de evolución? Esta acción no se puede deshacer.')) return;
+  const _na = (getEvoluciones().find(e => e.id === id)||{}).numAdmision || '';
   const evoluciones = getEvoluciones().filter(e => e.id !== id);
   saveEvoluciones(evoluciones);
+  try{ if(window.NexusHEV) NexusHEV.sync(_na); }catch(e){}
   showToast('Nota de evolución eliminada', 'success');
   renderTabla();
 }

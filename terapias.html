@@ -338,6 +338,8 @@ tr:hover td{background:rgba(0,180,216,.03)}
 </style>
     <script src="nexus_db.js"></script>
     <script src="permisos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="nexus_hev.js"></script>
 </head>
 <body>
 
@@ -1406,6 +1408,7 @@ function guardarTerapia() {
     document.getElementById('modalForm').dataset.citaId = '';
 
     saveTerapias(terapias);
+    try{ if(window.NexusHEV) NexusHEV.sync(data.numAdmision); }catch(e){}
     cerrarModal('modalForm');
     renderTabla();
 }
@@ -1703,8 +1706,10 @@ function hacerEvolucion(id) {
 function eliminarTerapia(id) {
     if (!ES_ADMIN) { showToast('Solo el rol ADMIN puede eliminar terapias', 'error'); return; }
     if (!confirm('¿Eliminar esta terapia? Esta acción no se puede deshacer.')) return;
+    const _na = (getTerapias().find(t => t.id === id)||{}).numAdmision || '';
     const terapias = getTerapias().filter(t => t.id !== id);
     saveTerapias(terapias);
+    try{ if(window.NexusHEV) NexusHEV.sync(_na); }catch(e){}
     showToast('Terapia eliminada', 'success');
     renderTabla();
 }
