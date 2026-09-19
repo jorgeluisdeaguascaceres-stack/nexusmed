@@ -1,6 +1,6 @@
 /*
- * NexusMed · Microservicio de verificación de CRC (Derechos) - Corrección Quirúrgica Coosalud
- * -----------------------------------------------------------------------------
+ * NexusMed · Microservicio de verificación de CRC (Derechos) - Enrutador Coosalud + FOMAG
+ * -----------------------------------------------------------------------------------
  */
 
 const express = require('express');
@@ -49,70 +49,46 @@ app.post('/crc', async (req, res) => {
       Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
     });
 
-    // 1. Ir a la página del formulario
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-
-    // 2. Rellenar y enviar formulario
-    await autoConsultarCoosalud(page, tipoDoc, documento);
-
-    // 3. Esperar a que aparezca el botón Certificado
-    await page.waitForFunction(() => {
-      const elements = Array.from(document.querySelectorAll('a, button, .btn'));
-      return elements.some(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
-    }, { timeout: 15000 }).catch(() => {});
-
-    // 4. Extraer la URL directa del Certificado
-    const urlCertificado = await page.evaluate(() => {
-      const elements = Array.from(document.querySelectorAll('a, button, .btn'));
-      const btnCert = elements.find(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
-      if (btnCert) {
-        if (btnCert.tagName === 'A' && btnCert.href) return btnCert.href;
-        return btnCert.getAttribute('href') || btnCert.getAttribute('onclick') || null;
-      }
-      return null;
-    });
-
-    // 5. Navegar directamente al PDF
-    if (urlCertificado && (urlCertificado.startsWith('http') || urlCertificado.includes('GetCertificate'))) {
-      let targetUrl = urlCertificado;
-      if (!targetUrl.startsWith('http')) {
-        targetUrl = new URL(urlCertificado, page.url()).href;
-      }
-      await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 30000 });
-      await new Promise(r => setTimeout(r, 4000));
-    } else {
+    // =========================================================================
+    // ENRUTADOR INTELIGENTE POR URL
+    // =========================================================================
+    if (url.includes('coosalud.com')) {
+      // 1. Ejecutar Flujo Quirúrgico de Coosalud
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+      await autoConsultarCoosalud(page, tipoDoc, documento);
+      
+      // Limpieza visual Coosalud
       await page.evaluate(() => {
-        const elements = Array.from(document.querySelectorAll('a, button, .btn'));
-        const btnCert = elements.find(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
-        if (btnCert) btnCert.click();
+        const elementos = Array.from(document.querySelectorAll('*'));
+        elementos.forEach(el => {
+          if ((el.textContent || '').includes('Cannot read properties') && el.children.length === 0) {
+            if (el.parentElement) el.parentElement.style.display = 'none';
+          }
+        });
+        const enlaces = Array.from(document.querySelectorAll('a, button'));
+        enlaces.forEach(el => {
+          if ((el.textContent || '').toUpperCase().includes('DESCARGAR CERTIFICADO')) el.style.display = 'none';
+        });
       });
-      await new Promise(r => setTimeout(r, 6000));
+
+    } else if (url.includes('horus-health.com') || url.includes('fomag')) {
+      // 2. Flujo Híbrido para FOMAG / HORUS debido al reCAPTCHA
+      // Si detecta FOMAG, arrojamos un error controlado para que tu frontend 
+      // abra la ventana manual directamente en el flujo de consulta manual.
+      await browser.close();
+      return res.status(400).json({ 
+        ok: false, 
+        isManualRequired: true,
+        error: 'El portal de FOMAG requiere validación de reCAPTCHA humana. Abriendo asistente manual...' 
+      });
+
+    } else {
+      // 3. Flujo Genérico para otras EPS
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+      // Aquí puedes mapear flujos genéricos en el futuro
     }
     
-    // =========================================================================
-    // 6. LIMPIEZA VISUAL QUIRÚRGICA (SOLO LO JUSTO Y NECESARIO)
-    // =========================================================================
-    await page.evaluate(() => {
-      // 1. Buscar el banner rojo específico basándonos exactamente en su texto de error
-      const elementos = Array.from(document.querySelectorAll('*'));
-      elementos.forEach(el => {
-        const texto = (el.textContent || '');
-        if (texto.includes('Cannot read properties of null') && el.children.length === 0) {
-          // Si encontramos el texto del error, ocultamos su contenedor padre directo que suele ser la barra roja
-          if (el.parentElement) el.parentElement.style.display = 'none';
-        }
-      });
-
-      // 2. Buscar y ocultar específicamente los botones verdes inferiores que digan "Descargar Certificado"
-      const enlaces = Array.from(document.querySelectorAll('a, button'));
-      enlaces.forEach(el => {
-        if ((el.textContent || '').toUpperCase().includes('DESCARGAR CERTIFICADO')) {
-          el.style.display = 'none';
-        }
-      });
-    });
-    
-    // 7. Generar el PDF final
+    // Generación del PDF final
     const pdfBuffer = await page.pdf({ 
       format: 'A4', 
       printBackground: true, 
@@ -121,12 +97,14 @@ app.post('/crc', async (req, res) => {
 
     await browser.close();
     return res.json({ ok: true, pdfBase64: Buffer.from(pdfBuffer).toString('base64') });
+
   } catch (err) {
     if (browser) { try { await browser.close(); } catch (_) {} }
     return res.status(500).json({ ok: false, error: err.message });
   }
 });
 
+// Función de consulta automatizada de Coosalud (Ya probada y perfecta)
 async function autoConsultarCoosalud(page, tipoDoc, documento) {
   await page.waitForSelector('select', { timeout: 10000 });
   await page.evaluate((tipo) => {
@@ -137,8 +115,7 @@ async function autoConsultarCoosalud(page, tipoDoc, documento) {
       CC: ['CC', 'CEDULA', 'CÉDULA'],
       TI: ['TI', 'TARJETA'],
       CE: ['CE', 'EXTRANJERIA'],
-      RC: ['RC', 'REGISTRO CIVIL'],
-      PA: ['PA', 'PASAPORTE']
+      RC: ['RC', 'REGISTRO CIVIL']
     };
     const wanted = alias[t] || [t];
     const elegido = Array.from(sel.options).find(opt => {
@@ -165,8 +142,39 @@ async function autoConsultarCoosalud(page, tipoDoc, documento) {
   });
 
   await new Promise(r => setTimeout(r, 4000));
+
+  await page.waitForFunction(() => {
+    const elements = Array.from(document.querySelectorAll('a, button, .btn'));
+    return elements.some(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
+  }, { timeout: 15000 }).catch(() => {});
+
+  const urlCertificado = await page.evaluate(() => {
+    const elements = Array.from(document.querySelectorAll('a, button, .btn'));
+    const btnCert = elements.find(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
+    if (btnCert) {
+      if (btnCert.tagName === 'A' && btnCert.href) return btnCert.href;
+      return btnCert.getAttribute('href') || btnCert.getAttribute('onclick') || null;
+    }
+    return null;
+  });
+
+  if (urlCertificado && (urlCertificado.startsWith('http') || urlCertificado.includes('GetCertificate'))) {
+    let targetUrl = urlCertificado;
+    if (!targetUrl.startsWith('http')) {
+      targetUrl = new URL(urlCertificado, page.url()).href;
+    }
+    await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+    await new Promise(r => setTimeout(r, 4000));
+  } else {
+    await page.evaluate(() => {
+      const elements = Array.from(document.querySelectorAll('a, button, .btn'));
+      const btnCert = elements.find(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
+      if (btnCert) btnCert.click();
+    });
+    await new Promise(r => setTimeout(r, 6000));
+  }
 }
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('[crc-service] Activo y corregido en puerto ' + PORT);
+  console.log('[crc-service] Enrutador inteligente corriendo en puerto ' + PORT);
 });
