@@ -46,6 +46,29 @@ function fomagLaunchOpts(headless) {
   return o;
 }
 
+// Navegador FOMAG SIEMPRE VIVO: se abre UNA vez y NO se cierra, para que el login
+// manual y TODAS las consultas usen exactamente el mismo navegador y la misma sesión.
+let fomagBrowser = null;
+let fomagPage = null;
+async function getFomagBrowser() {
+  if (fomagBrowser && fomagBrowser.isConnected()) return fomagBrowser;
+  fomagBrowser = await puppeteer.launch(fomagLaunchOpts(HEADLESS));
+  fomagBrowser.on('disconnected', () => { fomagBrowser = null; fomagPage = null; });
+  return fomagBrowser;
+}
+async function getFomagPage() {
+  const browser = await getFomagBrowser();
+  if (fomagPage && !fomagPage.isClosed()) return fomagPage;
+  const pages = await browser.pages();
+  fomagPage = pages[0] || await browser.newPage();
+  try {
+    await fomagPage.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await fomagPage.setExtraHTTPHeaders({ 'Accept-Language': 'es-ES,es;q=0.9' });
+    await fomagPage.setViewport({ width: 1366, height: 768 });
+  } catch (_) {}
+  return fomagPage;
+}
+
 // Detecta si la página actual es el login (pide contraseña / reCAPTCHA).
 function esPaginaLoginJS() {
   const t = document.body ? document.body.innerText.toUpperCase() : '';
@@ -61,24 +84,21 @@ function esPaginaLoginJS() {
 // -----------------------------------------------------------------------------
 app.post('/fomag/login', async (req, res) => {
   const { url = 'https://horus2.horus-health.com' } = req.body || {};
-  let browser;
   try {
-    browser = await puppeteer.launch(fomagLaunchOpts(false));
-    const page = (await browser.pages())[0] || await browser.newPage();
+    const page = await getFomagPage();          // MISMO navegador que usarán las consultas
+    await page.bringToFront().catch(() => {});
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-    // Espera hasta 5 min a que inicies sesión (aparece el menú de Aseguramiento).
+    // Espera hasta 5 min a que TÚ inicies sesión en ESTA ventana (menú Aseguramiento visible).
     const loggedIn = await page.waitForFunction(() => {
       const t = document.body ? document.body.innerText.toUpperCase() : '';
       const hayPass = !!document.querySelector('input[type="password"]');
       return !hayPass && (t.includes('ASEGURAMIENTO') || t.includes('VERIFICACI') ||
                           t.includes('TRANSCRIPCIONES') || t.includes('CENTRO REGULADOR'));
     }, { timeout: 300000 }).then(() => true).catch(() => false);
-    await sleep(1500); // deja que la sesión se guarde en disco
-    await browser.close();
-    if (!loggedIn) return res.status(408).json({ ok: false, error: 'No se detectó inicio de sesión (tiempo agotado). Intenta de nuevo.' });
-    return res.json({ ok: true, message: 'Sesión de FOMAG guardada. Ya puedes consultar automáticamente hasta que caduque.' });
+    // NO cerramos el navegador: queda vivo para que las consultas usen esta sesión.
+    if (!loggedIn) return res.status(408).json({ ok: false, error: 'No se detectó inicio de sesión (tiempo agotado). Vuelve a intentar.' });
+    return res.json({ ok: true, message: 'Sesión de FOMAG activa. El navegador queda abierto; las consultas ya son automáticas.' });
   } catch (err) {
-    if (browser) { try { await browser.close(); } catch (_) {} }
     return res.status(500).json({ ok: false, error: err.message });
   }
 });
@@ -108,57 +128,50 @@ function parseCookies(raw, url) {
 // FOMAG / HORUS · Reutiliza tu sesión (cookies) y automatiza la verificación.
 // =============================================================================
 async function handleFomagPuppeteer(browser, { url, verificacionUrl, tipoDoc, documento, fomagCookies }) {
-  // Con perfil persistente NO se requieren cookies: la sesión ya está guardada.
-  // fomagCookies queda como refuerzo OPCIONAL (por si quieres inyectar cookies).
   const origin = new URL(url).origin;
-  const page = await browser.newPage();
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-  await page.setExtraHTTPHeaders({ 'Accept-Language': 'es-ES,es;q=0.9' });
-  await page.setViewport({ width: 1366, height: 768 });
+  const page = await getFomagPage();   // MISMA pestaña/sesión del login
 
   // Carpeta temporal para descargas del certificado.
   const downloadDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fomag-'));
+  try {
+    const client = await page.target().createCDPSession();
+    await client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: downloadDir });
+  } catch (_) {}
 
-  // Captura de PDF: (a) por respuesta de red con content-type PDF, (b) por archivo descargado.
+  // Captura de PDF por respuesta de red (listener temporal, se retira al terminar).
   let pdfBuffer = null;
-  const attachPage = async (pg) => {
+  const onResponse = async (resp) => {
     try {
-      const client = await pg.target().createCDPSession();
-      await client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: downloadDir });
+      const ct = (resp.headers()['content-type'] || '').toLowerCase();
+      const cd = (resp.headers()['content-disposition'] || '').toLowerCase();
+      if (!pdfBuffer && (ct.includes('application/pdf') || cd.includes('.pdf'))) {
+        pdfBuffer = await resp.buffer();
+      }
     } catch (_) {}
-    pg.on('response', async (resp) => {
-      try {
-        const ct = (resp.headers()['content-type'] || '').toLowerCase();
-        const cd = (resp.headers()['content-disposition'] || '').toLowerCase();
-        if (!pdfBuffer && (ct.includes('application/pdf') || cd.includes('.pdf'))) {
-          pdfBuffer = await resp.buffer();
-        }
-      } catch (_) {}
-    });
   };
-  await attachPage(page);
-  browser.on('targetcreated', async (t) => {
-    try { const pg = await t.page(); if (pg) await attachPage(pg); } catch (_) {}
-  });
+  page.on('response', onResponse);
 
-  // 1) Inyectar cookies de sesión (el login + reCAPTCHA los resolviste tú a mano).
-  const cookies = parseCookies(fomagCookies, url);
-  if (cookies.length) { try { await page.setCookie(...cookies); } catch (_) {} }
+  try {
+    // Refuerzo OPCIONAL: inyectar cookies si vienen en el body.
+    const cookies = parseCookies(fomagCookies, url);
+    if (cookies.length) { try { await page.setCookie(...cookies); } catch (_) {} }
 
-  // 2) Ir directo a Verificación (ya autenticado => sin login ni reCAPTCHA).
-  const target = verificacionUrl || (origin + '/#/aseguramiento/verificacion');
-  await page.goto(target, { waitUntil: 'networkidle2', timeout: 60000 });
-  await sleep(3000);
+    // Ir directo a Verificación (ya autenticado => sin login ni reCAPTCHA).
+    const target = verificacionUrl || (origin + '/#/aseguramiento/verificacion');
+    await page.goto(target, { waitUntil: 'networkidle2', timeout: 60000 });
+    await sleep(3000);
 
-  // 3) ¿Nos mandó al login? => la sesión guardada caducó.
-  const enLogin = await page.evaluate(esPaginaLoginJS);
-  if (enLogin) {
-    const e = new Error('Tu sesión de FOMAG caducó. Vuelve a iniciar sesión una vez (endpoint /fomag/login) y listo.');
-    e.isTokenExpired = true;
-    throw e;
+    if (await page.evaluate(esPaginaLoginJS)) {
+      const e = new Error('No hay sesión activa de FOMAG. Inicia sesión una vez con /fomag/login (en la ventana que se abre) y reintenta.');
+      e.isTokenExpired = true;
+      throw e;
+    }
+
+    return await finalizarFomag(browser, page, downloadDir, { tipoDoc, documento, getPdf: () => pdfBuffer, setPdf: (b) => { pdfBuffer = b; } });
+  } finally {
+    try { page.removeListener('response', onResponse); } catch (_) {}
+    try { fs.rmSync(downloadDir, { recursive: true, force: true }); } catch (_) {}
   }
-
-  return await finalizarFomag(browser, page, downloadDir, { tipoDoc, documento, getPdf: () => pdfBuffer, setPdf: (b) => { pdfBuffer = b; } });
 }
 
 // Pasos 4-8: tipo doc -> número -> BUSCAR -> CERTIFICADO -> capturar PDF.
@@ -294,16 +307,13 @@ app.post('/crc', async (req, res) => {
   };
   if (process.env.PUPPETEER_EXECUTABLE_PATH) launchOpts.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
 
-  // --- FOMAG / HORUS: reutiliza tu sesión (cookies), sin automatizar login/reCAPTCHA ---
+  // --- FOMAG / HORUS: navegador siempre vivo (mismo del login), sin cerrarlo ---
   if (url.includes('horus-health.com') || url.toLowerCase().includes('fomag')) {
-    let browser;
     try {
-      browser = await puppeteer.launch(fomagLaunchOpts(HEADLESS));
+      const browser = await getFomagBrowser();
       const out = await handleFomagPuppeteer(browser, { url, verificacionUrl, tipoDoc, documento, fomagCookies });
-      await browser.close();
       return res.json(out);
     } catch (err) {
-      if (browser) { try { await browser.close(); } catch (_) {} }
       const status = err.isTokenExpired ? 401 : (err.isManualRequired ? 400 : 500);
       return res.status(status).json({
         ok: false,
