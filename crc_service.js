@@ -15,6 +15,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { execFile } = require('child_process');
 
 const app = express();
 app.use(cors());
@@ -25,6 +26,54 @@ const HEADLESS = process.env.HEADLESS !== 'false';
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 app.get('/', (_req, res) => res.json({ ok: true, service: 'nexusmed-crc-service', status: 'ready' }));
+
+// =============================================================================
+// ESCANER · /scan  ->  dispara el escaner físico y devuelve el PDF en base64.
+// Motor: NAPS2 (gratis). Instala NAPS2, crea un PERFIL (elige tu escaner) y usa
+// ese nombre de perfil. Coloca la hoja, llama /scan y regresa el PDF escaneado.
+// =============================================================================
+function fileExists(p) { try { return !!p && fs.existsSync(p); } catch (_) { return false; } }
+
+function findNaps2() {
+  const cands = [
+    process.env.NAPS2_PATH,
+    'C:\\Program Files\\NAPS2\\NAPS2.Console.exe',
+    'C:\\Program Files (x86)\\NAPS2\\NAPS2.Console.exe',
+    '/usr/bin/naps2',
+    '/usr/local/bin/naps2'
+  ].filter(Boolean);
+  return cands.find(fileExists) || null;
+}
+
+async function scanToPdf({ profile } = {}) {
+  const naps2 = findNaps2();
+  if (!naps2) {
+    throw new Error('No se encontró NAPS2. Instálalo (gratis, https://www.naps2.com), crea un perfil con tu escaner, o define la variable NAPS2_PATH.');
+  }
+  const prof = profile || process.env.NAPS2_PROFILE || 'NexusMed';
+  const outPath = path.join(os.tmpdir(), `scan-${Date.now()}.pdf`);
+  await new Promise((resolve, reject) => {
+    execFile(naps2, ['-o', outPath, '-p', prof, '--force'], { timeout: 120000 }, (err, _stdout, stderr) => {
+      if (err) return reject(new Error('El escaner no respondió: ' + (stderr || err.message)));
+      resolve();
+    });
+  });
+  if (!fileExists(outPath)) {
+    throw new Error(`No se generó el PDF. Verifica el perfil "${prof}" en NAPS2 y que haya hoja en el escaner.`);
+  }
+  const buf = fs.readFileSync(outPath);
+  try { fs.unlinkSync(outPath); } catch (_) {}
+  return buf;
+}
+
+app.post('/scan', async (req, res) => {
+  try {
+    const pdf = await scanToPdf(req.body || {});
+    return res.json({ ok: true, pdfBase64: pdf.toString('base64') });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+});
 
 // Carpeta de PERFIL PERSISTENTE de FOMAG: aquí se guarda tu sesión de Horus.
 // Inicias sesión UNA vez (resolviendo el reCAPTCHA a mano) y la sesión queda
