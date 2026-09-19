@@ -233,6 +233,7 @@ app.post('/crc', async (req, res) => {
   if (!url)       return res.status(400).json({ ok: false, error: 'Falta la URL del portal de la EPS' });
   if (!documento) return res.status(400).json({ ok: false, error: 'Falta el número de documento' });
 
+    // --- CONFIGURACIÓN PARA COOSALUD Y OTROS (SE MANTIENE INTACTA) ---
   const launchOpts = {
     headless: HEADLESS ? 'new' : false,
     args: [
@@ -245,11 +246,27 @@ app.post('/crc', async (req, res) => {
   };
   if (process.env.PUPPETEER_EXECUTABLE_PATH) launchOpts.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
 
+  // --- NUEVA CONFIGURACIÓN EXCLUSIVA PARA FOMAG (NO AFECTA A COOSALUD) ---
+  const windowsUser = os.userInfo().username; 
+  const launchOptsFomag = {
+    headless: false, // Obligatorio en false para abrir tu Chrome real
+    userDataDir: `C:\\Users\\${windowsUser}\\AppData\\Local\\Google\\Chrome\\User Data`,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-web-security',
+      '--profile-directory=Default' // Tu perfil principal de Chrome
+    ]
+  };
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) launchOptsFomag.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+
   // --- FOMAG / HORUS: reutiliza tu sesión (cookies), sin automatizar login/reCAPTCHA ---
   if (url.includes('horus-health.com') || url.toLowerCase().includes('fomag')) {
     let browser;
     try {
-      browser = await puppeteer.launch(launchOpts);
+      // Usamos la nueva configuración exclusiva de FOMAG aquí
+      browser = await puppeteer.launch(launchOptsFomag);
       const out = await handleFomagPuppeteer(browser, { url, verificacionUrl, tipoDoc, documento, fomagCookies });
       await browser.close();
       return res.json(out);
