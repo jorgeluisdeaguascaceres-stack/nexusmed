@@ -1564,6 +1564,14 @@ function pintarCajas(){
     zone.ondrop=function(e){e.preventDefault();zone.classList.remove('dragover');tomarDrop(doc.s,e);};
     div.appendChild(zone);
 
+    /* --- Módulo ESCÁNER (todas las casillas, al lado de la verificación) --- */
+    var btnScan=document.createElement('button');
+    btnScan.className='nx-btn mini ghost';
+    btnScan.style.cssText='align-self:flex-start';
+    btnScan.innerHTML='<i class="fas fa-print"></i> Escanear';
+    (function(sg){btnScan.onclick=function(){escanear(sg,btnScan);};})(doc.s);
+    div.appendChild(btnScan);
+
     /* --- Botón de verificación automática del CRC (solo casilla CRC) --- */
     if(doc.s==='CRC'){
       var na0=numAdmisionDeLote(loteActivoObj());
@@ -1720,7 +1728,7 @@ function tomarDrop(sigla,ev){
   agregarArchivos(sigla,files);
 }
 
-function agregarArchivos(sigla,arr){
+function agregarArchivos(sigla,arr,done){
   var existing=cola[sigla]||[];
   if(existing.length){
     // Show Reemplazar/Añadir modal
@@ -1740,11 +1748,12 @@ function agregarArchivos(sigla,arr){
     modal.hidden=false;
     document.body.classList.add('noscroll');
     // Store pending resolution
-    modal._pending={sigla:sigla,arr:arr};
+    modal._pending={sigla:sigla,arr:arr,done:done};
     return;
   }
   cola[sigla]=arr.slice();
   pintarCajas();
+  if(typeof done==='function')done();
 }
 
 // Modal button handlers (set up once)
@@ -1756,15 +1765,19 @@ function agregarArchivos(sigla,arr){
     var p=modal._pending;if(!p)return;
     if(!cola[p.sigla])cola[p.sigla]=[];
     cola[p.sigla]=cola[p.sigla].concat(p.arr);
+    var _d=p.done;
     modal._pending=null;
     pintarCajas();
+    if(typeof _d==='function')_d();
   };
   document.getElementById('modalRA-rep').onclick=function(){
     modal.hidden=true;document.body.classList.remove('noscroll');
     var p=modal._pending;if(!p)return;
     cola[p.sigla]=p.arr.slice();
+    var _d=p.done;
     modal._pending=null;
     pintarCajas();
+    if(typeof _d==='function')_d();
   };
   document.getElementById('modalRA-cancel').onclick=function(){
     modal.hidden=true;document.body.classList.remove('noscroll');
@@ -2303,13 +2316,61 @@ function crcServiceUrl(){
   try{return (localStorage.getItem('nexus_crc_service')||'').trim();}catch(e){return '';}
 }
 
+// URL del servicio LOCAL de escaneo (mismo crc_service corriendo en tu PC).
+// El navegador no puede hablar con el escáner directo; se delega en el servicio
+// local que dispara NAPS2 y devuelve el PDF. Configurable en localStorage.
+function scanServiceUrl(){
+  try{var u=(localStorage.getItem('nexus_scan_service')||'').trim();return u||'http://localhost:10000';}
+  catch(e){return 'http://localhost:10000';}
+}
+
+// Escanea una hoja y la coloca en la casilla indicada.
+// - Casilla vacía: se escanea y se guarda automáticamente.
+// - Casilla con contenido: pregunta Anexar / Reemplazar (igual que un PDF).
+async function escanear(sigla,btn){
+  var url=scanServiceUrl().replace(/\/$/,'')+'/scan';
+  var _t=null;
+  if(btn){_t=btn.innerHTML;btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Escaneando…';}
+  try{
+    var resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
+    var data=null;try{data=await resp.json();}catch(e){data=null;}
+    if(!resp.ok||!data||!data.ok||!data.pdfBase64)
+      throw new Error((data&&data.error)?data.error:('HTTP '+resp.status));
+    var bin=atob(data.pdfBase64.replace(/^data:[^,]+,/,''));
+    var bytes=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    var blob=new Blob([bytes],{type:'application/pdf'});
+    var _sep=(typeof sep!=='undefined'&&sep)?sep:'_';
+    var nombre='ESCANER'+_sep+sigla+_sep+Date.now()+'.pdf';
+    var file={name:nombre,size:blob.size,blob:blob,arrayBuffer:function(){return this.blob.arrayBuffer();}};
+    agregarArchivos(sigla,[file],function(){try{procesar(sigla);}catch(e){}});
+    toast('Hoja escaneada y añadida a '+sigla,'success');
+  }catch(err){
+    toast('❌ No se pudo escanear: '+err.message+'. Verifica que el servicio local (crc_service) esté corriendo en '+scanServiceUrl()+' y que NAPS2 tenga un perfil configurado.','error');
+  }finally{
+    if(btn){btn.disabled=false;btn.innerHTML=_t;}
+  }
+}
+
 // Guarda un PDF (Blob) en la casilla CRC del lote y refresca la vista.
 async function _guardarCrcEnCasilla(l,blob,nombre){
-  var wrap={name:nombre,size:blob.size,saved:true,blob:blob,
+  // ANEXAR SIEMPRE (verificación automática): si ya hay un CRC guardado, el
+  // nuevo certificado se FUSIONA al final. Nunca se borra ni se reemplaza.
+  var finalBlob=blob;
+  try{
+    var prev=await IDB.get('files',l.id+'_CRC');
+    if(prev&&prev.blob){
+      var b1=await prev.blob.arrayBuffer();
+      var b2=await blob.arrayBuffer();
+      var res=PDFMerge.merge([b1,b2],[prev.nombre||'CRC_previo.pdf',nombre]);
+      finalBlob=new Blob([res.bytes],{type:'application/pdf'});
+    }
+  }catch(e){finalBlob=blob;}
+  var wrap={name:nombre,size:finalBlob.size,saved:true,blob:finalBlob,
     arrayBuffer:function(){return this.blob.arrayBuffer();}};
   cola['CRC']=[wrap];
   try{
-    await IDB.put('files',{lid_sigla:l.id+'_CRC',blob:blob,nombre:nombre,sigla:'CRC',lid:l.id});
+    await IDB.put('files',{lid_sigla:l.id+'_CRC',blob:finalBlob,nombre:nombre,sigla:'CRC',lid:l.id});
     var lote=await IDB.get('lotes',l.id);
     if(lote){if(!lote.siglas)lote.siglas=[];if(lote.siglas.indexOf('CRC')<0)lote.siglas.push('CRC');
       lote.total=lote.siglas.length;await IDB.put('lotes',lote);}
