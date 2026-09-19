@@ -1,5 +1,5 @@
 /*
- * NexusMed · Microservicio de verificación de CRC (Derechos) - Optimizado Coosalud v2
+ * NexusMed · Microservicio de verificación de CRC (Derechos) - Versión Final Coosalud
  * -----------------------------------------------------------------------------
  */
 
@@ -49,13 +49,53 @@ app.post('/crc', async (req, res) => {
       Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
     });
 
+    // 1. Ir a la página del formulario
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
+    // 2. Rellenar y enviar formulario
     await autoConsultarCoosalud(page, tipoDoc, documento);
 
-    // Reemplazo de waitForTimeout por función nativa segura
-    await new Promise(r => setTimeout(r, 4000)); 
+    // 3. ESPERA A QUE APAREZCA EL BOTÓN CERTIFICADO
+    await page.waitForFunction(() => {
+      const elements = Array.from(document.querySelectorAll('a, button, .btn'));
+      return elements.some(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
+    }, { timeout: 15000 }).catch(() => {});
+
+    // 4. EXTRAER LA URL DIRECTA DEL CERTIFICADO (MÉTODO ULTRA-SEGURO)
+    const urlCertificado = await page.evaluate(() => {
+      const elements = Array.from(document.querySelectorAll('a, button, .btn'));
+      const btnCert = elements.find(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
+      if (btnCert) {
+        // Si es un enlace <a>, extraemos el href directo
+        if (btnCert.tagName === 'A' && btnCert.href) return btnCert.href;
+        // Si usa un comportamiento onclick o similar, intentamos capturar el atributo correspondiente o fallback
+        return btnCert.getAttribute('href') || btnCert.getAttribute('onclick') || null;
+      }
+      return null;
+    });
+
+    // 5. NAVEGAR DIRECTAMENTE AL PDF E IMPRIMIR
+    if (urlCertificado && (urlCertificado.startsWith('http') || urlCertificado.includes('GetCertificate'))) {
+      let targetUrl = urlCertificado;
+      // Si la URL es relativa, la unimos con el dominio base
+      if (!targetUrl.startsWith('http')) {
+        targetUrl = new URL(urlCertificado, page.url()).href;
+      }
+      
+      // Forzamos al navegador a ir directo al recurso del PDF
+      await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+      await new Promise(r => setTimeout(r, 4000));
+    } else {
+      // Fallback: Si no pudimos leer la URL, hacemos clic tradicional y esperamos
+      await page.evaluate(() => {
+        const elements = Array.from(document.querySelectorAll('a, button, .btn'));
+        const btnCert = elements.find(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
+        if (btnCert) btnCert.click();
+      });
+      await new Promise(r => setTimeout(r, 6000));
+    }
     
+    // 6. Generar el PDF final limpio
     const pdfBuffer = await page.pdf({ 
       format: 'A4', 
       printBackground: true, 
@@ -71,7 +111,6 @@ app.post('/crc', async (req, res) => {
 });
 
 async function autoConsultarCoosalud(page, tipoDoc, documento) {
-  // 1. Esperar y seleccionar el Tipo de Documento
   await page.waitForSelector('select', { timeout: 10000 });
   await page.evaluate((tipo) => {
     const sel = document.querySelector('select');
@@ -96,48 +135,21 @@ async function autoConsultarCoosalud(page, tipoDoc, documento) {
     }
   }, tipoDoc);
 
-  // 2. Esperar, limpiar e ingresar el número de documento
   const inputSel = 'input[type="text"], input[type="number"], input:not([type])';
   await page.waitForSelector(inputSel, { timeout: 5000 });
   await page.focus(inputSel);
-  // Limpiamos el input por si acaso
   await page.evaluate((sel) => { document.querySelector(sel).value = ''; }, inputSel);
-  await page.keyboard.type(String(documento), { delay: 60 });
+  await page.keyboard.type(String(documento), { delay: 50 });
 
-  // 3. Hacer clic en el botón "Enviar" usando coordenadas o evento nativo
   await page.evaluate(() => {
     const btns = Array.from(document.querySelectorAll('button, input[type="submit"], .btn'));
     const btnEnviar = btns.find(b => (b.textContent || b.value || '').trim().toUpperCase().includes('ENVIAR'));
-    if (btnEnviar) {
-      btnEnviar.click();
-    }
+    if (btnEnviar) btnEnviar.click();
   });
 
-  // 4. ESPERA CRÍTICA: Esperamos a que la tabla de resultados y el botón "Certificado" aparezcan en pantalla
-  // Usamos una evaluación constante en el DOM para buscar el texto 'CERTIFICADO'
-  try {
-    await page.waitForFunction(() => {
-      const elements = Array.from(document.querySelectorAll('a, button, .btn'));
-      return elements.some(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
-    }, { timeout: 15000 });
-  } catch (e) {
-    console.log("El botón Certificado no apareció dentro del tiempo límite.");
-  }
-
-  // 5. Hacer clic en el botón "Certificado"
-  const clickedCertificado = await page.evaluate(() => {
-    const elements = Array.from(document.querySelectorAll('a, button, .btn'));
-    const btnCert = elements.find(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
-    if (btnCert) {
-      btnCert.click();
-      return true;
-    }
-    return false;
-  });
-
-  // 6. Si el botón abrió el visualizador del certificado en una nueva URL, esperamos a que cargue
-  if (clickedCertificado) {
-    // Damos un tiempo de espera para que el visor cargue el documento oficial en pantalla
-    await new Promise(r => setTimeout(r, 6000));
-  }
+  await new Promise(r => setTimeout(r, 4000));
 }
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('[crc-service] Activo y enmascarado en puerto ' + PORT);
+});
