@@ -256,8 +256,8 @@
                     <div class="form-group"><label><i class="fas fa-id-card"></i> Número de Documento</label><input type="text" id="newDocumento" placeholder="C.C. 1010101010" maxlength="20"></div>
                     <div class="form-group full"><label><i class="fas fa-user"></i> Nombre Completo del Profesional</label><input type="text" id="newNombre" placeholder="Nombre y apellidos"></div>
                     <div class="form-group"><label><i class="fas fa-lock"></i> Contraseña</label><input type="password" id="newPassword" placeholder="Contraseña"></div>
-                    <div class="form-group"><label><i class="fas fa-user-tag"></i> Rol</label><select id="newRol" onchange="mostrarResumenRol()"></select></div>
-                    <div class="form-group"><label><i class="fas fa-stethoscope"></i> Especialidad / Área</label><input type="text" id="newEspecialidad" placeholder="Ej: Fisioterapia, Cardiología"></div>
+                    <div class="form-group"><label><i class="fas fa-user-tag"></i> Rol</label><select id="newRol" onchange="mostrarResumenRol(); if(this.value){document.getElementById('newEspecialidad').focus();}"></select></div>
+                    <div class="form-group"><label><i class="fas fa-stethoscope"></i> Especialidad / Área</label><select id="newEspecialidad"><option value="">Seleccione especialidad...</option><option value="General">General</option><option value="Fisioterapeuta">Fisioterapeuta</option><option value="Fonoaudiólogo">Fonoaudiólogo</option><option value="Terapeuta Ocupacional">Terapeuta Ocupacional</option><option value="Terapeuta Respiratorio">Terapeuta Respiratorio</option><option value="Psicólogo">Psicólogo</option><option value="Medicina Interna">Medicina Interna</option><option value="Pediatría">Pediatría</option><option value="Ginecología">Ginecología</option><option value="Cirugía General">Cirugía General</option><option value="Ortopedia">Ortopedia</option><option value="Auxiliar de Enfermería">Auxiliar de Enfermería</option><option value="Enfermería Jefe">Enfermería Jefe</option></select></div>
                     <div class="form-group"><label><i class="fas fa-certificate"></i> Registro Profesional</label><input type="text" id="newRegistro" placeholder="Ej: RM-12345"></div>
 
                     <div class="firma-box" id="firmaBox">
@@ -286,7 +286,7 @@
                 </div>
             </div>
 
-            </div><!-- /panel-usuarios -->
+            </div></div><!-- /panel-usuarios -->
             <div class="config-panel" id="panel-ips">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-hospital"></i> Información de la IPS</div>
@@ -325,7 +325,7 @@
             </div>
 
             
-            </div><!-- /panel-ips -->
+            </div></div><!-- /panel-ips -->
             <div class="config-panel" id="panel-cups">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-clipboard-list"></i> Catálogo de Servicios (CUPS) <span class="hint">Código · Nombre · Tipo · Ámbito · Valor por EPS</span></div>
@@ -355,13 +355,14 @@
                 </div>
             </div>
 
-            </div><!-- /panel-cups -->
+            </div></div><!-- /panel-cups -->
             <div class="config-panel" id="panel-eps">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-hospital-alt"></i> Gestión de EPS / Entidades Pagadoras <span class="hint">Código · Nombre · Régimen · Contacto</span></div>
                 <div class="form-grid">
                     <div class="form-group"><label><i class="fas fa-hashtag"></i> Código EPS</label><input type="text" id="epsCodigo" placeholder="Ej: EPS017" maxlength="10"></div>
                     <div class="form-group full"><label><i class="fas fa-building"></i> Nombre de la EPS</label><input type="text" id="epsNombre" placeholder="Ej: FOMAG EPS"></div>
+                    <div class="form-group full"><label><i class="fas fa-link"></i> URL de verificación (CRC) <span class="hint" style="text-transform:none;letter-spacing:0">Coosalud / Horus Health (FOMAG)</span></label><input type="url" id="epsUrlVerificacion" placeholder="https://portal-eps.com/verificar-derechos"></div>
                     <div class="form-group"><label>Régimen</label><select id="epsRegimen"><option value="subsidiado">Subsidiado</option><option value="contributivo">Contributivo</option><option value="mixto">Mixto</option></select></div>
                     <div class="form-group"><label><i class="fas fa-id-card"></i> NIT</label><input type="text" id="epsNit" placeholder="Ej: 900.123.456-7"></div>
                     <div class="form-group"><label><i class="fas fa-phone"></i> Teléfono</label><input type="text" id="epsTelefono" placeholder="+57 300 000 0000"></div>
@@ -380,7 +381,18 @@
                 </div>
             </div>
 
-            </div><!-- /panel-eps -->
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-robot"></i> Automatización de CRC (opcional) <span class="hint" style="text-transform:none;letter-spacing:0">Servidor Puppeteer</span></div>
+                <p class="hint" style="margin:0 0 12px;line-height:1.6">El navegador no puede consultar portales externos por sí solo. Para descargar el CRC automáticamente hay que desplegar aparte el microservicio <b>crc_service</b> (Node.js + Puppeteer) y pegar aquí su dirección. Si se deja vacío, al pulsar “Verificar CRC” se abrirá el portal para consulta manual.</p>
+                <div class="form-grid">
+                    <div class="form-group full"><label><i class="fas fa-server"></i> URL del servidor de automatización</label><input type="url" id="crcServiceUrl" placeholder="https://mi-crc-service.onrender.com"></div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-registrar" onclick="guardarCrcService()"><i class="fas fa-save"></i> Guardar servidor</button>
+                </div>
+            </div>
+
+            </div></div><!-- /panel-eps -->
             <div class="config-panel" id="panel-matriz">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-table-cells-large"></i> Matriz Global Definitiva de Permisos <span class="hint">Haga clic en cada letra para activar o desactivar el permiso</span></div>
@@ -409,7 +421,7 @@
                 </div>
             </div>
 
-            </div><!-- /panel-matriz -->
+            </div></div><!-- /panel-matriz -->
             <div class="config-panel" id="panel-prueba">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-flask"></i> Datos de Prueba</div>
@@ -419,7 +431,7 @@
                 </div>
             </div>
 
-            </div><!-- /panel-prueba -->
+            </div></div><!-- /panel-prueba -->
             <div class="config-panel" id="panel-mante">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-screwdriver-wrench"></i> Mantenimiento</div>
@@ -442,7 +454,7 @@
                 <div class="form-group full"><label>Nombre Completo</label><input type="text" id="editNombre"></div>
                 <div class="form-group"><label>Nueva Contraseña</label><input type="password" id="editPassword" placeholder="Dejar vacío si no cambia"></div>
                 <div class="form-group"><label>Rol</label><select id="editRol"></select></div>
-                <div class="form-group"><label>Especialidad / Área</label><input type="text" id="editEspecialidad"></div>
+                <div class="form-group"><label>Especialidad / Área</label><select id="editEspecialidad"><option value="">Seleccione especialidad...</option><option value="General">General</option><option value="Fisioterapeuta">Fisioterapeuta</option><option value="Fonoaudiólogo">Fonoaudiólogo</option><option value="Terapeuta Ocupacional">Terapeuta Ocupacional</option><option value="Terapeuta Respiratorio">Terapeuta Respiratorio</option><option value="Psicólogo">Psicólogo</option><option value="Medicina Interna">Medicina Interna</option><option value="Pediatría">Pediatría</option><option value="Ginecología">Ginecología</option><option value="Cirugía General">Cirugía General</option><option value="Ortopedia">Ortopedia</option><option value="Auxiliar de Enfermería">Auxiliar de Enfermería</option><option value="Enfermería Jefe">Enfermería Jefe</option></select></div>
                 <div class="form-group"><label>Registro Profesional</label><input type="text" id="editRegistro"></div>
                 <div class="firma-box">
                     <div class="firma-head">
@@ -802,7 +814,17 @@
             document.getElementById('editNombre').value = u.nombre || '';
             document.getElementById('editPassword').value = '';
             document.getElementById('editRol').value = normalizarRol(u.rol);
-            document.getElementById('editEspecialidad').value = u.especialidad || '';
+            (function(){
+                const selEsp = document.getElementById('editEspecialidad');
+                const val = u.especialidad || '';
+                // Si la especialidad guardada no existe en la lista, se agrega para no perderla
+                if (val && ![].slice.call(selEsp.options).some(o => o.value === val)) {
+                    const opt = document.createElement('option');
+                    opt.value = val; opt.textContent = val + ' (personalizada)';
+                    selEsp.appendChild(opt);
+                }
+                selEsp.value = val;
+            })();
             document.getElementById('editRegistro').value = u.registro || '';
             firmaEdicion = u.firma || '';
             pintarFirma('editFirmaPreview', firmaEdicion);
@@ -1153,6 +1175,16 @@
         function initEps() {
             let arr = leerEps();
             if (!arr || !Array.isArray(arr) || !arr.length) guardarEpsArr(EPS_DEFAULT);
+            const inp = document.getElementById('crcServiceUrl');
+            if (inp) { try { inp.value = localStorage.getItem('nexus_crc_service') || ''; } catch(e){} }
+        }
+
+        function guardarCrcService() {
+            const inp = document.getElementById('crcServiceUrl');
+            const url = (inp ? inp.value : '').trim();
+            try { localStorage.setItem('nexus_crc_service', url); } catch(e){}
+            if (typeof toast === 'function') toast(url ? 'Servidor de automatización guardado' : 'Servidor de automatización desactivado (consulta manual)', 'success');
+            else alert(url ? 'Servidor guardado' : 'Servidor desactivado');
         }
 
         function cargarTablaEps() {
@@ -1181,6 +1213,7 @@
         function guardarEps() {
             const codigo = document.getElementById('epsCodigo').value.trim().toUpperCase();
             const nombre = document.getElementById('epsNombre').value.trim();
+            const urlVerificacion = document.getElementById('epsUrlVerificacion').value.trim();
             const regimen = document.getElementById('epsRegimen').value;
             const nit = document.getElementById('epsNit').value.trim();
             const telefono = document.getElementById('epsTelefono').value.trim();
@@ -1196,7 +1229,7 @@
                 const idx = arr.findIndex(e => e.id === epsEditando);
                 if (idx !== -1) {
                     const oldCodigo = arr[idx].codigo;
-                    arr[idx] = { ...arr[idx], codigo, nombre, regimen, nit, telefono, email, notas };
+                    arr[idx] = { ...arr[idx], codigo, nombre, urlVerificacion, regimen, nit, telefono, email, notas };
                     // If code changed, update references in CUPS
                     if (oldCodigo !== codigo) {
                         let cups = leerCups() || [];
@@ -1214,7 +1247,7 @@
             } else {
                 if (arr.some(e => e.codigo === codigo)) { mostrarToast('Ya existe una EPS con ese código', 'error'); return; }
                 const id = 'eps_' + Date.now();
-                arr.push({ id, codigo, nombre, regimen, nit, telefono, email, notas, activo:true });
+                arr.push({ id, codigo, nombre, urlVerificacion, regimen, nit, telefono, email, notas, activo:true });
             }
 
             guardarEpsArr(arr);
@@ -1230,6 +1263,7 @@
             epsEditando = id;
             document.getElementById('epsCodigo').value = e.codigo || '';
             document.getElementById('epsNombre').value = e.nombre || '';
+            document.getElementById('epsUrlVerificacion').value = e.urlVerificacion || '';
             document.getElementById('epsRegimen').value = e.regimen || 'subsidiado';
             document.getElementById('epsNit').value = e.nit || '';
             document.getElementById('epsTelefono').value = e.telefono || '';
@@ -1257,7 +1291,7 @@
         }
 
         function limpiarFormEps() {
-            ['epsCodigo','epsNombre','epsNit','epsTelefono','epsEmail','epsNotas'].forEach(id => document.getElementById(id).value = '');
+            ['epsCodigo','epsNombre','epsUrlVerificacion','epsNit','epsTelefono','epsEmail','epsNotas'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('epsRegimen').value = 'subsidiado';
             epsEditando = null;
         }
