@@ -1,5 +1,5 @@
 /*
- * NexusMed · Microservicio de verificación de CRC (Derechos) - Versión Impecable Coosalud
+ * NexusMed · Microservicio de verificación de CRC (Derechos) - Corrección Quirúrgica Coosalud
  * -----------------------------------------------------------------------------
  */
 
@@ -90,36 +90,29 @@ app.post('/crc', async (req, res) => {
     }
     
     // =========================================================================
-    // 6. LIMPIEZA VISUAL (OCULTAR CUADRO ROJO Y BOTÓN VERDE DE ABAJO)
+    // 6. LIMPIEZA VISUAL QUIRÚRGICA (SOLO LO JUSTO Y NECESARIO)
     // =========================================================================
     await page.evaluate(() => {
-      // Ocultar la barra de alertas rojas/mensajes de error del portal de Coosalud
-      const alertas = Array.from(document.querySelectorAll('div, section, p, span'))
-        .filter(el => (el.textContent || '').includes('Cannot read properties') || el.style.backgroundColor === 'red' || el.className.includes('alert'));
-      alertas.forEach(el => el.style.display = 'none');
-
-      // Ocultar específicamente el botón verde "Descargar Certificado" inferior
-      const botonesDescarga = Array.from(document.querySelectorAll('a, button, input, div'))
-        .filter(el => (el.textContent || '').toUpperCase().includes('DESCARGAR CERTIFICADO'));
-      botonesDescarga.forEach(el => el.style.display = 'none');
-      
-      // Inyectar CSS global por si acaso para asegurar remoción total
-      const style = document.createElement('style');
-      style.innerHTML = `
-        div[style*="background-color: red"], 
-        div[class*="alert"], 
-        .alert-danger,
-        a.btn-success, 
-        button.btn-success,
-        footer,
-        div[style*="position: fixed; top: 0"] { 
-          display: none !important; 
+      // 1. Buscar el banner rojo específico basándonos exactamente en su texto de error
+      const elementos = Array.from(document.querySelectorAll('*'));
+      elementos.forEach(el => {
+        const texto = (el.textContent || '');
+        if (texto.includes('Cannot read properties of null') && el.children.length === 0) {
+          // Si encontramos el texto del error, ocultamos su contenedor padre directo que suele ser la barra roja
+          if (el.parentElement) el.parentElement.style.display = 'none';
         }
-      `;
-      document.head.appendChild(style);
+      });
+
+      // 2. Buscar y ocultar específicamente los botones verdes inferiores que digan "Descargar Certificado"
+      const enlaces = Array.from(document.querySelectorAll('a, button'));
+      enlaces.forEach(el => {
+        if ((el.textContent || '').toUpperCase().includes('DESCARGAR CERTIFICADO')) {
+          el.style.display = 'none';
+        }
+      });
     });
     
-    // 7. Generar el PDF final limpio
+    // 7. Generar el PDF final
     const pdfBuffer = await page.pdf({ 
       format: 'A4', 
       printBackground: true, 
@@ -175,5 +168,5 @@ async function autoConsultarCoosalud(page, tipoDoc, documento) {
 }
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('[crc-service] Activo, enmascarado y limpio en puerto ' + PORT);
+  console.log('[crc-service] Activo y corregido en puerto ' + PORT);
 });
