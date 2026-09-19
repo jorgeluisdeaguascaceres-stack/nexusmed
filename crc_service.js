@@ -1,5 +1,5 @@
 /*
- * NexusMed · Microservicio de verificación de CRC (Derechos) - Versión Final Coosalud
+ * NexusMed · Microservicio de verificación de CRC (Derechos) - Versión Impecable Coosalud
  * -----------------------------------------------------------------------------
  */
 
@@ -55,38 +55,32 @@ app.post('/crc', async (req, res) => {
     // 2. Rellenar y enviar formulario
     await autoConsultarCoosalud(page, tipoDoc, documento);
 
-    // 3. ESPERA A QUE APAREZCA EL BOTÓN CERTIFICADO
+    // 3. Esperar a que aparezca el botón Certificado
     await page.waitForFunction(() => {
       const elements = Array.from(document.querySelectorAll('a, button, .btn'));
       return elements.some(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
     }, { timeout: 15000 }).catch(() => {});
 
-    // 4. EXTRAER LA URL DIRECTA DEL CERTIFICADO (MÉTODO ULTRA-SEGURO)
+    // 4. Extraer la URL directa del Certificado
     const urlCertificado = await page.evaluate(() => {
       const elements = Array.from(document.querySelectorAll('a, button, .btn'));
       const btnCert = elements.find(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
       if (btnCert) {
-        // Si es un enlace <a>, extraemos el href directo
         if (btnCert.tagName === 'A' && btnCert.href) return btnCert.href;
-        // Si usa un comportamiento onclick o similar, intentamos capturar el atributo correspondiente o fallback
         return btnCert.getAttribute('href') || btnCert.getAttribute('onclick') || null;
       }
       return null;
     });
 
-    // 5. NAVEGAR DIRECTAMENTE AL PDF E IMPRIMIR
+    // 5. Navegar directamente al PDF
     if (urlCertificado && (urlCertificado.startsWith('http') || urlCertificado.includes('GetCertificate'))) {
       let targetUrl = urlCertificado;
-      // Si la URL es relativa, la unimos con el dominio base
       if (!targetUrl.startsWith('http')) {
         targetUrl = new URL(urlCertificado, page.url()).href;
       }
-      
-      // Forzamos al navegador a ir directo al recurso del PDF
       await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 30000 });
       await new Promise(r => setTimeout(r, 4000));
     } else {
-      // Fallback: Si no pudimos leer la URL, hacemos clic tradicional y esperamos
       await page.evaluate(() => {
         const elements = Array.from(document.querySelectorAll('a, button, .btn'));
         const btnCert = elements.find(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
@@ -95,11 +89,41 @@ app.post('/crc', async (req, res) => {
       await new Promise(r => setTimeout(r, 6000));
     }
     
-    // 6. Generar el PDF final limpio
+    // =========================================================================
+    // 6. LIMPIEZA VISUAL (OCULTAR CUADRO ROJO Y BOTÓN VERDE DE ABAJO)
+    // =========================================================================
+    await page.evaluate(() => {
+      // Ocultar la barra de alertas rojas/mensajes de error del portal de Coosalud
+      const alertas = Array.from(document.querySelectorAll('div, section, p, span'))
+        .filter(el => (el.textContent || '').includes('Cannot read properties') || el.style.backgroundColor === 'red' || el.className.includes('alert'));
+      alertas.forEach(el => el.style.display = 'none');
+
+      // Ocultar específicamente el botón verde "Descargar Certificado" inferior
+      const botonesDescarga = Array.from(document.querySelectorAll('a, button, input, div'))
+        .filter(el => (el.textContent || '').toUpperCase().includes('DESCARGAR CERTIFICADO'));
+      botonesDescarga.forEach(el => el.style.display = 'none');
+      
+      // Inyectar CSS global por si acaso para asegurar remoción total
+      const style = document.createElement('style');
+      style.innerHTML = `
+        div[style*="background-color: red"], 
+        div[class*="alert"], 
+        .alert-danger,
+        a.btn-success, 
+        button.btn-success,
+        footer,
+        div[style*="position: fixed; top: 0"] { 
+          display: none !important; 
+        }
+      `;
+      document.head.appendChild(style);
+    });
+    
+    // 7. Generar el PDF final limpio
     const pdfBuffer = await page.pdf({ 
       format: 'A4', 
       printBackground: true, 
-      margin: { top: '0mm', bottom: '0mm', left: '0mm', right: '0mm' } 
+      margin: { top: '5mm', bottom: '5mm', left: '5mm', right: '5mm' } 
     });
 
     await browser.close();
@@ -151,5 +175,5 @@ async function autoConsultarCoosalud(page, tipoDoc, documento) {
 }
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('[crc-service] Activo y enmascarado en puerto ' + PORT);
+  console.log('[crc-service] Activo, enmascarado y limpio en puerto ' + PORT);
 });
