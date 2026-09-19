@@ -71,6 +71,7 @@ app.post('/crc', async (req, res) => {
 });
 
 async function autoConsultarCoosalud(page, tipoDoc, documento) {
+  // 1. Esperar y seleccionar el Tipo de Documento
   await page.waitForSelector('select', { timeout: 10000 });
   await page.evaluate((tipo) => {
     const sel = document.querySelector('select');
@@ -95,23 +96,38 @@ async function autoConsultarCoosalud(page, tipoDoc, documento) {
     }
   }, tipoDoc);
 
+  // 2. Esperar, limpiar e ingresar el número de documento
   const inputSel = 'input[type="text"], input[type="number"], input:not([type])';
   await page.waitForSelector(inputSel, { timeout: 5000 });
   await page.focus(inputSel);
-  await page.keyboard.type(String(documento), { delay: 50 });
+  // Limpiamos el input por si acaso
+  await page.evaluate((sel) => { document.querySelector(sel).value = ''; }, inputSel);
+  await page.keyboard.type(String(documento), { delay: 60 });
 
+  // 3. Hacer clic en el botón "Enviar" usando coordenadas o evento nativo
   await page.evaluate(() => {
-    const btn = Array.from(document.querySelectorAll('button, input[type="submit"]'))
-      .find(b => (b.textContent || b.value || '').trim().toUpperCase().includes('ENVIAR'));
-    if (btn) btn.click();
+    const btns = Array.from(document.querySelectorAll('button, input[type="submit"], .btn'));
+    const btnEnviar = btns.find(b => (b.textContent || b.value || '').trim().toUpperCase().includes('ENVIAR'));
+    if (btnEnviar) {
+      btnEnviar.click();
+    }
   });
 
-  // Reemplazo de waitForTimeout nativo
-  await new Promise(r => setTimeout(r, 4000));
+  // 4. ESPERA CRÍTICA: Esperamos a que la tabla de resultados y el botón "Certificado" aparezcan en pantalla
+  // Usamos una evaluación constante en el DOM para buscar el texto 'CERTIFICADO'
+  try {
+    await page.waitForFunction(() => {
+      const elements = Array.from(document.querySelectorAll('a, button, .btn'));
+      return elements.some(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
+    }, { timeout: 15000 });
+  } catch (e) {
+    console.log("El botón Certificado no apareció dentro del tiempo límite.");
+  }
 
+  // 5. Hacer clic en el botón "Certificado"
   const clickedCertificado = await page.evaluate(() => {
-    const links = Array.from(document.querySelectorAll('a, button'));
-    const btnCert = links.find(l => (l.textContent || '').trim().toUpperCase().includes('CERTIFICADO'));
+    const elements = Array.from(document.querySelectorAll('a, button, .btn'));
+    const btnCert = elements.find(el => (el.textContent || '').toUpperCase().includes('CERTIFICADO'));
     if (btnCert) {
       btnCert.click();
       return true;
@@ -119,11 +135,9 @@ async function autoConsultarCoosalud(page, tipoDoc, documento) {
     return false;
   });
 
+  // 6. Si el botón abrió el visualizador del certificado en una nueva URL, esperamos a que cargue
   if (clickedCertificado) {
-    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 20000 }).catch(() => {});
+    // Damos un tiempo de espera para que el visor cargue el documento oficial en pantalla
+    await new Promise(r => setTimeout(r, 6000));
   }
 }
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log('[crc-service] Activo y enmascarado en puerto ' + PORT);
-});
