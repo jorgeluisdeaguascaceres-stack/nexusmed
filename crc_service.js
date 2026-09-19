@@ -1,6 +1,9 @@
 /*
  * NexusMed · Microservicio de verificación de CRC (Derechos) - Enrutador Coosalud + FOMAG
  * -----------------------------------------------------------------------------------
+ * FOMAG / Horus Health: NO usa Puppeteer (evita el reCAPTCHA del login). En su lugar
+ * reutiliza el token de sesión que TÚ ya obtuviste al iniciar sesión manualmente en el
+ * navegador, y llama directo a la API interna de Horus con Authorization: Bearer <token>.
  */
 
 const express = require('express');
@@ -16,16 +19,111 @@ const HEADLESS = process.env.HEADLESS !== 'false';
 
 app.get('/', (_req, res) => res.json({ ok: true, service: 'nexusmed-crc-service', status: 'ready' }));
 
+// =============================================================================
+// FOMAG / HORUS HEALTH  ·  Bypass por Token de Sesión Persistente
+// -----------------------------------------------------------------------------
+// No abre navegador. Recibe fomagToken (el que copias del navegador con F12) y
+// hace peticiones directas a la API interna de Horus inyectando el Bearer token.
+// =============================================================================
+async function handleFomag({ url, tipoDoc, documento, fomagToken }) {
+  if (!fomagToken) {
+    const e = new Error('Falta fomagToken. Inicia sesión en Horus y pega tu token de sesión en NexusMed.');
+    e.isManualRequired = true;
+    throw e;
+  }
+
+  // Origen base del portal, p.ej. https://horus-health.com
+  const origin = new URL(url).origin;
+
+  // Rutas internas. Ajústalas si en F12 > Network ves otras (ver instrucciones abajo).
+  const VERIFY_PATH = process.env.FOMAG_VERIFY_PATH || '/api/aseguramiento/verificacion';
+  const CERT_PATH   = process.env.FOMAG_CERT_PATH   || '/AffiliateManager/GetCertificate';
+
+  const authHeaders = {
+    'Authorization': `Bearer ${fomagToken}`,
+    'Accept': 'application/json, application/pdf, */*',
+    'Content-Type': 'application/json',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  };
+
+  // 1) Verificación de aseguramiento -> normalmente devuelve datos del afiliado.
+  const verifyRes = await fetch(origin + VERIFY_PATH, {
+    method: 'POST',
+    headers: authHeaders,
+    body: JSON.stringify({ tipoDocumento: tipoDoc, numeroDocumento: String(documento) })
+  });
+
+  if (verifyRes.status === 401 || verifyRes.status === 403) {
+    const e = new Error('Token de FOMAG inválido o expirado. Inicia sesión de nuevo y copia un token nuevo.');
+    e.isTokenExpired = true;
+    throw e;
+  }
+
+  let afiliado = null;
+  try { afiliado = await verifyRes.json(); } catch (_) { /* algunos endpoints no devuelven JSON */ }
+
+  // 2) Descarga directa del certificado PDF con el MISMO token.
+  const certUrl = new URL(origin + CERT_PATH);
+  certUrl.searchParams.set('documentType', tipoDoc);
+  certUrl.searchParams.set('documentNumber', String(documento));
+  const afiliadoId = afiliado && (afiliado.id || afiliado.affiliateId || afiliado.idAfiliado);
+  if (afiliadoId) certUrl.searchParams.set('affiliateId', afiliadoId);
+
+  const certRes = await fetch(certUrl.href, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${fomagToken}`, 'Accept': 'application/pdf, */*' }
+  });
+
+  if (certRes.status === 401 || certRes.status === 403) {
+    const e = new Error('Token de FOMAG inválido o expirado al descargar el certificado.');
+    e.isTokenExpired = true;
+    throw e;
+  }
+  if (!certRes.ok) throw new Error(`Horus respondió ${certRes.status} al descargar el certificado.`);
+
+  // 3) Convertir a base64 (soporta PDF binario o JSON con base64).
+  const contentType = (certRes.headers.get('content-type') || '').toLowerCase();
+  let pdfBase64;
+  if (contentType.includes('application/json')) {
+    const j = await certRes.json();
+    pdfBase64 = j.pdfBase64 || j.base64 || j.file || j.data;
+    if (!pdfBase64) throw new Error('La API devolvió JSON pero sin un campo de PDF reconocible.');
+    pdfBase64 = String(pdfBase64).replace(/^data:application\/pdf;base64,/, '');
+  } else {
+    const buf = Buffer.from(await certRes.arrayBuffer());
+    pdfBase64 = buf.toString('base64');
+  }
+
+  return { ok: true, pdfBase64, afiliado: afiliado || undefined };
+}
+
 app.post('/crc', async (req, res) => {
-  const { url = '', tipoDoc = 'CC', documento = '' } = req.body || {};
+  const { url = '', tipoDoc = 'CC', documento = '', fomagToken = '' } = req.body || {};
   if (!url)       return res.status(400).json({ ok: false, error: 'Falta la URL del portal de la EPS' });
   if (!documento) return res.status(400).json({ ok: false, error: 'Falta el número de documento' });
 
+  // --- FOMAG / HORUS: sin Puppeteer, vía token de sesión ---
+  if (url.includes('horus-health.com') || url.toLowerCase().includes('fomag')) {
+    try {
+      const out = await handleFomag({ url, tipoDoc, documento, fomagToken });
+      return res.json(out);
+    } catch (err) {
+      const status = err.isTokenExpired ? 401 : (err.isManualRequired ? 400 : 500);
+      return res.status(status).json({
+        ok: false,
+        isManualRequired: !!err.isManualRequired,
+        isTokenExpired: !!err.isTokenExpired,
+        error: err.message
+      });
+    }
+  }
+
+  // --- Resto de EPS (Coosalud / genérico): flujo Puppeteer existente ---
   const launchOpts = {
     headless: HEADLESS ? 'new' : false,
     args: [
-      '--no-sandbox', 
-      '--disable-setuid-sandbox', 
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       '--disable-web-security',
       '--disable-blink-features=AutomationControlled'
@@ -40,7 +138,7 @@ app.post('/crc', async (req, res) => {
   try {
     browser = await puppeteer.launch(launchOpts);
     const page = await browser.newPage();
-    
+
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
     await page.setExtraHTTPHeaders({ 'Accept-Language': 'es-ES,es;q=0.9' });
     await page.setViewport({ width: 1366, height: 768 });
@@ -49,15 +147,10 @@ app.post('/crc', async (req, res) => {
       Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
     });
 
-    // =========================================================================
-    // ENRUTADOR INTELIGENTE POR URL
-    // =========================================================================
     if (url.includes('coosalud.com')) {
-      // 1. Ejecutar Flujo Quirúrgico de Coosalud
       await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
       await autoConsultarCoosalud(page, tipoDoc, documento);
-      
-      // Limpieza visual Coosalud
+
       await page.evaluate(() => {
         const elementos = Array.from(document.querySelectorAll('*'));
         elementos.forEach(el => {
@@ -70,29 +163,14 @@ app.post('/crc', async (req, res) => {
           if ((el.textContent || '').toUpperCase().includes('DESCARGAR CERTIFICADO')) el.style.display = 'none';
         });
       });
-
-    } else if (url.includes('horus-health.com') || url.includes('fomag')) {
-      // 2. Flujo Híbrido para FOMAG / HORUS debido al reCAPTCHA
-      // Si detecta FOMAG, arrojamos un error controlado para que tu frontend 
-      // abra la ventana manual directamente en el flujo de consulta manual.
-      await browser.close();
-      return res.status(400).json({ 
-        ok: false, 
-        isManualRequired: true,
-        error: 'El portal de FOMAG requiere validación de reCAPTCHA humana. Abriendo asistente manual...' 
-      });
-
     } else {
-      // 3. Flujo Genérico para otras EPS
       await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-      // Aquí puedes mapear flujos genéricos en el futuro
     }
-    
-    // Generación del PDF final
-    const pdfBuffer = await page.pdf({ 
-      format: 'A4', 
-      printBackground: true, 
-      margin: { top: '5mm', bottom: '5mm', left: '5mm', right: '5mm' } 
+
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '5mm', bottom: '5mm', left: '5mm', right: '5mm' }
     });
 
     await browser.close();
