@@ -26,6 +26,63 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 app.get('/', (_req, res) => res.json({ ok: true, service: 'nexusmed-crc-service', status: 'ready' }));
 
+// Carpeta de PERFIL PERSISTENTE de FOMAG: aquí se guarda tu sesión de Horus.
+// Inicias sesión UNA vez (resolviendo el reCAPTCHA a mano) y la sesión queda
+// guardada en disco; las consultas siguientes son automáticas hasta que caduque.
+const FOMAG_PROFILE_DIR = process.env.FOMAG_PROFILE_DIR || path.join(__dirname, '.fomag-profile');
+
+function fomagLaunchOpts(headless) {
+  const o = {
+    headless: headless ? 'new' : false,
+    userDataDir: FOMAG_PROFILE_DIR,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-blink-features=AutomationControlled'
+    ]
+  };
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) o.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  return o;
+}
+
+// Detecta si la página actual es el login (pide contraseña / reCAPTCHA).
+function esPaginaLoginJS() {
+  const t = document.body ? document.body.innerText.toUpperCase() : '';
+  return !!document.querySelector('input[type="password"]') ||
+         t.includes('NO SOY UN ROBOT') || t.includes('RECUPERAR CONTRASEÑA');
+}
+
+// -----------------------------------------------------------------------------
+// LOGIN MANUAL (una sola vez). Abre el navegador VISIBLE para que inicies sesión
+// y resuelvas el reCAPTCHA tú mismo; la sesión se guarda en el perfil persistente.
+// IMPORTANTE: este endpoint necesita ejecutarse en un equipo CON pantalla
+// (tu computador), no en un servidor headless como Render.
+// -----------------------------------------------------------------------------
+app.post('/fomag/login', async (req, res) => {
+  const { url = 'https://horus2.horus-health.com' } = req.body || {};
+  let browser;
+  try {
+    browser = await puppeteer.launch(fomagLaunchOpts(false));
+    const page = (await browser.pages())[0] || await browser.newPage();
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+    // Espera hasta 5 min a que inicies sesión (aparece el menú de Aseguramiento).
+    const loggedIn = await page.waitForFunction(() => {
+      const t = document.body ? document.body.innerText.toUpperCase() : '';
+      const hayPass = !!document.querySelector('input[type="password"]');
+      return !hayPass && (t.includes('ASEGURAMIENTO') || t.includes('VERIFICACI') ||
+                          t.includes('TRANSCRIPCIONES') || t.includes('CENTRO REGULADOR'));
+    }, { timeout: 300000 }).then(() => true).catch(() => false);
+    await sleep(1500); // deja que la sesión se guarde en disco
+    await browser.close();
+    if (!loggedIn) return res.status(408).json({ ok: false, error: 'No se detectó inicio de sesión (tiempo agotado). Intenta de nuevo.' });
+    return res.json({ ok: true, message: 'Sesión de FOMAG guardada. Ya puedes consultar automáticamente hasta que caduque.' });
+  } catch (err) {
+    if (browser) { try { await browser.close(); } catch (_) {} }
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 // Convierte fomagCookies (string "a=b; c=d" o array [{name,value}]) a formato Puppeteer.
 function parseCookies(raw, url) {
   const domain = new URL(url).hostname;
@@ -51,12 +108,8 @@ function parseCookies(raw, url) {
 // FOMAG / HORUS · Reutiliza tu sesión (cookies) y automatiza la verificación.
 // =============================================================================
 async function handleFomagPuppeteer(browser, { url, verificacionUrl, tipoDoc, documento, fomagCookies }) {
-  if (!fomagCookies || (Array.isArray(fomagCookies) && !fomagCookies.length)) {
-    const e = new Error('Falta la sesión de FOMAG. Inicia sesión manualmente en Horus y copia tus cookies de sesión en NexusMed.');
-    e.isManualRequired = true;
-    throw e;
-  }
-
+  // Con perfil persistente NO se requieren cookies: la sesión ya está guardada.
+  // fomagCookies queda como refuerzo OPCIONAL (por si quieres inyectar cookies).
   const origin = new URL(url).origin;
   const page = await browser.newPage();
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
@@ -97,14 +150,10 @@ async function handleFomagPuppeteer(browser, { url, verificacionUrl, tipoDoc, do
   await page.goto(target, { waitUntil: 'networkidle2', timeout: 60000 });
   await sleep(3000);
 
-  // 3) ¿Nos mandó al login? => cookies expiradas.
-  const enLogin = await page.evaluate(() => {
-    const t = document.body ? document.body.innerText.toUpperCase() : '';
-    return !!document.querySelector('input[type="password"]') ||
-           t.includes('NO SOY UN ROBOT') || t.includes('RECUPERAR CONTRASEÑA');
-  });
+  // 3) ¿Nos mandó al login? => la sesión guardada caducó.
+  const enLogin = await page.evaluate(esPaginaLoginJS);
   if (enLogin) {
-    const e = new Error('Tu sesión de FOMAG expiró. Vuelve a iniciar sesión en Horus y copia cookies nuevas.');
+    const e = new Error('Tu sesión de FOMAG caducó. Vuelve a iniciar sesión una vez (endpoint /fomag/login) y listo.');
     e.isTokenExpired = true;
     throw e;
   }
@@ -233,7 +282,6 @@ app.post('/crc', async (req, res) => {
   if (!url)       return res.status(400).json({ ok: false, error: 'Falta la URL del portal de la EPS' });
   if (!documento) return res.status(400).json({ ok: false, error: 'Falta el número de documento' });
 
-    // --- CONFIGURACIÓN PARA COOSALUD Y OTROS (SE MANTIENE INTACTA) ---
   const launchOpts = {
     headless: HEADLESS ? 'new' : false,
     args: [
@@ -246,27 +294,11 @@ app.post('/crc', async (req, res) => {
   };
   if (process.env.PUPPETEER_EXECUTABLE_PATH) launchOpts.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
 
-  // --- NUEVA CONFIGURACIÓN EXCLUSIVA PARA FOMAG (NO AFECTA A COOSALUD) ---
-  const windowsUser = os.userInfo().username; 
-  const launchOptsFomag = {
-    headless: false, // Obligatorio en false para abrir tu Chrome real
-    userDataDir: `C:\\Users\\${windowsUser}\\AppData\\Local\\Google\\Chrome\\User Data`,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-web-security',
-      '--profile-directory=Default' // Tu perfil principal de Chrome
-    ]
-  };
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) launchOptsFomag.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-
   // --- FOMAG / HORUS: reutiliza tu sesión (cookies), sin automatizar login/reCAPTCHA ---
   if (url.includes('horus-health.com') || url.toLowerCase().includes('fomag')) {
     let browser;
     try {
-      // Usamos la nueva configuración exclusiva de FOMAG aquí
-      browser = await puppeteer.launch(launchOptsFomag);
+      browser = await puppeteer.launch(fomagLaunchOpts(HEADLESS));
       const out = await handleFomagPuppeteer(browser, { url, verificacionUrl, tipoDoc, documento, fomagCookies });
       await browser.close();
       return res.json(out);
